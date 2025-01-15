@@ -1,4 +1,4 @@
-# Sist-info-
+# Sist-info
 Project for sist info 
 Team
 Santiago Zabala
