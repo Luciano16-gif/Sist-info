@@ -4,10 +4,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import './index.css';
 
-import Tests from './pages/Tests';
-
 import HamburgerMenu from './components/menus/HamburgerMenu';
 import TopMenu from './components/menus/TopMenu';
+
+import Tests from './pages/Tests';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
