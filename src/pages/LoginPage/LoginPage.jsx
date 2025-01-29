@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-let placeholderImage = "https://play-lh.googleusercontent.com/VzwzCxyHai3poLa-gV8Jpd-JickpjK9XYUi43fyK6RqPbInBr3S2rRsbraNhKVs8TbA";
+let placeholderImage = "https://play.google.com/store/apps/details?id=com.WhyMe.Munk";
 
 const LoginPage = () => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -43,7 +43,7 @@ const LoginPage = () => {
           {/* Center - Sliding Content Panel */}
           <div className={`
             w-full lg:w-1/2 lg:absolute lg:z-30 lg:top-0 lg:h-full bg-gradient-to-br from-green-400 via-green-500 to-green-600 p-4 lg:p-8 
-            transition-all duration-500 ease-in-out rounded-xl sm:rounded-b-none
+            transition-all duration-500 ease-in-out rounded-xl
             ${isRegistering ? 'lg:translate-x-full lg:rounded-l-none order-first lg:order-none' : 'lg:rounded-r-none order-first lg:order-none'}`}>
 
             <div className="relative h-full flex flex-col justify-center py-8 lg:py-0 sm:content-center">
