@@ -24,6 +24,12 @@ const TopMenu = () => {
         justify-center 
         items-center
         shadow-lg
+        fixed
+        top-0
+        left-0
+        right-0
+        z-50
+        bg-opacity-90
       "
     >
       <ul className="flex flex-row space-x-6 uppercase font-semibold tracking-wider sm:space-x-8 sm:text-lg">
@@ -33,6 +39,7 @@ const TopMenu = () => {
             </li>
             ))}
       </ul>
+      <div className="bg-black h-16 md:hidden lg:hidden" />
     </nav>
   );
 };

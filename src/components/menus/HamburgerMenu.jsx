@@ -22,8 +22,8 @@ const HamburgerMenu = () => {
   }
 
   return (
-    <nav className="relative md:hidden lg:hidden">
-      <div className="absolute top-0 left-0 right-0 border-b-2 border-yellow-500 h-16 flex items-center px-4 z-50">
+    <nav className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden">
+      <div className="absolute top-0 left-0 right-0 border-b-2 border-yellow-500 h-16 flex items-center px-4 z-50 bg-black bg-opacity-90">
         {/* Burger Menu Button */}
         <div className="w-10 h-10">
           <label className="w-10 h-10 cursor-pointer flex items-center justify-center">
@@ -97,7 +97,6 @@ const HamburgerMenu = () => {
           ))}
         </ul>
       </div>
-      <div className="bg-black h-16 md:hidden lg:hidden" />
     </nav>
   );
 };
