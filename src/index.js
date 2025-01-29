@@ -14,8 +14,10 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       {/* The menus are here so that they are always visible, they are currently with placeholder data */}
+      {/* 
       <HamburgerMenu/>
       <TopMenu/>
+      */}
       <Routes>
         <Route path="/" element={<Tests/>}  />
       </Routes>
