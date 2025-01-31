@@ -66,7 +66,7 @@ const HamburgerMenu = () => {
         </div>
 
         <h2 className="text-2xl font-bold text-yellow-400 absolute left-1/2 transform -translate-x-1/2">
-          Vive el Ávila
+          Vive El Ávila
         </h2>
       </div>
       
