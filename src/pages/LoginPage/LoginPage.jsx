@@ -12,7 +12,7 @@ const LoginPage = () => {
           
           {/* Left Side - Register Form */}
           <div
-            className={`w-full lg:w-1/2 absolute lg:relative top-0 left-0 z-40 bg-white p-6 shadow-2xl rounded-xl lg:rounded-r-none
+            className={`w-full lg:w-1/2 absolute lg:relative top-0 left-0 z-10 bg-white p-6 shadow-2xl rounded-xl lg:rounded-r-none
               transform transition-all duration-500 ease-in-out
               ${isRegistering 
                 ? "translate-x-0 opacity-100 scale-100" 
@@ -61,7 +61,7 @@ const LoginPage = () => {
 
           {/* Center - Sliding Content Panel (Desktop Only) */}
           <div
-            className={`hidden lg:block w-full lg:w-1/2 lg:absolute lg:z-50 lg:top-0 lg:h-full 
+            className={`hidden lg:block w-full lg:w-1/2 lg:absolute lg:z-20 lg:top-0 lg:h-full 
               bg-gradient-to-br from-green-400 via-green-500 to-green-600 p-8 rounded-xl
               transition-all duration-500 ease-in-out
               ${isRegistering ? "lg:translate-x-full lg:rounded-l-none" : "lg:rounded-r-none"}`}
@@ -104,7 +104,7 @@ const LoginPage = () => {
 
           {/* Right Side - Login Form */}
           <div
-            className={`w-full lg:w-1/2 absolute lg:relative top-0 right-0 z-40 bg-white p-6 shadow-2xl rounded-xl lg:rounded-l-none
+            className={`w-full lg:w-1/2 absolute lg:relative top-0 right-0 z-10 bg-white p-6 shadow-2xl rounded-xl lg:rounded-l-none
               transform transition-all duration-500 ease-in-out
               ${!isRegistering 
                 ? "translate-x-0 opacity-100 scale-100" 
