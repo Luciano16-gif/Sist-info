@@ -5,7 +5,7 @@ import Layout from './components/layout/Layout';
 
 import './index.css';
 
-import Tests from './pages/Tests';
+import Tests from './pages/tests';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

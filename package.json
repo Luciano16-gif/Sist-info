@@ -14,11 +14,10 @@
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.4.17"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+ "scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [
@@ -37,5 +36,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.1.0"
   }
 }
