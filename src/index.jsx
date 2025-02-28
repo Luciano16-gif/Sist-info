@@ -2,10 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/layout/Layout';
-
+import Login_Page from './pages/login_page';
+import Home from './components/firebase-test/Home';
+import Foro from './components/firebase-test/Foro';
+import Login from './components/firebase-test/Login';
+import Register from './components/firebase-test/Register';
+import FirestoreTest from './components/firebase-test/FirestoreTest'; // Importar el componente FirestoreTest
+import AuthTest from './components/firebase-test/AuthTest';
+import StorageTest from './components/firebase-test/StorageTest';
 import './index.css';
-
-import Tests from './pages/tests';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -13,7 +18,14 @@ root.render(
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<Tests/>} />
+          <Route path="/login-page" element={<Login_Page />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/foro" element={<Foro />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/firestore-test" element={<FirestoreTest />} /> {/* Añadir la ruta */}
+          <Route path="/auth-test" element={<AuthTest />} />
+          <Route path="/storage-test" element={<StorageTest />} />
         </Routes>
       </Layout>
     </BrowserRouter>

@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 90px; /* Espacio entre los botones */
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
+    max-width: 400px; /* Ancho máximo para evitar que sea demasiado grande */
+  }

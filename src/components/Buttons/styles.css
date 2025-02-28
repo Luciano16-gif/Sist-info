@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Ysabeau+SC:wght@500&display=swap');
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #021200;
+    position: relative;
+    overflow: hidden; /* Evitar que el texto se salga del viewport */
+}
+
+.custom-button {
+    width: 389.28px; /* Reducido en un 20% (486.6 * 0.8) */
+    height: 67.68px; /* Reducido en un 20% (84.6 * 0.8) */
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: translateX(00px); /* Reducido en un 20% (6 * 0.8) */
+}
+
+.custom-button .background {
+    width: 100%;
+    height: 100%;
+    background-color: #fefefe;
+    border-radius: 15.36px; /* Reducido en un 20% (19.2 * 0.8) */
+    border: 1.92px solid #a3a398; /* Reducido en un 20% (2.4 * 0.8) */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease;
+    opacity: 1;
+    z-index: 1; /* Asegura que el fondo esté detrás del texto */
+}
+
+.custom-button .text {
+    width: 246.72px; /* Reducido en un 20% (308.4 * 0.8) */
+    height: 35.52px; /* Reducido en un 20% (44.4 * 0.8) */
+    color: rgba(126, 126, 126, 0.7); /* Texto más transparente */
+    font-size: 19.2px; /* Reducido en un 20% (24 * 0.8) */
+    font-weight: 500;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+    line-height: 38.4px; /* Reducido en un 20% (48 * 0.8) */
+    z-index: 2; /* Asegura que el texto estático esté por encima del fondo */
+    margin-top: 15.84px; /* Reducido en un 20% (19.8 * 0.8) */
+    margin-left: 111.04px; /* Reducido en un 20% (118.8 * 0.8) */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.custom-button .text.clicked {
+    transform: translateY(-48px); /* Reducido en un 20% (60 * 0.8) */
+    margin-left: 0; 
+    width: 100%; /* Asegurar que el texto ocupe todo el ancho */
+    transition: transform 0.31s ease, margin 0.32s ease, color 0.2s ease; /* Animación suave */
+    color: #ffffff;
+}
+
+.custom-button .text.clicked::before {
+    content: '|';
+    position: absolute;
+    left: 6%; /* Centrar la línea */
+    transform: translateX(-50%);
+    top: 42.72px; /* Reducido en un 20% (53.4 * 0.8) */
+    font-size: 48px; /* Reducido en un 20% (60 * 0.8) */
+    color: rgba(47, 47, 47, 0.7); /* Color de la línea igual al texto */
+    animation: blink 1s infinite;
+    opacity: 1;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.custom-button:hover .background {
+    background-color: #c1c0bd;
+    border-color: #8b8b83;
+}
+
+.custom-button .text.clicked + .background {
+    background-color: #a3a398;
+    border-color: #7e7e7e;
+}
+
+/* Estilos para el campo de entrada */
+.custom-button .input-text {
+    width: 246.72px; /* Mismo ancho que el texto estático */
+    height: 35.52px; /* Mismo alto que el texto estático */
+    color: rgba(126, 126, 126, 0.7); /* Mismo color que el texto estático */
+    font-size: 19.2px; /* Mismo tamaño de fuente que el texto estático */
+    font-weight: 500;
+    font-family: 'Ysabeau SC', sans-serif; /* Mismo tipo de fuente que el texto estático */
+    line-height: 38.4px; /* Mismo interlineado que el texto estático */
+    margin-top: 17.04px; /* Mismo margen superior que el texto estático */
+    margin-left: 68.44px; /* Mismo margen izquierdo que el texto estático */
+    padding: 0; /* Elimina el relleno predeterminado */
+    border: none; /* Elimina el borde predeterminado */
+    outline: none; /* Elimina el contorno predeterminado */
+    background-color: transparent; /* Fondo transparente */
+    text-align: center; /* Centra el texto dentro del campo */
+    z-index: 3; /* Asegura que el campo de entrada esté por encima del fondo */
+    position: relative;
+}
+
+.custom-button .input-text.textemail {
+    width: 15.72px; /* Reducido en un 20% (308.4 * 0.8) */
+    height: 35.52px; /* Reducido en un 20% (44.4 * 0.8) */
+    color: rgba(126, 126, 126, 0.7); /* Texto más transparente */
+    font-size: 19.2px; /* Reducido en un 20% (24 * 0.8) */
+    font-weight: 500;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+    line-height: 38.4px; /* Reducido en un 20% (48 * 0.8) */
+    z-index: 2; /* Asegura que el texto estático esté por encima del fondo */
+    margin-top: 15.84px; /* Reducido en un 20% (19.8 * 0.8) */
+    margin-left: 111.04px; /* Reducido en un 20% (118.8 * 0.8) */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.custom-button .input-text.textemail::placeholder {
+    color: rgba(126, 126, 126, 0.7); /* Mismo color que el texto estático */
+}
