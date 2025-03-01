@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from 'react';
-import { storage } from '../../../firebase-config'; // Ajusta la ruta
+import { storage } from '../../../../firebase/firebase-config'; // Ajusta la ruta
 import { ref, uploadBytes } from 'firebase/storage';
 import './StorageTest.css'; // Importa los estilos específicos del componente
 
