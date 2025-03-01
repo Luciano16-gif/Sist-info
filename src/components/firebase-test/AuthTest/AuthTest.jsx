@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth } from '../../../../firebase/firebase-config';
+import { auth } from '../../../firebase-config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import './AuthTest.css'; // Importa los estilos específicos del componente
 

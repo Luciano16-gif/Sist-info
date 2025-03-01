@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { auth, db } from '../../../../firebase/firebase-config'; // Ajusta la ruta si es necesario
+import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
 import './SignUpPage.css'; // Importa los estilos específicos del componente
@@ -35,17 +35,14 @@ function SignUpPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h2>Registro y Prueba de Firestore</h2>
-      <div className="input-container" style={{ display: 'flex', gap: '300px' }}>
-        <div>
-          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-        </div>
+      <div className="input-container" style={{ display: 'flex', gap: '600px', marginBottom: '80px' }}>
         <div>
           <input
             type="text"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             placeholder="Ingresa tu nombre"
+            style={{ marginRight: '600px' }}
           />
           <input
             type="text"
@@ -55,7 +52,14 @@ function SignUpPage() {
           />
         </div>
       </div>
-      <button className="addbutton" onClick={handleExecute}>Ejecutar</button>
+      <div className="input-container" style={{ display: 'flex', gap: '600px' }}>
+        <div>
+          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
+          style={{ marginRight: '600px' }}/>
+          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+        </div>
+      </div>
+      <button className="addbutton" onClick={handleExecute} style={{ marginTop: '40px' }}>Ejecutar</button>
       {user && <p>Usuario logeado: {user.email}</p>}
     </div>
   );

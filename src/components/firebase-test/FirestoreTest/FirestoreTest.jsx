@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from 'react';
-import { db } from '../../../../firebase/firebase-config'; // Ajusta la ruta si es necesario
+import { db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { collection, addDoc } from 'firebase/firestore';
 import './FirestoreTest.css'; // Importa los estilos específicos del componente
 
