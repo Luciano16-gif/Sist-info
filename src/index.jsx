@@ -8,8 +8,8 @@ import Foro from './components/firebase-test/Foro';
 import Login from './components/firebase-test/Login';
 import Register from './components/firebase-test/Register';
 import FirestoreTest from './components/firebase-test/FirestoreTest'; // Importar el componente FirestoreTest
-import AuthTest from './components/firebase-test/AuthTest';
-import StorageTest from './components/firebase-test/StorageTest';
+import AuthTest from './components/firebase-test/AuthTest/AuthTest';
+import StorageTest from './components/firebase-test/StorageTest/StorageTest';
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
