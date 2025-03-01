@@ -6,7 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #021200;
+    background-color: #021200; /* Fondo oscuro */
     position: relative;
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
@@ -19,12 +19,15 @@ h2 {
 
 .input-container {
     display: flex;
-    gap: 600px; /* Espacio entre los inputs */
+    flex-direction: column; /* Alinea los inputs en columna */
+    gap: 10px; /* Espacio entre los inputs */
     margin-bottom: 20px;
 }
 
+input[type="email"],
+input[type="password"],
 input[type="text"] {
-    width: 300PX; /* Aumenta el tamaño horizontal de los inputs */
+    width: 300px; /* Aumenta el tamaño horizontal de los inputs */
     padding: 10px;
     border: 5px solid #ffffff;
     border-radius: 4px;
@@ -34,12 +37,16 @@ input[type="text"] {
     color: #333; /* Color inicial del texto */
 }
 
+input[type="email"]:focus,
+input[type="password"]:focus,
 input[type="text"]:focus {
     border-color: #2e6126;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Nuevos estilos para hover en inputs */
+input[type="email"]:hover,
+input[type="password"]:hover,
 input[type="text"]:hover {
     background-color: #c2c2c2;
     border-color: #c2c2c2;
