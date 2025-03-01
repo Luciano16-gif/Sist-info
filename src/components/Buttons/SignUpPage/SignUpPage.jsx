@@ -9,6 +9,7 @@ function SignUpPage() {
   const [password, setPassword] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemLastName, setNewItemLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // Nuevo estado para el número telefónico
   const [user, setUser] = useState(null);
   const itemsCollection = collection(db, 'testItems');
 
@@ -21,10 +22,11 @@ function SignUpPage() {
       // Iniciar sesión con el usuario recién creado
       await signInWithEmailAndPassword(auth, email, password);
       // Añadir item a Firestore
-      if (newItemName.trim() !== '' && newItemLastName.trim() !== '') {
-        await addDoc(itemsCollection, { name: newItemName, lastName: newItemLastName });
+      if (newItemName.trim() !== '' && newItemLastName.trim() !== '' && phoneNumber.trim() !== '') {
+        await addDoc(itemsCollection, { name: newItemName, lastName: newItemLastName, phone: phoneNumber });
         setNewItemName(''); // Vacía el campo de entrada después de añadir
         setNewItemLastName(''); // Vacía el campo de entrada después de añadir
+        setPhoneNumber(''); // Vacía el campo de entrada después de añadir
         alert('Item añadido!');
       }
     } catch (error) {
@@ -54,8 +56,19 @@ function SignUpPage() {
       </div>
       <div className="input-container" style={{ display: 'flex', gap: '600px' }}>
         <div>
+          <input
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="Ingresa tu nro telefónico"
+            style={{ width: '300px', padding: '10px', border: '5px solid #ffffff', borderRadius: '4px', fontSize: '16px', fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
+          />
           <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
-          style={{ marginRight: '600px' }}/>
+          style={{ marginLeft: '600px' }}/>
+        </div>
+      </div>
+      <div className="input-container" style={{ display: 'flex', gap: '600px' }}>
+        <div>
           <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
         </div>
       </div>
