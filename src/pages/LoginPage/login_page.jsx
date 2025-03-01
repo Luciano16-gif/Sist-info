@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import EnterUserNameButton from '../../components/Buttons/EnterUserNameButton';
 import EnterUserLastNameButton from '../../components/Buttons/EnterUserLastNameButton';
