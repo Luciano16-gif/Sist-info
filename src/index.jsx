@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/layout/Layout';
-import Login_Page from './pages/login_page';
+import Login_Page from './pages/LoginPage/login_page';
 import Home from './components/firebase-test/Home';
 import Foro from './components/firebase-test/Foro';
 import Login from './components/firebase-test/Login';

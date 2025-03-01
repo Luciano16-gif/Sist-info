@@ -1,9 +1,9 @@
 
 
 import React from 'react';
-import EnterUserNameButton from '../components/Buttons/EnterUserNameButton';
-import EnterUserLastNameButton from '../components/Buttons/EnterUserLastNameButton';
-import EnterUserEmailButton from '../components/Buttons/EnterUserEmailButton';
+import EnterUserNameButton from '../../components/Buttons/EnterUserNameButton';
+import EnterUserLastNameButton from '../../components/Buttons/EnterUserLastNameButton';
+import EnterUserEmailButton from '../../components/Buttons/EnterUserEmailButton';
 
 const Login_Page = () => {
   return (

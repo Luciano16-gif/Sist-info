@@ -29,10 +29,13 @@ function AuthTest() {
     }
 
     return (
-        <div className="auth-container">
-            <h2>Prueba de Auth</h2>
-            <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Elimina esta línea */}
+            {/* <h2>Prueba de Auth</h2> */}
+            <div className="input-container">
+                <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+                <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+            </div>
             <button onClick={handleRegister}>Registrar</button>
             <button onClick={handleLogin}>Login</button>
             {user && <p>Usuario logeado: {user.email}</p>}

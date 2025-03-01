@@ -1,39 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Ysabeau+SC:wght@500&display=swap');
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #021200;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-}
-
-.auth-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
+    background-color: #021200;
+    position: relative;
+    overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
 
 h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: #ffffff;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+.input-container {
+    display: flex;
+    gap: 600px; /* Espacio entre los inputs */
+    margin-bottom: 20px;
 }
 
 input[type="email"],
 input[type="password"] {
-    width: calc(100% - 20px);
+    width: 300PX; /* Aumenta el tamaño horizontal de los inputs */
     padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
+    border: 5px solid #ffffff;
     border-radius: 4px;
     font-size: 16px;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Añade transición para suavizar cambios */
+    color: #333; /* Color inicial del texto */
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #2e6126;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Nuevos estilos para hover en inputs */
+input[type="email"]:hover,
+input[type="password"]:hover {
+    background-color: #c2c2c2;
+    border-color: #c2c2c2;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    color: #000; /* Cambia ligeramente el color del texto al hacer hover */
 }
 
 button {
-    width: 100%;
+    width: 150px; /* Tamaño fijo para los botones */
     padding: 10px;
     margin: 5px 0;
     background-color: #007bff;
@@ -43,13 +61,20 @@ button {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
+button:active {
+    background-color: #00876e;
+    transform: translateY(2px);
+}
+
 p {
     margin-top: 20px;
-    color: #333;
+    color: #ffffff;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
 }
