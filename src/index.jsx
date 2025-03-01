@@ -10,6 +10,7 @@ import Register from './components/firebase-test/Register';
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest'; // Importar el componente FirestoreTest
 import AuthTest from './components/firebase-test/AuthTest/AuthTest';
 import StorageTest from './components/firebase-test/StorageTest/StorageTest';
+import SignUpPage from './components/Buttons/SignUpPage/SignUpPage'; // Importa el componente SignUpPage
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -26,6 +27,7 @@ root.render(
           <Route path="/firestore-test" element={<FirestoreTest />} /> {/* Añadir la ruta */}
           <Route path="/auth-test" element={<AuthTest />} />
           <Route path="/storage-test" element={<StorageTest />} />
+          <Route path="/sign-up-page" element={<SignUpPage />} /> {/* Añadir la nueva ruta */}
         </Routes>
       </Layout>
     </BrowserRouter>
