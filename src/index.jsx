@@ -7,7 +7,7 @@ import Home from './components/firebase-test/Home';
 import Foro from './components/firebase-test/Foro';
 import Login from './components/firebase-test/Login';
 import Register from './components/firebase-test/Register';
-import FirestoreTest from './components/firebase-test/FirestoreTest'; // Importar el componente FirestoreTest
+import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest'; // Importar el componente FirestoreTest
 import AuthTest from './components/firebase-test/AuthTest/AuthTest';
 import StorageTest from './components/firebase-test/StorageTest/StorageTest';
 import './index.css';

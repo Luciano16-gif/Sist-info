@@ -1,7 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase-config'; // Ajusta la ruta si es necesario
+import { db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { collection, addDoc, getDocs } from 'firebase/firestore';
+import './FirestoreTest.css'; // Importa los estilos específicos del componente
 
 function FirestoreTest() {
   const [data, setData] = useState([]);
@@ -36,10 +37,10 @@ function FirestoreTest() {
         onChange={(e) => setNewItem(e.target.value)}
         placeholder="Nuevo item"
       />
-      <button onClick={addItem}>Añadir</button>
+      <button className="addbutton"  onClick={addItem}>Añadir</button>
       <ul>
         {data.map((item) => (
-          <li key={item.id}>{item.name}</li>
+          <li className="item_Firestore" key={item.id}>{item.name}</li>
         ))}
       </ul>
     </div>
