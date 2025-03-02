@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'; // Add useEffect
 import HeroSection from '../../components/landing-page/HeroSection';
 import Divider from '../../components/landing-page/Divider';
 import FeatureSection from '../../components/landing-page/FeatureSection';
+import ExploreSection from '../../components/landing-page/ExploreSection';
 
 const AvilaLanding = () => {
   useEffect(() => {
@@ -35,6 +36,15 @@ const AvilaLanding = () => {
       <div>
         <FeatureSection />
       </div>
+
+      {/* Divider */}
+      <Divider />
+
+       {/* Explore Section */}
+       <div>
+        <ExploreSection />
+      </div>
+      
       {/* Divider */}
       <Divider />
     </div>

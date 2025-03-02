@@ -8,6 +8,7 @@ export const BackgroundCircle = ({ size, top, left, opacity }) => (
       left: left,
       opacity: opacity,
       backgroundColor: 'rgba(44,59,35,255)',
+      zIndex: 10
     }}
   />
 );

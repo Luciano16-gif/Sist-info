@@ -1,4 +1,8 @@
+// ========== HERO SECTION ==========
+
 export { default as HERO_IMAGE } from "../assets/images/landing-page/HERO/avila.webp";
+
+// ========== Features section ==========
 
 export const FEATURES = [
   {
@@ -46,5 +50,49 @@ export const FEATURES = [
   }
 ];
 
+// ========== Explore section ==========
+
 export { default as explore_image } from "../assets/images/landing-page/explore/explore.webp";
+
+import gallery_1 from "../assets/images/landing-page/explore/gallery/gallery_1.webp";
+import gallery_2 from "../assets/images/landing-page/explore/gallery/gallery_2.webp";
+import gallery_3 from "../assets/images/landing-page/explore/gallery/gallery_3.webp";
+import gallery_4 from "../assets/images/landing-page/explore/gallery/gallery_4.webp";
+import gallery_5 from "../assets/images/landing-page/explore/gallery/gallery_5.webp";
+import gallery_6 from "../assets/images/landing-page/explore/gallery/gallery_6.webp";
+
+export const gallery = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
+
+export const EXPLORE_TEXTS = [
+  {
+    title: "EXPLORA E",
+    subtitle: "INSPIRA TU VIDA",
+    description: "La belleza del Ávila en cada foto..."
+  },
+  {
+    title: "DESCUBRE",
+    subtitle: "NUEVAS RUTAS",
+    description: "Senderos de ensueño que te llevan a paisajes increíbles."
+  },
+  {
+    title: "CONECTA CON",
+    subtitle: "LA NATURALEZA",
+    description: "Flora y fauna única en un entorno natural impresionante."
+  },
+  {
+    title: "SUPERA TUS",
+    subtitle: "LÍMITES",
+    description: "Desafíos que transforman y elevan tu espíritu aventurero."
+  },
+  {
+    title: "MEMORIAS",
+    subtitle: "INOLVIDABLES",
+    description: "Momentos para recordar en este maravilloso parque natural."
+  },
+  {
+    title: "AVENTURAS",
+    subtitle: "EN GRUPO",
+    description: "Comparte la experiencia con amigos y familiares."
+  }
+];
 
