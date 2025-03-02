@@ -73,6 +73,33 @@ button:active {
     transform: translateY(2px);
 }
 
+button.google-button {
+    width: 200px; /* Ajusta el ancho del botón según sea necesario */
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el logo y el texto */
+}
+
+button.google-button:hover {
+    background-color: #007146;
+}
+
+button.google-button:active {
+    background-color: #dbffca;
+    transform: translateY(2px);
+}
+
+
 p {
     margin-top: 20px;
     color: #ffffff;
