@@ -23,12 +23,13 @@ function LoginPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h2 className="login-title">Login Page</h2>
-      <div className="input-container">
-        <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <h2 className="login-title">Iniciar Sesión</h2>
+      <div className="input-container-login">
+        <input type="email-login" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input type="password-login" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
       </div>
-      <button className="addbutton" onClick={handleLogin}>Login</button>
+      <button className="addbutton-login" onClick={handleLogin}>Login</button>
+      <p className="signup-link-login" style={{  }}>¿No tienes cuenta? <a href="/sign-up-page">Registrarse</a></p>
     </div>
   );
 }
