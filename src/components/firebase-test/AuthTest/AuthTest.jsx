@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebase-config';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa la función signOut
 import './AuthTest.css'; // Importa los estilos específicos del componente
 
 function AuthTest() {
@@ -9,7 +9,16 @@ function AuthTest() {
   const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
 
+  const validateEmail = (email) => {
+    const domain = 'correo.unimet.edu.ve';
+    return email.endsWith(`@${domain}`);
+  };
+
   const handleRegister = async () => {
+    if (!validateEmail(email)) {
+      alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+      return;
+    }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
@@ -20,6 +29,10 @@ function AuthTest() {
   };
 
   const handleLogin = async () => {
+    if (!validateEmail(email)) {
+      alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+      return;
+    }
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
@@ -32,6 +45,15 @@ function AuthTest() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      const userEmail = result.user.email;
+
+      if (!validateEmail(userEmail)) {
+        alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+        // Desloguear al usuario si el correo no cumple con la regla
+        await signOut(auth); // Utiliza la función signOut correctamente
+        return;
+      }
+
       setUser(result.user);
       alert('Usuario logeado con Google!');
     } catch (error) {
