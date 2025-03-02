@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebase-config'; // Ajusta la ruta si es necesario
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa la función signOut
 import './LoginPage.css'; // Importa los estilos específicos del componente
 
 function LoginPage() {
@@ -9,7 +9,16 @@ function LoginPage() {
   const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
 
+  const validateEmail = (email) => {
+    const domain = 'correo.unimet.edu.ve';
+    return email.endsWith(`@${domain}`);
+  };
+
   const handleLogin = async () => {
+    if (!validateEmail(email)) {
+      alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+      return;
+    }
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
@@ -25,6 +34,15 @@ function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      const userEmail = result.user.email;
+
+      if (!validateEmail(userEmail)) {
+        alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+        // Desloguear al usuario si el correo no cumple con la regla
+        await signOut(auth); // Utiliza la función signOut correctamente
+        return;
+      }
+
       setUser(result.user);
       alert('Usuario logeado con Google!');
     } catch (error) {
