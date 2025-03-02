@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { auth } from '../../../firebase-config'; // Ajusta la ruta si es necesario
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa la función signOut
+import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa las funciones necesarias de Firebase Authentication
+import { collection, getDocs, query, where } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './LoginPage.css'; // Importa los estilos específicos del componente
 
@@ -22,6 +23,16 @@ function LoginPage() {
       return;
     }
     try {
+      // Buscar al usuario en la colección Lista de Usuarios mediante su correo electrónico
+      const usersCollection = collection(db, 'Lista de Usuarios');
+      const q = query(usersCollection, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        alert('Usuario no encontrado.');
+        return;
+      }
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       // Vacía los campos de entrada después de iniciar sesión
@@ -42,6 +53,17 @@ function LoginPage() {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         // Desloguear al usuario si el correo no cumple con la regla
         await signOut(auth); // Utiliza la función signOut correctamente
+        return;
+      }
+
+      // Buscar al usuario en la colección Lista de Usuarios mediante su correo electrónico
+      const usersCollection = collection(db, 'Lista de Usuarios');
+      const q = query(usersCollection, where("email", "==", userEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        alert('Usuario no encontrado.');
+        await signOut(auth); // Desloguear al usuario si el correo no se encuentra en Firestore
         return;
       }
 

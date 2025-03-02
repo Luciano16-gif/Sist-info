@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './SignUpPage.css'; // Importa los estilos específicos del componente
 
@@ -13,7 +13,7 @@ function SignUpPage() {
   const [phoneNumber, setPhoneNumber] = useState(''); // Nuevo estado para el número telefónico
   const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
-  const itemsCollection = collection(db, 'testItems');
+  const usersCollection = collection(db, 'Lista de Usuarios');
   const navigate = useNavigate(); // Utiliza el hook useNavigate
 
   const validateEmail = (email) => {
@@ -32,13 +32,15 @@ function SignUpPage() {
       setUser(userCredential.user);
       // Iniciar sesión con el usuario recién creado
       await signInWithEmailAndPassword(auth, email, password);
-      // Añadir item a Firestore
-      if (newItemName.trim() !== '' && newItemLastName.trim() !== '' && phoneNumber.trim() !== '') {
-        await addDoc(itemsCollection, { name: newItemName, lastName: newItemLastName, phone: phoneNumber });
-        setNewItemName(''); // Vacía el campo de entrada después de añadir
-        setNewItemLastName(''); // Vacía el campo de entrada después de añadir
-        setPhoneNumber(''); // Vacía el campo de entrada después de añadir
-      }
+      // Crear el documento en Firestore con el nombre y apellido del usuario
+      const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
+      await setDoc(docRef, {
+        email: email,
+        name: newItemName,
+        lastName: newItemLastName,
+        password: password,
+        phone: phoneNumber
+      });
       navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
@@ -55,6 +57,34 @@ function SignUpPage() {
         await signOut(auth); // Utiliza la función signOut correctamente
         return;
       }
+
+      // Obtener la información del usuario desde el resultado de la autenticación con Google
+      const userName = result.user.displayName || '';
+      let name = '';
+      let lastName = '';
+
+      if (userName) {
+        const nameParts = userName.split(' ');
+        if (nameParts.length >= 2) {
+          name = nameParts[0];
+          lastName = nameParts.slice(1).join(' ');
+        } else {
+          name = userName;
+        }
+      }
+
+      const userPhone = ''; // Puedes obtener el número de teléfono del usuario de alguna otra manera si es necesario
+
+      // Crear el documento en Firestore con la información del usuario
+      const docRef = doc(usersCollection, `${name} ${lastName}`);
+      await setDoc(docRef, {
+        email: userEmail,
+        name: name,
+        lastName: lastName,
+        password: '', // No se guarda la contraseña del usuario registrado con Google
+        phone: userPhone
+      });
+
       setUser(result.user);
       navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
     } catch (error) {
