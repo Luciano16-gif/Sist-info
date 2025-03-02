@@ -33,24 +33,25 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Layout>
-        <Routes>
+      <Routes>
+        {/* Authentication Routes (without Layout) */}
+        <Route path="/login-page" element={<Login_Page />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/sign-up-page" element={<SignUpPage />} />
+        
+        {/* Routes with Layout */}
+        <Route element={<Layout />}>
           {/* Main Routes */}
           <Route path="/" element={<AvilaLanding />} />
           <Route path="/foro" element={<Foro />} />
-          
-          {/* Authentication Routes */}
-          <Route path="/login-page" element={<Login_Page />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/sign-up-page" element={<SignUpPage />} />
           
           {/* Testing Routes */}
           <Route path="/firestore-test" element={<FirestoreTest />} />
           <Route path="/auth-test" element={<AuthTest />} />
           <Route path="/storage-test" element={<StorageTest />} />
-        </Routes>
-      </Layout>
+        </Route>
+      </Routes>
     </BrowserRouter>
   </React.StrictMode>
 );

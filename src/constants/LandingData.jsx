@@ -1,5 +1,4 @@
-import avilaLanscape from '../assets/images/landing-page/HERO/avila.jpg';;
-export const HERO_IMAGE = avilaLanscape;
+export { default as HERO_IMAGE } from "../assets/images/landing-page/HERO/avila.webp";
 
 export const FEATURES = [
   {
@@ -46,3 +45,6 @@ export const FEATURES = [
     description: "Únete a nuestra comunidad de exploradores y comparte tus experiencias con los demás usuarios."
   }
 ];
+
+export { default as explore_image } from "../assets/images/landing-page/explore/explore.webp";
+
