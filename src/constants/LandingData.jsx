@@ -1,4 +1,5 @@
-export const HERO_IMAGE = "https://play-lh.googleusercontent.com/VzwzCxyHai3poLa-gV8Jpd-JickpjK9XYUi43fyK6RqPbInBr3S2rRsbraNhKVs8TbA";
+import avilaLanscape from '../assets/images/avila.JPG';
+export const HERO_IMAGE = avilaLanscape;
 
 export const FEATURES = [
   {
