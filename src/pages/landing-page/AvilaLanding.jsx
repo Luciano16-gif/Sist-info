@@ -3,6 +3,7 @@ import HeroSection from '../../components/landing-page/HeroSection';
 import Divider from '../../components/landing-page/Divider';
 import FeatureSection from '../../components/landing-page/FeatureSection';
 import ExploreSection from '../../components/landing-page/ExploreSection';
+import TestimonySection from '../../components/landing-page/Testimonials';
 
 const AvilaLanding = () => {
   useEffect(() => {
@@ -47,6 +48,15 @@ const AvilaLanding = () => {
       
       {/* Divider */}
       <Divider />
+
+      {/* Comments and Posts Section */}
+      <div>
+        <TestimonySection/>
+      </div>
+
+       {/* Divider */}
+       <Divider />
+
     </div>
   );
 };
