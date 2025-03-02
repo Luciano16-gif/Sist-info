@@ -1,0 +1,173 @@
+[debug] [2025-03-01T16:49:36.498Z] ----------------------------------------------------------------------
+[debug] [2025-03-01T16:49:36.502Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Santi\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2025-03-01T16:49:36.503Z] CLI Version:   13.32.0
+[debug] [2025-03-01T16:49:36.503Z] Platform:      win32
+[debug] [2025-03-01T16:49:36.503Z] Node Version:  v23.3.0
+[debug] [2025-03-01T16:49:36.503Z] Time:          Sat Mar 01 2025 12:49:36 GMT-0400 (hora de Venezuela)
+[debug] [2025-03-01T16:49:36.504Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-01T16:49:36.509Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-03-01T16:49:37.017Z] Object "/emulators/storage" in "firebase.json" has unknown property: {"additionalProperty":"rules"}
+[debug] [2025-03-01T16:49:37.032Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-01T16:49:37.033Z] > authorizing via signed-in user (szabala@correo.unimet.edu.ve)
+[debug] [2025-03-01T16:49:37.288Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-03-01T16:49:37.289Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-03-01T16:49:37.409Z] java version "22.0.2" 2024-07-16
+
+[debug] [2025-03-01T16:49:37.410Z] Java(TM) SE Runtime Environment (build 22.0.2+9-70)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)
+
+[debug] [2025-03-01T16:49:37.439Z] Parsed Java major version: 22
+[info] i  emulators: Starting emulators: auth, functions, firestore, hosting, storage, extensions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore, hosting, storage, extensions"}}
+[debug] [2025-03-01T16:49:37.443Z] Checked if tokens are valid: false, expires at: 1740837419131
+[debug] [2025-03-01T16:49:37.444Z] Checked if tokens are valid: false, expires at: 1740837419131
+[debug] [2025-03-01T16:49:37.444Z] > refreshing access token with scopes: []
+[debug] [2025-03-01T16:49:37.446Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-03-01T16:49:37.446Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-01T16:49:37.690Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-03-01T16:49:37.691Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-01T16:49:37.718Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/avilaventuras-grupo5 [none]
+[debug] [2025-03-01T16:49:38.120Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/avilaventuras-grupo5 200
+[debug] [2025-03-01T16:49:38.121Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/avilaventuras-grupo5 {"projectNumber":"478627959056","projectId":"avilaventuras-grupo5","lifecycleState":"ACTIVE","name":"AvilaVenturas-Grupo5","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-02-28T14:20:58.799900Z","parent":{"type":"organization","id":"633802772574"}}
+[debug] [2025-03-01T16:49:38.171Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.171Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.171Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.171Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.172Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.172Z] [storage] Storage Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.172Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-03-01T16:49:38.189Z] [hub] writing locator at C:\Users\Santi\AppData\Local\Temp\hub-avilaventuras-grupo5.json
+[debug] [2025-03-01T16:49:38.206Z] [Extensions] Started Extensions emulator, this is a noop.
+[debug] [2025-03-01T16:49:38.221Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.221Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.222Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-01T16:49:38.222Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, database, pubsub, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, database, pubsub, dataconnect\u001b[22m"}}
+[debug] [2025-03-01T16:49:38.237Z] defaultcredentials: writing to file C:\Users\Santi\AppData\Roaming\firebase\szabala_correo_unimet.edu.ve_application_default_credentials.json
+[debug] [2025-03-01T16:49:38.242Z] Setting GAC to C:\Users\Santi\AppData\Roaming\firebase\szabala_correo_unimet.edu.ve_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Santi\\AppData\\Roaming\\firebase\\szabala_correo_unimet.edu.ve_application_default_credentials.json"}}
+[debug] [2025-03-01T16:49:38.244Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:49:38.244Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:49:38.244Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/adminSdkConfig [none]
+[debug] [2025-03-01T16:49:38.713Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/adminSdkConfig 200
+[debug] [2025-03-01T16:49:38.713Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/adminSdkConfig {"projectId":"avilaventuras-grupo5","storageBucket":"avilaventuras-grupo5.firebasestorage.app"}
+[debug] [2025-03-01T16:49:38.745Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-03-01T16:49:38.745Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-03-01T16:49:38.746Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Santi\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","avilaventuras-grupo5","--rules","C:\\Users\\Santi\\Documents\\unimet_zabala\\SistemasDeInformación\\Proyectos\\linktree\\mi-proyecto-react2\\Sist-info\\firestore.rules","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Santi\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"avilaventuras-grupo5\",\"--rules\",\"C:\\\\Users\\\\Santi\\\\Documents\\\\unimet_zabala\\\\SistemasDeInformación\\\\Proyectos\\\\linktree\\\\mi-proyecto-react2\\\\Sist-info\\\\firestore.rules\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2025-03-01T16:50:02.329Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-03-01T16:50:04.665Z] Temp file directory for storage emulator: C:\Users\Santi\AppData\Local\Temp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: C:\\Users\\Santi\\AppData\\Local\\Temp/firebase/storage/blobs"}}
+[debug] [2025-03-01T16:50:04.674Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:04.675Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:04.675Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/avilaventuras-grupo5/sites 
+[debug] [2025-03-01T16:50:05.254Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/avilaventuras-grupo5/sites 200
+[debug] [2025-03-01T16:50:05.254Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/avilaventuras-grupo5/sites {"sites":[{"name":"projects/avilaventuras-grupo5/sites/avilaventuras-grupo5","defaultUrl":"https://avilaventuras-grupo5.web.app","appId":"1:478627959056:web:2e252f44e11d3c61a79595","type":"DEFAULT_SITE"}]}
+[debug] [2025-03-01T16:50:05.255Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:05.255Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:05.255Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/webApps/1:478627959056:web:2e252f44e11d3c61a79595/config [none]
+[debug] [2025-03-01T16:50:05.884Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/webApps/1:478627959056:web:2e252f44e11d3c61a79595/config 200
+[debug] [2025-03-01T16:50:05.884Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5/webApps/1:478627959056:web:2e252f44e11d3c61a79595/config {"projectId":"avilaventuras-grupo5","appId":"1:478627959056:web:2e252f44e11d3c61a79595","storageBucket":"avilaventuras-grupo5.firebasestorage.app","apiKey":"AIzaSyCP-Z2THXcn_yRA02m1q5NwobXLSJZ9Jk8","authDomain":"avilaventuras-grupo5.firebaseapp.com","messagingSenderId":"478627959056","measurementId":"G-JQ53EF61KR"}
+[debug] [2025-03-01T16:50:05.891Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:05.892Z] Checked if tokens are valid: true, expires at: 1740851376691
+[debug] [2025-03-01T16:50:05.892Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5 [none]
+[debug] [2025-03-01T16:50:06.160Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5 200
+[debug] [2025-03-01T16:50:06.160Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/avilaventuras-grupo5 {"projectId":"avilaventuras-grupo5","projectNumber":"478627959056","displayName":"AvilaVenturas-Grupo5","name":"projects/avilaventuras-grupo5","resources":{"hostingSite":"avilaventuras-grupo5"},"state":"ACTIVE","etag":"1_70c1a9f6-0ae8-4535-9db1-a4a61db3ffd3"}
+[info] i  hosting[avilaventuras-grupo5]: Serving hosting files from: dist {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mdist\u001b[22m"}}
+[info] +  hosting[avilaventuras-grupo5]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2025-03-01T16:50:06.214Z] [Extensions] Connecting Extensions emulator, this is a noop.
+[info] i  functions: Watching "C:\Users\Santi\Documents\unimet_zabala\SistemasDeInformación\Proyectos\linktree\mi-proyecto-react2\Sist-info\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"C:\\Users\\Santi\\Documents\\unimet_zabala\\SistemasDeInformación\\Proyectos\\linktree\\mi-proyecto-react2\\Sist-info\\functions\" for Cloud Functions..."}}
+[debug] [2025-03-01T16:50:06.242Z] Validating nodejs source
+[debug] [2025-03-01T16:50:09.251Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.15.0",
+    "eslint-config-google": "^0.14.0",
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}
+[debug] [2025-03-01T16:50:09.252Z] Building nodejs source
+[debug] [2025-03-01T16:50:09.254Z] Failed to find version of module node: reached end of search path C:\Users\Santi\Documents\unimet_zabala\SistemasDeInformación\Proyectos\linktree\mi-proyecto-react2\Sist-info\functions\node_modules
+[warn] !  functions: Your requested "node" version "22" doesn't match your global version "23". Using node@23 from host. 
+[debug] [2025-03-01T16:50:09.265Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-03-01T16:50:09.286Z] Found firebase-functions binary at 'C:\Users\Santi\Documents\unimet_zabala\SistemasDeInformación\Proyectos\linktree\mi-proyecto-react2\Sist-info\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8300
+
+[debug] [2025-03-01T16:50:11.250Z] Got response from /__/functions.yaml {"endpoints":{},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[debug] [2025-03-01T16:50:15.304Z] defaultcredentials: writing to file C:\Users\Santi\AppData\Roaming\firebase\szabala_correo_unimet.edu.ve_application_default_credentials.json
+[debug] [2025-03-01T16:50:15.305Z] Setting GAC to C:\Users\Santi\AppData\Roaming\firebase\szabala_correo_unimet.edu.ve_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Santi\\AppData\\Roaming\\firebase\\szabala_correo_unimet.edu.ve_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: . {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: ."}}
+[debug] [2025-03-01T16:50:15.321Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED ::1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬──────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth       │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage    │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Extensions     │ 127.0.0.1:5001 │ http://127.0.0.1:4000/extensions │
+└────────────────┴────────────────┴──────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+┌─────────────────────────┬───────────────┬─────────────────────┐
+│ Extension Instance Name │ Extension Ref │ View in Emulator UI │
+└─────────────────────────┴───────────────┴─────────────────────┘
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2025-03-01T16:58:52.198Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T16:58:52.198Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"eventId":"92d98f83-5759-4e8f-a79c-a55a3dbc02a1","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/avilaventuras-grupo5","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2025-03-01T16:58:52.197Z","data":{"uid":"pmIhTrDqashKk9P3iln3z9CGvVLt","email":"santirzr@gmail.com","emailVerified":false,"metadata":{"creationTime":"2025-03-01T16:58:52.194Z","lastSignInTime":"2025-03-01T16:58:52.194Z"},"customClaims":{},"providerData":[{"providerId":"password","email":"santirzr@gmail.com","federatedId":"santirzr@gmail.com","rawId":"santirzr@gmail.com"}]}}
+[debug] [2025-03-01T16:58:52.224Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T16:58:52.225Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:03:38.052Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:03:38.053Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"eventId":"a475c32c-e485-47ac-b2d6-d1ef4681ced3","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/avilaventuras-grupo5","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2025-03-01T17:03:38.052Z","data":{"uid":"UY5j0YenSGlztlPTBRjXSWh9375L","email":"wawawa@gmail.com","emailVerified":false,"metadata":{"creationTime":"2025-03-01T17:03:38.051Z","lastSignInTime":"2025-03-01T17:03:38.051Z"},"customClaims":{},"providerData":[{"providerId":"password","email":"wawawa@gmail.com","federatedId":"wawawa@gmail.com","rawId":"wawawa@gmail.com"}]}}
+[debug] [2025-03-01T17:03:38.062Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:03:38.062Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:10:41.381Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:10:41.381Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"eventId":"1740849041381","timestamp":"2025-03-01T17:10:41.381Z","eventType":"google.storage.object.finalize","resource":{"service":"storage.googleapis.com","name":"projects/_/buckets/avilaventuras-grupo5.firebasestorage.app/objects/uploads/Captura de pantalla (1).png","type":"storage#object"},"data":{"kind":"storage#object","name":"uploads/Captura de pantalla (1).png","bucket":"avilaventuras-grupo5.firebasestorage.app","generation":"1740849040916","metageneration":"1","contentType":"image/png","timeCreated":"2025-03-01T17:10:40.917Z","updated":"2025-03-01T17:10:40.917Z","storageClass":"STANDARD","size":"403590","md5Hash":"dBHx85SnG98o6nUzgvqIfg==","etag":"bCAB3pyu5galUZa9Ic+N9q0gLbk","metadata":{"firebaseStorageDownloadTokens":"864e93f2-873a-4752-9173-7b0b168bfd34"},"crc32c":"SuC26g==","timeStorageClassUpdated":"2025-03-01T17:10:40.917Z","id":"avilaventuras-grupo5.firebasestorage.app/uploads/Captura de pantalla (1).png/1740849040916","selfLink":"http://127.0.0.1:9199/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FCaptura%20de%20pantalla%20(1).png","mediaLink":"http://127.0.0.1:9199/download/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FCaptura%20de%20pantalla%20(1).png?generation=1740849040916&alt=media"}}
+[debug] [2025-03-01T17:10:41.392Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:10:41.392Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:10:41.393Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:10:41.393Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"specversion":"1.0","id":"ec50b111-9305-4bef-b503-4136e4e02cf9","type":"google.cloud.storage.object.v1.finalized","source":"//storage.googleapis.com/projects/_/buckets/avilaventuras-grupo5.firebasestorage.app/objects/uploads/Captura de pantalla (1).png","time":"2025-03-01T17:10:40.917Z","data":{"kind":"storage#object","name":"uploads/Captura de pantalla (1).png","bucket":"avilaventuras-grupo5.firebasestorage.app","generation":"1740849040916","metageneration":"1","contentType":"image/png","timeCreated":"2025-03-01T17:10:40.917Z","updated":"2025-03-01T17:10:40.917Z","storageClass":"STANDARD","size":"403590","md5Hash":"dBHx85SnG98o6nUzgvqIfg==","etag":"bCAB3pyu5galUZa9Ic+N9q0gLbk","metadata":{"firebaseStorageDownloadTokens":"864e93f2-873a-4752-9173-7b0b168bfd34"},"crc32c":"SuC26g==","timeStorageClassUpdated":"2025-03-01T17:10:40.917Z","id":"avilaventuras-grupo5.firebasestorage.app/uploads/Captura de pantalla (1).png/1740849040916","selfLink":"http://127.0.0.1:9199/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FCaptura%20de%20pantalla%20(1).png","mediaLink":"http://127.0.0.1:9199/download/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FCaptura%20de%20pantalla%20(1).png?generation=1740849040916&alt=media"}}
+[debug] [2025-03-01T17:10:41.397Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:10:41.397Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:12:03.203Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:12:03.203Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"eventId":"1740849123203","timestamp":"2025-03-01T17:12:03.203Z","eventType":"google.storage.object.finalize","resource":{"service":"storage.googleapis.com","name":"projects/_/buckets/avilaventuras-grupo5.firebasestorage.app/objects/uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf","type":"storage#object"},"data":{"kind":"storage#object","name":"uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf","bucket":"avilaventuras-grupo5.firebasestorage.app","generation":"1740849123189","metageneration":"1","contentType":"application/pdf","timeCreated":"2025-03-01T17:12:03.189Z","updated":"2025-03-01T17:12:03.189Z","storageClass":"STANDARD","size":"241482","md5Hash":"23b4rlf+w4FExJ7aO/jY3A==","etag":"ardKZveyrTkEdZrrKi9YIOgz+Z4","metadata":{"firebaseStorageDownloadTokens":"8aaf3ebd-8dc1-41ce-8310-5dcccaeddb6f"},"crc32c":"YSPmVw==","timeStorageClassUpdated":"2025-03-01T17:12:03.189Z","id":"avilaventuras-grupo5.firebasestorage.app/uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf/1740849123189","selfLink":"http://127.0.0.1:9199/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FActividad%202%20Evaluativa%20Ejercicio%20ODS.pdf","mediaLink":"http://127.0.0.1:9199/download/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FActividad%202%20Evaluativa%20Ejercicio%20ODS.pdf?generation=1740849123189&alt=media"}}
+[debug] [2025-03-01T17:12:03.211Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:12:03.211Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:12:03.212Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:12:03.212Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"specversion":"1.0","id":"5aef9b06-7b85-4a0f-8964-12d0bd9bba41","type":"google.cloud.storage.object.v1.finalized","source":"//storage.googleapis.com/projects/_/buckets/avilaventuras-grupo5.firebasestorage.app/objects/uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf","time":"2025-03-01T17:12:03.189Z","data":{"kind":"storage#object","name":"uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf","bucket":"avilaventuras-grupo5.firebasestorage.app","generation":"1740849123189","metageneration":"1","contentType":"application/pdf","timeCreated":"2025-03-01T17:12:03.189Z","updated":"2025-03-01T17:12:03.189Z","storageClass":"STANDARD","size":"241482","md5Hash":"23b4rlf+w4FExJ7aO/jY3A==","etag":"ardKZveyrTkEdZrrKi9YIOgz+Z4","metadata":{"firebaseStorageDownloadTokens":"8aaf3ebd-8dc1-41ce-8310-5dcccaeddb6f"},"crc32c":"YSPmVw==","timeStorageClassUpdated":"2025-03-01T17:12:03.189Z","id":"avilaventuras-grupo5.firebasestorage.app/uploads/Actividad 2 Evaluativa Ejercicio ODS.pdf/1740849123189","selfLink":"http://127.0.0.1:9199/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FActividad%202%20Evaluativa%20Ejercicio%20ODS.pdf","mediaLink":"http://127.0.0.1:9199/download/storage/v1/b/avilaventuras-grupo5.firebasestorage.app/o/uploads%2FActividad%202%20Evaluativa%20Ejercicio%20ODS.pdf?generation=1740849123189&alt=media"}}
+[debug] [2025-03-01T17:12:03.216Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:12:03.216Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
+[debug] [2025-03-01T17:13:14.597Z] >>> [apiv2][query] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast [none]
+[debug] [2025-03-01T17:13:14.597Z] >>> [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"eventId":"fcd3b73a-0169-4b35-aa2d-e3acb02185ab","eventType":"providers/firebase.auth/eventTypes/user.create","resource":{"name":"projects/avilaventuras-grupo5","service":"firebaseauth.googleapis.com"},"params":{},"timestamp":"2025-03-01T17:13:14.597Z","data":{"uid":"ergJKsFG8kPNx1NxYs0TthBNXM4R","email":"wewewe@gmail.com","emailVerified":false,"metadata":{"creationTime":"2025-03-01T17:13:14.596Z","lastSignInTime":"2025-03-01T17:13:14.596Z"},"customClaims":{},"providerData":[{"providerId":"password","email":"wewewe@gmail.com","federatedId":"wewewe@gmail.com","rawId":"wewewe@gmail.com"}]}}
+[debug] [2025-03-01T17:13:14.605Z] <<< [apiv2][status] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast 200
+[debug] [2025-03-01T17:13:14.605Z] <<< [apiv2][body] POST http://127.0.0.1:5001/functions/projects/avilaventuras-grupo5/trigger_multicast {"status":"multicast_acknowledged"}
