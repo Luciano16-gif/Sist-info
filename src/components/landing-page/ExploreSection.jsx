@@ -118,14 +118,14 @@ const ExploreSection = () => {
 
   return (
     <div 
-      className="relative w-full min-h-screen bg-[rgba(13,24,6,1)] text-white"
+      className="relative w-full min-h-screen text-white"
       style={{
         backgroundImage: `url(${explore_image})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundBlendMode: 'overlay',
-        backgroundColor: 'rgba(13,24,6,0.7)',
+        backgroundColor: 'rgba(13,24,6,0.3)',
         zIndex: 1
       }}
     >
