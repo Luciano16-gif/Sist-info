@@ -110,8 +110,45 @@ button.google-button-login:active {
 
 .signup-link-login {
     text-align: center;
-    margin-bottom: 170px;
+    margin-bottom: 6px;
     font-size: 20px;
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+
+.signup-link-login a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.signup-link-login a:hover {
+    color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
+}
+
+.signup-link-login a:active {
+    color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
+}
+
+.adminlogin-link-login {
+    text-align: center;
+    margin-bottom: 80px;
+    font-size: 20px;
+    color: #ffffff;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+.adminlogin-link-login a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.adminlogin-link-login a:hover {
+    color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
+}
+
+.adminlogin-link-login a:active {
+    color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
