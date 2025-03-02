@@ -40,12 +40,12 @@ function AdminLoginPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h2 className="login-title">Iniciar Sesión como Administrador/Guía</h2>
+      <h2 className="login-title">Iniciar Sesión como Guía</h2>
       <div className="input-container-login">
         <input type="text" placeholder="Ingresa tu código" onChange={(e) => setCode(e.target.value)} />
       </div>
       <button className="addbutton-login" onClick={handleLogin}>Iniciar Sesión</button>
-      <p className="login-link-adminlogin" style={{ marginTop: '20px' }}>¿No eres administrador/guía? <a href="/login-page">Iniciar Sesión</a></p>
+      <p className="login-link-adminlogin" style={{ marginTop: '20px' }}>¿No eres Guía? <a href="/login-page">Iniciar Sesión</a></p>
     </div>
   );
 }

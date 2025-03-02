@@ -65,7 +65,7 @@ function LoginPage() {
         Iniciar Sesión con Google
       </button>
       <p className="signup-link-login" style={{ marginTop: '20px' }}>¿No tienes cuenta? <a href="/sign-up-page">Registrarse</a></p>
-      <p className="adminlogin-link-login" style={{ marginTop: '20px' }}>¿Eres administrador/guía? <a href="/admin-login-page">Ingresar código</a></p>
+      <p className="adminlogin-link-login" style={{ marginTop: '20px' }}>¿Eres Guía? <a href="/guia-login-page">Ingresar código</a></p>
     </div>
   );
 }

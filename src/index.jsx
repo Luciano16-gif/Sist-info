@@ -31,7 +31,7 @@ root.render(
           <Route path="/storage-test" element={<StorageTest />} />
           <Route path="/sign-up-page" element={<SignUpPage />} /> {/* Añadir la nueva ruta */}
           <Route path="/login-page" element={<LoginPage />} />
-          <Route path="/admin-login-page" element={<AdminLoginPage />} />
+          <Route path="/guia-login-page" element={<AdminLoginPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
