@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './SignUpPage.css'; // Importa los estilos específicos del componente
 
 function SignUpPage() {
@@ -13,6 +14,7 @@ function SignUpPage() {
   const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
   const itemsCollection = collection(db, 'testItems');
+  const navigate = useNavigate(); // Utiliza el hook useNavigate
 
   const validateEmail = (email) => {
     const domain = 'correo.unimet.edu.ve';
@@ -28,7 +30,6 @@ function SignUpPage() {
       // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      alert('Usuario registrado!');
       // Iniciar sesión con el usuario recién creado
       await signInWithEmailAndPassword(auth, email, password);
       // Añadir item a Firestore
@@ -37,8 +38,8 @@ function SignUpPage() {
         setNewItemName(''); // Vacía el campo de entrada después de añadir
         setNewItemLastName(''); // Vacía el campo de entrada después de añadir
         setPhoneNumber(''); // Vacía el campo de entrada después de añadir
-        alert('Item añadido!');
       }
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -48,16 +49,14 @@ function SignUpPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userEmail = result.user.email;
-
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         // Desloguear al usuario si el correo no cumple con la regla
         await signOut(auth); // Utiliza la función signOut correctamente
         return;
       }
-
       setUser(result.user);
-      alert('Usuario registrado con Google!');
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }

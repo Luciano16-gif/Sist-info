@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { getDocs, collection } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
+import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './AdminLoginPage.css'; // Importa los estilos específicos del componente
 
 function AdminLoginPage() {
   const [code, setCode] = useState('');
   const [user, setUser] = useState(null);
+  const navigate = useNavigate(); // Utiliza el hook useNavigate
 
   const handleLogin = async () => {
     try {
@@ -29,9 +31,8 @@ function AdminLoginPage() {
       // Aquí puedes agregar la lógica para iniciar sesión como administrador o guía
       // Por ejemplo, podrías utilizar una función personalizada para autenticar al usuario
       // o simplemente establecer el estado `user` para indicar que el usuario ha iniciado sesión.
-
       setUser({ email: 'admin@example.com' }); // Ejemplo de cómo establecer el usuario
-      alert('Inicio de sesión exitoso como administrador/guía!');
+      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }

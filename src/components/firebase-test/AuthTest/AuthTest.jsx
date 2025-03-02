@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { auth } from '../../../firebase-config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa la función signOut
+import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './AuthTest.css'; // Importa los estilos específicos del componente
 
 function AuthTest() {
@@ -8,6 +9,7 @@ function AuthTest() {
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
+  const navigate = useNavigate(); // Utiliza el hook useNavigate
 
   const validateEmail = (email) => {
     const domain = 'correo.unimet.edu.ve';
@@ -23,6 +25,7 @@ function AuthTest() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       alert('Usuario registrado!');
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -37,6 +40,7 @@ function AuthTest() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
       alert('Usuario logeado!');
+      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -56,6 +60,7 @@ function AuthTest() {
 
       setUser(result.user);
       alert('Usuario logeado con Google!');
+      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión con Google exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
