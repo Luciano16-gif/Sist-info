@@ -1,4 +1,4 @@
-import avilaLanscape from '../assets/images/avila.JPG';
+import avilaLanscape from '../assets/images/landing-page/HERO/avila.jpg';;
 export const HERO_IMAGE = avilaLanscape;
 
 export const FEATURES = [
