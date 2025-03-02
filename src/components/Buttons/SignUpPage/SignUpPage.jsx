@@ -36,44 +36,45 @@ function SignUpPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h2>Registro y Prueba de Firestore</h2>
-      <div className="input-container" style={{ display: 'flex', gap: '600px', marginBottom: '80px' }}>
+      <h2 className="signup-title"> Registrarse</h2>
+      <div className="input-container-signup" >
         <div>
           <input
-            type="text"
+            type="text-signup"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             placeholder="Ingresa tu nombre"
             style={{ marginRight: '600px' }}
           />
           <input
-            type="text"
+            type="text-signup"
             value={newItemLastName}
             onChange={(e) => setNewItemLastName(e.target.value)}
             placeholder="Ingresa tu apellido"
           />
         </div>
       </div>
-      <div className="input-container" style={{ display: 'flex', gap: '600px' }}>
+      <div className="input-container-signup" style={{ display: 'flex', gap: '600px' }}>
         <div>
           <input
-            type="tel"
+            type="tel-signup"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="Ingresa tu nro telefónico"
-            style={{ width: '300px', padding: '10px', border: '5px solid #ffffff', borderRadius: '4px', fontSize: '16px', fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
+            style={{fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
           />
-          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
+          <input type="email-signup" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
           style={{ marginLeft: '600px' }}/>
         </div>
       </div>
-      <div className="input-container" style={{ display: 'flex', gap: '600px' }}>
+      <div className="input-container-signup" style={{ display: 'flex', gap: '600px' }}>
         <div>
-          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+          <input type="password-signup" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
         </div>
       </div>
-      <button className="addbutton" onClick={handleExecute} style={{ marginTop: '40px' }}>Ejecutar</button>
+      <button className="addbutton-signup" onClick={handleExecute} >Registrarse</button>
       {user && <p>Usuario logeado: {user.email}</p>}
+      <p className="login-link-signup" style={{  }}>¿Tienes cuenta? <a href="/login-page">Iniciar Sesión</a></p>
     </div>
   );
 }
