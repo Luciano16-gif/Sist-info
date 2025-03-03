@@ -1,62 +1,6 @@
-import React from 'react';
-
-import user471 from "../../assets/images/landing-page/publications/user471.webp";
-import user1982 from "../../assets/images/landing-page/publications/user1982.webp";
-import user2567 from "../../assets/images/landing-page/publications/user2567.webp";
-
-import andrea from "../../assets/images/landing-page/publications/andrea.webp";
-import carlos from "../../assets/images/landing-page/publications/carlos.webp";
-import victoria from "../../assets/images/landing-page/publications/victoria.webp";
+import { testimonios, publicaciones } from "../../constants/LandingData";
 
 const Testimonios = () => {
-  const testimonios = [
-    {
-      id: 1,
-      usuario: 'Usuario #1982:',
-      comentario: '¡Una experiencia increíble! Las rutas son impresionantes y los guías son muy profesionales. Sin duda, volveré a esta área más del Ávila con ustedes.',
-      avatar: user1982,
-      estrellas: 5
-    },
-    {
-      id: 2,
-      usuario: 'Usuario #471:',
-      comentario: 'Me encantó cada minuto de la excursión. La belleza del parque es incomparable y los senderos que todo turista ama nos esperaba. ¡Totalmente recomendado!',
-      avatar: user471,
-      estrellas: 5
-    },
-    {
-      id: 3,
-      usuario: 'Usuario #2567:',
-      comentario: 'Perfecto para desconectar. Las rutas son bien señalizadas y el servicio fue excepcional. Gracias por una aventura inolvidable en el Ávila.',
-      avatar: user2567,
-      estrellas: 5
-    }
-  ];
-
-  const publicaciones = [
-    {
-      id: 1,
-      usuario: 'Victoria G.',
-      fechaPublicacion: '08/12/2024',
-      imagen: victoria,
-      hashtags: '#Ávila #Venezuela #Montaña #Ejercicio #ÁvilaAventuras #Motivacion'
-    },
-    {
-      id: 2,
-      usuario: 'Carlos T.',
-      fechaPublicacion: '12/01/2025',
-      imagen: carlos,
-      hashtags: '#Diversion #Naturaleza #Ávila #ParqueElÁvila #Excursion #ÁvilaAventuras'
-    },
-    {
-      id: 3,
-      usuario: 'Andrea P.',
-      fechaPublicacion: '25/11/2024',
-      imagen: andrea,
-      hashtags: '#Aventura #Ávila #Excursion #Ruta #ÁvilaAventuras #AmoVenezuela'
-    }
-  ];
-
   const renderEstrellas = (cantidad) => {
     if (cantidad === 0) return null;
     const estrellas = [];
@@ -68,8 +12,24 @@ const Testimonios = () => {
     return <div className="flex">{estrellas}</div>;
   };
 
+  // Custom styles for different publication positions
+  const publicationStyles = [
+    { // Victoria (top right)
+      className: "col-start-2 row-start-1 flex justify-center",
+      imgHeight: "h-[210px]"
+    },
+    { // Carlos (left column)
+      className: "col-start-1 row-span-2 flex justify-center items-center",
+      imgHeight: "h-[430px]"
+    },
+    { // Andrea (bottom right)
+      className: "col-start-2 row-start-2 flex justify-center",
+      imgHeight: "h-[210px]"
+    }
+  ];
+
   return (
-    <div className="#2c3b23 text-white py-10 px-6"> {/* <-- Cambiado a py-10 px-6 */}
+    <div className="text-white py-10 px-6"> 
       <div className="max-w-6xl mx-auto">
         <div className="mb-4">
           <h2 className="text-4xl font-bold mb-1">Algunos comentarios y</h2>
@@ -79,19 +39,29 @@ const Testimonios = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Columna izquierda - Testimonios */}
-          <div className="col-span-2 space-y-4">
-            {testimonios.map((testimonio) => (
-              <div key={testimonio.id} className="bg-white rounded-full p-4 flex items-center border-2 border-white-300 shadow-lg">
-                <div className="mr-4">
+          <div className="col-span-2" style={{
+            zIndex: 20
+          }}>
+            {testimonios.map((testimonio, index) => (
+              <div 
+                key={testimonio.id} 
+                className="bg-gray-200 rounded-3xl p-5 flex items-center max-w-xl mb-0" 
+                style={{
+                  marginLeft: index === 1 ? '60px' : '0',
+                  marginTop: index > 0 ? '-10px' : '0',
+                  boxShadow: '0 4px 12px rgba(58,66,53,1)'
+                }}
+              >
+                <div className="mr-5">
                   <img
                     src={testimonio.avatar}
                     alt="Avatar de usuario"
-                    className="w-12 h-12 rounded-full object-cover"
+                    className="w-16 h-16 rounded-full object-cover"
                   />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-center mb-2">
-                    <p className="font-bold text-black">{testimonio.usuario}</p>
+                    <p className="font-bold text-black text-lg">Usuario #{testimonio.id}</p>
                     {renderEstrellas(testimonio.estrellas)}
                   </div>
                   <p className="text-sm text-black">{testimonio.comentario}</p>
@@ -99,59 +69,41 @@ const Testimonios = () => {
               </div>
             ))}
           </div>
-          {/* Columna derecha - Publicaciones */}
-          <div className="col-span-1 grid grid-cols-2 gap-4 justify-center">
-            {/* Publicación de Victoria */}
-            <div className="flex justify-center row-start-1 col-start-2">
-              <div className="relative"> {/* Contenedor relative para la imagen y el texto */}
-                <img
-                  src={publicaciones[0].imagen}
-                  alt="Publicación de usuario Victoria"
-                  className="w-[313px] h-[430px] object-cover rounded-lg flex-shrink-0"
-                />
-                <div className="absolute bottom-0 left-0 p-4 text-white bg-black bg-opacity-50"> {/* Texto superpuesto con fondo */}
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold">{publicaciones[0].usuario}</p>
-                    <p className="text-xs opacity-75">{publicaciones[0].fechaPublicacion}</p>
+          
+          {/* Columna derecha - Publicaciones con layout específico */}
+          <div className="col-span-1 grid grid-cols-2 gap-4 relative p-4" style={{ 
+            position: 'relative',
+            zIndex: 10
+          }}>
+            {/* Green glow effect - positioned absolutely */}
+            <div className="absolute inset-0 rounded-3xl" style={{
+              boxShadow: '0 0 400px 400px rgba(31,43,22,0.9)',
+              pointerEvents: 'none'
+            }}></div>
+            
+            {/* Loop through the first 3 publications */}
+            {publicaciones.slice(0, 3).map((publicacion, index) => (
+              <div key={index} className={publicationStyles[index].className}>
+                <div className="relative">
+                  <img
+                    src={publicacion.imagen}
+                    alt={`Publicación de usuario ${publicacion.usuario}`}
+                    className={`w-full ${publicationStyles[index].imgHeight} object-cover rounded-lg`}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white bg-black bg-opacity-50">
+                    <div className="flex justify-between items-center">
+                      <p className="font-bold">{publicacion.usuario}</p>
+                      <p className="text-xs opacity-75">{publicacion.fechaPublicacion}</p>
+                    </div>
+                    <div className="flex flex-wrap mt-1">
+                      {publicacion.hashtags.split(' ').map((tag, i) => (
+                        <span key={i} className="text-xs mr-1">{tag}</span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-xs mt-1 text-justify">{publicaciones[0].hashtags}</p>
                 </div>
               </div>
-            </div>
-            {/* Publicación de Carlos */}
-            <div>
-              <div className="relative"> {/* Contenedor relative para la imagen y el texto */}
-                <img
-                  src={publicaciones[1].imagen}
-                  alt="Publicación de usuario Carlos"
-                  className="w-[313px] h-[430px] object-cover rounded-lg flex-shrink-0"
-                />
-                <div className="absolute bottom-0 left-0 p-4 text-white bg-black bg-opacity-50"> {/* Texto superpuesto con fondo */}
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold">{publicaciones[1].usuario}</p>
-                    <p className="text-xs opacity-75">{publicaciones[1].fechaPublicacion}</p>
-                  </div>
-                  <p className="text-xs mt-1 text-justify">{publicaciones[1].hashtags}</p>
-                </div>
-              </div>
-            </div>
-            {/* Publicación de Andrea */}
-            <div className="row-start-2 col-start-2">
-              <div className="relative"> {/* Contenedor relative para la imagen y el texto */}
-                <img
-                  src={publicaciones[2].imagen}
-                  alt="Publicación de usuario Andrea"
-                  className="w-[313px] h-[430px] object-cover rounded-lg flex-shrink-0"
-                />
-                <div className="absolute bottom-0 left-0 p-4 text-white bg-black bg-opacity-50"> {/* Texto superpuesto con fondo */}
-                  <div className="flex justify-between items-center">
-                    <p className="font-bold">{publicaciones[2].usuario}</p>
-                    <p className="text-xs opacity-75">{publicaciones[2].fechaPublicacion}</p>
-                  </div>
-                  <p className="text-xs mt-1 text-justify">{publicaciones[2].hashtags}</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

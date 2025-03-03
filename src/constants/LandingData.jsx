@@ -96,3 +96,60 @@ export const EXPLORE_TEXTS = [
   }
 ];
 
+// ========== Testimonials section ==========
+
+import user471 from "../assets/images/landing-page/publications/user471.webp";
+import user1982 from "../assets/images/landing-page/publications/user1982.webp";
+import user2567 from "../assets/images/landing-page/publications/user2567.webp";
+
+import andrea from "../assets/images/landing-page/publications/andrea.webp";
+import carlos from "../assets/images/landing-page/publications/carlos.webp";
+import victoria from "../assets/images/landing-page/publications/victoria.webp";
+
+export const testimonios = [
+  {
+    id: 1,
+    usuario: 'Usuario #1982:',
+    comentario: '¡Una experiencia increíble! Las rutas son impresionantes y los guías son muy profesionales. Sin duda, volveré a esta área más del Ávila con ustedes.',
+    avatar: user1982,
+    estrellas: 5
+  },
+  {
+    id: 2,
+    usuario: 'Usuario #471:',
+    comentario: 'Me encantó cada minuto de la excursión. La belleza del parque es incomparable y los senderos que todo turista ama nos esperaba. ¡Totalmente recomendado!',
+    avatar: user471,
+    estrellas: 5
+  },
+  {
+    id: 3,
+    usuario: 'Usuario #2567:',
+    comentario: 'Perfecto para desconectar. Las rutas son bien señalizadas y el servicio fue excepcional. Gracias por una aventura inolvidable en el Ávila.',
+    avatar: user2567,
+    estrellas: 5
+  }
+];
+
+export const publicaciones = [
+  {
+    id: 1,
+    usuario: 'Victoria G.',
+    fechaPublicacion: '08/12/2024',
+    imagen: victoria,
+    hashtags: '#Ávila #Venezuela #Montaña #Ejercicio #ÁvilaAventuras #Motivacion'
+  },
+  {
+    id: 2,
+    usuario: 'Carlos T.',
+    fechaPublicacion: '12/01/2025',
+    imagen: carlos,
+    hashtags: '#Diversion #Naturaleza #Ávila #ParqueElÁvila #Excursion #ÁvilaAventuras'
+  },
+  {
+    id: 3,
+    usuario: 'Andrea P.',
+    fechaPublicacion: '25/11/2024',
+    imagen: andrea,
+    hashtags: '#Aventura #Ávila #Excursion #Ruta #ÁvilaAventuras #AmoVenezuela'
+  }
+];
