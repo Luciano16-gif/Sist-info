@@ -1,65 +1,85 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const TopMenu = () => {
+  const [scrolled, setScrolled] = useState(false);
 
-  const menuItems= [
+  const menuItems = [
     { href: "/experiencias", label: "Experiencias" },
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
     { href: "/resenas", label: "Reseñas" },
   ];
 
-  const sesionItems= [
+  const sesionItems = [
     { href: "/sign-up-page", label: "Registrarse"},
     { href: "/login-page", label: "Iniciar Sesión"},
-  ]
+  ];
+
+  // Detectar scroll para añadir un fondo más opaco cuando se hace scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrolled]);
 
   return (
     <nav 
-      className="
+      className={`
         hidden
         bg-black
         text-white 
-        p-2
+        p-1
         md:flex 
-        justify-evenly
         items-center
         shadow-lg
         fixed
         top-0
         left-0
         right-0
-        bg-opacity-85
-        space-x-12
+        ${scrolled ? 'bg-opacity-95' : 'bg-opacity-85'}
+        transition-all
+        duration-300
         min-h-16
-      "
-      style={{zIndex: 9999}}
+        z-50
+      `}
     >
-      <div className="flex items-center justify-center">
-        <img className="max-h-12 min-w-20 min-h-7 px-2"
-        src="/src/assets/images/Logo_Avilaventuras.webp"
-        alt="Avilaventuras"
-        />
-      </div>
-      <p className="uppercase font-ysabeau text-gray-400 flex items-center justify-center">Visitante</p>
-      <ul className="flex flex-row uppercase font-ysabeau underline sm:text-sm sm:space-x-12 justify-center">
-            {menuItems.map((item) => (
-            <li key={item.href} className="hover:scale-110 transform transition-all duration-300 flex items-center">
-                <Link to={item.href} className="text-center">{item.label}</Link>
+      <div className="w-full flex flex-wrap items-center justify-between px-4">
+        <div className="flex items-center">
+          <img 
+            className="max-h-10 min-w-16 min-h-6"
+            src="/src/assets/images/Logo_Avilaventuras.webp"
+            alt="Avilaventuras"
+          />
+          <p className="uppercase font-ysabeau text-gray-400 text-xs ml-4 md:text-xs lg:text-sm">Visitante</p>
+        </div>
+        
+        <ul className="flex flex-row uppercase font-ysabeau underline text-xs lg:text-sm space-x-3 md:space-x-4 lg:space-x-8">
+          {menuItems.map((item) => (
+            <li key={item.href} className="hover:scale-110 transform transition-all duration-300">
+              <Link to={item.href} className="text-center whitespace-nowrap">{item.label}</Link>
             </li>
-            ))}
-      </ul>
-      <div className="flex justify-center">
-        <ul className="flex flex-row uppercase font-ysabeau sm:text-sm sm:space-x-2">
-          {sesionItems.map((item) => (
-              <li key={item.href} className="bg-gray-800 box-border px-4 py-2 border-gray-200 border rounded-full
-              hover:scale-110 transform transition-all duration-300 flex items-center justify-center">
-                  <Link to={item.href} className="text-center whitespace-nowrap">{item.label}</Link>
-              </li>))}
+          ))}
         </ul>
+        
+        <div className="flex">
+          <ul className="flex flex-row uppercase font-ysabeau text-xs lg:text-sm space-x-1 md:space-x-2">
+            {sesionItems.map((item) => (
+              <li key={item.href} className="bg-gray-800 box-border px-2 md:px-3 lg:px-4 py-1 md:py-1.5 border-gray-200 border rounded-full hover:scale-110 transform transition-all duration-300">
+                <Link to={item.href} className="text-center whitespace-nowrap">{item.label}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-
-      <div className="bg-black h-16 md:hidden lg:hidden" />
     </nav>
   );
 };
