@@ -175,3 +175,10 @@ import card_2 from "../assets/images/landing-page/ideal-routes/cards/card_2.webp
 import card_3 from "../assets/images/landing-page/ideal-routes/cards/card_3.webp";
 
 export const cards = [card_1, card_2, card_3];
+
+
+export const routesData = [
+  { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 },
+  { difficulty: 4, length: 4, rating: 5, spots: 20, maxSpots: 40 },
+  { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 }
+];
