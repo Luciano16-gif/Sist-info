@@ -22,7 +22,10 @@ const HamburgerMenu = () => {
   }
 
   return (
-    <nav className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden">
+    <nav 
+    className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden"
+    style={{ zIndex: 9999 }}
+    >
       <div className="absolute top-0 left-0 right-0 border-b-2 border-yellow-500 h-16 flex items-center px-4 z-50 bg-black bg-opacity-90">
         {/* Burger Menu Button */}
         <div className="w-10 h-10">
