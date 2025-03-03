@@ -55,6 +55,14 @@ const RoutesSection = () => {
 
       {/* Bottom gradient overlay for fade effect */}
       <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-[rgba(13,24,6,1)] pointer-events-none z-10"></div>
+      
+      {/* Footer */}
+      <div className="relative z-20 text-center pb-6 pt-12">
+        {/* Copyright Text */}
+        <div className="text-sm">
+          ©2025 | ÁvilaVenturas all right reserved
+        </div>
+      </div>
     </div>
   );
 };
