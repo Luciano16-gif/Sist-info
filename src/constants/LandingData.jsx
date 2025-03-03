@@ -168,7 +168,7 @@ export const publicaciones = [
 
 // ========== Routes section ==========
 
-export { default as routes_background } from "../assets/images/landing-page/ideal-routes/routes_background.webp";
+export { default as routes_background } from "../assets/images/landing-page/ideal-routes/routes-background.webp";
 
 import card_1 from "../assets/images/landing-page/ideal-routes/cards/card_1.webp";
 import card_2 from "../assets/images/landing-page/ideal-routes/cards/card_2.webp";
