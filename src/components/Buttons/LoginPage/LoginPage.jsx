@@ -33,29 +33,29 @@ function LoginPage() {
         return;
       }
 
-      const userDocRef = doc(usersCollection, `${email}`);
-      const userDocSnapshot = await getDoc(userDocRef);
-
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-
-        if (!userData.password) {
-          alert('Este correo está registrado pero no tiene una contraseña asociada. Inicia sesión con Google.');
-          return;
-        }
-
-        // Iniciar sesión con el usuario recién creado
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        setUser(userCredential.user);
-        // Vacía los campos de entrada después de iniciar sesión
-        setEmail('');
-        setPassword('');
-        navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
-      } else {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setUser(userCredential.user);
+      // Vacía los campos de entrada después de iniciar sesión
+      setEmail('');
+      setPassword('');
+      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+    } catch (error) {
+      if(error.code === 'auth/wrong-password') {
+        alert('Contraseña incorrecta.');
+        return;
+      }
+      if(error.code === 'auth/user-not-found') {
         alert('Usuario no encontrado.');
         return;
       }
-    } catch (error) {
+      if(error.code === 'auth/invalid-email') {
+        alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+        return;
+      }
+      if(error.code === 'auth/invalid-credential'){
+        alert('Ya utilizaste otro método de Registro/Inicio de Sesión')
+        return;
+      }
       alert(`Error: ${error.message}`);
     }
   };
@@ -64,6 +64,7 @@ function LoginPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userEmail = result.user.email;
+
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         // Desloguear al usuario si el correo no cumple con la regla

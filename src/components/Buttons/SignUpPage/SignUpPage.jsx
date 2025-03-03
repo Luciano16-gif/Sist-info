@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, addDoc, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './SignUpPage.css'; // Importa los estilos específicos del componente
 
@@ -27,48 +27,21 @@ function SignUpPage() {
       return;
     }
     try {
-      // Verificar si el correo ya está registrado en Firestore
-      const userDocRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
-      const userDocSnapshot = await getDoc(userDocRef);
-
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-
-        if (userData.password) {
-          alert('Este correo ya está registrado y tiene una contraseña asociada.');
-          return;
-        }
-
-        // Actualizar el documento existente con la nueva información
-        await setDoc(userDocRef, {
-          password: password,
-          phone: phoneNumber
-        }, { merge: true });
-
-        // Esperar 0.5 segundos antes de intentar iniciar sesión
-        setTimeout(async () => {
-          // Iniciar sesión con el usuario recién creado
-          await signInWithEmailAndPassword(auth, email, password);
-        }, 500); // Tiempo de espera de 0.5 segundos
-        navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
-      } else {
-        // Crear el documento en Firestore con la información del usuario
-        const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
-        await setDoc(docRef, {
-          email: email,
-          name: newItemName,
-          lastName: newItemLastName,
-          password: password,
-          phone: phoneNumber
-        });
-
-        // Registrar usuario
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        setUser(userCredential.user);
-        // Iniciar sesión con el usuario recién creado
-        await signInWithEmailAndPassword(auth, email, password);
-        navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
-      }
+      // Registrar usuario
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      setUser(userCredential.user);
+      // Iniciar sesión con el usuario recién creado
+      await signInWithEmailAndPassword(auth, email, password);
+      // Crear el documento en Firestore con el nombre y apellido del usuario
+      const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
+      await setDoc(docRef, {
+        email: email,
+        name: newItemName,
+        lastName: newItemLastName,
+        password: password,
+        phone: phoneNumber
+      });
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -102,44 +75,22 @@ function SignUpPage() {
 
       const userPhone = ''; // Puedes obtener el número de teléfono del usuario de alguna otra manera si es necesario
 
-      // Verificar si el correo ya está registrado en Firestore
-      const userDocRef = doc(usersCollection, `${name} ${lastName}`);
-      const userDocSnapshot = await getDoc(userDocRef);
+      // Crear el documento en Firestore con la información del usuario
+      const docRef = doc(usersCollection, `${name} ${lastName}`);
+      await setDoc(docRef, {
+        email: userEmail,
+        name: name,
+        lastName: lastName,
+        password: '', // No se guarda la contraseña del usuario registrado con Google
+        phone: userPhone
+      });
 
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-
-        if (userData.password) {
-          alert('Este correo ya está registrado y tiene una contraseña asociada.');
-          return;
-        }
-
-        // Actualizar el documento existente con la nueva información
-        await setDoc(userDocRef, {
-          email: userEmail,
-          phone: userPhone
-        }, { merge: true });
-
-        // Esperar 1 segundos antes de intentar iniciar sesión
-        setTimeout(async () => {
-          // Iniciar sesión con el usuario recién creado
-          setUser(result.user);
-        }, 1000); // Tiempo de espera de 2 segundos
-        navigate('/home');
-      } else {
-        // Crear el documento en Firestore con la información del usuario
-        const docRef = doc(usersCollection, `${name} ${lastName}`);
-        await setDoc(docRef, {
-          email: userEmail,
-          name: name,
-          lastName: lastName,
-          password: '', // No se guarda la contraseña del usuario registrado con Google
-          phone: userPhone
-        });
-        setUser(result.user);
-        navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
-      }
+      setUser(result.user);
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
     } catch (error) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        return;
+      }
       alert(`Error: ${error.message}`);
     }
   };
