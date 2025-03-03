@@ -1,14 +1,15 @@
+import { Outlet } from 'react-router-dom';
 import HamburgerMenu from "../menus/HamburgerMenu";
-// import TopMenu from "../menus/TopMenu";
+import TopMenu from "../menus/TopMenu";
 
-const Layout = ({ children }) => {
-    return (
-      <div className="pt-16">
-        <HamburgerMenu />
-        {/* <TopMenu /> */}
-        {children}
-      </div>
-    );
-  };
-  
-  export default Layout;
+const Layout = () => {
+  return (
+    <div className="pt-16">
+      <TopMenu />
+      <HamburgerMenu />
+      <Outlet />
+    </div>
+  );
+};
+
+export default Layout;

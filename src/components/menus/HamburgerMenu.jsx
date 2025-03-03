@@ -4,13 +4,10 @@ import { useState } from "react";
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuItems = [
-    { href: "/", label: "Home" },
-    { href: "/people", label: "People" },
-    { href: "/planets", label: "Planets" },
-    { href: "/films", label: "Films" },
-    { href: "/starships", label: "Starships" },
-    { href: "/vehicles", label: "Vehicles" },
-    { href: "/species", label: "Species" },
+    { href: "/experiencias", label: "Experiencias" },
+    { href: "/equipo", label: "Nuestro Equipo" },
+    { href: "/galeria", label: "Galería" },
+    { href: "/resenas", label: "Reseñas" },
   ];
 
   function toggleMenu() {
@@ -22,7 +19,10 @@ const HamburgerMenu = () => {
   }
 
   return (
-    <nav className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden">
+    <nav 
+    className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden"
+    style={{ zIndex: 9999 }}
+    >
       <div className="absolute top-0 left-0 right-0 border-b-2 border-yellow-500 h-16 flex items-center px-4 z-50 bg-black bg-opacity-90">
         {/* Burger Menu Button */}
         <div className="w-10 h-10">
@@ -65,9 +65,10 @@ const HamburgerMenu = () => {
           </label>
         </div>
 
-        <h2 className="text-2xl font-bold text-yellow-400 absolute left-1/2 transform -translate-x-1/2">
-          Vive El Ávila
-        </h2>
+        <a className="sm:flex">
+          <img src="src/assets/images/Logo_Avilaventuras.webp"
+          />
+        </a>
       </div>
       
       {/* Menu Overlay */}
