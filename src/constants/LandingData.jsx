@@ -165,3 +165,13 @@ export const publicaciones = [
     hashtags: '#Aventura #Ávila #Excursion #Ruta #ÁvilaAventuras #AmoVenezuela'
   }
 ];
+
+// ========== Routes section ==========
+
+export { default as routes_background } from "../assets/images/landing-page/ideal-routes/routes-background.webp";
+
+import card_1 from "../assets/images/landing-page/ideal-routes/cards/card_1.webp";
+import card_2 from "../assets/images/landing-page/ideal-routes/cards/card_2.webp";
+import card_3 from "../assets/images/landing-page/ideal-routes/cards/card_3.webp";
+
+export const cards = [card_1, card_2, card_3];

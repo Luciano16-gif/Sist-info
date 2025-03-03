@@ -4,6 +4,7 @@ import Divider from '../../components/landing-page/Divider';
 import FeatureSection from '../../components/landing-page/FeatureSection';
 import ExploreSection from '../../components/landing-page/ExploreSection';
 import TestimonySection from '../../components/landing-page/Testimonials';
+import RoutesSection from '../../components/landing-page/RoutesSection'; 
 
 const AvilaLanding = () => {
   useEffect(() => {
@@ -54,8 +55,13 @@ const AvilaLanding = () => {
         <TestimonySection/>
       </div>
 
-       {/* Divider */}
-       <Divider />
+      {/* Divider */}
+      <Divider />
+      
+      {/* Routes Section*/}
+      <div>
+        <RoutesSection />
+      </div>
 
     </div>
   );

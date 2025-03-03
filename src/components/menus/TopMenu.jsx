@@ -48,8 +48,8 @@ const TopMenu = () => {
             </li>
             ))}
       </ul>
-      <div className="flex flex-row uppercase font-ysabeau underline sm:text-sm sm:space-x-12">
-        <ul className="me-3 inline-block rounded bg-white">
+      <div className="">
+        <ul className="flex flex-row uppercase font-ysabeau sm:text-sm sm:space-x-12">
           {sesionItems.map((item) => (
               <li key={item.href} className="hover:scale-110 transform transition-all duration-300">
                   <Link to={item.href}>{item.label}</Link>
