@@ -10,6 +10,11 @@ const HamburgerMenu = () => {
     { href: "/resenas", label: "Reseñas" },
   ];
 
+  const sesionItems= [
+    { href: "/sign-up-page", label: "Registrarse"},
+    { href: "/login-page", label: "Iniciar Sesión"},
+  ]
+
   function toggleMenu() {
     setIsOpen(!isOpen);
   }
@@ -23,7 +28,7 @@ const HamburgerMenu = () => {
     className="fixed z-50 top-0 left-0 right-0 md:hidden lg:hidden"
     style={{ zIndex: 9999 }}
     >
-      <div className="absolute top-0 left-0 right-0 border-b-2 border-yellow-500 h-16 flex items-center px-4 z-50 bg-black bg-opacity-90">
+      <div className="absolute top-0 left-0 right-0 h-16 flex items-center px-4 z-50 bg-black bg-opacity-90">
         {/* Burger Menu Button */}
         <div className="w-10 h-10">
           <label className="w-10 h-10 cursor-pointer flex items-center justify-center">
@@ -39,7 +44,7 @@ const HamburgerMenu = () => {
             <div className="w-10 h-10 relative flex items-center justify-center">
               {/* Top bar */}
               <span 
-                className={`absolute h-1.5 bg-yellow-400 rounded-full transition-all duration-300
+                className={`absolute h-1.5 bg-white rounded-full transition-all duration-300
                   ${isOpen 
                     ? "w-10 rotate-45" 
                     : "w-10 -translate-y-3"
@@ -47,7 +52,7 @@ const HamburgerMenu = () => {
               />
               {/* Middle bar */}
               <span 
-                className={`block h-1.5 bg-yellow-400 rounded-full transition-all duration-300
+                className={`block h-1.5 bg-white rounded-full transition-all duration-300
                   ${isOpen 
                     ? "w-10 opacity-0 -translate-x-5" 
                     : "w-10 opacity-100"
@@ -55,7 +60,7 @@ const HamburgerMenu = () => {
               />
               {/* Bottom bar */}
               <span 
-                className={`absolute h-1.5 bg-yellow-400 rounded-full transition-all duration-300
+                className={`absolute h-1.5 bg-white rounded-full transition-all duration-300
                   ${isOpen 
                     ? "w-10 -rotate-45" 
                     : "w-10 translate-y-3"
@@ -65,7 +70,7 @@ const HamburgerMenu = () => {
           </label>
         </div>
 
-        <a className="sm:flex">
+        <a className="items-center">
           <img src="src/assets/images/Logo_Avilaventuras.webp"
           />
         </a>
@@ -84,7 +89,7 @@ const HamburgerMenu = () => {
           {menuItems.map((item, index) => (
             <li key={item.href} className="hover:scale-110 transform transition-all duration-300">
               <Link
-                className="text-yellow-400 hover:text-yellow-300 text-xl uppercase tracking-wider font-semibold py-4 px-4 w-full inline-block
+                className="text-white hover:text-gray-100100 text-xl uppercase tracking-wider font-semibold py-4 px-4 w-full inline-block
                           transform transition-all duration-300 hover:scale-110
                           hover:bg-yellow-500/10"
                 to={item.href}
@@ -92,7 +97,7 @@ const HamburgerMenu = () => {
                 {item.label}
               </Link>
               {index < menuItems.length - 1 && (
-                <div className="w-24 h-px bg-yellow-500/30 mx-auto" />
+                <div className="w-24 h-px bg-white/30 mx-auto" />
               )}
             </li>
           ))}

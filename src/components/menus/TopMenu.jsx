@@ -35,7 +35,7 @@ const TopMenu = () => {
       style={{zIndex: 9999}}
     >
       <div>
-        <img class="max-h-12 min-h-5 space-x-5 px-2"
+        <img class="max-h-12 min-w-20 min-h-7 space-x-5 px-2"
         src="/src/assets/images/Logo_Avilaventuras.webp"
         alt="Avilaventuras"
         />
@@ -51,7 +51,7 @@ const TopMenu = () => {
       <div className="">
         <ul className="flex flex-row uppercase font-ysabeau sm:text-sm sm:space-x-12">
           {sesionItems.map((item) => (
-              <li key={item.href} className="bg-gray-700 box-border border-gray-200 border
+              <li key={item.href} className="bg-gray-700 box-border p-2 border-gray-200 border rounded-full
               hover:scale-110 transform transition-all duration-300">
                   <Link to={item.href}>{item.label}</Link>
               </li>))}
