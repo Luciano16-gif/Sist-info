@@ -10,8 +10,8 @@ const TopMenu = () => {
   ];
 
   const sesionItems= [
-    { href: "/registro", label: "Registrate"},
-    { href: "/iniciar", label: "Inicia Sesión"},
+    { href: "/sign-up-page", label: "Registrarse"},
+    { href: "/login-page", label: "Iniciar Sesión"},
   ]
 
   return (

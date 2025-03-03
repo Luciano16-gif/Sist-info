@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
@@ -101,14 +101,14 @@ function SignUpPage() {
       <div className="input-container-signup">
         <div>
           <input
-            type="text"
+            type="text-signup"
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             placeholder="Ingresa tu nombre"
             style={{ marginRight: '600px' }}
           />
           <input
-            type="text"
+            type="text-signup"
             value={newItemLastName}
             onChange={(e) => setNewItemLastName(e.target.value)}
             placeholder="Ingresa tu apellido"
@@ -118,13 +118,13 @@ function SignUpPage() {
       <div className="input-container-signup" style={{ display: 'flex', gap: '600px' }}>
         <div>
           <input
-            type="tel"
+            type="tel-signup"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="Ingresa tu nro telefónico"
             style={{ fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
           />
-          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
+          <input type="email-signup" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
           style={{ marginLeft: '600px' }}/>
         </div>
       </div>

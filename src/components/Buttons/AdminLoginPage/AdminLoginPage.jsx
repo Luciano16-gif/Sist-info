@@ -32,7 +32,7 @@ function AdminLoginPage() {
       // Por ejemplo, podrías utilizar una función personalizada para autenticar al usuario
       // o simplemente establecer el estado `user` para indicar que el usuario ha iniciado sesión.
       setUser({ email: 'admin@example.com' }); // Ejemplo de cómo establecer el usuario
-      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -40,9 +40,9 @@ function AdminLoginPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h2 className="login-title">Iniciar Sesión como Guía</h2>
+      <h2 className="admin-login-title">Iniciar Sesión como Guía</h2>
       <div className="input-container-login">
-        <input type="text" placeholder="Ingresa tu código" onChange={(e) => setCode(e.target.value)} />
+        <input type="text-admin" placeholder="Ingresa tu código" onChange={(e) => setCode(e.target.value)} />
       </div>
       <button className="addbutton-login" onClick={handleLogin}>Iniciar Sesión</button>
       <p className="login-link-adminlogin" style={{ marginTop: '20px' }}>¿No eres Guía? <a href="/login-page">Iniciar Sesión</a></p>

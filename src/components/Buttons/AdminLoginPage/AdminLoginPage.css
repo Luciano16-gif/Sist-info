@@ -12,8 +12,8 @@ body {
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
 
-.login-title {
-    font-size: 80px; /* Tamaño de fuente más grande */
+.admin-login-title {
+    font-size: 95px; /* Tamaño de fuente más grande */
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
     display: flex;
@@ -31,7 +31,7 @@ body {
     margin-bottom: 30px;
 }
 
-input[type="text"] {
+input[type="text-admin"] {
     width: 350PX; /* Aumenta el tamaño horizontal de los inputs */
     padding: 12px;
     border: 5px solid #ffffff;
@@ -42,13 +42,13 @@ input[type="text"] {
     color: #333; /* Color inicial del texto */
 }
 
-input[type="text"]:focus {
+input[type="text-admin"]:focus {
     border-color: #2e6126;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Nuevos estilos para hover en inputs */
-input[type="text"]:hover {
+input[type="text-admin"]:hover {
     background-color: #c2c2c2;
     border-color: #c2c2c2;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);

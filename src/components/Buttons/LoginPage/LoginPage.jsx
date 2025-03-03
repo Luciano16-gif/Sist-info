@@ -38,7 +38,7 @@ function LoginPage() {
       // Vacía los campos de entrada después de iniciar sesión
       setEmail('');
       setPassword('');
-      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
     } catch (error) {
       if(error.code === 'auth/wrong-password') {
         alert('Contraseña incorrecta.');
@@ -84,7 +84,7 @@ function LoginPage() {
       }
 
       setUser(result.user);
-      navigate('/home'); // Redirige al usuario a la página Home después de un inicio de sesión con Google exitoso
+      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión con Google exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -95,7 +95,7 @@ function LoginPage() {
       <h2 className="login-title">Iniciar Sesión</h2>
       <div className="input-container-login">
         <input type="email-login" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+        <input type="password-login" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
       </div>
       <button className="addbutton-login" onClick={handleLogin}>Iniciar Sesión</button>
       <button className="google-button-login" onClick={handleGoogleSignIn}>

@@ -30,10 +30,10 @@ body {
     margin-bottom: 20px;
 }
 
-input[type="email"],
-input[type="password"],
-input[type="text"],
-input[type="tel"] {
+input[type="email-signup"],
+input[type="password-signup"],
+input[type="text-signup"],
+input[type="tel-signup"] {
     width: 350px; /* Aumenta el tamaño horizontal de los inputs */
     padding: 12px;
     border: 5px solid #ffffff;
@@ -44,19 +44,19 @@ input[type="tel"] {
     color: #333; /* Color inicial del texto */
 }
 
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="text"]:focus,
-input[type="tel"]:focus {
+input[type="email-signup"]:focus,
+input[type="password-signup"]:focus,
+input[type="text-signup"]:focus,
+input[type="tel-signup"]:focus {
     border-color: #2e6126;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Nuevos estilos para hover en inputs */
-input[type="email"]:hover,
-input[type="password"]:hover,
-input[type="text"]:hover,
-input[type="tel"]:hover {
+input[type="email-signup"]:hover,
+input[type="password-signup"]:hover,
+input[type="text-signup"]:hover,
+input[type="tel-signup"]:hover {
     background-color: #c2c2c2;
     border-color: #c2c2c2;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
@@ -116,7 +116,7 @@ button.google-button-signup:active {
 
 .login-link-signup {
     text-align: center;
-    margin-bottom: 110px;
+    margin-bottom: 60px;
     font-size: 20px;
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
@@ -132,6 +132,6 @@ button.google-button-signup:active {
     color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
 }
 
-.login-link-signupa:active {
+.login-link-signup a:active {
     color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
