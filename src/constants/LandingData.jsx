@@ -54,17 +54,11 @@ export const FEATURES = [
 
 export { default as explore_image } from "../assets/images/landing-page/explore/explore.webp";
 
-
 import gallery_1 from "../assets/images/landing-page/explore/gallery/gallery_1.webp";
- 
 import gallery_2 from "../assets/images/landing-page/explore/gallery/gallery_2.webp";
- 
 import gallery_3 from "../assets/images/landing-page/explore/gallery/gallery_3.webp";
- 
 import gallery_4 from "../assets/images/landing-page/explore/gallery/gallery_4.webp";
- 
 import gallery_5 from "../assets/images/landing-page/explore/gallery/gallery_5.webp";
- 
 import gallery_6 from "../assets/images/landing-page/explore/gallery/gallery_6.webp";
 
 export const gallery = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
@@ -106,16 +100,12 @@ export const EXPLORE_TEXTS = [
 
  
 import user471 from "../assets/images/landing-page/publications/user471.webp";
- 
 import user1982 from "../assets/images/landing-page/publications/user1982.webp";
- 
 import user2567 from "../assets/images/landing-page/publications/user2567.webp";
 
  
 import andrea from "../assets/images/landing-page/publications/andrea.webp";
- 
 import carlos from "../assets/images/landing-page/publications/carlos.webp";
- 
 import victoria from "../assets/images/landing-page/publications/victoria.webp";
 
 export const testimonios = [
