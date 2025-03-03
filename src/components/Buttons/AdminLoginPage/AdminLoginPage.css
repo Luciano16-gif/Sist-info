@@ -6,102 +6,96 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #021200;
+    background-image: url('../public/background_login_signin.png'); /* Ruta a la imagen de fondo */
+    background-size: cover;
     position: relative;
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
 
-h2 {
-    margin-bottom: 20px;
+.login-title {
+    font-size: 80px; /* Tamaño de fuente más grande */
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
-}
-
-.input-container {
     display: flex;
-    gap: 600px; /* Espacio entre los inputs */
-    margin-bottom: 20px;
+    height: 1.811px;
+    padding-bottom: 120px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
 }
 
-input[type="email"],
-input[type="password"] {
-    width: 300PX; /* Aumenta el tamaño horizontal de los inputs */
-    padding: 10px;
+.input-container-login {
+    display: flex;
+    flex-direction: column; /* Alinea los inputs en columna */
+    gap: 20px; /* Espacio entre los inputs */
+    margin-bottom: 30px;
+}
+
+input[type="text"] {
+    width: 350PX; /* Aumenta el tamaño horizontal de los inputs */
+    padding: 12px;
     border: 5px solid #ffffff;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 19px;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
     transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Añade transición para suavizar cambios */
     color: #333; /* Color inicial del texto */
 }
 
-input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="text"]:focus {
     border-color: #2e6126;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Nuevos estilos para hover en inputs */
-input[type="email"]:hover,
-input[type="password"]:hover {
+input[type="text"]:hover {
     background-color: #c2c2c2;
     border-color: #c2c2c2;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     color: #000; /* Cambia ligeramente el color del texto al hacer hover */
 }
 
-button {
+button.addbutton-login {
     width: 150px; /* Tamaño fijo para los botones */
     padding: 10px;
-    margin: 5px 0;
-    background-color: #007bff;
+    margin-bottom: 10px;
+    background-color: #0058b7;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 20px;
     transition: background-color 0.3s ease;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-button:active {
-    background-color: #00876e;
-    transform: translateY(2px);
-}
-
-button.google-button {
-    width: 200px; /* Ajusta el ancho del botón según sea necesario */
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Espacio entre el logo y el texto */
-}
-
-button.google-button:hover {
+button.addbutton-login:hover {
     background-color: #007146;
 }
 
-button.google-button:active {
+button.addbutton-login:active {
     background-color: #dbffca;
     transform: translateY(2px);
 }
 
-
-p {
-    margin-top: 20px;
+.login-link-adminlogin {
+    text-align: center;
+    margin-bottom: 90px;
+    font-size: 20px;
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+.login-link-adminlogin a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-link-adminlogin a:hover {
+    color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
+}
+
+.login-link-adminlogin a:active {
+    color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }

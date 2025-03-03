@@ -61,8 +61,8 @@ input[type="password-login"]:hover {
 button.addbutton-login {
     width: 150px; /* Tamaño fijo para los botones */
     padding: 10px;
-    margin-bottom: 40px;
-    background-color: #007bff;
+    margin-bottom: 10px;
+    background-color: #0058b7;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -81,10 +81,74 @@ button.addbutton-login:active {
     transform: translateY(2px);
 }
 
+button.google-button-login {
+    width: 303px; /* Ajusta el ancho del botón según sea necesario */
+    padding: 10px;
+    margin-top: 10px; /* Añade un margen superior de 40px */
+    margin-bottom: 20px;
+    background-color: #0058b7;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: background-color 0.3s ease;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el logo y el texto */
+}
+
+button.google-button-login:hover {
+    background-color: #007146;
+}
+
+button.google-button-login:active {
+    background-color: #dbffca;
+    transform: translateY(2px);
+}
+
 .signup-link-login {
     text-align: center;
-    margin-bottom: 170px;
+    margin-bottom: 6px;
     font-size: 20px;
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+
+.signup-link-login a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.signup-link-login a:hover {
+    color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
+}
+
+.signup-link-login a:active {
+    color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
+}
+
+.adminlogin-link-login {
+    text-align: center;
+    margin-bottom: 80px;
+    font-size: 20px;
+    color: #ffffff;
+    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
+}
+
+.adminlogin-link-login a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.adminlogin-link-login a:hover {
+    color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
+}
+
+.adminlogin-link-login a:active {
+    color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
