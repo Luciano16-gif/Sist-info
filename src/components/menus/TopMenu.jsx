@@ -22,7 +22,7 @@ const TopMenu = () => {
         text-white 
         p-2
         md:flex 
-        justify-start
+        justify-evenly
         items-center
         shadow-lg
         fixed
@@ -48,12 +48,16 @@ const TopMenu = () => {
             </li>
             ))}
       </ul>
-      <ul className="flex flex-row uppercase font-ysabeau sm:text-sm sm:space-x-12">
-        {sesionItems.map((item) => (
-            <li key={item.href} className="">
-                <Link to={item.href}>{item.label}</Link>
-            </li>))}
-      </ul>
+      <div className="">
+        <ul className="flex flex-row uppercase font-ysabeau sm:text-sm sm:space-x-12">
+          {sesionItems.map((item) => (
+              <li key={item.href} className="bg-gray-700 box-border border-gray-200 border
+              hover:scale-110 transform transition-all duration-300">
+                  <Link to={item.href}>{item.label}</Link>
+              </li>))}
+        </ul>
+      </div>
+
       <div className="bg-black h-16 md:hidden lg:hidden" />
     </nav>
   );
