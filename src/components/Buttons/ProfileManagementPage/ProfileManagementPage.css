@@ -150,3 +150,31 @@ body {
   color: #ffffff; /* Cambia ligeramente el color del texto al hacer hover */
 }
 
+/* Inside ProfileManagementPage.css */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px; /* Ensure it takes up some space */
+  width: 100%; /* Full width */
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #3498db; /* Your primary color */
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container p {
+   margin-top: 1rem; /* Add some spacing between spinner and text*/
+}
