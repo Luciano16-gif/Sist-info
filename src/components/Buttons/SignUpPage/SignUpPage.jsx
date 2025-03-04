@@ -26,6 +26,13 @@ function SignUpPage() {
       alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
       return;
     }
+
+    // Verificar las restricciones del número telefónico
+    if (phoneNumber && (!/^\d{11}$/.test(phoneNumber))) {
+      alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
+      return;
+    }
+
     try {
       // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
