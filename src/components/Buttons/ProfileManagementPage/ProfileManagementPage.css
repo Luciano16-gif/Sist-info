@@ -72,7 +72,7 @@ body {
 
 .subtext {
   margin-top: 20px;
-  margin-bottom: 5px;
+  margin-bottom: 25px;
   margin-left: 6px;
 }
 
@@ -149,3 +149,4 @@ body {
   border-color: #ffffff;
   color: #ffffff; /* Cambia ligeramente el color del texto al hacer hover */
 }
+
