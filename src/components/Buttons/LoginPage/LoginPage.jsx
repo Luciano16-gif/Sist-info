@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'; // Importa las funciones necesarias de Firebase Authentication
-import { collection, getDocs, query, where } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
-import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
-import './LoginPage.css'; // Importa los estilos específicos del componente
+import { auth, db } from '../../../firebase-config';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore'; // Import updateDoc and doc
+import { useNavigate } from 'react-router-dom';
+import './LoginPage.css';
 
 function LoginPage() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const googleProvider = new GoogleAuthProvider();
-  const navigate = useNavigate(); // Utiliza el hook useNavigate
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const domain = 'correo.unimet.edu.ve';
@@ -23,7 +23,6 @@ function LoginPage() {
       return;
     }
     try {
-      // Buscar al usuario en la colección Lista de Usuarios mediante su correo electrónico
       const usersCollection = collection(db, 'Lista de Usuarios');
       const q = query(usersCollection, where("email", "==", email));
       const querySnapshot = await getDocs(q);
@@ -34,6 +33,8 @@ function LoginPage() {
       }
 
       const userData = querySnapshot.docs[0].data();
+      const userRef = querySnapshot.docs[0].ref; // Get the document reference
+
 
       if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
         alert('Ya utilizaste otro método de Registro/Inicio de Sesión');
@@ -42,18 +43,23 @@ function LoginPage() {
 
       if (userData['Registro/Inicio de Sesión'] === 'Correo-Contraseña') {
         if(userData.password === password) {
+          // Update user type to "usuario"
+          await updateDoc(userRef, { userType: "usuario" });
+
           setEmail('');
           setPassword('');
-          navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+          navigate('/');
           return;
         }
       }
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Vacía los campos de entrada después de iniciar sesión
+      // Update user type to "usuario"
+      await updateDoc(userRef, { userType: "usuario" });
+
       setEmail('');
       setPassword('');
-      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+      navigate('/');
     } catch (error) {
       if (error.code === 'auth/wrong-password') {
         alert('Contraseña incorrecta.');
@@ -82,24 +88,26 @@ function LoginPage() {
 
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
-        // Desloguear al usuario si el correo no cumple con la regla
-        await signOut(auth); // Utiliza la función signOut correctamente
+        await signOut(auth);
         return;
       }
 
-      // Verificar si el correo existe en Firestore
       const usersCollection = collection(db, 'Lista de Usuarios');
       const q = query(usersCollection, where("email", "==", userEmail));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
         alert('No puedes iniciar sesión con un correo que no se encuentra registrado.');
-        await signOut(auth); // Desloguear al usuario si el correo no se encuentra en Firestore
+        await signOut(auth);
         return;
       }
 
+      const userRef = querySnapshot.docs[0].ref; // Get the document reference
+       // Update user type to "usuario"
+      await updateDoc(userRef, { userType: "usuario" });
+
       setUser(result.user);
-      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión con Google exitoso
+      navigate('/');
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
