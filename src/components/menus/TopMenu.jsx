@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import useScrollDetection from "./useScrollDetection";
 
 const TopMenu = () => {
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useScrollDetection();
 
   const menuItems = [
     { href: "/experiencias", label: "Experiencias" },
@@ -15,21 +15,6 @@ const TopMenu = () => {
     { href: "/sign-up-page", label: "Registrarse"},
     { href: "/login-page", label: "Iniciar Sesión"},
   ];
-
-  // Detectar scroll para añadir un fondo más opaco cuando se hace scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [scrolled]);
 
   return (
     <nav 
