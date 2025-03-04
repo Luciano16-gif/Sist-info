@@ -1,0 +1,152 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Ysabeau SC', sans-serif;
+  background-color: #223A26; /* Color de fondo */
+}
+
+.profile-management-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.title {
+  color: #FFF;
+  font-size: 90px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.content-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-right: 200px;
+}
+
+.profile-image {
+  width: 400px;
+  height: 440px;
+  border-radius: 10px;
+  margin-right: 100px;
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
+  transition: transform 0.4s ease;
+  border: #c587ffde solid 5px;
+}
+
+.profile-image:active {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+  border: #d7ff24de solid 5px;
+}
+
+.info-container, .stats-container {
+  display: flex;
+  flex-direction: column;
+  color: #FFF;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.subtitle {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  width: 400px;
+}
+
+.subtext {
+  margin-top: 20px;
+  margin-bottom: 25px;
+  margin-left: 6px;
+}
+
+.stats-container {
+  margin-left: 40px;
+}
+
+.button-container-profile {
+  display: flex;
+  justify-content: center;
+  width: 1000px;
+  margin-top: 8px;
+  margin-left: 300px;
+  margin-bottom: 60px;
+}
+
+.edit-profile-button, .logout-button, .save-changes-button {
+  width: 200px;
+  height: 48px;
+  background-color: #bdbdbdde;
+  border: none;
+  border-radius: 20px;
+  color: #FFF;
+  font-size: 27px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  cursor: pointer;
+  margin: 0 20px;
+}
+
+.save-changes-button {
+  width: 300px;
+  height: 58px;
+  background-color: #bdbdbdde;
+  border: none;
+  border-radius: 20px;
+  color: #FFF;
+  font-size: 27px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  cursor: pointer;
+  margin: 0 20px;
+}
+
+.edit-profile-button:hover {
+  background-color: #c587ffde;
+}
+
+.logout-button:hover {
+  background-color: #dd2e2ede;
+}
+
+.save-changes-button:hover {
+  background-color: #ff9809de;
+}
+
+.subtext-input {
+  width: 300px;
+  height: 35px;
+  padding: 6px;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  background: none;
+  color: #FFF;
+  margin-bottom: 15px;
+}
+
+.subtext-input:hover {
+  background-color: none;
+  border-color: #ffffff;
+  color: #ffffff; /* Cambia ligeramente el color del texto al hacer hover */
+}
+

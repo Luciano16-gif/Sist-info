@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc, setDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './SignUpPage.css'; // Importa los estilos específicos del componente
 
 function SignUpPage() {
+  const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemLastName, setNewItemLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(''); // Nuevo estado para el número telefónico
-  const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
   const usersCollection = collection(db, 'Lista de Usuarios');
   const navigate = useNavigate(); // Utiliza el hook useNavigate
@@ -39,9 +39,10 @@ function SignUpPage() {
         name: newItemName,
         lastName: newItemLastName,
         password: password,
-        phone: phoneNumber
+        phone: phoneNumber,
+        'Registro/Inicio de Sesión': 'Correo-Contraseña' // Agregar el método de registro/inicio de sesión al documento
       });
-      navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
+      navigate('/'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -51,10 +52,22 @@ function SignUpPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userEmail = result.user.email;
+
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         // Desloguear al usuario si el correo no cumple con la regla
         await signOut(auth); // Utiliza la función signOut correctamente
+        return;
+      }
+
+      // Verificar si el correo existe en Firestore
+      const usersCollection = collection(db, 'Lista de Usuarios');
+      const q = query(usersCollection, where("email", "==", userEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        alert('Ya ha registrado un usuario con ese correo.');
+        await signOut(auth); // Desloguear al usuario si el correo ya existe en Firestore
         return;
       }
 
@@ -82,11 +95,12 @@ function SignUpPage() {
         name: name,
         lastName: lastName,
         password: '', // No se guarda la contraseña del usuario registrado con Google
-        phone: userPhone
+        phone: userPhone,
+        'Registro/Inicio de Sesión': 'Google Authentication' // Agregar el método de registro/inicio de sesión al documento
       });
 
       setUser(result.user);
-      navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
+      navigate('/'); // Redirige al usuario a la página Home después de un registro con Google exitoso
     } catch (error) {
       if (error.code === 'auth/popup-closed-by-user') {
         return;
@@ -130,7 +144,7 @@ function SignUpPage() {
       </div>
       <div className="input-container-signup" style={{ display: 'flex', gap: '600px' }}>
         <div>
-          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+          <input type="password-signup" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
         </div>
       </div>
       <button className="addbutton-signup" onClick={handleExecute}>Registrarse</button>
