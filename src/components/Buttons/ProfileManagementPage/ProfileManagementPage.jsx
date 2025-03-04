@@ -149,8 +149,14 @@ function ProfileManagementPage() {
     setFile(event.target.files[0]);
   };
 
+  // Inside ProfileManagementPage.jsx
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Cargando datos...</p>
+      </div>
+    );
   }
 
   return (
