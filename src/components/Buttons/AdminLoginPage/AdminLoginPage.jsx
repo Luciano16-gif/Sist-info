@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
-import { getDoc, doc } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
-import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
-import './AdminLoginPage.css'; // Importa los estilos específicos del componente
+import { auth, db } from '../../../firebase-config';
+import { getDoc, doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore'; // Import query, where, getDocs
+import { useNavigate } from 'react-router-dom';
+import './AdminLoginPage.css';
 
 function AdminLoginPage() {
   const [code, setCode] = useState('');
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate(); // Utiliza el hook useNavigate
+  const [user, setUser] = useState(null); // Consider removing if not used
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      // Verifica si el código está en Firebase (por ejemplo, en una colección específica)
       const adminsDocRef = doc(db, 'Códigos Admin-Guías', 'Admins');
       const guiasDocRef = doc(db, 'Códigos Admin-Guías', 'Guías');
 
@@ -20,20 +19,34 @@ function AdminLoginPage() {
 
       let validCode = false;
       let userType = null;
+      let userName = null;
+    //  let userEmailFromCode = null; // No longer needed
 
+      // Check admin codes
       if (adminsDocSnapshot.exists()) {
         const adminsData = adminsDocSnapshot.data();
-        if (adminsData.codigo === code) {
-          validCode = true;
-          userType = 'admin';
+        for (const field in adminsData) {
+          if (adminsData.hasOwnProperty(field) && adminsData[field] === code) {
+            validCode = true;
+            userType = 'admin';
+            userName = field;
+            // userEmailFromCode = `${userName.toLowerCase().replace(/\s+/g, '')}@example.com`; // No longer needed
+            break;
+          }
         }
       }
 
-      if (guiasDocSnapshot.exists()) {
+      // Check guide codes
+      if (!validCode && guiasDocSnapshot.exists()) {
         const guiasData = guiasDocSnapshot.data();
-        if (guiasData.codigo === code) {
-          validCode = true;
-          userType = 'guia';
+        for (const field in guiasData) {
+          if (guiasData.hasOwnProperty(field) && guiasData[field] === code) {
+            validCode = true;
+            userType = 'guia';
+             userName = field;
+            // userEmailFromCode = `${userName.toLowerCase().replace(/\s+/g, '')}@example.com`; // No longer needed
+            break;
+          }
         }
       }
 
@@ -42,17 +55,41 @@ function AdminLoginPage() {
         return;
       }
 
-      // Aquí puedes agregar la lógica para iniciar sesión como administrador o guía
-      // Por ejemplo, podrías utilizar una función personalizada para autenticar al usuario
-      // o simplemente establecer el estado `user` para indicar que el usuario ha iniciado sesión.
-      setUser({ email: 'admin@example.com' }); // Ejemplo de cómo establecer el usuario
+      // --- Query the "Lista de Usuarios" collection for the code ---
+      const usersCollection = collection(db, 'Lista de Usuarios');
+      const q = query(usersCollection, where("code", "==", code));
+      const querySnapshot = await getDocs(q);
 
-      // Redirige al usuario a la ruta correspondiente
-      if (userType === 'admin') {
-        navigate('/admin'); // Redirige al usuario a la página de administrador después de un inicio de sesión exitoso
-      } else if (userType === 'guia') {
-        navigate('/guia'); // Redirige al usuario a la página de guía después de un inicio de sesión exitoso
+      if (querySnapshot.empty) {
+        alert('El código ingresado no está asociado a ningún usuario. Por favor, contacta a soporte técnico.');
+        return;
       }
+
+        // Get the first user document. There should only be one.
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        userName = `${userData.name} ${userData.lastName}` //Now, it will use the correct names
+
+        // Update user document (if needed)
+        // Use the document ID from the query
+          await setDoc(doc(usersCollection, userDoc.id), {
+            name: userData.name, //keep original values
+            lastName: userData.lastName, //keep original values
+            userType: userType, //Keep original values
+            code: code,          //keep original values
+            email: userData.email //keep original values
+            }, { merge: true });
+
+          setUser({ email: userData.email});
+
+
+      if (userType === 'admin') {
+        navigate('/');
+      } else if (userType === 'guia') {
+        navigate('/');
+      }
+
+
     } catch (error) {
       alert(`Error: ${error.message}`);
     }

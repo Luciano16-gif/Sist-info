@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
+import { auth, db } from '../../../firebase-config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { collection, getDocs, query, where, addDoc, setDoc, doc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
-import './SignUpPage.css'; // Importa los estilos específicos del componente
+import { useNavigate } from 'react-router-dom';
+import './SignUpPage.css';
 
 function SignUpPage() {
   const [user, setUser] = useState(null);
@@ -11,10 +11,10 @@ function SignUpPage() {
   const [password, setPassword] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemLastName, setNewItemLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState(''); // Nuevo estado para el número telefónico
+  const [phoneNumber, setPhoneNumber] = useState('');
   const googleProvider = new GoogleAuthProvider();
   const usersCollection = collection(db, 'Lista de Usuarios');
-  const navigate = useNavigate(); // Utiliza el hook useNavigate
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const domain = 'correo.unimet.edu.ve';
@@ -26,13 +26,16 @@ function SignUpPage() {
       alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
       return;
     }
+
+    if (phoneNumber && (!/^\d{11}$/.test(phoneNumber))) {
+      alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
+      return;
+    }
+
     try {
-      // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      // Iniciar sesión con el usuario recién creado
       await signInWithEmailAndPassword(auth, email, password);
-      // Crear el documento en Firestore con el nombre y apellido del usuario
       const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
       await setDoc(docRef, {
         email: email,
@@ -40,9 +43,10 @@ function SignUpPage() {
         lastName: newItemLastName,
         password: password,
         phone: phoneNumber,
-        'Registro/Inicio de Sesión': 'Correo-Contraseña' // Agregar el método de registro/inicio de sesión al documento
+        'Registro/Inicio de Sesión': 'Correo-Contraseña',
+        userType: "usuario", // Add userType here
       });
-      navigate('/'); // Redirige al usuario a la página Home después de un registro exitoso
+      navigate('/');
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -55,23 +59,19 @@ function SignUpPage() {
 
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
-        // Desloguear al usuario si el correo no cumple con la regla
-        await signOut(auth); // Utiliza la función signOut correctamente
+        await signOut(auth);
         return;
       }
 
-      // Verificar si el correo existe en Firestore
-      const usersCollection = collection(db, 'Lista de Usuarios');
       const q = query(usersCollection, where("email", "==", userEmail));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
         alert('Ya ha registrado un usuario con ese correo.');
-        await signOut(auth); // Desloguear al usuario si el correo ya existe en Firestore
+        await signOut(auth);
         return;
       }
 
-      // Obtener la información del usuario desde el resultado de la autenticación con Google
       const userName = result.user.displayName || '';
       let name = '';
       let lastName = '';
@@ -86,21 +86,21 @@ function SignUpPage() {
         }
       }
 
-      const userPhone = ''; // Puedes obtener el número de teléfono del usuario de alguna otra manera si es necesario
+      const userPhone = '';
 
-      // Crear el documento en Firestore con la información del usuario
       const docRef = doc(usersCollection, `${name} ${lastName}`);
       await setDoc(docRef, {
         email: userEmail,
         name: name,
         lastName: lastName,
-        password: '', // No se guarda la contraseña del usuario registrado con Google
+        password: '',
         phone: userPhone,
-        'Registro/Inicio de Sesión': 'Google Authentication' // Agregar el método de registro/inicio de sesión al documento
+        'Registro/Inicio de Sesión': 'Google Authentication',
+        userType: "usuario", // Add userType here
       });
 
       setUser(result.user);
-      navigate('/'); // Redirige al usuario a la página Home después de un registro con Google exitoso
+      navigate('/');
     } catch (error) {
       if (error.code === 'auth/popup-closed-by-user') {
         return;
@@ -136,7 +136,7 @@ function SignUpPage() {
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="Ingresa tu nro telefónico"
-            style={{ fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
+            style={{ fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease' }}
           />
           <input type="email-signup" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
           style={{ marginLeft: '600px' }}/>
