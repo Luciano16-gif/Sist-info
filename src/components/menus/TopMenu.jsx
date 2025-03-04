@@ -51,6 +51,7 @@ const TopMenu = () => {
         min-h-16
         z-50
       `}
+      style={{ zIndex: 9999 }}
     >
       <div className="w-full flex flex-wrap items-center justify-between px-4">
         <div className="flex items-center">
