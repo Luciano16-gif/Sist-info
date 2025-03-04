@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './LoginPage.css'; // Importa los estilos específicos del componente
 
 function LoginPage() {
+  const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
   const navigate = useNavigate(); // Utiliza el hook useNavigate
 
@@ -33,27 +33,42 @@ function LoginPage() {
         return;
       }
 
+      const userData = querySnapshot.docs[0].data();
+
+      if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
+        alert('Ya utilizaste otro método de Registro/Inicio de Sesión');
+        return;
+      }
+
+      if (userData['Registro/Inicio de Sesión'] === 'Correo-Contraseña') {
+        if(userData.password === password) {
+          setEmail('');
+          setPassword('');
+          navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+          return;
+        }
+      }
+      
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setUser(userCredential.user);
       // Vacía los campos de entrada después de iniciar sesión
       setEmail('');
       setPassword('');
       navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
     } catch (error) {
-      if(error.code === 'auth/wrong-password') {
-        alert('Contraseña incorrecta.');
+      if (error.code === 'auth/wrong-password') {
+        alert('Contraseña incorrecta.');
         return;
       }
-      if(error.code === 'auth/user-not-found') {
+      if (error.code === 'auth/user-not-found') {
         alert('Usuario no encontrado.');
         return;
       }
-      if(error.code === 'auth/invalid-email') {
+      if (error.code === 'auth/invalid-email') {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         return;
       }
-      if(error.code === 'auth/invalid-credential'){
-        alert('Ya utilizaste otro método de Registro/Inicio de Sesión')
+      if (error.code === 'auth/invalid-credential') {
+        alert('Ya utilizaste otro método de Registro/Inicio de Sesión');
         return;
       }
       alert(`Error: ${error.message}`);
@@ -72,13 +87,13 @@ function LoginPage() {
         return;
       }
 
-      // Buscar al usuario en la colección Lista de Usuarios mediante su correo electrónico
+      // Verificar si el correo existe en Firestore
       const usersCollection = collection(db, 'Lista de Usuarios');
       const q = query(usersCollection, where("email", "==", userEmail));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        alert('Usuario no encontrado.');
+        alert('No puedes iniciar sesión con un correo que no se encuentra registrado.');
         await signOut(auth); // Desloguear al usuario si el correo no se encuentra en Firestore
         return;
       }

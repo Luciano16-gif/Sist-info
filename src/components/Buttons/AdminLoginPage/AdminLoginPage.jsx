@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
-import { getDocs, collection } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
+import { getDoc, doc } from 'firebase/firestore'; // Importa las funciones necesarias de Firestore
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
 import './AdminLoginPage.css'; // Importa los estilos específicos del componente
 
@@ -12,16 +12,30 @@ function AdminLoginPage() {
   const handleLogin = async () => {
     try {
       // Verifica si el código está en Firebase (por ejemplo, en una colección específica)
-      const codeCollection = collection(db, 'Códigos Admin-Guías');
-      const querySnapshot = await getDocs(codeCollection);
-      let validCode = false;
+      const adminsDocRef = doc(db, 'Códigos Admin-Guías', 'Admins');
+      const guiasDocRef = doc(db, 'Códigos Admin-Guías', 'Guías');
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.Admin1 === code || data.Guía1 === code) {
+      const adminsDocSnapshot = await getDoc(adminsDocRef);
+      const guiasDocSnapshot = await getDoc(guiasDocRef);
+
+      let validCode = false;
+      let userType = null;
+
+      if (adminsDocSnapshot.exists()) {
+        const adminsData = adminsDocSnapshot.data();
+        if (adminsData.codigo === code) {
           validCode = true;
+          userType = 'admin';
         }
-      });
+      }
+
+      if (guiasDocSnapshot.exists()) {
+        const guiasData = guiasDocSnapshot.data();
+        if (guiasData.codigo === code) {
+          validCode = true;
+          userType = 'guia';
+        }
+      }
 
       if (!validCode) {
         alert('Código no válido.');
@@ -32,7 +46,13 @@ function AdminLoginPage() {
       // Por ejemplo, podrías utilizar una función personalizada para autenticar al usuario
       // o simplemente establecer el estado `user` para indicar que el usuario ha iniciado sesión.
       setUser({ email: 'admin@example.com' }); // Ejemplo de cómo establecer el usuario
-      navigate('/'); // Redirige al usuario a la página Home después de un inicio de sesión exitoso
+
+      // Redirige al usuario a la ruta correspondiente
+      if (userType === 'admin') {
+        navigate('/admin'); // Redirige al usuario a la página de administrador después de un inicio de sesión exitoso
+      } else if (userType === 'guia') {
+        navigate('/guia'); // Redirige al usuario a la página de guía después de un inicio de sesión exitoso
+      }
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
