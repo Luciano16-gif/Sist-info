@@ -54,7 +54,21 @@ function ProfileManagementPage() {
                     setCorreoElectronico(userData.email);
                     setNumeroTelefonico(userData.phone);
                     setTipoUsuario(userData.userType);
-                    setFechaRegistro(userData.creationTime || ''); // Use creationTime
+                  
+                    // Format creationTime to "day of month of year"
+                    if (user.metadata.creationTime) {
+                        const date = new Date(user.metadata.creationTime);
+                        const day = date.getDate();
+                        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                        ];
+                        const month = monthNames[date.getMonth()];
+                        const year = date.getFullYear();
+                        setFechaRegistro(`${day} de ${month} del ${year}`);
+                    } else {
+                         setFechaRegistro('');
+                    }
+
                     setContraseña(userData.password || '');
                     setFotoPerfilUrl(userData['Foto de Perfil'] || '');
 

@@ -56,9 +56,6 @@ function LoginPage() {
             // No need to check password here. signInWithEmailAndPassword does it
             const userCredential = await signInWithEmailAndPassword(auth, email, password); // Use it here
 
-            // Update user type to "usuario" AFTER successful login
-            await updateDoc(userRef, { userType: "usuario" });
-
             setEmail('');
             setPassword('');
             // No navigate('/') here, onAuthStateChanged handles it
@@ -102,8 +99,6 @@ function LoginPage() {
             }
 
             const userRef = querySnapshot.docs[0].ref; // Get document reference
-            // Update user type to "usuario" AFTER successful login
-            await updateDoc(userRef, { userType: "usuario" });
 
             // No setUser or navigate here - onAuthStateChanged handles it
             // No navigate here
