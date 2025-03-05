@@ -12,7 +12,7 @@ import Layout from './components/layout/Layout';
 // Authentication Pages
 import LoginPage from './components/Buttons/LoginPage/LoginPage';
 import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
-import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
+// import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
 //import Home from './components/firebase-test/Home';
@@ -36,7 +36,7 @@ root.render(
       <Routes>
         {/* Authentication Routes (without Layout) */}
         <Route path="/login-page" element={<LoginPage />} />
-        <Route path="/guia-login-page" element={<AdminLoginPage />} />
+        {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
         <Route path="/sign-up-page" element={<SignUpPage />} />
         
         {/* Routes with Layout */}
