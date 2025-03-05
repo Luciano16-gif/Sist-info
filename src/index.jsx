@@ -12,12 +12,13 @@ import Layout from './components/layout/Layout';
 // Authentication Pages
 import LoginPage from './components/Buttons/LoginPage/LoginPage';
 import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
-import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
+// import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
 //import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
 import Foro from './components/firebase-test/Foro';
+import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 
 // Test Components
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
@@ -35,7 +36,7 @@ root.render(
       <Routes>
         {/* Authentication Routes (without Layout) */}
         <Route path="/login-page" element={<LoginPage />} />
-        <Route path="/guia-login-page" element={<AdminLoginPage />} />
+        {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
         <Route path="/sign-up-page" element={<SignUpPage />} />
         
         {/* Routes with Layout */}
@@ -48,6 +49,9 @@ root.render(
           <Route path="/firestore-test" element={<FirestoreTest />} />
           <Route path="/auth-test" element={<AuthTest />} />
           <Route path="/storage-test" element={<StorageTest />} />
+
+          {/* Profile Management Routes */}
+          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
         </Route>
       </Routes>
 
