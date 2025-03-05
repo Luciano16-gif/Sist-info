@@ -5,4 +5,4 @@ Santiago Zabala
 Luciano Minardo
 Ricardo Paez 
 Sofia Machado
-Pablo Pellicioni
+Pablo Pelliccioni
