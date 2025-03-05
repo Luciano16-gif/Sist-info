@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { auth, db } from '../../../firebase-config';
+import { auth, db } from '../../../firebase-config'; // Ajusta la ruta si es necesario
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { collection, getDocs, query, where, addDoc, setDoc, doc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import './SignUpPage.css';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate
+import './SignUpPage.css'; // Importa los estilos específicos del componente
 
 function SignUpPage() {
-  const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemLastName, setNewItemLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // Nuevo estado para el número telefónico
+  const [user, setUser] = useState(null);
   const googleProvider = new GoogleAuthProvider();
   const usersCollection = collection(db, 'Lista de Usuarios');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Utiliza el hook useNavigate
 
   const validateEmail = (email) => {
     const domain = 'correo.unimet.edu.ve';
@@ -26,33 +26,22 @@ function SignUpPage() {
       alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
       return;
     }
-
-    if (phoneNumber && (!/^\d{11}$/.test(phoneNumber))) {
-      alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
-      return;
-    }
-
     try {
+      // Registrar usuario
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      await signInWithEmailAndPassword(auth, email, password);  //Sign in after creating
+      // Iniciar sesión con el usuario recién creado
+      await signInWithEmailAndPassword(auth, email, password);
+      // Crear el documento en Firestore con el nombre y apellido del usuario
       const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
       await setDoc(docRef, {
         email: email,
         name: newItemName,
         lastName: newItemLastName,
         password: password,
-        phone: phoneNumber,
-        'Registro/Inicio de Sesión': 'Correo-Contraseña',
-        userType: "usuario", // Add userType here
-        days: [],
-        actualRoute: [],
-        activitiesPerformed: [],
-        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
-        schedule: [],
-        activitiesCreated: [] // Added activitiesCreated
+        phone: phoneNumber
       });
-      navigate('/');
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro exitoso
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
@@ -62,22 +51,14 @@ function SignUpPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userEmail = result.user.email;
-
       if (!validateEmail(userEmail)) {
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
-        await signOut(auth);
+        // Desloguear al usuario si el correo no cumple con la regla
+        await signOut(auth); // Utiliza la función signOut correctamente
         return;
       }
 
-      const q = query(usersCollection, where("email", "==", userEmail));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        alert('Ya ha registrado un usuario con ese correo.');
-        await signOut(auth);
-        return;
-      }
-
+      // Obtener la información del usuario desde el resultado de la autenticación con Google
       const userName = result.user.displayName || '';
       let name = '';
       let lastName = '';
@@ -92,28 +73,20 @@ function SignUpPage() {
         }
       }
 
-      const userPhone = '';
+      const userPhone = ''; // Puedes obtener el número de teléfono del usuario de alguna otra manera si es necesario
 
+      // Crear el documento en Firestore con la información del usuario
       const docRef = doc(usersCollection, `${name} ${lastName}`);
       await setDoc(docRef, {
         email: userEmail,
         name: name,
         lastName: lastName,
-        password: '',  //Password is empty when using google auth
-        phone: userPhone,
-        'Registro/Inicio de Sesión': 'Google Authentication',
-        userType: "usuario", // Add userType here
-        days: [],
-        actualRoute: [],
-        activitiesPerformed: [],
-        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
-        schedule: [],
-        activitiesCreated: [] // Added activitiesCreated
-
+        password: '', // No se guarda la contraseña del usuario registrado con Google
+        phone: userPhone
       });
 
       setUser(result.user);
-      navigate('/');
+      navigate('/home'); // Redirige al usuario a la página Home después de un registro con Google exitoso
     } catch (error) {
       if (error.code === 'auth/popup-closed-by-user') {
         return;
@@ -149,7 +122,7 @@ function SignUpPage() {
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="Ingresa tu nro telefónico"
-            style={{ fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease' }}
+            style={{ fontFamily: "'Ysabeau SC', sans-serif", transition: 'border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease', color: '#333' }}
           />
           <input type="email-signup" placeholder="Email" onChange={(e) => setEmail(e.target.value)} 
           style={{ marginLeft: '600px' }}/>
@@ -157,7 +130,7 @@ function SignUpPage() {
       </div>
       <div className="input-container-signup" style={{ display: 'flex', gap: '600px' }}>
         <div>
-          <input type="password-signup" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
         </div>
       </div>
       <button className="addbutton-signup" onClick={handleExecute}>Registrarse</button>

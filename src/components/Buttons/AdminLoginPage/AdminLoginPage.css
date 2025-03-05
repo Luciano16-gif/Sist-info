@@ -6,13 +6,14 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #021200; /* Fondo oscuro */
+    background-image: url('../public/background_login_signin.png'); /* Ruta a la imagen de fondo */
+    background-size: cover;
     position: relative;
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
 
-.signup-title {
-    font-size: 130px; /* Tamaño de fuente más grande */
+.admin-login-title {
+    font-size: 95px; /* Tamaño de fuente más grande */
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
     display: flex;
@@ -23,18 +24,15 @@ body {
     flex-shrink: 0;
 }
 
-.input-container-signup {
+.input-container-login {
     display: flex;
     flex-direction: column; /* Alinea los inputs en columna */
-    gap: 10px; /* Espacio entre los inputs */
-    margin-bottom: 20px;
+    gap: 20px; /* Espacio entre los inputs */
+    margin-bottom: 30px;
 }
 
-input[type="email-signup"],
-input[type="password-signup"],
-input[type="text-signup"],
-input[type="tel-signup"] {
-    width: 350px; /* Aumenta el tamaño horizontal de los inputs */
+input[type="text-admin"] {
+    width: 350PX; /* Aumenta el tamaño horizontal de los inputs */
     padding: 12px;
     border: 5px solid #ffffff;
     border-radius: 4px;
@@ -44,94 +42,60 @@ input[type="tel-signup"] {
     color: #333; /* Color inicial del texto */
 }
 
-input[type="email-signup"]:focus,
-input[type="password-signup"]:focus,
-input[type="text-signup"]:focus,
-input[type="tel-signup"]:focus {
+input[type="text-admin"]:focus {
     border-color: #2e6126;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Nuevos estilos para hover en inputs */
-input[type="email-signup"]:hover,
-input[type="password-signup"]:hover,
-input[type="text-signup"]:hover,
-input[type="tel-signup"]:hover {
+input[type="text-admin"]:hover {
     background-color: #c2c2c2;
     border-color: #c2c2c2;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     color: #000; /* Cambia ligeramente el color del texto al hacer hover */
 }
 
-button.addbutton-signup {
+button.addbutton-login {
     width: 150px; /* Tamaño fijo para los botones */
-    padding: 12px;
-    margin-top: 10px; /* Añade un margen superior de 40px */
-    margin-bottom: 20px;
+    padding: 10px;
+    margin-bottom: 10px;
     background-color: #0058b7;
     color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 19px;
+    font-size: 20px;
     transition: background-color 0.3s ease;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
 }
 
-button.addbutton-signup:hover {
+button.addbutton-login:hover {
     background-color: #007146;
 }
 
-button.addbutton-signup:active {
-    background-color: #e8ffac;
+button.addbutton-login:active {
+    background-color: #dbffca;
     transform: translateY(2px);
 }
 
-button.google-button-signup {
-    width: 290px; /* Ajusta el ancho del botón según sea necesario */
-    padding: 12px;
-    margin-top: 10px; /* Añade un margen superior de 40px */
-    margin-bottom: 20px;
-    background-color: #0058b7;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 19px;
-    transition: background-color 0.3s ease;
-    font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Espacio entre el logo y el texto */
-}
-
-button.google-button-signup:hover {
-    background-color: #007146;
-}
-
-button.google-button-signup:active {
-    background-color: #e8ffac;
-    transform: translateY(2px);
-}
-
-.login-link-signup {
+.login-link-adminlogin {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 90px;
     font-size: 20px;
     color: #ffffff;
     font-family: 'Ysabeau SC', sans-serif; /* Cambio a la fuente usada en el botón de Google */
 }
 
-.login-link-signup a {
+.login-link-adminlogin a {
     color: #ffffff;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.login-link-signup a:hover {
+.login-link-adminlogin a:hover {
     color: #00e08a; /* Cambia el color del enlace cuando se hace hover */
 }
 
-.login-link-signup a:active {
+.login-link-adminlogin a:active {
     color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
