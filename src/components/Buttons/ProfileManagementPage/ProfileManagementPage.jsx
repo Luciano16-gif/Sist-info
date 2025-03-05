@@ -21,6 +21,7 @@ function ProfileManagementPage() {
     const [activities, setActivities] = useState([]);
     const [activitiesPerformed, setActivitiesPerformed] = useState([]);
     const [mostPerformedActivity, setMostPerformedActivity] = useState({ Actividad: '', timesPerformed: 0 });
+    const [activitiesCreatedCount, setActivitiesCreatedCount] = useState(0); // New state
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -54,7 +55,7 @@ function ProfileManagementPage() {
                     setCorreoElectronico(userData.email);
                     setNumeroTelefonico(userData.phone);
                     setTipoUsuario(userData.userType);
-                  
+
                     // Format creationTime to "day of month of year"
                     if (user.metadata.creationTime) {
                         const date = new Date(user.metadata.creationTime);
@@ -109,6 +110,14 @@ function ProfileManagementPage() {
                     }
                     // Set activities state *after* the conditional logic.
                     setActivities(fetchedActivities);
+
+                    // Activities created Count
+                    if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
+                        setActivitiesCreatedCount(userData.activitiesCreated.length);
+                    } else {
+                        setActivitiesCreatedCount(0); // Default to 0 if not found or not an array
+                    }
+
 
 
                 } catch (error) {
@@ -288,14 +297,27 @@ function ProfileManagementPage() {
 
                 {/* Stats and Conditional Rendering */}
                 <div className="stats-container">
-                    <div className="stat-item">
-                        <p className="subtitle">EXPERIENCIAS COMPLETADAS</p>
-                        <p className="subtext">{activitiesPerformed.join(', ')}</p>
-                    </div>
-                    <div className="stat-item">
-                        <p className="subtitle">EXPERIENCIA MÁS REALIZADA</p>
-                        <p className="subtext">{mostPerformedActivity.Actividad} = {mostPerformedActivity.timesPerformed} veces completada</p>
-                    </div>
+                    {/* Conditional Rendering based on userType */}
+                    {tipoUsuario === 'admin' ? (
+                        <>
+                            <div className="stat-item">
+                                <p className="subtitle">EXPERIENCIAS CREADAS</p>
+                                <p className="subtext">{activitiesCreatedCount} experiencias creadas</p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="stat-item">
+                                <p className="subtitle">EXPERIENCIAS COMPLETADAS</p>
+                                <p className="subtext">{activitiesPerformed.join(', ')}</p>
+                            </div>
+                            <div className="stat-item">
+                                <p className="subtitle">EXPERIENCIA MÁS REALIZADA</p>
+                                <p className="subtext">{mostPerformedActivity.Actividad} = {mostPerformedActivity.timesPerformed} veces completada</p>
+                            </div>
+                        </>
+                    )}
+
 
                     {/* Conditional Rendering for Guides - Keep this as is */}
                     {tipoUsuario === 'Guia' && (

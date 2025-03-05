@@ -45,11 +45,12 @@ function SignUpPage() {
         phone: phoneNumber,
         'Registro/Inicio de Sesión': 'Correo-Contraseña',
         userType: "usuario", // Add userType here
-        days: [],  //Added days
-        actualRoute: [], //Added actualRoute
-        activitiesPerformed: [],  //Added ActivitiesPerformed
-        mostPerformedActivity: {Actividad:"", timesPerformed: 0},  //Added mostPerformedActivity
-        schedule: []  //Added Schedule
+        days: [],
+        actualRoute: [],
+        activitiesPerformed: [],
+        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+        schedule: [],
+        activitiesCreated: [] // Added activitiesCreated
       });
       navigate('/');
     } catch (error) {
@@ -102,11 +103,12 @@ function SignUpPage() {
         phone: userPhone,
         'Registro/Inicio de Sesión': 'Google Authentication',
         userType: "usuario", // Add userType here
-        days: [],  //Added days
-        actualRoute: [], //Added actualRoute
-        activitiesPerformed: [],  //Added ActivitiesPerformed
-        mostPerformedActivity: {Actividad:"", timesPerformed: 0},  //Added mostPerformedActivity
-        schedule: []  //Added Schedule
+        days: [],
+        actualRoute: [],
+        activitiesPerformed: [],
+        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+        schedule: [],
+        activitiesCreated: [] // Added activitiesCreated
 
       });
 
