@@ -19,6 +19,7 @@ import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
 import Foro from './components/firebase-test/Foro';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
+import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 
 // Test Components
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
@@ -50,8 +51,8 @@ root.render(
           <Route path="/auth-test" element={<AuthTest />} />
           <Route path="/storage-test" element={<StorageTest />} />
 
-          {/* Profile Management Routes */}
           <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+          <Route path="/gallery-page" element={<GalleryPage />} />
         </Route>
       </Routes>
 
