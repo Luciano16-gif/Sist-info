@@ -20,6 +20,7 @@ import AvilaLanding from './pages/landing-page/AvilaLanding';
 import Foro from './components/firebase-test/Foro';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
+import OurTeam from './components/nuestro-equipo/OurTeam';
 
 // Test Components
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
@@ -45,6 +46,7 @@ root.render(
           {/* Main Routes */}
           <Route path="/" element={<AvilaLanding />} />
           <Route path="/foro" element={<Foro />} />
+          <Route path="/equipo" element={<OurTeam />} />
           
           {/* Testing Routes */}
           <Route path="/firestore-test" element={<FirestoreTest />} />
