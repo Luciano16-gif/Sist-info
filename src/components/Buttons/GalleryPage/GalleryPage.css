@@ -68,18 +68,27 @@ body {
 
 
 .gallery-image {
-    width: 400px;  /* Image width */
+    width: 400px;
     height: 258px;
     object-fit: cover;
     border-radius: 10px;
     scroll-snap-align: center;
     flex-shrink: 0;
     cursor: pointer;
+    transition: border 0.2s ease; /* Add transition for smooth border change */
 }
+
+/* Style for the selected image in delete mode */
+.gallery-image.selected {
+    border: 4px solid #00a3a1; /* Highlight color - adjust as needed */
+}
+
 
 .button-container{
     display: flex;
     gap: 61px;
+    flex-wrap: wrap; /* allows buttons to wrap on smaller screens*/
+    justify-content: center; /*centers the buttons*/
 }
 
 .mount-archive-button,
@@ -193,7 +202,6 @@ body {
 .zoom-controls button:hover {
     background-color: rgba(255, 255, 255, 1);
 }
-
 .zoom-controls button:active{
     transform: translateY(2px);
 }
@@ -217,4 +225,20 @@ body {
 }
 .close-button:active{
     transform: translateY(2px);
+}
+ .upload-progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  margin-bottom: 10px; /* Add some spacing */
+  border-radius: 5px;
+}
+
+.upload-progress-bar {
+  height: 100%;
+  background-color: #4CAF50; /* Or any color you like */
+  text-align: center;
+  line-height: 30px; /* Vertically center the text */
+  color: white;
+  border-radius: 5px;
 }
