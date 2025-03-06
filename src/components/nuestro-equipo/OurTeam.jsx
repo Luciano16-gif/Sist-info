@@ -4,12 +4,12 @@ import ScrollFix from './ScrollFix';
 
 // Button component for consistency
 const Button = ({ text, className }) => (
-  <button
-    className={`px-6 py-2 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-colors border border-white whitespace-nowrap ${className}`}
+  <button className={`px-3 py-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-color border-white whitespace-nowrap font-bold border-2 ${className}`}
   >
     {text}
   </button>
 );
+
 // Main component for Ávila Venturas website
 const OurTeam = () => {
   return (
@@ -36,7 +36,7 @@ const OurTeam = () => {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-3xl font-light">¿Quiénes somos?</h2>
+              <h2 className="text-3xl font-light text-center">¿Quiénes somos?</h2>
               <p className="text-sm leading-relaxed text-justify">
                 Nuestro equipo de Ingenieros de Sistemas de la Universidad
                 Metropolitana se dedica a desarrollar una plataforma web
@@ -55,7 +55,7 @@ const OurTeam = () => {
         <section className="py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1 space-y-4">
-              <h2 className="text-3xl font-light">Nuestra Visión</h2>
+              <h2 className="text-3xl font-light text-center">Nuestra Visión</h2>
               <p className="text-sm leading-relaxed text-justify">
                 Desarrollar una plataforma digital innovadora y atractiva que
                 facilite a los estudiantes la gestión, participación y disfrute
@@ -74,7 +74,7 @@ const OurTeam = () => {
               </p>
             </div>
 
-            <div className="order-1 md:order-2 flex justify-center md:justify-start">
+            <div className="order-1 md:order-2 flex justify-center"> {/* Cambiado aquí */}
               <img
                 src="/api/placeholder/400/300"
                 alt="Excursionistas en El Ávila"
@@ -96,7 +96,7 @@ const OurTeam = () => {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-3xl font-light">Nuestra Misión</h2>
+              <h2 className="text-3xl font-light text-center">Nuestra Misión</h2>
               <p className="text-sm leading-relaxed text-justify">
                 Impulsar la conexión con la naturaleza y nutrir el espíritu
                 aventurero de los estudiantes de la Universidad Metropolitana
