@@ -51,7 +51,7 @@ function SignUpPage() {
         mostPerformedActivity: {Actividad:"", timesPerformed: 0},  //Added mostPerformedActivity
         schedule: []  //Added Schedule
       });
-      navigate('/');
+      navigate('/landing-page-user');
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
