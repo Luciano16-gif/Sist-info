@@ -1,0 +1,256 @@
+/* GalleryPage.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Ysabeau SC', sans-serif;
+    background-color: #223A26;
+}
+
+.galeria-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.title {
+    color: #FFF;
+    font-size: 90px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.gallery-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 60px;
+}
+
+.image-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 40px;
+    padding: 10px;
+    width: calc(100% - 100px);
+    scroll-snap-type: x mandatory;
+    flex-shrink: 0;
+}
+
+/* Hide scrollbar (optional) */
+.image-container::-webkit-scrollbar {
+    width: 12px;
+}
+
+.image-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.image-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+}
+
+
+.gallery-image {
+    width: 400px;
+    height: 258px;
+    object-fit: cover;
+    border-radius: 10px;
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border 0.2s ease; /* Add transition for smooth border change */
+}
+
+/* Style for the selected image in delete mode */
+.gallery-image.selected {
+    border: 4px solid #00a3a1; /* Highlight color - adjust as needed */
+}
+
+
+.button-container{
+    display: flex;
+    gap: 61px;
+    flex-wrap: wrap; /* allows buttons to wrap on smaller screens*/
+    justify-content: center; /*centers the buttons*/
+}
+
+.mount-archive-button,
+.delete-archive-button {
+    width: 270px;
+    height: 52px;
+    background-color: #bdbdbdde;
+    border: none;
+    border-radius: 20px;
+    color: #FFF;
+    font-size: 27px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    cursor: pointer;
+    margin-bottom: 70px;
+}
+
+.mount-archive-button:hover {
+    background-color: #00a3a1;
+}
+
+.mount-archive-button:active {
+    background-color: #dbffca;
+    transform: translateY(2px);
+}
+
+.delete-archive-button:hover {
+    background-color: #e80000;
+}
+
+.delete-archive-button:active {
+    background-color: #ffdbdb;
+    transform: translateY(2px);
+}
+
+.scroll-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 2;
+    position: relative;
+}
+.scroll-button.left{
+    margin-right: 10px;
+
+}
+.scroll-button.right{
+    margin-left: 10px;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    overflow: auto; /* Allow scrolling within modal if needed */
+}
+
+/* Container for image and zoom controls */
+.modal-content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /*  For close button positioning */
+    max-width: 90%;  /* Limit width - good for responsiveness */
+    max-height: 90vh; /* Limit height - good for responsiveness */
+
+}
+
+.modal-image {
+    max-width: 100%;  /* Use 100% of container width */
+    max-height: 70vh; /* Reduce max-height to make room for buttons */
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    margin-bottom: 20px;
+}
+
+/* Image info styles */
+.image-info {
+  text-align: center;
+  color: white;
+  margin-bottom: 10px; /* Space between info and zoom controls */
+  font-size: 0.9rem;
+}
+
+.image-info p {
+    margin: 0.2rem 0; /* Reduce margin between lines */
+}
+
+
+.zoom-controls {
+    display: flex;
+    gap: 10px;
+    z-index: 102;
+    margin-bottom: 1rem;
+}
+
+.zoom-controls button {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 20px;
+    color: black;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+.zoom-controls button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+.zoom-controls button:active{
+    transform: translateY(2px);
+}
+/* Close button styles */
+.close-button {
+    position: absolute;
+    top: 60px;      /* Position below TopMenu - Adjust as needed */
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px; /*  Larger size */
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 103;     /* Ensure it's on top */
+    padding: 5px;      /* Smaller padding */
+}
+
+.close-button:hover {
+    color: #dbffca;
+}
+.close-button:active{
+    transform: translateY(2px);
+}
+ .upload-progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  margin-bottom: 10px; /* Add some spacing */
+  border-radius: 5px;
+}
+
+.upload-progress-bar {
+  height: 100%;
+  background-color: #4CAF50; /* Or any color you like */
+  text-align: center;
+  line-height: 30px; /* Vertically center the text */
+  color: white;
+  border-radius: 5px;
+}

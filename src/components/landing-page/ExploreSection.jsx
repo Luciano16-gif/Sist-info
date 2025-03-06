@@ -12,6 +12,19 @@ const ExploreSection = () => {
   
   // Current front image index
   const currentFrontIndex = imageOrder[0];
+
+  // Emergency reset for animation state
+  useEffect(() => {
+    let safetyTimer;
+    if (isAnimating) {
+      safetyTimer = setTimeout(() => {
+        setIsAnimating(false);
+        setTransitionDirection(null);
+        setExitingImageIndex(null);
+      }, 1200); // Reset animation state after 1.2s in case of issues
+    }
+    return () => clearTimeout(safetyTimer);
+  }, [isAnimating]);
   
   // Update text with animation when front image changes
   useEffect(() => {
@@ -35,11 +48,20 @@ const ExploreSection = () => {
     setIsAnimating(true);
     setTransitionDirection('prev');
     
-    // Store current last image for animation
+    // Store both current last image and current front image for animation
     const lastIndex = imageOrder[imageOrder.length - 1];
-    setExitingImageIndex(lastIndex);
+    const frontIndex = imageOrder[0]; // Also store front index for proper animation
     
-    // After a short delay to allow exit animation to start
+    // Set both indexes for proper animation
+    setExitingImageIndex({ 
+      back: lastIndex,  // The back image moving to front
+      front: frontIndex // The front image that needs to move back
+    });
+    
+    // Keep the front image fully visible during the start of the animation
+    // Delay the reordering operation to control the timing
+    const reorderDelay = 400; // Increased delay for slower animation
+    
     setTimeout(() => {
       // Move the last image (furthest back) to the front
       setImageOrder(prevOrder => {
@@ -47,32 +69,18 @@ const ExploreSection = () => {
         const lastItem = newOrder.pop(); // Remove the last item
         return [lastItem, ...newOrder]; // Add it to the front
       });
-      
-      // Clear exiting image marker
-      setExitingImageIndex(null);
-    }, 50);
+    }, reorderDelay);
     
-    // Release animation lock after animation completes
-    const timer = setTimeout(() => {
+    // Release animation lock and clear states after animation completes
+    // Using a single longer timeout to prevent hiccups at the end
+    setTimeout(() => {
+      setExitingImageIndex(null);
       setIsAnimating(false);
       setTransitionDirection(null);
-    }, 700);
-    
-    // Safety timeout in case the animation gets stuck
-    const safetyTimer = setTimeout(() => {
-      clearTimeout(timer);
-      setIsAnimating(false);
-      setTransitionDirection(null);
-      setExitingImageIndex(null);
-    }, 1500);
-    
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(safetyTimer);
-    };
+    }, 850); // Increased duration
   };
 
-  const handleNext = () => {
+      const handleNext = () => {
     if (isAnimating) return;
     
     // Set animation states
@@ -81,9 +89,9 @@ const ExploreSection = () => {
     
     // Store current front image for animation
     const frontIndex = imageOrder[0];
-    setExitingImageIndex(frontIndex);
+    setExitingImageIndex({ front: frontIndex });
     
-    // After a short delay to allow exit animation to start
+    // Keep the exiting state for a while to let the animation play
     setTimeout(() => {
       // Move the first image (front) to the back
       setImageOrder(prevOrder => {
@@ -91,29 +99,14 @@ const ExploreSection = () => {
         const firstItem = newOrder.shift(); // Remove the first item
         return [...newOrder, firstItem]; // Add it to the back
       });
-      
-      // Clear exiting image marker
-      setExitingImageIndex(null);
-    }, 50);
+    }, 450); // Slightly slower
     
-    // Release animation lock after animation completes
-    const timer = setTimeout(() => {
+    // Finally clear all animation states with a single timeout
+    setTimeout(() => {
+      setExitingImageIndex(null);
       setIsAnimating(false);
       setTransitionDirection(null);
-    }, 700);
-    
-    // Safety timeout in case the animation gets stuck
-    const safetyTimer = setTimeout(() => {
-      clearTimeout(timer);
-      setIsAnimating(false);
-      setTransitionDirection(null);
-      setExitingImageIndex(null);
-    }, 1500);
-    
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(safetyTimer);
-    };
+    }, 850); // Match the prev animation duration
   };
 
   return (
@@ -129,6 +122,23 @@ const ExploreSection = () => {
         zIndex: 1
       }}
     >
+      {/* CSS animations for the carousel transitions */}
+      <style jsx>{`
+        /* Improved keyframes for delayed opacity change on prev transition */
+        @keyframes prevFadeOutDelay {
+          0%, 65% { opacity: 1; } /* Keep full opacity for 65% of the animation */
+          100% { opacity: 0.3; }  /* Then fade to background level */
+        }
+        
+        /* Animation for the incoming image from the back */
+        @keyframes prevFadeInDelay {
+          0% { opacity: 0.3; transform: translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg); }
+          30% { opacity: 0.7; }
+          80% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Position reached earlier */
+          100% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Hold final position */
+        }
+      `}</style>
+      
       {/* Top gradient overlay for fade effect */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-t from-transparent to-[rgba(13,24,6,1)] pointer-events-none z-10"></div>
       
@@ -171,28 +181,38 @@ const ExploreSection = () => {
                 let animationStyles = {};
                 
                 // Front image moving to back (next button)
-                if (transitionDirection === 'next' && exitingImageIndex === imgIndex) {
+                if (transitionDirection === 'next' && exitingImageIndex?.front === imgIndex) {
                   animationStyles = {
-                    transform: `translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(0.6) rotate(${-gallery.length}deg)`,
-                    opacity: 0.2,
-                    zIndex: 0,
-                    transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1)'
+                    transform: `translateX(${gallery.length * 35}px) translateY(${gallery.length * 15}px) scale(0.7) rotate(${-gallery.length * 1.5}deg)`,
+                    opacity: 0.6, // Keep more visible during transition
+                    zIndex: 0, // Set to back immediately
+                    transition: 'transform 650ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 400ms ease-out', // Slower, smoother transition
+                    willChange: 'transform, opacity' // Performance optimization
                   };
                 } 
                 // Back image moving to front (prev button)
-                else if (transitionDirection === 'prev' && exitingImageIndex === imgIndex) {
+                else if (transitionDirection === 'prev' && exitingImageIndex?.back === imgIndex) {
                   animationStyles = {
-                    transform: `translateX(-30px) translateY(-12px) scale(1.05) rotate(1deg)`,
-                    opacity: 0.2,
                     zIndex: gallery.length + 1,
-                    transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1)'
+                    animation: 'prevFadeInDelay 750ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards',
+                    willChange: 'transform, opacity' // Performance optimization
+                  };
+                }
+                // Current front image when prev button is pressed
+                else if (transitionDirection === 'prev' && exitingImageIndex?.front === imgIndex) {
+                  // Apply the delayed fade out animation
+                  animationStyles = {
+                    zIndex: gallery.length - 1, // Just below the incoming card
+                    animation: 'prevFadeOutDelay 700ms ease-out forwards',
+                    willChange: 'opacity', // Performance optimization
+                    transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
                   };
                 }
                 
                 return (
                   <div
                     key={imgIndex}
-                    className="absolute top-0 left-0 w-full h-full transition-all duration-700 ease-in-out rounded-lg shadow-2xl"
+                    className="absolute top-0 left-0 w-full h-full transition-all duration-500 ease-in-out rounded-lg shadow-2xl"
                     style={{
                       zIndex,
                       opacity,
@@ -212,23 +232,20 @@ const ExploreSection = () => {
               })}
             </div>
             
-            {/* Navigation arrows with visual feedback but no movement */}
+            {/* Navigation arrows with better disabling during animation */}
             <div 
               role="button"
-              tabIndex="0"
-              onClick={!isAnimating ? handlePrev : undefined}
+              tabIndex={isAnimating ? -1 : 0}
+              onClick={isAnimating ? null : handlePrev}
               onKeyDown={(e) => e.key === 'Enter' && !isAnimating && handlePrev()}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 rounded-full p-3 focus:outline-none select-none transition-colors duration-150"
+              className={`absolute left-4 top-1/2 -translate-y-1/2 z-30 rounded-full p-3 focus:outline-none select-none transition-all duration-300 ${isAnimating ? 'opacity-40' : 'opacity-100 hover:bg-white hover:bg-opacity-30'}`}
               aria-label="Previous image"
+              aria-disabled={isAnimating}
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 pointerEvents: isAnimating ? 'none' : 'auto',
-                cursor: isAnimating ? 'default' : 'pointer',
+                cursor: isAnimating ? 'not-allowed' : 'pointer',
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
-              onMouseDown={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'}
-              onMouseUp={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
             >
               <svg className="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"></path>
@@ -236,20 +253,17 @@ const ExploreSection = () => {
             </div>
             <div 
               role="button"
-              tabIndex="0"
-              onClick={!isAnimating ? handleNext : undefined}
+              tabIndex={isAnimating ? -1 : 0}
+              onClick={isAnimating ? null : handleNext}
               onKeyDown={(e) => e.key === 'Enter' && !isAnimating && handleNext()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 rounded-full p-3 focus:outline-none select-none transition-colors duration-150"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 z-30 rounded-full p-3 focus:outline-none select-none transition-all duration-300 ${isAnimating ? 'opacity-40' : 'opacity-100 hover:bg-white hover:bg-opacity-30'}`}
               aria-label="Next image"
+              aria-disabled={isAnimating}
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 pointerEvents: isAnimating ? 'none' : 'auto',
-                cursor: isAnimating ? 'default' : 'pointer',
+                cursor: isAnimating ? 'not-allowed' : 'pointer',
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
-              onMouseDown={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'}
-              onMouseUp={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
             >
               <svg className="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"></path>

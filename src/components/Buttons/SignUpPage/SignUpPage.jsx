@@ -35,7 +35,7 @@ function SignUpPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       setUser(userCredential.user);
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);  //Sign in after creating
       const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
       await setDoc(docRef, {
         email: email,
@@ -45,6 +45,12 @@ function SignUpPage() {
         phone: phoneNumber,
         'Registro/Inicio de Sesión': 'Correo-Contraseña',
         userType: "usuario", // Add userType here
+        days: [],
+        actualRoute: [],
+        activitiesPerformed: [],
+        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+        schedule: [],
+        activitiesCreated: [] // Added activitiesCreated
       });
       navigate('/');
     } catch (error) {
@@ -93,10 +99,17 @@ function SignUpPage() {
         email: userEmail,
         name: name,
         lastName: lastName,
-        password: '',
+        password: '',  //Password is empty when using google auth
         phone: userPhone,
         'Registro/Inicio de Sesión': 'Google Authentication',
         userType: "usuario", // Add userType here
+        days: [],
+        actualRoute: [],
+        activitiesPerformed: [],
+        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+        schedule: [],
+        activitiesCreated: [] // Added activitiesCreated
+
       });
 
       setUser(result.user);
