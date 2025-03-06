@@ -18,6 +18,8 @@ function GalleryPage() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [showDeleteImages, setShowDeleteImages] = useState(false);
     const [userImages, setUserImages] = useState([]);
+    const [imageMetadata, setImageMetadata] = useState({}); // New state for metadata
+
 
     const [mockImages, setMockImages] = useState([
         "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png",
@@ -34,7 +36,7 @@ function GalleryPage() {
             if (user) {
                 await loadUserImages(user.email);
             } else {
-                setUserImages([]);
+              setUserImages([]);
             }
         });
         return () => unsubscribe();
@@ -100,8 +102,9 @@ function GalleryPage() {
     const handleZoomOut = () => {
         setZoomLevel(prevZoom => Math.max(prevZoom - 0.2, 0.4));
     };
+
     const handleWheel = (event) => {
-        if (selectedImage && !showDeleteImages) {
+      if (selectedImage && !showDeleteImages) {
           event.preventDefault();
             if (event.deltaY < 0) {
                 handleZoomIn();
@@ -110,6 +113,7 @@ function GalleryPage() {
             }
         }
     };
+
 
     const handleMouseDown = (event) => {
         if (selectedImage && !showDeleteImages) {
@@ -200,21 +204,36 @@ function GalleryPage() {
                         const userGalleryDocRef = doc(galleryCollection, userName);
                         const userGalleryDocSnap = await getDoc(userGalleryDocRef);
 
+                         // Get current date and time
+                        const now = new Date();
+                        const uploadDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}/${now.getHours()}:${now.getMinutes()}`;
+
+
                         if (userGalleryDocSnap.exists()) {
                             await updateDoc(userGalleryDocRef, {
                                 email: user.email,
-                                images: arrayUnion(downloadURL)
+                                images: arrayUnion(downloadURL),
+                                 // Add metadata to Firestore.  Store as a map (object)
+                                uploadDates: arrayUnion({ url: downloadURL, date: uploadDate, uploader: userName })
+
                             });
                             console.log("Image URL added to existing gallery document.");
 
                         } else {
                             await setDoc(userGalleryDocRef, {
                                 email: user.email,
-                                images: [downloadURL]
+                                images: [downloadURL],
+                                // Add metadata. Store as a map.
+                                uploadDates: [{ url: downloadURL, date: uploadDate, uploader: userName}]
                             });
                             console.log("New gallery document created.");
                         }
-                        await loadUserImages(user.email); //  Reload images after adding
+                         await loadUserImages(user.email); //  Reload images after adding.
+                         // Add image metadata to local state.
+                        setImageMetadata(prevMetadata => ({
+                            ...prevMetadata,
+                            [downloadURL]: { uploader: userName, date: uploadDate }
+                        }));
                     } catch (firestoreError) {
                         console.error("Error updating Firestore:", firestoreError);
                         alert("Error saving image to user's gallery: " + firestoreError.message);
@@ -227,6 +246,7 @@ function GalleryPage() {
             }
         );
     };
+
 
     const loadUserImages = async (userEmail) => {
       try {
@@ -248,12 +268,27 @@ function GalleryPage() {
         if (userGalleryDocSnap.exists()) {
           const galleryData = userGalleryDocSnap.data();
             if (galleryData.images && Array.isArray(galleryData.images)) {
-                setUserImages(galleryData.images); // Update userImages state
+                setUserImages(galleryData.images);
+
+                // Load image metadata
+                if (galleryData.uploadDates && Array.isArray(galleryData.uploadDates)) {
+                    const newMetadata = {};
+                    galleryData.uploadDates.forEach(item => {
+                      if(item.url && item.date && item.uploader){ //Important, check if item.url exists
+                        newMetadata[item.url] = { uploader: item.uploader, date: item.date };
+                      }
+                    });
+                    setImageMetadata(newMetadata); // This sets ALL metadata at once.
+                } else {
+                    setImageMetadata({}); // Clear/reset metadata if none found
+                }
             } else {
-                setUserImages([]); // No images found
+                setUserImages([]);
+                setImageMetadata({}); // Clear metadata if no images
             }
         } else {
-          setUserImages([]); // No images found
+          setUserImages([]);
+          setImageMetadata({}); // Clear metadata if no images
         }
       } catch (error) {
         console.error("Error loading user images:", error);
@@ -261,10 +296,11 @@ function GalleryPage() {
       }
     };
 
-     const toggleDeleteMode = () => {
-        // Reset selected image when toggling delete mode.  This is important!
+
+
+    const toggleDeleteMode = () => {
         setSelectedImage(null);
-        setShowDeleteImages(!showDeleteImages); // Toggle the state
+        setShowDeleteImages(!showDeleteImages);
         if (!showDeleteImages) {
             if (auth.currentUser) {
               loadUserImages(auth.currentUser.email);
@@ -300,16 +336,19 @@ function GalleryPage() {
             }
 
             const userDoc = userQuerySnapshot.docs[0];
-            const userDocRef = userDoc.ref; // Correctly get the DocumentReference
+            const userDocRef = userDoc.ref;
             const userData = userDoc.data();
             const userName = `${userData.name} ${userData.lastName}`;
 
             const galleryCollection = collection(db, 'Galeria de Imágenes');
             const userGalleryDocRef = doc(galleryCollection, userName);
 
+            // Remove both the URL and the metadata entry.
             await updateDoc(userGalleryDocRef, {
-                images: arrayRemove(selectedImage)  // Remove the image URL
+              images: arrayRemove(selectedImage),
+              uploadDates: arrayRemove(imageMetadata[selectedImage] ? {url: selectedImage, ...imageMetadata[selectedImage]} : null) //Remove image metadata
             });
+
 
             // 3. Update Local State
               setUserImages(prevImages => prevImages.filter(imgUrl => imgUrl !== selectedImage)); // Remove from userImages.
@@ -320,6 +359,12 @@ function GalleryPage() {
             }
             setSelectedImage(null);  // Clear selected image (close modal)
             alert("Imagen borrada exitosamente.");
+            // Remove metadata for the deleted image.
+            setImageMetadata(prevMetadata => {
+                const newMetadata = { ...prevMetadata };
+                delete newMetadata[selectedImage]; // Remove the entry
+                return newMetadata;
+            });
             await loadUserImages(auth.currentUser.email); //  Reload images after adding
 
         } catch (error) {
@@ -345,7 +390,7 @@ function GalleryPage() {
                             key={index}
                             src={imageUrl}
                             alt={`Imagen ${index}`}
-                            className={`gallery-image ${selectedImage === imageUrl && showDeleteImages ? 'selected' : ''}`} // Conditionally apply 'selected' class
+                            className={`gallery-image ${selectedImage === imageUrl && showDeleteImages ? 'selected' : ''}`}
                             onClick={() => openImage(imageUrl)}
                         />
                     ))}
@@ -407,6 +452,14 @@ function GalleryPage() {
                             ref={modalImageRef}
                             onClick={(e) => e.stopPropagation()} // Prevent close on image click
                         />
+                        {/* Display image metadata */}
+                        {imageMetadata[selectedImage] && (
+                            <div className="image-info">
+                                <p>Subido por: {imageMetadata[selectedImage].uploader}</p>
+                                <p>Fecha y hora: {imageMetadata[selectedImage].date}</p>
+                            </div>
+                        )}
+
                         <div className="zoom-controls">
                             <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}>+</button>
                             <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}>-</button>

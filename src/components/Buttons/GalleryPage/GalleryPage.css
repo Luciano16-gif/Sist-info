@@ -178,6 +178,18 @@ body {
     margin-bottom: 20px;
 }
 
+/* Image info styles */
+.image-info {
+  text-align: center;
+  color: white;
+  margin-bottom: 10px; /* Space between info and zoom controls */
+  font-size: 0.9rem;
+}
+
+.image-info p {
+    margin: 0.2rem 0; /* Reduce margin between lines */
+}
+
 
 .zoom-controls {
     display: flex;
