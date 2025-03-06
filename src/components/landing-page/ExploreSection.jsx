@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { gallery, EXPLORE_TEXTS, explore_image } from '../../constants/LandingData';
 
 const ExploreSection = () => {
@@ -77,10 +77,10 @@ const ExploreSection = () => {
       setExitingImageIndex(null);
       setIsAnimating(false);
       setTransitionDirection(null);
-    }, 850); // Increased duration
+    }, 850); 
   };
 
-      const handleNext = () => {
+  const handleNext = () => {
     if (isAnimating) return;
     
     // Set animation states
@@ -99,7 +99,7 @@ const ExploreSection = () => {
         const firstItem = newOrder.shift(); // Remove the first item
         return [...newOrder, firstItem]; // Add it to the back
       });
-    }, 450); // Slightly slower
+    }, 450);
     
     // Finally clear all animation states with a single timeout
     setTimeout(() => {
@@ -108,6 +108,57 @@ const ExploreSection = () => {
       setTransitionDirection(null);
     }, 850); // Match the prev animation duration
   };
+
+  const keyframesStyles = {
+    '@keyframes prevFadeOutDelay': {
+      '0%, 65%': { opacity: 1 }, // Keep full opacity for 65% of the animation
+      '100%': { opacity: 0.3 }   // Then fade to background level
+    },
+    '@keyframes prevFadeInDelay': {
+      '0%': { 
+        opacity: 0.3, 
+        transform: `translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg)` 
+      },
+      '30%': { opacity: 0.7 },
+      '80%': { 
+        opacity: 1, 
+        transform: 'translateX(0) translateY(0) scale(1) rotate(0)' 
+      },
+      '100%': { 
+        opacity: 1, 
+        transform: 'translateX(0) translateY(0) scale(1) rotate(0)' 
+      }
+    }
+  };
+
+  // Add the keyframes to the document
+  useEffect(() => {
+    // Create a style element
+    const styleElement = document.createElement('style');
+    
+    // Define the keyframes
+    styleElement.textContent = `
+      @keyframes prevFadeOutDelay {
+        0%, 65% { opacity: 1; }
+        100% { opacity: 0.3; }
+      }
+      
+      @keyframes prevFadeInDelay {
+        0% { opacity: 0.3; transform: translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg); }
+        30% { opacity: 0.7; }
+        80% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); }
+        100% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); }
+      }
+    `;
+    
+    // Add the style element to the document head
+    document.head.appendChild(styleElement);
+    
+    // Clean up the style element when the component unmounts
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, [gallery.length]);
 
   return (
     <div 
@@ -122,23 +173,6 @@ const ExploreSection = () => {
         zIndex: 1
       }}
     >
-      {/* CSS animations for the carousel transitions */}
-      <style jsx>{`
-        /* Improved keyframes for delayed opacity change on prev transition */
-        @keyframes prevFadeOutDelay {
-          0%, 65% { opacity: 1; } /* Keep full opacity for 65% of the animation */
-          100% { opacity: 0.3; }  /* Then fade to background level */
-        }
-        
-        /* Animation for the incoming image from the back */
-        @keyframes prevFadeInDelay {
-          0% { opacity: 0.3; transform: translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg); }
-          30% { opacity: 0.7; }
-          80% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Position reached earlier */
-          100% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Hold final position */
-        }
-      `}</style>
-      
       {/* Top gradient overlay for fade effect */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-t from-transparent to-[rgba(13,24,6,1)] pointer-events-none z-10"></div>
       
