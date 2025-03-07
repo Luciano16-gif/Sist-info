@@ -4,7 +4,7 @@ import TopMenu from "../menus/TopMenu";
 
 const Layout = () => {
   return (
-    <div className="pt-16">
+    <div className="sm:pt-15 lg:pt-16">
       <TopMenu />
       <HamburgerMenu />
       <Outlet />
