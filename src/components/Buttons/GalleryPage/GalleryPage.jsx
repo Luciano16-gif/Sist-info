@@ -36,45 +36,16 @@ function GalleryPage() {
             } else {
                 setUserImages([]);
             }
+            // Load all images whenever the user changes (login/logout)
+            loadAllImages();
         });
         return () => unsubscribe();
     }, []);
 
-    // Load ALL images (Firestore + Mock) on component mount (once)
+    // Load ALL images (Firestore + Mock), filtering out reported images
     useEffect(() => {
-        const loadAllImages = async () => {
-            try {
-                const galleryCollection = collection(db, 'Galeria de Imágenes');
-                const querySnapshot = await getDocs(galleryCollection);
-                const firestoreImages = [];
-
-                querySnapshot.forEach((doc) => {
-                    const galleryData = doc.data();
-                    if (galleryData.images && Array.isArray(galleryData.images)) {
-                        galleryData.images.forEach(image => {
-                            firestoreImages.push(image);
-                        });
-                    }
-                });
-
-                // Combine Firestore images with mock images, avoiding duplicates
-                const allImages = [...mockImages];
-                firestoreImages.forEach(firestoreImage => {
-                    if (!allImages.some(img => img.url === firestoreImage.url)) {
-                        allImages.push(firestoreImage);
-                    }
-                });
-
-                setImages(allImages); // Set the combined array
-            } catch (error) {
-                console.error("Error loading all images:", error);
-                alert("Error loading images: " + error.message);
-            }
-        };
-
-        loadAllImages();
-    }, []); // Empty dependency array: runs only once on mount
-
+      loadAllImages();
+    }, []);
 
     const scrollLeft = () => {
         if (imageContainerRef.current) {
@@ -307,36 +278,66 @@ function GalleryPage() {
             loadAllImages();
         }
     };
+const loadAllImages = async () => {
+    try {
+        const galleryCollection = collection(db, 'Galeria de Imágenes');
+        const querySnapshot = await getDocs(galleryCollection);
+        let firestoreImages = [];
 
-    const loadAllImages = async () => {
-        try {
-            const galleryCollection = collection(db, 'Galeria de Imágenes');
-            const querySnapshot = await getDocs(galleryCollection);
-            const firestoreImages = [];
-
-            querySnapshot.forEach((doc) => {
-                const galleryData = doc.data();
-                if (galleryData.images && Array.isArray(galleryData.images)) {
-                    galleryData.images.forEach(image => {
+        querySnapshot.forEach((doc) => {
+            const galleryData = doc.data();
+            if (galleryData.images && Array.isArray(galleryData.images)) {
+                galleryData.images.forEach(image => {
+                    // **FIX:** Check if image.url exists before using .split()
+                    if (image.url) {
                         firestoreImages.push(image);
-                    });
-                }
-            });
+                    } else {
+                        console.warn("Skipping image with missing URL:", image);
+                    }
+                });
+            }
+        });
 
-            // Combine Firestore images with mock images, avoiding duplicates
-            const allImages = [...mockImages];
-            firestoreImages.forEach(firestoreImage => {
-                if (!allImages.some(img => img.url === firestoreImage.url)) {
-                    allImages.push(firestoreImage);
-                }
-            });
+        // Get reported images for the current user
+        let reportedImageRefs = [];
+        if (auth.currentUser) {
+            const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
+            const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
+            const reporterDocSnap = await getDoc(reporterDocRef);
 
-            setImages(allImages); // Set the combined array
-        } catch (error) {
-            console.error("Error loading all images:", error);
-            alert("Error loading images: " + error.message);
+            if (reporterDocSnap.exists()) {
+                const reportedData = reporterDocSnap.data();
+                // **FIX:** Ensure reportedData.images exists and is an array
+                if (reportedData.images && Array.isArray(reportedData.images)) {
+                  reportedImageRefs = reportedData.images.map(image => image.imageRef);
+                }
+            }
         }
-    };
+
+        // Filter out reported images
+        firestoreImages = firestoreImages.filter(image => {
+            // **FIX:**  Use optional chaining and nullish coalescing for safety
+            const imagePath = image.url?.split("/o/")[1]?.split("?")[0] ?? '';
+            const decodedImagePath = decodeURIComponent(imagePath);
+            return !reportedImageRefs.includes(decodedImagePath);
+        });
+
+
+        // Combine Firestore images with mock images, avoiding duplicates
+        const allImages = [...mockImages];
+        firestoreImages.forEach(firestoreImage => {
+            if (!allImages.some(img => img.url === firestoreImage.url)) {
+                allImages.push(firestoreImage);
+            }
+        });
+
+        setImages(allImages); // Set the combined and filtered array
+    } catch (error) {
+        console.error("Error loading all images:", error);
+        alert("Error loading images: " + error.message);
+    }
+};
+
 
 
     const handleDeleteImage = async () => {
@@ -393,12 +394,70 @@ function GalleryPage() {
         }
     };
 
-    const reportImage = (image) => {
-        // *REPLACE* this with your actual reporting logic.
-        console.log("Reporting image:", image);
-        alert(`Reporting image: ${image.url}\nUploaded by: ${image.uploadedBy}\nUploaded on: ${image.uploadDate}`);
-        // Example: Send an email, update a Firestore document, etc.
-    };
+const reportImage = async (image) => {
+    if (!auth.currentUser) {
+        alert("Por favor, inicia sesión para reportar imágenes.");
+        return;
+    }
+
+    const reporterEmail = auth.currentUser.email;
+    const uploaderEmail = image.uploadedBy;
+      //Get uploader email from 'Lista de Usuarios' collection
+    let uploaderEmailReal = "";
+    const usersCollection = collection(db, 'Lista de Usuarios');
+    const userQuery = query(usersCollection, where("name", "==", uploaderEmail.split(" ")[0])); // Assuming 'name' field contains the first name
+    const userQuerySnapshot = await getDocs(userQuery);
+
+    if (!userQuerySnapshot.empty) {
+        const userDoc = userQuerySnapshot.docs[0];
+        uploaderEmailReal = userDoc.data().email;  // Get real email
+    } else {
+        console.error("Uploader not found");
+        return; // Stop the report action if no user founded
+    }
+    // **Prevent self-reporting:**
+    if (reporterEmail === uploaderEmailReal) {
+        alert("No puedes reportar tus propias imágenes.");
+        return;
+    }
+
+    const imagePath = image.url.split("/o/")[1].split("?")[0];
+    const decodedImagePath = decodeURIComponent(imagePath);
+    const imageRef = decodedImagePath;
+
+    try {
+        const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
+        const reporterDocRef = doc(reportedImagesCollection, reporterEmail);
+        const reporterDocSnap = await getDoc(reporterDocRef);
+
+        const reportData = {
+            imageRef: imageRef,
+            uploaderEmail: uploaderEmailReal // Store the uploader's email
+        };
+
+
+        if (reporterDocSnap.exists()) {
+            await updateDoc(reporterDocRef, {
+                images: arrayUnion(reportData)
+            });
+            console.log("Image report added to existing document.");
+        } else {
+            await setDoc(reporterDocRef, {
+                images: [reportData]
+            });
+            console.log("New report document created.");
+        }
+
+        // Remove the image from the *current user's* view
+        setImages(prevImages => prevImages.filter(img => img.url !== image.url));
+        alert("Imagen reportada exitosamente.");
+
+
+    } catch (error) {
+        console.error("Error reporting image:", error);
+        alert("Error al reportar la imagen: " + error.message);
+    }
+};
 
 
 
