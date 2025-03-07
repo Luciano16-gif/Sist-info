@@ -77,7 +77,7 @@ const Testimonios = () => {
           }}>
             {/* Green glow effect - positioned absolutely */}
             <div className="absolute inset-0 rounded-3xl" style={{
-              boxShadow: '0 0 300px 300px rgba(31,43,22,0.9)',
+              boxShadow: '0 0 400px 400px rgba(31,43,22,0.9)',
               pointerEvents: 'none'
             }}></div>
             
