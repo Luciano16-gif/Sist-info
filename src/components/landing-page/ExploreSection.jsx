@@ -1,5 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { gallery, EXPLORE_TEXTS, explore_image } from '../../constants/LandingData';
+
+// Define keyframes style string outside component to prevent recreation on each render
+const keyframesStyle = `
+  @keyframes prevFadeOutDelay {
+    0%, 65% { opacity: 1; }
+    100% { opacity: 0.3; }
+  }
+  
+  @keyframes prevFadeInDelay {
+    0% { opacity: 0.3; transform: var(--back-transform); }
+    30% { opacity: 0.7; }
+    80% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); }
+    100% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); }
+  }
+`;
 
 const ExploreSection = () => {
   // Enhanced animation states for smoother transitions
@@ -10,8 +25,16 @@ const ExploreSection = () => {
   const [transitionDirection, setTransitionDirection] = useState(null); // 'next' or 'prev'
   const [exitingImageIndex, setExitingImageIndex] = useState(null);
   
-  // Current front image index
-  const currentFrontIndex = imageOrder[0];
+  // Memoize the current front index to prevent unnecessary calculations
+  const currentFrontIndex = useMemo(() => imageOrder[0], [imageOrder]);
+
+  // Memoize animation values to prevent recalculation
+  const animationValues = useMemo(() => {
+    return {
+      backTransform: `translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg)`,
+      nextTransform: `translateX(${gallery.length * 35}px) translateY(${gallery.length * 15}px) scale(0.7) rotate(${-gallery.length * 1.5}deg)`
+    };
+  }, [gallery.length]);
 
   // Emergency reset for animation state
   useEffect(() => {
@@ -40,8 +63,38 @@ const ExploreSection = () => {
     return () => clearTimeout(timeout);
   }, [currentFrontIndex]);
 
-  // More reliable event handlers with smoother animations
-  const handlePrev = () => {
+  // Add the keyframes to the document only once with a unique ID
+  useEffect(() => {
+    const styleId = 'explore-section-keyframes';
+    if (!document.getElementById(styleId)) {
+      // Create a style element
+      const styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      
+      // Set CSS variables for the animation
+      document.documentElement.style.setProperty(
+        '--back-transform', 
+        animationValues.backTransform
+      );
+      
+      // Define the keyframes
+      styleElement.textContent = keyframesStyle;
+      
+      // Add the style element to the document head
+      document.head.appendChild(styleElement);
+    }
+    
+    // Clean up function to remove style when component unmounts
+    return () => {
+      const styleElement = document.getElementById(styleId);
+      if (styleElement) {
+        document.head.removeChild(styleElement);
+      }
+    };
+  }, [animationValues.backTransform]); // Only recreate if the animation values change
+
+  // Optimized event handler with useCallback
+  const handlePrev = useCallback(() => {
     if (isAnimating) return;
     
     // Set animation states
@@ -60,27 +113,31 @@ const ExploreSection = () => {
     
     // Keep the front image fully visible during the start of the animation
     // Delay the reordering operation to control the timing
-    const reorderDelay = 400; // Increased delay for slower animation
-    
-    setTimeout(() => {
+    const reorderTimer = setTimeout(() => {
       // Move the last image (furthest back) to the front
       setImageOrder(prevOrder => {
         const newOrder = [...prevOrder];
         const lastItem = newOrder.pop(); // Remove the last item
         return [lastItem, ...newOrder]; // Add it to the front
       });
-    }, reorderDelay);
+    }, 400);
     
     // Release animation lock and clear states after animation completes
-    // Using a single longer timeout to prevent hiccups at the end
-    setTimeout(() => {
+    const completeTimer = setTimeout(() => {
       setExitingImageIndex(null);
       setIsAnimating(false);
       setTransitionDirection(null);
-    }, 850); // Increased duration
-  };
+    }, 850); 
+    
+    // Cleanup to prevent memory leaks
+    return () => {
+      clearTimeout(reorderTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [imageOrder, isAnimating]);
 
-      const handleNext = () => {
+  // Optimized event handler with useCallback
+  const handleNext = useCallback(() => {
     if (isAnimating) return;
     
     // Set animation states
@@ -92,22 +149,95 @@ const ExploreSection = () => {
     setExitingImageIndex({ front: frontIndex });
     
     // Keep the exiting state for a while to let the animation play
-    setTimeout(() => {
+    const reorderTimer = setTimeout(() => {
       // Move the first image (front) to the back
       setImageOrder(prevOrder => {
         const newOrder = [...prevOrder];
         const firstItem = newOrder.shift(); // Remove the first item
         return [...newOrder, firstItem]; // Add it to the back
       });
-    }, 450); // Slightly slower
+    }, 450);
     
     // Finally clear all animation states with a single timeout
-    setTimeout(() => {
+    const completeTimer = setTimeout(() => {
       setExitingImageIndex(null);
       setIsAnimating(false);
       setTransitionDirection(null);
     }, 850); // Match the prev animation duration
-  };
+    
+    // Cleanup to prevent memory leaks
+    return () => {
+      clearTimeout(reorderTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [imageOrder, isAnimating]);
+
+  // Memoize the image elements to prevent unnecessary re-renders
+  const imageElements = useMemo(() => {
+    return imageOrder.map((imgIndex, orderIndex) => {
+      // Enhanced visual properties for better depth effect
+      const zIndex = gallery.length - orderIndex;
+      const opacity = Math.max(0.3, 1 - orderIndex * 0.18); // Steeper opacity falloff
+      const scale = Math.max(0.75, 1 - orderIndex * 0.07); // More pronounced scaling
+      const translateX = orderIndex * 30; // Increased horizontal offset
+      const translateY = orderIndex * 12; // Increased vertical offset
+      const rotate = orderIndex * -1; // Slight rotation for depth
+      
+      // Special animation for the transitioning image
+      let animationStyles = {};
+      
+      // Front image moving to back (next button)
+      if (transitionDirection === 'next' && exitingImageIndex?.front === imgIndex) {
+        animationStyles = {
+          transform: animationValues.nextTransform,
+          opacity: 0.6, // Keep more visible during transition
+          zIndex: 0, // Set to back immediately
+          transition: 'transform 650ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 400ms ease-out', // Slower, smoother transition
+          willChange: 'transform, opacity' // Performance optimization
+        };
+      } 
+      // Back image moving to front (prev button)
+      else if (transitionDirection === 'prev' && exitingImageIndex?.back === imgIndex) {
+        animationStyles = {
+          zIndex: gallery.length + 1,
+          animation: 'prevFadeInDelay 750ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards',
+          willChange: 'transform, opacity' // Performance optimization
+        };
+      }
+      // Current front image when prev button is pressed
+      else if (transitionDirection === 'prev' && exitingImageIndex?.front === imgIndex) {
+        // Apply the delayed fade out animation
+        animationStyles = {
+          zIndex: gallery.length - 1, // Just below the incoming card
+          animation: 'prevFadeOutDelay 700ms ease-out forwards',
+          willChange: 'opacity', // Performance optimization
+          transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+        };
+      }
+      
+      return (
+        <div
+          key={imgIndex}
+          className="absolute top-0 left-0 w-full h-full transition-all duration-500 ease-in-out rounded-lg shadow-2xl"
+          style={{
+            zIndex,
+            opacity,
+            transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+            transformOrigin: 'center center',
+            boxShadow: orderIndex === 0 ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
+            ...animationStyles
+          }}
+        >
+          <img 
+            src={gallery[imgIndex]} 
+            alt={`Aventura en El Ávila ${imgIndex + 1}`}
+            className="w-full h-full object-cover"
+            loading={orderIndex === 0 ? "eager" : "lazy"} // Optimize image loading
+          />
+        </div>
+      );
+    });
+  }, [imageOrder, transitionDirection, exitingImageIndex, gallery.length, animationValues]);
 
   return (
     <div 
@@ -122,23 +252,6 @@ const ExploreSection = () => {
         zIndex: 1
       }}
     >
-      {/* CSS animations for the carousel transitions */}
-      <style jsx>{`
-        /* Improved keyframes for delayed opacity change on prev transition */
-        @keyframes prevFadeOutDelay {
-          0%, 65% { opacity: 1; } /* Keep full opacity for 65% of the animation */
-          100% { opacity: 0.3; }  /* Then fade to background level */
-        }
-        
-        /* Animation for the incoming image from the back */
-        @keyframes prevFadeInDelay {
-          0% { opacity: 0.3; transform: translateX(${gallery.length * 30}px) translateY(${gallery.length * 12}px) scale(${Math.max(0.75, 1 - gallery.length * 0.07)}) rotate(${gallery.length * -1}deg); }
-          30% { opacity: 0.7; }
-          80% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Position reached earlier */
-          100% { opacity: 1; transform: translateX(0) translateY(0) scale(1) rotate(0); } /* Hold final position */
-        }
-      `}</style>
-      
       {/* Top gradient overlay for fade effect */}
       <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-t from-transparent to-[rgba(13,24,6,1)] pointer-events-none z-10"></div>
       
@@ -168,68 +281,7 @@ const ExploreSection = () => {
           <div className="w-full md:w-1/2 h-[350px] md:h-[400px] relative">
             {/* Images with better depth effect and smooth animation */}
             <div className="relative w-full h-full perspective-1000">
-              {imageOrder.map((imgIndex, orderIndex) => {
-                // Enhanced visual properties for better depth effect
-                const zIndex = gallery.length - orderIndex;
-                const opacity = Math.max(0.3, 1 - orderIndex * 0.18); // Steeper opacity falloff
-                const scale = Math.max(0.75, 1 - orderIndex * 0.07); // More pronounced scaling
-                const translateX = orderIndex * 30; // Increased horizontal offset
-                const translateY = orderIndex * 12; // Increased vertical offset
-                const rotate = orderIndex * -1; // Slight rotation for depth
-                
-                // Special animation for the transitioning image
-                let animationStyles = {};
-                
-                // Front image moving to back (next button)
-                if (transitionDirection === 'next' && exitingImageIndex?.front === imgIndex) {
-                  animationStyles = {
-                    transform: `translateX(${gallery.length * 35}px) translateY(${gallery.length * 15}px) scale(0.7) rotate(${-gallery.length * 1.5}deg)`,
-                    opacity: 0.6, // Keep more visible during transition
-                    zIndex: 0, // Set to back immediately
-                    transition: 'transform 650ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity 400ms ease-out', // Slower, smoother transition
-                    willChange: 'transform, opacity' // Performance optimization
-                  };
-                } 
-                // Back image moving to front (prev button)
-                else if (transitionDirection === 'prev' && exitingImageIndex?.back === imgIndex) {
-                  animationStyles = {
-                    zIndex: gallery.length + 1,
-                    animation: 'prevFadeInDelay 750ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards',
-                    willChange: 'transform, opacity' // Performance optimization
-                  };
-                }
-                // Current front image when prev button is pressed
-                else if (transitionDirection === 'prev' && exitingImageIndex?.front === imgIndex) {
-                  // Apply the delayed fade out animation
-                  animationStyles = {
-                    zIndex: gallery.length - 1, // Just below the incoming card
-                    animation: 'prevFadeOutDelay 700ms ease-out forwards',
-                    willChange: 'opacity', // Performance optimization
-                    transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
-                  };
-                }
-                
-                return (
-                  <div
-                    key={imgIndex}
-                    className="absolute top-0 left-0 w-full h-full transition-all duration-500 ease-in-out rounded-lg shadow-2xl"
-                    style={{
-                      zIndex,
-                      opacity,
-                      transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
-                      transformOrigin: 'center center',
-                      boxShadow: orderIndex === 0 ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
-                      ...animationStyles
-                    }}
-                  >
-                    <img 
-                      src={gallery[imgIndex]} 
-                      alt={`Aventura en El Ávila ${imgIndex + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                );
-              })}
+              {imageElements}
             </div>
             
             {/* Navigation arrows with better disabling during animation */}

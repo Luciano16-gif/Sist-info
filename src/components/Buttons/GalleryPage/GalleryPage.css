@@ -233,7 +233,8 @@ body {
 }
 
 .close-button:hover {
-    color: #dbffca;
+    color: #ffffff;
+    background-color: #e80000;
 }
 .close-button:active{
     transform: translateY(2px);
@@ -253,4 +254,27 @@ body {
   line-height: 30px; /* Vertically center the text */
   color: white;
   border-radius: 5px;
+}
+
+.report-button {
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 103;
+    padding: 5px;
+}
+
+.report-button:hover {
+    color: #ffffff; 
+    background-color: #e80000;
+}
+
+.report-button:active {
+    transform: translateY(2px);
 }
