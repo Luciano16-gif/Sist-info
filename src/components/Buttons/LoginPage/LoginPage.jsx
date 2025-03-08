@@ -20,7 +20,7 @@ function LoginPage() {
         const unsubscribe = auth.onAuthStateChanged(user => {
             if (user) {
                 // User is signed in, navigate to home page
-                navigate('/');
+                navigate('/landing-page-user');
             }
         });
 
