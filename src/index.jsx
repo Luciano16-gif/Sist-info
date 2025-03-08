@@ -52,7 +52,7 @@ root.render(
           <Route path="/storage-test" element={<StorageTest />} />
 
           <Route path="/profile-management-page" element={<ProfileManagementPage />} />
-          <Route path="/gallery-page" element={<GalleryPage />} />
+          <Route path="/galeria" element={<GalleryPage />} />
         </Route>
       </Routes>
 
