@@ -1,10 +1,15 @@
 import React from 'react';
 import { OurTeamCircles } from './BackgroundElements';
 import ScrollFix from './ScrollFix';
+import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
+import visionImage from '../../assets/images/nuestro-equipo/image_vision.webp';
+import misionImage from '../../assets/images/nuestro-equipo/image_mision.webp';
 
 // Button component for consistency
-const Button = ({ text, className }) => (
-  <button className={`px-3 py-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-color border-white whitespace-nowrap font-bold border-2 ${className}`}
+const Button = ({ text, className, onClick }) => (
+  <button
+    className={`px-3 py-3 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-colors duration-300  border-white - whitespace-nowrap font-bold  ${className}`}
+    onClick={onClick} 
   >
     {text}
   </button>
@@ -20,16 +25,16 @@ const OurTeam = () => {
       {/* Scroll fix for the background circles */}
       <ScrollFix />
 
-      {/* Main content container */}
-      <div className="relative container mx-auto px-4 py-8 z-10">
+      {/* Main content container, made full width by removing container class and py */}
+      <div className="relative w-full px-4 z-10">
         {/* Header - Nuestro Equipo */}
-        <section className="py-12">
-          <h1 className="text-5xl md:text-6xl font-light text-center mb-12">Nuestro Equipo</h1>
+        <section className="py-12 px-4 md:px-16 lg:px-24 xl:px-32">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-center mb-12">Nuestro Equipo</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex justify-center md:justify-end">
               <img
-                src="/api/placeholder/400/300"
+                src={logoImage}
                 alt="Ávila Venturas Logo"
                 className="w-3/4 max-w-sm"
               />
@@ -52,7 +57,7 @@ const OurTeam = () => {
         </section>
 
         {/* Nuestra Visión */}
-        <section className="py-12">
+        <section className="py-12 px-4 md:px-16 lg:px-24 xl:px-32">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1 space-y-4">
               <h2 className="text-3xl font-light text-center">Nuestra Visión</h2>
@@ -74,9 +79,9 @@ const OurTeam = () => {
               </p>
             </div>
 
-            <div className="order-1 md:order-2 flex justify-center"> {/* Cambiado aquí */}
+            <div className="order-1 md:order-2 flex justify-center">
               <img
-                src="/api/placeholder/400/300"
+                src={visionImage}
                 alt="Excursionistas en El Ávila"
                 className="w-full max-w-md rounded-lg"
               />
@@ -85,11 +90,11 @@ const OurTeam = () => {
         </section>
 
         {/* Nuestra Misión */}
-        <section className="py-12">
+        <section className="py-12 px-4 md:px-16 lg:px-24 xl:px-32">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex justify-center md:justify-end">
               <img
-                src="/api/placeholder/400/300"
+                src={misionImage}
                 alt="Senderismo en El Ávila"
                 className="w-full max-w-md rounded-lg"
               />
@@ -113,9 +118,8 @@ const OurTeam = () => {
         </section>
 
         {/* Nuestros Contactos */}
-        <section className="py-12">
+        <section className="py-12 px-4 md:px-16 lg:px-24 xl:px-32">
           <h2 className="text-3xl font-light text-center mb-8">Nuestros Contactos</h2>
-
           <div className="max-w-2xl mx-auto text-center mb-8">
             <p className="text-sm leading-relaxed text-justify">
               Estamos aquí para ayudarte en cada paso de tu aventura. Ponte en
@@ -126,7 +130,7 @@ const OurTeam = () => {
           </div>
 
           <div className="flex justify-center mb-12">
-            <Button text="Enviar Mensaje" />
+            <Button text="Enviar Mensaje" onClick={() => {}} />
           </div>
 
           <h2 className="text-3xl font-light text-center mb-8">
@@ -161,7 +165,7 @@ const OurTeam = () => {
           </div>
 
           <div className="flex justify-center mb-12">
-            <Button text="Unirse al Equipo" />
+            <Button text="Unirse al Equipo" onClick={() => {}} />
           </div>
 
           <h2 className="text-3xl font-light text-center mb-8">
@@ -177,7 +181,7 @@ const OurTeam = () => {
           </div>
 
           {/* Footer */}
-          <footer className="mt-16 text-center">
+          <footer className="mt-16 text-center px-4 md:px-16 lg:px-24 xl:px-32">
             <p className="text-sm">©2025 | ÁvilaVenturas ALL RIGHT RESERVED</p>
           </footer>
         </section>
@@ -185,5 +189,4 @@ const OurTeam = () => {
     </div>
   );
 };
-
 export default OurTeam;
