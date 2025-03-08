@@ -18,7 +18,9 @@ const Button = ({ text, className, onClick }) => (
 // Main component for Ávila Venturas website
 const OurTeam = () => {
   return (
-    <div className="relative min-h-screen bg-[#2C3B23] text-white font-sans overflow-x-hidden">
+    <div className="relative min-h-screen text-white font-sans overflow-x-hidden" 
+      style={{ background: "linear-gradient(to bottom, #3F5333, #2C3B23, #182411,#0D1806)" }}>
+
       {/* Background circles */}
       <OurTeamCircles />
 
