@@ -1,82 +1,160 @@
 // ForumPage.jsx
 import React, { useState, useRef, useEffect } from 'react';
+import { collection, getDocs, doc, getDoc, query, orderBy, setDoc } from "firebase/firestore";
+import { db } from './../../../firebase-config';
 import './ForumPage.css';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Import getDownloadURL
+
+const getCurrentUser = () => {
+    return new Promise((resolve, reject) => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            unsubscribe();
+            if (user) {
+                try {
+                    const userDocRef = doc(db, "Lista de Usuarios", user.email);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (!userDocSnap.exists()) {
+                        console.warn("Usuario no encontrado en Firestore:", user.email);
+                        resolve({
+                            email: user.email,
+                            profileImage: "url_por_defecto.jpg",  // Default URL
+                            userName: user.displayName || "Usuario Anónimo"
+                        });
+                        return;
+                    }
+                    const userData = userDocSnap.data();
+                    let profileImageUrl = "url_por_defecto.jpg"; // Default
+
+                    // Use 'Foto de Perfil' field
+                    if (userData['Foto de Perfil']) {
+                        profileImageUrl = userData['Foto de Perfil'];
+                    }
+
+                    resolve({
+                        email: user.email,
+                        profileImage: profileImageUrl,
+                        userName: userData.name + " " + userData.lastName || user.displayName || "Usuario Anónimo"
+                    });
+                } catch (error) {
+                    console.error("Error al obtener la información del usuario:", error);
+                    reject(error);
+                }
+            } else {
+                resolve(null);
+            }
+        }, (error) => {
+            reject(error);
+        });
+    });
+};
 
 function ForumPage() {
     const forumContainerRef = useRef(null);
-    const textRefs = useRef([]);
     const [showComments, setShowComments] = useState(null);
-    const [forums] = useState([
-        {
-            id: 1,
-            profileImage: '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png',
-            title: "Guía #19: \"Consejos de Seguridad\"",
-            date: "Hace 2 semanas",
-            content: "Excursión en la montaña: experiencia increíble, seguridad fundamental. Puntos clave:\n1. Planificación\n2. Equipo\n3. Clima\n4. Hidratación\n5. Ambiente\n6. Límites\n7. Comunicación",
-            userName: "Guía Excursionista",
-            comments: [
-               { id: 101, user: "Usuario #789", text: "¡Excelentes consejos! Siempre llevo un silbato y una manta térmica por si acaso.", date: "Hace 1 semana", replyingTo: "Guía Excursionista" },
-                { id: 102, user: "Usuario #123", text: "La planificación es clave. Nunca salgo sin revisar el pronóstico del tiempo varias veces.", date: "Hace 5 días" , replyingTo: "Guía Excursionista"},
-                { id: 103, user: "Usuario #456", text: "Yo agregaría llevar un pequeño botiquín de primeros auxilios, incluso para caminatas cortas.", date: "Hace 2 días", replyingTo: "Usuario #789" },
-                { id: 104, user: "Usuario #999", text: "Muy cierto lo del botiquín.", date: "Hace 1 día", replyingTo: "Usuario #456" },
-            ]
-        },
-        {
-            id: 2,
-            profileImage: '../../src/assets/images/landing-page/profile_managemente/profile_picture_2.png',
-            title: "Usuario #424: \"Mi Experiencia\"",
-            date: "Hace 3 semanas",
-            content: "Excursión: comparto lugares. ¡Aquí algunos!\nPico Naiguatá\nLaguna de Los Patos\nCascada\nMirador\nSendero",
-            userName: "Usuario #424",
-            comments: []
-        },
-        {
-            id: 3,
-            profileImage: '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png',
-            title: "Guía #20: \"Equipo Esencial\"",
-            date: "Hace 1 semana",
-            content: "Equipo adecuado: crucial para seguridad y comodidad. Elementos:\n1. Mochila\n2. Botas\n3. Ropa\n4. Chaqueta\n5. Botiquín\n6. Mapa/GPS\n7. Linterna",
-            userName: "Guía Excursionista",
-            comments: []
-        },
-        {
-            id: 4,
-            profileImage: '../../src/assets/images/landing-page/profile_managemente/profile_picture_2.png',
-            title: "Usuario #555: \"Recomendaciones\"",
-            date: "Hace 4 días",
-            content: "Recomendaciones adicionales:\n- Informa\n- Verifica clima\n- Agua\n- Protector solar\n- No rastro",
-            userName: "Usuario #555",
-            comments: []
-        }
-    ]);
+    const [forums, setForums] = useState([]);
+    const [comments, setComments] = useState([]);
+    const [loadingForums, setLoadingForums] = useState(true);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [error, setError] = useState(null);
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyingToUserName, setReplyingToUserName] = useState(null);
+    const [showCommentPopup, setShowCommentPopup] = useState(false);
+    const [newComment, setNewComment] = useState("");
+    const [targetForumId, setTargetForumId] = useState(null);
+    const [showCreateForumPopup, setShowCreateForumPopup] = useState(false);
+    const [newForumTitle, setNewForumTitle] = useState("");
+    const [newForumDescription, setNewForumDescription] = useState("");
 
-    const addTextRef = (el) => {
-        if (el && !textRefs.current.includes(el)) {
-            textRefs.current.push(el);
+    // --- Helper Function to Fetch Profile Image URL ---
+    const fetchProfileImage = async (email) => {
+        try {
+            const userDocRef = doc(db, "Lista de Usuarios", email);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                if (userData['Foto de Perfil']) {
+                    return userData['Foto de Perfil'];
+                }
+            }
+            return "url_por_defecto.jpg"; // Default URL
+        } catch (error) {
+            console.error("Error fetching profile image:", error);
+            return "url_por_defecto.jpg"; // Default URL on error
         }
     };
 
-    const checkForOverflow = () => {
-      textRefs.current.forEach(ref => {
-        if (ref.scrollHeight > ref.clientHeight) {
-          ref.classList.add('fade');
-        } else {
-          ref.classList.remove('fade');
-        }
-      });
-    };
 
     useEffect(() => {
-        if (!showComments) {
-            checkForOverflow();
+        const fetchForums = async () => {
+            setLoadingForums(true);
+            setError(null);
+            try {
+                const forumsRef = collection(db, "Foros");
+                const q = query(forumsRef, orderBy("ID"));
+                const querySnapshot = await getDocs(q);
+                const fetchedForums = [];
 
-            const handleResize = () => checkForOverflow();
-            window.addEventListener('resize', handleResize);
+                for (const docSnap of querySnapshot.docs) {
+                    const forumData = docSnap.data();
+                    const profileImageUrl = await fetchProfileImage(forumData.Email); // Use helper function
 
-            return () => window.removeEventListener('resize', handleResize);
+                    fetchedForums.push({
+                        ...forumData,
+                        firestoreId: docSnap.id,
+                        profileImage: profileImageUrl,
+                    });
+                }
+                setForums(fetchedForums);
+            } catch (err) {
+                console.error("Error al cargar los foros:", err);
+                setError("Error al cargar los foros: " + err.message);
+            } finally {
+                setLoadingForums(false);
+            }
+        };
+        fetchForums();
+    }, []);
+
+    useEffect(() => {
+        const fetchComments = async (forumId) => {
+            setLoadingComments(true);
+            setError(null);
+            try {
+                const commentsRef = collection(db, "Foros", forumId, "comments");
+                const q = query(commentsRef, orderBy("ID"));
+                const querySnapshot = await getDocs(q);
+                const fetchedComments = [];
+
+                for (const docSnap of querySnapshot.docs) {
+                    const commentData = docSnap.data();
+                    const profileImageUrl = await fetchProfileImage(commentData.Email);  // Use helper function
+
+                    fetchedComments.push({
+                        ...commentData,
+                        firestoreId: docSnap.id,
+                        profileImage: profileImageUrl,
+                    });
+                }
+                setComments(fetchedComments);
+            } catch (err) {
+                console.error("Error al cargar los comentarios:", err);
+                setError("Error al cargar los comentarios: " + err.message);
+            } finally {
+                setLoadingComments(false);
+            }
+        };
+
+        if (showComments) {
+            fetchComments(showComments);
+        } else {
+            setComments([]);
         }
-    }, [forums, showComments]);
+    }, [showComments]);
 
+    // ... (rest of your component methods: scrollLeft, scrollRight, handleViewComments, etc.) ...
 
     const scrollLeft = () => {
         if (forumContainerRef.current) {
@@ -90,28 +168,30 @@ function ForumPage() {
         }
     };
 
-    const [replyingTo, setReplyingTo] = useState(null);
-    const [showCommentPopup, setShowCommentPopup] = useState(false);
-    const [newComment, setNewComment] = useState("");
-    const [targetForumId, setTargetForumId] = useState(null); // New state
-
     const handleViewComments = (forumId) => {
         setShowComments(forumId);
-        setTargetForumId(null); // Reset target forum ID when manually viewing comments
-
     };
 
-    const handleAddComment = (forumId, userName) => {
-        setReplyingTo(userName);
-        setTargetForumId(forumId);  // Store the forum ID
-        setShowComments(forumId);   // Show comments *first*
+    const handleAddComment = (forumId) => {
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para comentar.");
+            return;
+        }
+        setTargetForumId(forumId);
+        setShowComments(forumId);
         setShowCommentPopup(true);
     };
 
-
     const handleAddCommentToComment = (forumId, commentId, replyingToUser) => {
-        setReplyingTo(replyingToUser);
-        setTargetForumId(forumId); // Also set from within comment section
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para comentar.");
+            return;
+        }
+        setReplyingTo(commentId);
+        setReplyingToUserName(replyingToUser);
+        setTargetForumId(forumId);
         setShowCommentPopup(true);
     };
 
@@ -119,89 +199,213 @@ function ForumPage() {
         setShowCommentPopup(false);
         setReplyingTo(null);
         setNewComment("");
+        setReplyingToUserName(null);
     };
 
     const handleCommentInputChange = (event) => {
-      setNewComment(event.target.value);
+        setNewComment(event.target.value);
     };
 
-     const handlePublishComment = () => {
-        // Implementar lógica para publicar.
-        console.log("Publicando comentario:", newComment, "respondiendo a:", replyingTo, "en foro:", targetForumId);
-        handleCloseCommentPopup(); // Close popup after publishing.
+    const handlePublishComment = async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para publicar un comentario.");
+            return;
+        }
+        if (!newComment.trim()) {
+            setError("El comentario no puede estar vacío.");
+            return;
+        }
+        if (!targetForumId) {
+            setError("Error interno: No se especificó el foro de destino.");
+            return;
+        }
+        try {
+            const forumRef = doc(db, "Foros", targetForumId);
+            const forumSnap = await getDoc(forumRef);
+            if (!forumSnap.exists()) {
+                setError("El foro no existe.");
+                return;
+            }
+            const commentsRef = collection(db, "Foros", targetForumId, "comments");
+            let newCommentId;
+            if (replyingTo) {
+                const parentComment = comments.find(c => c.firestoreId === replyingTo);
+                if (!parentComment) {
+                    setError("No se ha encontrado el comentario principal al que se va a responder");
+                    return;
+                }
+                const replyCount = comments.filter(c => c.ID && c.ID.startsWith(parentComment.ID + ".")).length;
+                newCommentId = `${parentComment.ID}.${replyCount + 1}`;
+            } else {
+                const commentsSnap = await getDocs(commentsRef);
+                newCommentId = `${targetForumId}.${commentsSnap.size + 1}`;
+            }
+            const newCommentData = {
+                ID: newCommentId,
+                description: newComment,
+                Email: user.email,
+                Date: new Date().toLocaleDateString('es-ES'),
+                replyingTo: replyingToUserName || null,
+                userName: user.userName,
+                profileImage: user.profileImage, // Correct URL
+            };
+            await setDoc(doc(commentsRef, newCommentId), newCommentData);
+            setComments([...comments, { ...newCommentData, firestoreId: newCommentId }]);
+            setShowCommentPopup(false);
+            setNewComment(""); //Clear the comment input after publishing
+            setReplyingTo(null);
+            setReplyingToUserName(null);
+        } catch (err) {
+            console.error("Error al publicar el comentario:", err);
+            setError("Error al publicar el comentario: " + err.message);
+        }
     };
 
     const handleBackToForums = () => {
         setShowComments(null);
         setReplyingTo(null);
-        setTargetForumId(null); // Reset target forum ID on back
+        setTargetForumId(null);
+        setReplyingToUserName(null);
     };
 
-    const selectedForum = forums.find(f => f.id === showComments);
+    const handleCreateTopic = () => {
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para crear un tema.");
+            return;
+        }
+        setShowCreateForumPopup(true);
+    };
+
+    const handleCloseCreateForumPopup = () => {
+        setShowCreateForumPopup(false);
+        setNewForumTitle("");
+        setNewForumDescription("");
+    };
+
+    const handleForumTitleChange = (event) => {
+        setNewForumTitle(event.target.value);
+    };
+
+    const handleForumDescriptionChange = (event) => {
+        setNewForumDescription(event.target.value);
+    };
+
+    const handlePublishForum = async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para publicar un foro.");
+            return;
+        }
+        if (!newForumTitle.trim() || !newForumDescription.trim()) {
+            setError("El título y la descripción no pueden estar vacíos.");
+            return;
+        }
+        try {
+            const forumsRef = collection(db, "Foros");
+            const forumsSnap = await getDocs(forumsRef);
+            const newForumId = String(forumsSnap.size + 1);
+            const newForumData = {
+                ID: newForumId,
+                Title: newForumTitle,
+                description: newForumDescription,
+                Email: user.email,
+                Date: new Date().toLocaleDateString('es-ES'),
+                userName: user.userName,
+                profileImage: user.profileImage,  // Correct URL
+            };
+            await setDoc(doc(db, "Foros", newForumId), newForumData);
+            setForums([...forums, { ...newForumData, firestoreId: newForumId }]);
+            setShowCreateForumPopup(false);
+            setNewForumTitle("");
+            setNewForumDescription("");
+        } catch (err) {
+            console.error("Error al publicar el foro:", err);
+            setError("Error al publicar el foro: " + err.message);
+        }
+    };
+    const selectedForum = forums.find(f => f.firestoreId === showComments);
+
+    if (loadingForums) {
+        return <div>Cargando foros...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     return (
         <div className="forum-page-forum">
             <h1 className="forum-title-forum">Foros</h1>
             <div className="forum-wrapper-forum">
                 {showComments ? (
-                    // Comments View
                     <div className="comments-view-forum">
                         <button className="back-button-forum" onClick={handleBackToForums}>
                             {"< Volver a Foros"}
                         </button>
-                        <div className="original-post-forum">
-                            <div className="profile-image-container-forum">
-                                <img src={selectedForum.profileImage} alt="Profile" className="profile-image-forum" />
-                            </div>
-                            <div className="forum-content-forum">
-                                <h2 className="forum-subtitle-forum">{selectedForum.title}</h2>
-                                <p className='forum-date-forum'>{selectedForum.date}</p>
-                                <p className="forum-text-forum forum-text-no-fade-forum">{selectedForum.content}</p>
-                                 <div className="forum-buttons-forum" style={{marginLeft: "auto", marginRight: "auto", marginTop: "10px"}}>
-                                    <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.id, selectedForum.userName)}>
-                                        Comentar
-                                    </span>
+                        {selectedForum ? (
+                            <div className="original-post-forum">
+                                <div className="profile-image-container-forum">
+                                    <img src={selectedForum.profileImage} alt="Profile" className="profile-image-forum" />
                                 </div>
-                            </div>
-                        </div>
-                        <div className="comments-container-forum">
-                           {selectedForum.comments.map(comment => (
-                                <div className="comment-item-forum" key={comment.id}>
-                                    <div className="comment-content-forum">
-                                         <p className="comment-user-forum">
-                                            {comment.user}
-                                            {comment.replyingTo && <span className="replying-to-text"> Respondiendo a {comment.replyingTo}</span>}
-                                        </p>
-                                        <p className="comment-date-forum">{comment.date}</p>
-                                        <p className="comment-text-forum">{comment.text}</p>
-                                        <div className="comment-button-container-forum">
-                                            <span className="forum-button-forum"  onClick={() => handleAddCommentToComment(selectedForum.id, comment.id, comment.user)}>Comentar</span>
-                                         </div>
+                                <div className="forum-content-forum">
+                                    <h2 className="forum-subtitle-forum">{selectedForum.Title}</h2>
+                                    <p className='forum-date-forum'>{selectedForum.Date}</p>
+                                    <p className="forum-text-forum forum-text-no-fade-forum">{selectedForum.description}</p>
+                                    <div className="forum-buttons-forum" style={{ marginLeft: "auto", marginRight: "auto", marginTop: "10px" }}>
+                                        <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.firestoreId, selectedForum.userName)}>
+                                            Comentar
+                                        </span>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+                        ) : (
+                            <div>No se ha seleccionado ningún foro, o el foro no existe.</div>
+                        )}
+                        <div className="comments-container-forum">
+                            {loadingComments ? (
+                                <div>Cargando comentarios...</div>
+                            ) : (
+                                comments.map(comment => (
+                                    <div className="comment-item-forum" key={comment.firestoreId}>
+                                        <div className="profile-image-container-forum">
+                                            <img src={comment.profileImage} alt="Profile" className="profile-image-forum" />
+                                        </div>
+                                        <div className="comment-content-forum">
+                                            <p className="comment-user-forum">
+                                                {comment.userName}
+                                                {comment.replyingTo && <span className="replying-to-text"> Respondiendo a {comment.replyingTo}</span>}
+                                            </p>
+                                            <p className="comment-date-forum">{comment.Date}</p>
+                                            <p className="comment-text-forum">{comment.description}</p>
+                                            <div className="comment-button-container-forum">
+                                                <span className="forum-button-forum" onClick={() => handleAddCommentToComment(selectedForum.firestoreId, comment.firestoreId, comment.userName)}>Comentar</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
-                         {/* Comment Popup */}
                         {showCommentPopup && (
                             <div className="comment-popup-overlay">
                                 <div className="comment-popup">
-                                     <span className="close-button" onClick={handleCloseCommentPopup}>×</span>
+                                    <span className="close-button" onClick={handleCloseCommentPopup}>×</span>
                                     <p className="replying-to-popup">
-                                        {replyingTo ? `Respondiendo a ${replyingTo}` : 'Escribe un comentario'}
+                                        {replyingToUserName ? `Respondiendo a ${replyingToUserName}` : 'Escribe un comentario'}
                                     </p>
                                     <textarea
                                         className="comment-input"
                                         placeholder="Introduce un texto"
                                         value={newComment}
                                         onChange={handleCommentInputChange}
-                                     />
+                                    />
                                     <button className="publish-button" onClick={handlePublishComment}>Publicar</button>
                                 </div>
                             </div>
                         )}
                     </div>
                 ) : (
-                    // Forum List View
                     <>
                         <div className="scroll-buttons-container-forum">
                             <button className="scroll-button-forum left-forum" onClick={scrollLeft}>
@@ -217,20 +421,19 @@ function ForumPage() {
                         </div>
                         <div className="forum-container-forum" ref={forumContainerRef}>
                             {forums.map((forum) => (
-                                <div className="forum-item-forum" key={forum.id}>
+                                <div className="forum-item-forum" key={forum.firestoreId}>
                                     <div className="profile-image-container-forum">
                                         <img src={forum.profileImage} alt="Profile" className="profile-image-forum" />
                                     </div>
                                     <div className="forum-content-forum">
-                                        <h2 className="forum-subtitle-forum">{forum.title}</h2>
-                                        <p className='forum-date-forum'>{forum.date}</p>
-                                        <p className="forum-text-forum" ref={addTextRef}>{forum.content}</p>
+                                        <h2 className="forum-subtitle-forum">{forum.Title}</h2>
+                                        <p className='forum-date-forum'>{forum.Date}</p>
+                                        <p className="forum-text-forum">{forum.description}</p>
                                         <div className="forum-buttons-forum">
-                                            <span className="forum-button-forum" onClick={() => handleViewComments(forum.id)}>
+                                            <span className="forum-button-forum" onClick={() => handleViewComments(forum.firestoreId)}>
                                                 Ver Comentarios
                                             </span>
-                                           {/* Pass forum.userName here */}
-                                            <span className="forum-button-forum" onClick={() => handleAddComment(forum.id, forum.userName)}>
+                                            <span className="forum-button-forum" onClick={() => handleAddComment(forum.firestoreId)}>
                                                 Comentar
                                             </span>
                                         </div>
@@ -238,7 +441,36 @@ function ForumPage() {
                                 </div>
                             ))}
                         </div>
-                        <button className="create-topic-button-forum">Crear un Tema</button>
+                        <button className="create-topic-button-forum" onClick={handleCreateTopic}>
+                            Crear un Tema
+                        </button>
+                        {showCreateForumPopup && (
+                            <div className="comment-popup-overlay">
+                                <div className="comment-popup">
+                                    <span className="close-button" onClick={handleCloseCreateForumPopup}>
+                                        ×
+                                    </span>
+                                    <p className="replying-to-popup">Crear Nuevo Foro</p>
+                                    <input
+                                        type="text"
+                                        className="comment-input"
+                                        placeholder="Título del foro"
+                                        value={newForumTitle}
+                                        onChange={handleForumTitleChange}
+                                        style={{ height: "45px" }}
+                                    />
+                                    <textarea
+                                        className="comment-input"
+                                        placeholder="Descripción del foro"
+                                        value={newForumDescription}
+                                        onChange={handleForumDescriptionChange}
+                                    />
+                                    <button className="publish-button" onClick={handlePublishForum}>
+                                        Publicar Foro
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
