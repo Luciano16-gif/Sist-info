@@ -15,21 +15,16 @@ import Layout from './components/layout/Layout';
 // Authentication Pages
 import OldLoginPage from './components/Buttons/LoginPage/LoginPage';
 import LoginPage from './components/Auth/LoginPage';
-import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
+import SignUpPage from './components/Auth/SignUpPage';
+import OldSignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
 //import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
-import Foro from './components/firebase-test/Foro';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
-
-// Test Components
-import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
-import AuthTest from './components/firebase-test/AuthTest/AuthTest';
-import StorageTest from './components/firebase-test/StorageTest/StorageTest';
 
 // ========== Styles ==========
 import './index.css';
@@ -46,18 +41,14 @@ root.render(
           <Route path="/login-page" element={<LoginPage />} />
           <Route path="/Old" element={<OldLoginPage />} />
           {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
-          <Route path="/sign-up-page" element={<SignUpPage />} />
+          <Route path="/signUpPage" element={<SignUpPage />} />
+          <Route path="/OldSignUp" element={<OldSignUpPage />} />
           
           {/* Routes with Layout */}
           <Route element={<Layout />}>
             {/* Main Routes */}
             <Route path="/" element={<AvilaLanding />} />
             <Route path="/foro" element={<ForumPage />} />
-            
-            {/* Testing Routes */}
-            <Route path="/firestore-test" element={<FirestoreTest />} />
-            <Route path="/auth-test" element={<AuthTest />} />
-            <Route path="/storage-test" element={<StorageTest />} />
 
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
