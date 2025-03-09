@@ -8,9 +8,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 function CrearExperiencia() {
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
-  const [fechas, setFechas] = useState([]); // Use an array for multiple dates
+  const [fechas, setFechas] = useState([]);
   const [descripcion, setDescripcion] = useState('');
-  const [horario, setHorario] = useState('');
+  const [horarioInicio, setHorarioInicio] = useState('');
+  const [horarioFin, setHorarioFin] = useState('');
   const [puntoSalida, setPuntoSalida] = useState('');
   const [longitudRecorrido, setLongitudRecorrido] = useState('');
   const [duracionRecorrido, setDuracionRecorrido] = useState('');
@@ -24,47 +25,95 @@ function CrearExperiencia() {
   const fileInputRef = useRef(null);
 
     const handleAgregar = async () => {
-        // 1. Data Validation
-        if (!nombre || !precio || fechas.length === 0 || !descripcion || !horario || !puntoSalida ||
+        // 1. Data Validation (moved most validations before image upload)
+        if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
             !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad) {
             alert('Por favor, complete todos los campos.');
             return;
         }
 
-        if (isNaN(parseFloat(precio)) || parseFloat(precio) <= 0) {
-            alert('Por favor ingrese un número valido y mayor que 0 para el precio.');
-            return;
-        }
-        if (isNaN(parseInt(minimoUsuarios)) || parseInt(minimoUsuarios) <= 0) {
-            alert('Por favor ingrese un número valido y mayor que 0 para el minimo de usuarios.');
-            return;
-        }
-        if (isNaN(parseInt(maximoUsuarios)) || parseInt(maximoUsuarios) <= 0) {
-            alert('Por favor ingrese un número valido y mayor que 0 para el maximo de usuarios.');
-            return;
-        }
-        if (parseInt(minimoUsuarios) > parseInt(maximoUsuarios)) {
-            alert('El minimo de usuarios no puede ser mayor que el máximo.');
+        // Time Validation (remains the same)
+        if (!/^\d{2}:\d{2}$/.test(horarioInicio) || !/^\d{2}:\d{2}$/.test(horarioFin)) {
+            alert('Por favor, ingrese horarios válidos en formato HH:MM.');
             return;
         }
 
-        if (isNaN(parseInt(guiasRequeridos)) || parseInt(guiasRequeridos) < 0) {
+        const [startHours, startMinutes] = horarioInicio.split(':').map(Number);
+        const [endHours, endMinutes] = horarioFin.split(':').map(Number);
+
+        if (startHours < 0 || startHours > 23 || startMinutes < 0 || startMinutes > 59 ||
+            endHours < 0 || endHours > 23 || endMinutes < 0 || endMinutes > 59) {
+          alert("Por favor, ingrese horas y minutos válidos (horas 0-23, minutos 0-59).");
+          return;
+        }
+
+        if (startHours > endHours || (startHours === endHours && startMinutes >= endMinutes)) {
+            alert('La hora de finalización debe ser posterior a la hora de inicio.');
+            return;
+        }
+
+
+      // User Count Validation (remains mostly the same)
+      const minUsers = parseInt(minimoUsuarios);
+      const maxUsers = parseInt(maximoUsuarios);
+
+        if (isNaN(minUsers) || minUsers <= 0) {
+            alert('Por favor, ingrese un número válido y mayor que 0 para el mínimo de usuarios.');
+            return;
+        }
+        if (isNaN(maxUsers) || maxUsers <= 0) {
+            alert('Por favor, ingrese un número válido y mayor que 0 para el máximo de usuarios.');
+            return;
+        }
+
+        // Min/Max User Comparison (remains the same)
+        if (minUsers > maxUsers) {
+            alert('El mínimo de usuarios no puede ser mayor que el máximo de usuarios.');
+            return;
+        }
+
+        // Precio Validation (now handles the '$' prefix)
+        if (!/^\d+(\.\d{0,2})?$/.test(precio)) {
+            alert('Por favor ingrese un número válido para el precio.');
+            return;
+        }
+        const precioNumerico = parseFloat(precio);
+        if (precioNumerico <= 0) {
+            alert("El precio debe ser mayor que cero.");
+            return;
+        }
+
+        // Duracion Recorrido Validation (must be a positive integer - minutes)
+        if (!/^\d+$/.test(duracionRecorrido)) {
+            alert("Por favor, ingrese un número entero válido para la duración del recorrido (en minutos).");
+            return;
+        }
+        const duracionNumerica = parseInt(duracionRecorrido);
+        if (duracionNumerica <= 0) {
+          alert("La duración debe ser mayor que cero.");
+          return
+        }
+
+        // Longitud Recorrido Validation (must be positive number, "km" suffix)
+        if (!/^\d+(\.\d*)?$/.test(longitudRecorrido)) {
+            alert("Por favor, ingrese un número válido para la longitud del recorrido (en km).");
+            return;
+        }
+        const longitudNumerica = parseFloat(longitudRecorrido);
+        if (longitudNumerica <= 0) {
+          alert("La longitud debe ser mayor que cero");
+          return
+        }
+
+        //Guias requeridos validation
+        if (parseInt(guiasRequeridos) < 0 || isNaN(parseInt(guiasRequeridos))) {
             alert('Por favor ingrese un número valido y no negativo para los guias requeridos.');
             return;
         }
 
-        if (isNaN(parseFloat(longitudRecorrido)) || parseFloat(longitudRecorrido) < 0) {
-            alert('Por favor ingrese un número valido no negativo para la longitud del recorrido.');
-            return;
-        }
-        if (isNaN(parseFloat(duracionRecorrido)) || parseFloat(duracionRecorrido) < 0) {
-            alert('Por favor ingrese un número valido no negativo para la duración del recorrido.');
-            return;
-        }
-
         try {
-            // 2. Upload the image
+            // 2. Upload the image (remains the same)
             let imageUrl = null;
             if (imageFile) {
                 const storageRef = ref(storage, `experiences/${imageFile.name}`);
@@ -72,36 +121,39 @@ function CrearExperiencia() {
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
 
-            // 3. Create the data object
+            // 3. Create the data object (MODIFIED to format price, duration, and length)
             const experienciaData = {
                 nombre,
-                precio: parseFloat(precio),
-                fechas,  // Store the array of dates
+                precio: `$${precioNumerico.toFixed(2)}`,
+                fechas,
                 descripcion,
-                horario,
+                horarioInicio,
+                horarioFin,
                 puntoSalida,
-                longitudRecorrido: parseFloat(longitudRecorrido),
-                duracionRecorrido: parseFloat(duracionRecorrido),
+                longitudRecorrido: `${longitudNumerica}km`,
+                duracionRecorrido: `${duracionNumerica}min`, // Add "min" suffix
                 guiasRequeridos: parseInt(guiasRequeridos),
-                minimoUsuarios: parseInt(minimoUsuarios),
-                maximoUsuarios: parseInt(maximoUsuarios),
+                minimoUsuarios: minUsers,
+                maximoUsuarios: maxUsers,
                 incluidosExperiencia,
                 tipoActividad,
                 imageUrl,
             };
 
-            // 4. Add to Firestore
+
+            // 4. Add to Firestore (remains the same)
             const docRef = await addDoc(collection(db, "Experiencias"), experienciaData);
-            await setDoc(doc(db, "Experiencias", nombre), experienciaData); // Also add with doc name = nombre
+            await setDoc(doc(db, "Experiencias", nombre), experienciaData);
 
             console.log("Document written with ID: ", docRef.id);
 
-            // 5. Clear the form
-             setNombre('');
+            // 5. Clear the form (remains the same)
+            setNombre('');
             setPrecio('');
-            setFechas([]); // Clear the dates array
+            setFechas([]);
             setDescripcion('');
-            setHorario('');
+            setHorarioInicio('');
+            setHorarioFin('');
             setPuntoSalida('');
             setLongitudRecorrido('');
             setDuracionRecorrido('');
@@ -113,7 +165,7 @@ function CrearExperiencia() {
             setImageFile(null);
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
 
-            // 6. Success message
+            // 6. Success message (remains the same)
             alert('Experiencia creada exitosamente!');
 
         } catch (error) {
@@ -121,6 +173,8 @@ function CrearExperiencia() {
             alert("Error al crear la experiencia.  Por favor, inténtelo de nuevo.");
         }
     };
+
+    // --- Handler Functions ---
 
     const handleImageClick = () => {
         fileInputRef.current.click();
@@ -141,11 +195,18 @@ function CrearExperiencia() {
         }
     };
 
+     // Keep this as is, we just validate the format *before* storing
     const handlePrecioChange = (e) => {
-        const value = e.target.value;
-        if (/^(\d+(\.\d{0,2})?)?$/.test(value)) {
-            setPrecio(value);
-        }
+      setPrecio(e.target.value);
+    };
+    //  Validates integer input (for Duracion Recorrido)
+    const handleDuracionChange = (e) => {
+        setDuracionRecorrido(e.target.value); //  Set the raw input, validate on submit
+    };
+
+    // Validates float input (for Longitud Recorrido)
+    const handleLongitudChange = (e) => {
+        setLongitudRecorrido(e.target.value);
     };
 
     const handleIntegerInputChange = (setter) => (e) => {
@@ -155,21 +216,12 @@ function CrearExperiencia() {
         }
     };
 
-    const handleFloatInputChange = (setter) => (e) => {
-        const value = e.target.value;
-        if (/^(\d+(\.\d*)?)?$/.test(value)) {
-            setter(value);
-        }
-    };
 
     // --- Date Handling ---
     const handleDateChange = (date) => {
-      // Check if the date is already selected
       if (fechas.includes(date)) {
-          // If it's selected, remove it (toggle off)
           setFechas(fechas.filter(d => d !== date));
       } else {
-          // If it's not selected, add it (toggle on)
           setFechas([...fechas, date]);
       }
   };
@@ -186,6 +238,17 @@ function CrearExperiencia() {
               {day}
           </button>
       ));
+    };
+
+    // --- Time Input Handler ---
+    const handleTimeChange = (setter) => (e) => {
+        let value = e.target.value;
+        value = value.replace(/[^0-9:]/g, '');
+        value = value.slice(0, 5);
+        if (value.length >= 2 && value.indexOf(':') === -1) {
+            value = value.slice(0, 2) + ':' + value.slice(2);
+        }
+        setter(value);
     };
 
     return (
@@ -232,13 +295,25 @@ function CrearExperiencia() {
                     </div>
                     <div className='campo-row-crear-experiencia'>
                         <div className="campo-crear-experiencia">
-                            <label htmlFor="horario">Horario</label>
-                            <input type="text" id="horario" value={horario} onChange={(e) => setHorario(e.target.value)} />
+                            <label htmlFor="horarioInicio">Horario Inicio</label>
+                            <input
+                                type="text"
+                                id="horarioInicio"
+                                value={horarioInicio}
+                                onChange={handleTimeChange(setHorarioInicio)}
+                                maxLength="5"
+                            />
                         </div>
 
                         <div className="campo-crear-experiencia">
-                            <label> - </label>
-                            <input type="text" disabled />
+                            <label htmlFor="horarioFin">Horario Fin</label>
+                            <input
+                                type="text"
+                                id="horarioFin"
+                                value={horarioFin}
+                                onChange={handleTimeChange(setHorarioFin)}
+                                maxLength="5"
+                            />
                         </div>
                     </div>
 
@@ -271,15 +346,15 @@ function CrearExperiencia() {
                             <input type="text" id="maximoUsuarios" value={maximoUsuarios} onChange={handleIntegerInputChange(setMaximoUsuarios)} />
                         </div>
                         <div className="campo-crear-experiencia">
-                            <label htmlFor="longitudRecorrido">Longitud de Recorrido</label>
-                            <input type="text" id="longitudRecorrido" value={longitudRecorrido} onChange={handleFloatInputChange(setLongitudRecorrido)} />
+                            <label htmlFor="longitudRecorrido">Longitud de Recorrido (km)</label>
+                            <input type="text" id="longitudRecorrido" value={longitudRecorrido} onChange={handleLongitudChange} />
                         </div>
                     </div>
 
                     <div className="campo-row-crear-experiencia">
                         <div className="campo-crear-experiencia">
-                            <label htmlFor="duracionRecorrido">Duración de Recorrido (aprox.)</label>
-                            <input type="text" id="duracionRecorrido" value={duracionRecorrido} onChange={handleFloatInputChange(setDuracionRecorrido)} />
+                            <label htmlFor="duracionRecorrido">Duración de Recorrido (minutos)</label>
+                            <input type="text" id="duracionRecorrido" value={duracionRecorrido} onChange={handleDuracionChange} />
                         </div>
                         <div className="campo-crear-experiencia">
                             <label htmlFor="tipoActividad">Seleccionar Tipo de Actividad</label>
@@ -299,5 +374,4 @@ function CrearExperiencia() {
     );
 }
 
-//wawa
 export default CrearExperiencia;
