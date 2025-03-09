@@ -17,6 +17,7 @@ import {
 
 const googleProvider = new GoogleAuthProvider();
 const UNIMET_DOMAIN = 'correo.unimet.edu.ve';
+const USERS_COLLECTION = 'Lista de Usuarios';
 
 // Validation utilities
 export const validateEmail = (email) => {
@@ -52,7 +53,7 @@ export const emailSignIn = async (email, password) => {
   }
 
   try {
-    const usersCollection = collection(db, 'Lista de Usuarios');
+    const usersCollection = collection(db, USERS_COLLECTION);
     const q = query(usersCollection, where("email", "==", trimmedEmail));
     const querySnapshot = await getDocs(q);
 
@@ -60,9 +61,15 @@ export const emailSignIn = async (email, password) => {
       throw new Error('Usuario no encontrado.');
     }
 
+    const userData = querySnapshot.docs[0].data();
+    if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
+      throw new Error('Este correo está registrado con Google Authentication. Por favor, use la opción de Google para iniciar sesión.');
+    }
+
     const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
     return userCredential.user;
   } catch (error) {
+    console.error("Login error:", error);
     const errorMessage = getAuthErrorMessage(error.code) || error.message;
     throw new Error(errorMessage);
   }
@@ -82,17 +89,25 @@ export const emailSignUp = async (userData) => {
   }
 
   try {
+    // Check if user already exists
+    const usersCollection = collection(db, USERS_COLLECTION);
+    const q = query(usersCollection, where("email", "==", trimmedEmail));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      throw new Error('Este correo ya está registrado.');
+    }
+
+    // Create the Firebase auth user
     const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
     
-    // Create user document
-    const usersCollection = collection(db, 'Lista de Usuarios');
+    // Create user document - IMPORTANT: Don't store the password
     const docRef = doc(usersCollection, trimmedEmail);
     
     await setDoc(docRef, {
       email: trimmedEmail,
       name,
       lastName,
-      password, // 
       phone,
       'Registro/Inicio de Sesión': 'Correo-Contraseña',
       userType: "usuario",
@@ -106,6 +121,7 @@ export const emailSignUp = async (userData) => {
     
     return userCredential.user;
   } catch (error) {
+    console.error("Sign up error:", error);
     const errorMessage = getAuthErrorMessage(error.code) || error.message;
     throw new Error(errorMessage);
   }
@@ -122,7 +138,7 @@ export const googleAuth = async (isSignUp = false) => {
       throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
     }
 
-    const usersCollection = collection(db, 'Lista de Usuarios');
+    const usersCollection = collection(db, USERS_COLLECTION);
     const q = query(usersCollection, where("email", "==", trimmedEmail));
     const querySnapshot = await getDocs(q);
 
@@ -132,8 +148,14 @@ export const googleAuth = async (isSignUp = false) => {
       throw new Error('Ya ha registrado un usuario con ese correo.');
     }
 
-    // If user doesn't exist in Firestore, create them
-    if (querySnapshot.empty) {
+    // For login, check if user doesn't exist
+    if (!isSignUp && querySnapshot.empty) {
+      await signOut(auth);
+      throw new Error('No existe una cuenta con este correo. Por favor, regístrese primero.');
+    }
+
+    // If user doesn't exist in Firestore and this is signup, create them
+    if (querySnapshot.empty && isSignUp) {
       const displayName = user.displayName || '';
       const nameParts = displayName.split(' ');
       
@@ -141,7 +163,7 @@ export const googleAuth = async (isSignUp = false) => {
         email: trimmedEmail,
         name: nameParts[0] || "",
         lastName: nameParts.slice(1).join(' ') || "",
-        'Foto de Perfil': user.photoURL || "url_por_defecto.jpg",
+        'Foto de Perfil': user.photoURL || "",
         phone: "",
         userType: "usuario",
         'Registro/Inicio de Sesión': 'Google Authentication',
@@ -158,6 +180,7 @@ export const googleAuth = async (isSignUp = false) => {
 
     return user;
   } catch (error) {
+    console.error("Google auth error:", error);
     if (error.code === 'auth/popup-closed-by-user') {
       return null; // User closed the popup, no need for error
     }
@@ -167,6 +190,12 @@ export const googleAuth = async (isSignUp = false) => {
   }
 };
 
-export const logOut = () => {
-  return signOut(auth);
+export const logOut = async () => {
+  try {
+    await signOut(auth);
+    return true;
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw new Error('Error al cerrar sesión.');
+  }
 };

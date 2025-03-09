@@ -47,11 +47,8 @@
   margin-bottom: 30px;
 }
 
-/* Input styles */
-input[type="email-login"],
-input[type="password-login"],
-input[type="text-signup"],
-input[type="tel-signup"] {
+/* Input styles - updated to use standard input types with custom classes */
+.auth-input {
   width: 350px;
   padding: 12px;
   border: 5px solid #ffffff;
@@ -62,18 +59,12 @@ input[type="tel-signup"] {
   color: #333;
 }
 
-input[type="email-login"]:focus,
-input[type="password-login"]:focus,
-input[type="text-signup"]:focus,
-input[type="tel-signup"]:focus {
+.auth-input:focus {
   border-color: #2e6126;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-input[type="email-login"]:hover,
-input[type="password-login"]:hover,
-input[type="text-signup"]:hover,
-input[type="tel-signup"]:hover {
+.auth-input:hover {
   background-color: #c2c2c2;
   border-color: #c2c2c2;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
@@ -165,4 +156,9 @@ input[type="tel-signup"]:hover {
 .auth-error {
   margin-bottom: 15px;
   max-width: 350px;
+  color: #ff3333;
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
 }

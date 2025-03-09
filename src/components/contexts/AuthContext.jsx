@@ -1,5 +1,4 @@
-// src/contexts/AuthContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../../firebase-config';
 import { useNavigate } from 'react-router-dom';
 import * as authService from '../services/authService';
@@ -39,13 +38,11 @@ export const AuthProvider = ({ children }) => {
     if (callback) callback(error);
   };
 
-  // Define authentication methods
+  // Define authentication methods using authService
   const login = async (email, password, onError) => {
     try {
       setError(null);
-      // For testing - using dummy implementation until authService is ready
-      const userCredential = await auth.signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      return await authService.emailSignIn(email, password);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
@@ -55,13 +52,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData, onError) => {
     try {
       setError(null);
-      // Dummy implementation
-      const userCredential = await auth.createUserWithEmailAndPassword(
-        auth, 
-        userData.email, 
-        userData.password
-      );
-      return userCredential.user;
+      return await authService.emailSignUp(userData);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
@@ -71,8 +62,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (isSignUp = false, onError) => {
     try {
       setError(null);
-      // Dummy implementation
-      return null;
+      return await authService.googleAuth(isSignUp);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
@@ -82,9 +72,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async (onError) => {
     try {
       setError(null);
-      await auth.signOut();
+      await authService.logOut();
+      return true;
     } catch (error) {
       handleAuthError(error, onError);
+      return false;
     }
   };
 
@@ -96,7 +88,8 @@ export const AuthProvider = ({ children }) => {
     signup,
     loginWithGoogle,
     logout,
-    loading
+    loading,
+    setError
   };
 
   return (
