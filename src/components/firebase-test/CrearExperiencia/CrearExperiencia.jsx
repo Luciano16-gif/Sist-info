@@ -1,29 +1,176 @@
 // CrearExperiencia.jsx (UPDATED)
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './CrearExperiencia.css';
 import { db, storage } from '../../../firebase-config';
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function CrearExperiencia() {
-  const [nombre, setNombre] = useState('');
-  const [precio, setPrecio] = useState('');
-  const [fechas, setFechas] = useState([]);
-  const [descripcion, setDescripcion] = useState('');
-  const [horarioInicio, setHorarioInicio] = useState('');
-  const [horarioFin, setHorarioFin] = useState('');
-  const [puntoSalida, setPuntoSalida] = useState('');
-  const [longitudRecorrido, setLongitudRecorrido] = useState('');
-  const [duracionRecorrido, setDuracionRecorrido] = useState('');
-  const [guiasRequeridos, setGuiasRequeridos] = useState('');
-  const [minimoUsuarios, setMinimoUsuarios] = useState('');
-  const [maximoUsuarios, setMaximoUsuarios] = useState('');
-  const [incluidosExperiencia, setIncluidosExperiencia] = useState('');
-  const [tipoActividad, setTipoActividad] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
-  const fileInputRef = useRef(null);
-  const [dificultad, setDificultad] = useState(0); // New state for difficulty
+    const [nombre, setNombre] = useState('');
+    const [precio, setPrecio] = useState('');
+    const [fechas, setFechas] = useState([]);
+    const [descripcion, setDescripcion] = useState('');
+    const [horarioInicio, setHorarioInicio] = useState('');
+    const [horarioFin, setHorarioFin] = useState('');
+    const [puntoSalida, setPuntoSalida] = useState(''); // Now a selected value
+    const [longitudRecorrido, setLongitudRecorrido] = useState('');
+    const [duracionRecorrido, setDuracionRecorrido] = useState('');
+    const [guiasRequeridos, setGuiasRequeridos] = useState('');
+    const [minimoUsuarios, setMinimoUsuarios] = useState('');
+    const [maximoUsuarios, setMaximoUsuarios] = useState('');
+    const [incluidosExperiencia, setIncluidosExperiencia] = useState('');
+    const [tipoActividad, setTipoActividad] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
+    const fileInputRef = useRef(null);
+    const [dificultad, setDificultad] = useState(0);
+    const [tiposActividad, setTiposActividad] = useState([]);
+    const [nuevoTipoActividad, setNuevoTipoActividad] = useState("");
+    const [opcionesIncluidos, setOpcionesIncluidos] = useState([]);
+    const [nuevoIncluido, setNuevoIncluido] = useState("");
+    const [puntosSalida, setPuntosSalida] = useState([]); //  Options for "Puntos de Salida"
+    const [nuevoPuntoSalida, setNuevoPuntoSalida] = useState("");  // New "Punto de Salida" input
+
+
+    // --- Firestore Interaction for Activity Types ---
+    useEffect(() => {
+        const fetchTiposActividad = async () => {
+            try {
+                const docRef = doc(db, "Configuraciones de Experiencias", "Tipo de actividad");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setTiposActividad(docSnap.data().tipos);
+                } else {
+                    console.log("No such document!");
+                    await setDoc(docRef, { tipos: [] });
+                    setTiposActividad([]);
+                }
+            } catch (error) {
+                console.error("Error fetching activity types:", error);
+            }
+        };
+
+        fetchTiposActividad();
+    }, []);
+
+    const handleAgregarNuevoTipo = async () => {
+        const nuevoTipo = nuevoTipoActividad.trim();
+        if (!nuevoTipo) {
+            alert("Por favor, ingrese un tipo de actividad.");
+            return;
+        }
+        const nuevoTipoLower = nuevoTipo.toLowerCase();
+        if (tiposActividad.map(tipo => tipo.toLowerCase()).includes(nuevoTipoLower)) {
+            alert("Este tipo de actividad ya existe.");
+            return;
+        }
+        try {
+            const docRef = doc(db, "Configuraciones de Experiencias", "Tipo de actividad");
+            const updatedTipos = [...tiposActividad, nuevoTipo];
+            await updateDoc(docRef, { tipos: updatedTipos });
+            setTiposActividad(updatedTipos);
+            setNuevoTipoActividad("");
+        } catch (error) {
+            console.error("Error adding activity type:", error);
+            alert("Error al agregar el tipo de actividad. Inténtelo de nuevo.");
+        }
+    };
+
+    // --- Firestore Interaction for "Incluidos" Options ---
+    useEffect(() => {
+        const fetchIncluidos = async () => {
+            try {
+                const docRef = doc(db, "Configuraciones de Experiencias", "Incluidos de la Experiencia");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setOpcionesIncluidos(docSnap.data().incluidos);
+                } else {
+                    console.log("No 'Incluidos' document!");
+                    await setDoc(docRef, { incluidos: [] });
+                    setOpcionesIncluidos([]);
+                }
+            } catch (error) {
+                console.error("Error fetching 'Incluidos':", error);
+            }
+        };
+
+        fetchIncluidos();
+    }, []);
+
+    const handleAgregarNuevoIncluido = async () => {
+        const nuevoIncluidoTrim = nuevoIncluido.trim();
+        if (!nuevoIncluidoTrim) {
+            alert("Por favor, ingrese un elemento a incluir.");
+            return;
+        }
+          const nuevoIncluidoLower = nuevoIncluidoTrim.toLowerCase();
+          if (opcionesIncluidos.map(inc => inc.toLowerCase()).includes(nuevoIncluidoLower)) {
+            alert("Este elemento ya existe en la lista de incluidos.");
+            return;
+        }
+
+        try {
+            const docRef = doc(db, "Configuraciones de Experiencias", "Incluidos de la Experiencia");
+            const updatedIncluidos = [...opcionesIncluidos, nuevoIncluidoTrim];
+            await updateDoc(docRef, { incluidos: updatedIncluidos });
+            setOpcionesIncluidos(updatedIncluidos);
+            setNuevoIncluido("");
+        } catch (error) {
+            console.error("Error adding 'Incluido':", error);
+            alert("Error al agregar el elemento. Inténtelo de nuevo.");
+        }
+    };
+
+    // --- Firestore Interaction for "Puntos de Salida" ---
+    useEffect(() => {
+        const fetchPuntosSalida = async () => {
+            try {
+                const docRef = doc(db, "Configuraciones de Experiencias", "Puntos de Salida");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setPuntosSalida(docSnap.data().puntos); // Assuming the field is named 'puntos'
+                } else {
+                    console.log("No 'Puntos de Salida' document!");
+                    await setDoc(docRef, { puntos: [] }); // Initialize if it doesn't exist
+                    setPuntosSalida([]);
+                }
+            } catch (error) {
+                console.error("Error fetching 'Puntos de Salida':", error);
+            }
+        };
+
+        fetchPuntosSalida();
+    }, []);
+
+    const handleAgregarNuevoPuntoSalida = async () => {
+        const nuevoPuntoTrim = nuevoPuntoSalida.trim();
+        if (!nuevoPuntoTrim) {
+            alert("Por favor, ingrese un punto de salida.");
+            return;
+        }
+        const nuevoPuntoLower = nuevoPuntoTrim.toLowerCase();
+
+        if (puntosSalida.map(punto => punto.toLowerCase()).includes(nuevoPuntoLower)) {
+          alert("Este punto de salida ya existe.");
+          return;
+        }
+
+        try {
+            const docRef = doc(db, "Configuraciones de Experiencias", "Puntos de Salida");
+            const updatedPuntos = [...puntosSalida, nuevoPuntoTrim];
+            await updateDoc(docRef, { puntos: updatedPuntos });
+            setPuntosSalida(updatedPuntos);
+            setNuevoPuntoSalida(""); // Clear input
+        } catch (error) {
+            console.error("Error adding 'Punto de Salida':", error);
+            alert("Error al agregar el punto de salida. Inténtelo de nuevo.");
+        }
+    };
+
+
 
     const handleAgregar = async () => {
         // 1. Data Validation (moved most validations before image upload)
@@ -350,10 +497,34 @@ function CrearExperiencia() {
                         </div>
                     </div>
 
+                    {/* Punto de Salida - Now a Select + Add */}
                     <div className="campo-row-crear-experiencia">
                         <div className="campo-crear-experiencia">
                             <label htmlFor="puntoSalida">Punto de Salida</label>
-                            <input type="text" id="puntoSalida" value={puntoSalida} onChange={(e) => setPuntoSalida(e.target.value)} />
+                            <select
+                                id="puntoSalida"
+                                value={puntoSalida}
+                                onChange={(e) => setPuntoSalida(e.target.value)}
+                            >
+                                <option value="">Seleccione...</option>
+                                {puntosSalida.map((punto) => (
+                                    <option key={punto} value={punto}>
+                                        {punto}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="add-activity-container">
+                                <input
+                                    type="text"
+                                    placeholder="Nuevo punto..."
+                                    value={nuevoPuntoSalida}
+                                    onChange={(e) => setNuevoPuntoSalida(e.target.value)}
+                                    className="nuevo-tipo-input"
+                                />
+                                <button type="button" onClick={handleAgregarNuevoPuntoSalida} className="add-activity-button">
+                                    Agregar
+                                </button>
+                            </div>
                         </div>
                         <div className="campo-crear-experiencia">
                             <label htmlFor="guiasRequeridos">Guías Requeridos</label>
@@ -367,9 +538,39 @@ function CrearExperiencia() {
                             <input type="text" id="minimoUsuarios" value={minimoUsuarios} onChange={handleIntegerInputChange(setMinimoUsuarios)} />
                         </div>
 
-                        <div className="campo-crear-experiencia full-width-input-crear-experiencia">
+                        {/* Incluidos de la Experiencia - Now a Select + Add */}
+                        <div className="campo-crear-experiencia campo-incluidos-experiencia">
                             <label htmlFor="incluidosExperiencia">Incluidos en la Experiencia</label>
-                            <input type="text" id="incluidosExperiencia" value={incluidosExperiencia} onChange={(e) => setIncluidosExperiencia(e.target.value)} />
+                            <select
+                                id="incluidosExperiencia"
+                                value={incluidosExperiencia}
+                                onChange={(e) => setIncluidosExperiencia(e.target.value)}
+                            >
+                                <option value="">Seleccione...</option>
+                                {opcionesIncluidos.map((incluido) => (
+                                    <option key={incluido} value={incluido}>
+                                        {incluido}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <div className="add-activity-container">
+                                 {/* Use consistent class names */}
+                                <input
+                                    type="text"
+                                    placeholder="Nuevo incluido..."
+                                    value={nuevoIncluido}
+                                    onChange={(e) => setNuevoIncluido(e.target.value)}
+                                    className="nuevo-tipo-input"  /* Consistent class */
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleAgregarNuevoIncluido}
+                                    className="add-activity-button"  /* Consistent class */
+                                >
+                                    Agregar
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -389,15 +590,28 @@ function CrearExperiencia() {
                             <label htmlFor="duracionRecorrido">Duración de Recorrido (minutos)</label>
                             <input type="text" id="duracionRecorrido" value={duracionRecorrido} onChange={handleDuracionChange} />
                         </div>
-                        <div className="campo-crear-experiencia">
+                        <div className="campo-crear-experiencia campo-tipo-actividad">
                             <label htmlFor="tipoActividad">Seleccionar Tipo de Actividad</label>
                             <select id="tipoActividad" value={tipoActividad} onChange={(e) => setTipoActividad(e.target.value)}>
                                 <option value="">Seleccione...</option>
-                                <option value="senderismo">Senderismo</option>
-                                <option value="ciclismo">Ciclismo</option>
-                                <option value="kayak">Kayak</option>
-                                <option value="cultural">Cultural</option>
+                                {tiposActividad.map((tipo) => (
+                                    <option key={tipo} value={tipo}>
+                                        {tipo}
+                                    </option>
+                                ))}
                             </select>
+                            <div className="add-activity-container">
+                                <input
+                                    type="text"
+                                    placeholder="Nuevo tipo..."
+                                    value={nuevoTipoActividad}
+                                    onChange={(e) => setNuevoTipoActividad(e.target.value)}
+                                    className="nuevo-tipo-input"
+                                />
+                                <button type="button" onClick={handleAgregarNuevoTipo} className="add-activity-button">
+                                    Agregar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
