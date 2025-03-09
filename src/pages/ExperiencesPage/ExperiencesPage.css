@@ -1,0 +1,216 @@
+/* ExperiencesPage.css */
+
+.container-experiences {
+    background-color: none;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+    margin-top: 340px;
+}
+
+.title-experiences {
+    color: #FFF;
+    text-align: center;
+    font-family: "Ysabeau SC";
+    font-size: 48px;
+    font-weight: 600;
+    line-height: normal;
+    margin-bottom: 30px;
+}
+
+.experience-card-experiences {
+    display: flex;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1000px;
+    flex-wrap: wrap;
+}
+
+.image-experiences {
+    width: 300px;
+    height: 400px;
+    flex-shrink: 0;
+    border-radius: 20px;
+    object-fit: cover;
+}
+
+.experience-info-experiences {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 50%;
+}
+
+.rating-box-experiences {
+    width: auto;
+    height: auto;
+    margin-bottom: 5px;
+    color: #FFF;
+    font-family: "Alegreya Sans";
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    /* Añadido para el rectángulo */
+    background-color: rgba(119, 119, 119, 0.5); /* Fondo semitransparente */
+    padding: 5px 10px;
+    border-radius: 5px;
+
+}
+
+
+.subtitle-experiences {
+    display: flex;
+    width: auto;
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 32px;
+    font-weight: 600;
+    line-height: normal;
+    margin-bottom: 5px;
+    border-radius: 15px;
+}
+
+.description-experiences {
+    display: flex;
+    width: auto;
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.data-container-experiences {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 2px;
+}
+
+.data-text-experiences {
+    display: flex;
+    width: auto;
+    height: auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
+    color: #FFF;
+    font-family: "Alegreya Sans";
+    font-size: 18px;
+    font-weight: 400;
+    line-height: normal;
+    gap: 5px;
+}
+
+.data-text-experiences i {
+    margin-right: 5px;
+}
+
+
+.button-experiences {
+    width: 170px;
+    height: 42px;
+    flex-shrink: 0;
+    background-color: #D9D9D9;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.button-experiences:hover {
+    background-color: #ffce66;
+}
+
+.button-experiences:active {
+    background-color: #fff677;
+    transform: translateY(2px);
+}
+
+.price-experiences {
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.dot-experiences {
+    height: 8px;
+    width: 8px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+}
+
+.dot-gray-experiences {
+    height: 8px;
+    width: 8px;
+    background-color: #686868;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 2px;
+}
+
+.fas,
+.far {
+    margin-right: 3px;
+}
+
+.calendar-icon-experiences,
+.camino-icon-experiences,
+.participantes-icon-experiences {
+    margin-right: 5px;
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+}
+
+.data-text-experiences {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+
+}
+
+.image-container-experiences {
+    position: relative;
+    width: 300px;
+    height: 400px;
+
+}
+
+.price-overlay-experiences {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: "Ysabeau SC";
+    font-size: 20px;
+    z-index: 10;
+}

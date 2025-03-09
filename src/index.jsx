@@ -21,11 +21,13 @@ import Foro from './components/firebase-test/Foro';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
+import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 
 // Test Components
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
 import AuthTest from './components/firebase-test/AuthTest/AuthTest';
 import StorageTest from './components/firebase-test/StorageTest/StorageTest';
+import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearExperiencia';
 
 // ========== Styles ==========
 import './index.css';
@@ -51,9 +53,11 @@ root.render(
           <Route path="/firestore-test" element={<FirestoreTest />} />
           <Route path="/auth-test" element={<AuthTest />} />
           <Route path="/storage-test" element={<StorageTest />} />
+          <Route path="/crear-experiencia" element={<CrearExperiencia />} />
 
           <Route path="/profile-management-page" element={<ProfileManagementPage />} />
           <Route path="/galeria" element={<GalleryPage />} />
+          <Route path="/experiencias" element={<ExperiencesPage />} />
         </Route>
       </Routes>
 
