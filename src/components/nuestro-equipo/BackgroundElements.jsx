@@ -1,4 +1,4 @@
-export const BackgroundCircle = ({ size, top, left, opacity }) => (
+export const BackgroundCircle = ({ size, top, left,bottom, opacity }) => (
   <div 
     className="absolute rounded-full blur-sm pointer-events-none"
     style={{
@@ -6,6 +6,7 @@ export const BackgroundCircle = ({ size, top, left, opacity }) => (
       height: size,
       top: top,
       left: left,
+      bottom: bottom,
       opacity: opacity,
       backgroundColor: '#516644',
       zIndex: 10
@@ -31,29 +32,24 @@ export const BackgroundCircle = ({ size, top, left, opacity }) => (
   );;
 
   export const OurTeamCircles = () => (
-    <div 
+    <div
       className="absolute inset-0 w-full h-full overflow-hidden"
       style={{
-        background: "linear-gradient(to bottom, #3F5333, #2C3B23, #182411,#182411)", 
-        zIndex: 1, 
+        background: "linear-gradient(to bottom, #3F5333, #2C3B23, #182411,#182411)",
+        zIndex: 1,
       }}
     >
-      {/* Circle 1: Large circle in top-left */}
-      <BackgroundCircle size="40vw" top="-40vh" left="-40vw" opacity={0.5} />
   
-      {/* Circle 2: Medium circle in top-right */}
-      <BackgroundCircle size="35vw" top="-35vh" right="-35vw" opacity={0.6} />
+      {/* Circle 1 */}
+      <BackgroundCircle size="30vw" top="5vh" right="-15vw" opacity={0.6} />
   
-      {/* Circle 3: Large circle in middle-left */}
-      <BackgroundCircle size="45vw" top="15vh" left="-45vw" opacity={0.6} />
+      {/* Circle 2 */}
+      <BackgroundCircle size="45vw" top="40vh" left="40%" opacity={0.6} />
   
-      {/* Circle 4: Small circle in middle-right */}
-      <BackgroundCircle size="15vw" top="55vh" right="50vw" opacity={0.7} />
+      {/* Circle 3 */}
+      <BackgroundCircle size="35vw" bottom="-20vh" left="55vw" opacity={0.7} />
   
-      {/* Circle 5: Small circle in bottom-left */}
-      <BackgroundCircle size="20vw" top="105vh" left="-15vw" opacity={0.7} />
-  
-      {/* Circle 6: Large circle in bottom-right */}
-      <BackgroundCircle size="50vw" top="90vh" right="-45vw" opacity={0.6} />
+      {/* Circle 4 */}
+      <BackgroundCircle size="40vw" bottom="35vh" right="-40vw" opacity={0.6} />
     </div>
   );
