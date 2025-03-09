@@ -7,6 +7,9 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #021200; /* Fondo oscuro */
+    background-image: url('../public/background_login_signin.png');
+    background-repeat: no-repeat;
+    background-size: cover;
     position: relative;
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }

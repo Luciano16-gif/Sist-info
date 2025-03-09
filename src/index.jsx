@@ -5,12 +5,16 @@ import ReactDOM from 'react-dom/client';
 // ========== Routing Imports ==========
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// ========== Auth Context Import ==========
+import { AuthProvider } from './components/contexts/AuthContext';
+
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
 
 // ========== Page Components ==========
 // Authentication Pages
-import LoginPage from './components/Buttons/LoginPage/LoginPage';
+import OldLoginPage from './components/Buttons/LoginPage/LoginPage';
+import LoginPage from './components/Auth/LoginPage';
 import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
@@ -35,28 +39,31 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        {/* Authentication Routes (without Layout) */}
-        <Route path="/login-page" element={<LoginPage />} />
-        {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
-        <Route path="/sign-up-page" element={<SignUpPage />} />
-        
-        {/* Routes with Layout */}
-        <Route element={<Layout />}>
-          {/* Main Routes */}
-          <Route path="/" element={<AvilaLanding />} />
-          <Route path="/foro" element={<ForumPage />} />
+      {/* Wrap everything in AuthProvider so context is available throughout the app */}
+      <AuthProvider>
+        <Routes>
+          {/* Authentication Routes (without Layout) */}
+          <Route path="/login-page" element={<LoginPage />} />
+          <Route path="/Old" element={<OldLoginPage />} />
+          {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
+          <Route path="/sign-up-page" element={<SignUpPage />} />
           
-          {/* Testing Routes */}
-          <Route path="/firestore-test" element={<FirestoreTest />} />
-          <Route path="/auth-test" element={<AuthTest />} />
-          <Route path="/storage-test" element={<StorageTest />} />
+          {/* Routes with Layout */}
+          <Route element={<Layout />}>
+            {/* Main Routes */}
+            <Route path="/" element={<AvilaLanding />} />
+            <Route path="/foro" element={<ForumPage />} />
+            
+            {/* Testing Routes */}
+            <Route path="/firestore-test" element={<FirestoreTest />} />
+            <Route path="/auth-test" element={<AuthTest />} />
+            <Route path="/storage-test" element={<StorageTest />} />
 
-          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
-          <Route path="/galeria" element={<GalleryPage />} />
-        </Route>
-      </Routes>
-
+            <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+            <Route path="/galeria" element={<GalleryPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
