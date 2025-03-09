@@ -22,7 +22,7 @@ const RouteCards = () => {
   return (
     <div className="relative w-full min-h-screen text-white"
       style={{
-        backgroundImage: `url('https://via.placeholder.com/1920x1080')`, // Reemplaza con la imagen de fondo deseada
+        backgroundImage: `url('https://via.placeholder.com/1920x1080')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

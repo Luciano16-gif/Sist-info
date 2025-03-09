@@ -2,9 +2,7 @@ import React, { useEffect } from 'react'; // Add useEffect
 import HeroSection from '../../components/landing-page-user/HeroSection';
 import Divider from '../../components/landing-page-user/Divider';
 import FeatureSection from '../../components/landing-page-user/FeatureSection';
-import ExploreSection from '../../components/landing-page-user/ExploreSection';
-import TestimonySection from '../../components/landing-page-user/Testimonials';
-import RouteCards from '../../components/landing-page-user/RouteCards'; // Importa el nuevo componente
+import RouteCards from '../../components/landing-page-user/RouteCards'; 
 
 const AvilaLandingUser = () => {
   useEffect(() => {
@@ -43,22 +41,6 @@ const AvilaLandingUser = () => {
 
       {/* Divider */}
       <Divider />
-
-       {/* Explore Section */}
-       <div>
-        <ExploreSection />
-      </div>
-      
-      {/* Divider */}
-      <Divider />
-
-      {/* Comments and Posts Section */}
-      <div>
-        <TestimonySection/>
-      </div>
-
-       {/* Divider */}
-       <Divider />
 
     </div>
   );
