@@ -1,8 +1,8 @@
-// CrearExperiencia.jsx (UPDATED)
+// CrearExperiencia.jsx (UPDATED - Corrected Doc ID)
 import React, { useState, useRef, useEffect } from 'react';
 import './CrearExperiencia.css';
 import { db, storage } from '../../../firebase-config';
-import { collection, addDoc, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function CrearExperiencia() {
@@ -12,7 +12,7 @@ function CrearExperiencia() {
     const [descripcion, setDescripcion] = useState('');
     const [horarioInicio, setHorarioInicio] = useState('');
     const [horarioFin, setHorarioFin] = useState('');
-    const [puntoSalida, setPuntoSalida] = useState(''); // Now a selected value
+    const [puntoSalida, setPuntoSalida] = useState('');
     const [longitudRecorrido, setLongitudRecorrido] = useState('');
     const [duracionRecorrido, setDuracionRecorrido] = useState('');
     const [guiasRequeridos, setGuiasRequeridos] = useState('');
@@ -28,8 +28,8 @@ function CrearExperiencia() {
     const [nuevoTipoActividad, setNuevoTipoActividad] = useState("");
     const [opcionesIncluidos, setOpcionesIncluidos] = useState([]);
     const [nuevoIncluido, setNuevoIncluido] = useState("");
-    const [puntosSalida, setPuntosSalida] = useState([]); //  Options for "Puntos de Salida"
-    const [nuevoPuntoSalida, setNuevoPuntoSalida] = useState("");  // New "Punto de Salida" input
+    const [puntosSalida, setPuntosSalida] = useState([]);
+    const [nuevoPuntoSalida, setNuevoPuntoSalida] = useState("");
 
 
     // --- Firestore Interaction for Activity Types ---
@@ -105,8 +105,8 @@ function CrearExperiencia() {
             alert("Por favor, ingrese un elemento a incluir.");
             return;
         }
-          const nuevoIncluidoLower = nuevoIncluidoTrim.toLowerCase();
-          if (opcionesIncluidos.map(inc => inc.toLowerCase()).includes(nuevoIncluidoLower)) {
+        const nuevoIncluidoLower = nuevoIncluidoTrim.toLowerCase();
+        if (opcionesIncluidos.map(inc => inc.toLowerCase()).includes(nuevoIncluidoLower)) {
             alert("Este elemento ya existe en la lista de incluidos.");
             return;
         }
@@ -131,10 +131,10 @@ function CrearExperiencia() {
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    setPuntosSalida(docSnap.data().puntos); // Assuming the field is named 'puntos'
+                    setPuntosSalida(docSnap.data().puntos);
                 } else {
                     console.log("No 'Puntos de Salida' document!");
-                    await setDoc(docRef, { puntos: [] }); // Initialize if it doesn't exist
+                    await setDoc(docRef, { puntos: [] });
                     setPuntosSalida([]);
                 }
             } catch (error) {
@@ -154,8 +154,8 @@ function CrearExperiencia() {
         const nuevoPuntoLower = nuevoPuntoTrim.toLowerCase();
 
         if (puntosSalida.map(punto => punto.toLowerCase()).includes(nuevoPuntoLower)) {
-          alert("Este punto de salida ya existe.");
-          return;
+            alert("Este punto de salida ya existe.");
+            return;
         }
 
         try {
@@ -163,7 +163,7 @@ function CrearExperiencia() {
             const updatedPuntos = [...puntosSalida, nuevoPuntoTrim];
             await updateDoc(docRef, { puntos: updatedPuntos });
             setPuntosSalida(updatedPuntos);
-            setNuevoPuntoSalida(""); // Clear input
+            setNuevoPuntoSalida("");
         } catch (error) {
             console.error("Error adding 'Punto de Salida':", error);
             alert("Error al agregar el punto de salida. Inténtelo de nuevo.");
@@ -173,7 +173,7 @@ function CrearExperiencia() {
 
 
     const handleAgregar = async () => {
-        // 1. Data Validation (moved most validations before image upload)
+        // 1. Data Validation
         if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
             !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad || !dificultad) {
@@ -181,7 +181,7 @@ function CrearExperiencia() {
             return;
         }
 
-        // Time Validation (remains the same)
+        // Time Validation
         if (!/^\d{2}:\d{2}$/.test(horarioInicio) || !/^\d{2}:\d{2}$/.test(horarioFin)) {
             alert('Por favor, ingrese horarios válidos en formato HH:MM.');
             return;
@@ -192,8 +192,8 @@ function CrearExperiencia() {
 
         if (startHours < 0 || startHours > 23 || startMinutes < 0 || startMinutes > 59 ||
             endHours < 0 || endHours > 23 || endMinutes < 0 || endMinutes > 59) {
-          alert("Por favor, ingrese horas y minutos válidos (horas 0-23, minutos 0-59).");
-          return;
+            alert("Por favor, ingrese horas y minutos válidos (horas 0-23, minutos 0-59).");
+            return;
         }
 
         if (startHours > endHours || (startHours === endHours && startMinutes >= endMinutes)) {
@@ -201,10 +201,8 @@ function CrearExperiencia() {
             return;
         }
 
-
-      // User Count Validation (remains mostly the same)
-      const minUsers = parseInt(minimoUsuarios);
-      const maxUsers = parseInt(maximoUsuarios);
+        const minUsers = parseInt(minimoUsuarios);
+        const maxUsers = parseInt(maximoUsuarios);
 
         if (isNaN(minUsers) || minUsers <= 0) {
             alert('Por favor, ingrese un número válido y mayor que 0 para el mínimo de usuarios.');
@@ -215,13 +213,11 @@ function CrearExperiencia() {
             return;
         }
 
-        // Min/Max User Comparison (remains the same)
         if (minUsers > maxUsers) {
             alert('El mínimo de usuarios no puede ser mayor que el máximo de usuarios.');
             return;
         }
 
-        // Precio Validation (now handles the '$' prefix)
         if (!/^\d+(\.\d{0,2})?$/.test(precio)) {
             alert('Por favor ingrese un número válido para el precio.');
             return;
@@ -232,36 +228,39 @@ function CrearExperiencia() {
             return;
         }
 
-        // Duracion Recorrido Validation (must be a positive integer - minutes)
         if (!/^\d+$/.test(duracionRecorrido)) {
             alert("Por favor, ingrese un número entero válido para la duración del recorrido (en minutos).");
             return;
         }
         const duracionNumerica = parseInt(duracionRecorrido);
         if (duracionNumerica <= 0) {
-          alert("La duración debe ser mayor que cero.");
-          return
+            alert("La duración debe ser mayor que cero.");
+            return
         }
 
-        // Longitud Recorrido Validation (must be positive number, "km" suffix)
         if (!/^\d+(\.\d*)?$/.test(longitudRecorrido)) {
             alert("Por favor, ingrese un número válido para la longitud del recorrido (en km).");
             return;
         }
         const longitudNumerica = parseFloat(longitudRecorrido);
         if (longitudNumerica <= 0) {
-          alert("La longitud debe ser mayor que cero");
-          return
+            alert("La longitud debe ser mayor que cero");
+            return
         }
 
-        //Guias requeridos validation
         if (parseInt(guiasRequeridos) < 0 || isNaN(parseInt(guiasRequeridos))) {
             alert('Por favor ingrese un número valido y no negativo para los guias requeridos.');
             return;
         }
 
         try {
-            // 2. Upload the image (remains the same)
+            // Check for duplicate experience based on name (but allow if updating)
+            const experienciasRef = collection(db, "Experiencias");
+            const q = query(experienciasRef, where("nombre", "==", nombre));
+            const querySnapshot = await getDocs(q);
+
+
+            // 2. Upload the image
             let imageUrl = null;
             if (imageFile) {
                 const storageRef = ref(storage, `experiences/${imageFile.name}`);
@@ -269,17 +268,17 @@ function CrearExperiencia() {
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
 
-            // 3. Create the data object (MODIFIED to format price, duration, and length)
+            // 3. Create the data object
             const experienciaData = {
                 nombre,
-                precio: `$${precioNumerico.toFixed(2)}`,
+                precio: precioNumerico,
                 fechas,
                 descripcion,
                 horarioInicio,
                 horarioFin,
                 puntoSalida,
-                longitudRecorrido: `${longitudNumerica}km`,
-                duracionRecorrido: `${duracionNumerica}min`, // Add "min" suffix
+                longitudRecorrido: longitudNumerica,
+                duracionRecorrido: duracionNumerica,
                 guiasRequeridos: parseInt(guiasRequeridos),
                 minimoUsuarios: minUsers,
                 maximoUsuarios: maxUsers,
@@ -289,14 +288,19 @@ function CrearExperiencia() {
                 dificultad,
             };
 
+            // 4. Add to Firestore (Use setDoc with nombre as doc ID, but ONLY if it doesn't exist)
+            if (querySnapshot.empty) { // Only create if truly new
+                const docRef = doc(db, "Experiencias", nombre); // Use nombre as doc ID
+                await setDoc(docRef, experienciaData);  // Use setDoc
+                 console.log("Document written with ID: ", nombre); //Log the name
+             }
+            else{
+                 alert("El nombre de la experiencia ya existe, intente con otro");
+                 return;
+             }
+           
 
-            // 4. Add to Firestore (remains the same)
-            const docRef = await addDoc(collection(db, "Experiencias"), experienciaData);
-            await setDoc(doc(db, "Experiencias", nombre), experienciaData);
-
-            console.log("Document written with ID: ", docRef.id);
-
-            // 5. Clear the form (remains the same)
+            // 5. Clear the form
             setNombre('');
             setPrecio('');
             setFechas([]);
@@ -315,7 +319,7 @@ function CrearExperiencia() {
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
             setDificultad(0);
 
-            // 6. Success message (remains the same)
+            // 6. Success message
             alert('Experiencia creada exitosamente!');
 
         } catch (error) {
@@ -345,16 +349,13 @@ function CrearExperiencia() {
         }
     };
 
-     // Keep this as is, we just validate the format *before* storing
     const handlePrecioChange = (e) => {
-      setPrecio(e.target.value);
+        setPrecio(e.target.value);
     };
-    //  Validates integer input (for Duracion Recorrido)
     const handleDuracionChange = (e) => {
-        setDuracionRecorrido(e.target.value); //  Set the raw input, validate on submit
+        setDuracionRecorrido(e.target.value);
     };
 
-    // Validates float input (for Longitud Recorrido)
     const handleLongitudChange = (e) => {
         setLongitudRecorrido(e.target.value);
     };
@@ -366,31 +367,28 @@ function CrearExperiencia() {
         }
     };
 
-
-    // --- Date Handling ---
     const handleDateChange = (date) => {
-      if (fechas.includes(date)) {
-          setFechas(fechas.filter(d => d !== date));
-      } else {
-          setFechas([...fechas, date]);
-      }
-  };
-
-    const renderDateButtons = () => {
-      const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-      return days.map((day) => (
-          <button
-              key={day}
-              type="button"
-              className={`date-button ${fechas.includes(day) ? 'selected' : ''}`}
-              onClick={() => handleDateChange(day)}
-          >
-              {day}
-          </button>
-      ));
+        if (fechas.includes(date)) {
+            setFechas(fechas.filter(d => d !== date));
+        } else {
+            setFechas([...fechas, date]);
+        }
     };
 
-    // --- Time Input Handler ---
+    const renderDateButtons = () => {
+        const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        return days.map((day) => (
+            <button
+                key={day}
+                type="button"
+                className={`date-button ${fechas.includes(day) ? 'selected' : ''}`}
+                onClick={() => handleDateChange(day)}
+            >
+                {day}
+            </button>
+        ));
+    };
+
     const handleTimeChange = (setter) => (e) => {
         let value = e.target.value;
         value = value.replace(/[^0-9:]/g, '');
@@ -401,14 +399,13 @@ function CrearExperiencia() {
         setter(value);
     };
 
-    // --- Difficulty Circle Handlers ---
     const handleDificultadClick = (level) => {
-      if (dificultad === level && dificultad === 1){
-        setDificultad(0);
-      }
-      else{
-        setDificultad(level);
-      }
+        if (dificultad === level && dificultad === 1) {
+            setDificultad(0);
+        }
+        else {
+            setDificultad(level);
+        }
     };
 
     const renderDifficultyCircles = () => {
@@ -464,7 +461,7 @@ function CrearExperiencia() {
                     </div>
                     <div className="campo-crear-experiencia">
                         <label htmlFor="fecha">Fecha</label>
-                          <div className="date-buttons-container">
+                        <div className="date-buttons-container">
                             {renderDateButtons()}
                         </div>
                     </div>
@@ -497,7 +494,6 @@ function CrearExperiencia() {
                         </div>
                     </div>
 
-                    {/* Punto de Salida - Now a Select + Add */}
                     <div className="campo-row-crear-experiencia">
                         <div className="campo-crear-experiencia">
                             <label htmlFor="puntoSalida">Punto de Salida</label>
@@ -538,7 +534,6 @@ function CrearExperiencia() {
                             <input type="text" id="minimoUsuarios" value={minimoUsuarios} onChange={handleIntegerInputChange(setMinimoUsuarios)} />
                         </div>
 
-                        {/* Incluidos de la Experiencia - Now a Select + Add */}
                         <div className="campo-crear-experiencia campo-incluidos-experiencia">
                             <label htmlFor="incluidosExperiencia">Incluidos en la Experiencia</label>
                             <select
@@ -555,18 +550,17 @@ function CrearExperiencia() {
                             </select>
 
                             <div className="add-activity-container">
-                                 {/* Use consistent class names */}
                                 <input
                                     type="text"
                                     placeholder="Nuevo incluido..."
                                     value={nuevoIncluido}
                                     onChange={(e) => setNuevoIncluido(e.target.value)}
-                                    className="nuevo-tipo-input"  /* Consistent class */
+                                    className="nuevo-tipo-input"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleAgregarNuevoIncluido}
-                                    className="add-activity-button"  /* Consistent class */
+                                    className="add-activity-button"
                                 >
                                     Agregar
                                 </button>

@@ -13,7 +13,7 @@
     overflow-y: auto;
     height: calc(97vh - 40px); /* Adjust as needed based on header height */
     margin-bottom: 30px;
-    margin-top: 50px;
+    margin-top: 150px;
 }
 
 .titulo-crear-experiencia {
@@ -157,7 +157,7 @@
 }
 
 .boton-agregar-crear-experiencia:hover {
-    background-color: #eee;
+    background-color: #fcff54;
 }
 
 .boton-agregar-crear-experiencia .material-symbols-outlined {
