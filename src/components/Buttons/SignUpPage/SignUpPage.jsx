@@ -52,7 +52,7 @@ function SignUpPage() {
         schedule: [],
         activitiesCreated: [] // Added activitiesCreated
       });
-      navigate('/');
+      navigate('/landing-page-user');
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
