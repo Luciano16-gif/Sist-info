@@ -22,7 +22,9 @@ function SignUpPage() {
   };
 
   const handleExecute = async () => {
-    if (!validateEmail(email)) {
+    const trimmedEmail = email.trim(); // Trim email
+
+    if (!validateEmail(trimmedEmail)) { // Use trimmed email for validation
       alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
       return;
     }
@@ -33,24 +35,25 @@ function SignUpPage() {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password); // Use trimmed email
       setUser(userCredential.user);
-      await signInWithEmailAndPassword(auth, email, password);  //Sign in after creating
-      const docRef = doc(usersCollection, `${newItemName} ${newItemLastName}`);
+      await signInWithEmailAndPassword(auth, trimmedEmail, password);  //Sign in after creating, use trimmed email
+      // Use email as document ID, and trim it!
+      const docRef = doc(usersCollection, trimmedEmail);
       await setDoc(docRef, {
-        email: email,
+        email: trimmedEmail, // Store trimmed email
         name: newItemName,
         lastName: newItemLastName,
         password: password,
         phone: phoneNumber,
         'Registro/Inicio de Sesión': 'Correo-Contraseña',
-        userType: "usuario", // Add userType here
+        userType: "usuario",
         days: [],
         actualRoute: [],
         activitiesPerformed: [],
         mostPerformedActivity: {Actividad:"", timesPerformed: 0},
         schedule: [],
-        activitiesCreated: [] // Added activitiesCreated
+        activitiesCreated: []
       });
       navigate('/');
     } catch (error) {
@@ -62,14 +65,15 @@ function SignUpPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userEmail = result.user.email;
+      const trimmedUserEmail = userEmail.trim(); // Trim email
 
-      if (!validateEmail(userEmail)) {
+      if (!validateEmail(trimmedUserEmail)) { // Use trimmed email for validation
         alert('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
         await signOut(auth);
         return;
       }
 
-      const q = query(usersCollection, where("email", "==", userEmail));
+      const q = query(usersCollection, where("email", "==", trimmedUserEmail)); // Use trimmed email
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
@@ -94,9 +98,10 @@ function SignUpPage() {
 
       const userPhone = '';
 
-      const docRef = doc(usersCollection, `${name} ${lastName}`);
+        // Use the trimmed email as the document ID
+      const docRef = doc(usersCollection, trimmedUserEmail);
       await setDoc(docRef, {
-        email: userEmail,
+        email: trimmedUserEmail, // Store trimmed email
         name: name,
         lastName: lastName,
         password: '',  //Password is empty when using google auth

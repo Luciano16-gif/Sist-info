@@ -1,10 +1,11 @@
 // ForumPage.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { collection, getDocs, doc, getDoc, query, orderBy, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, setDoc } from "firebase/firestore";
 import { db } from './../../../firebase-config';
 import './ForumPage.css';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Import getDownloadURL
+import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Imports are present but not directly used here
+
 
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
@@ -17,24 +18,25 @@ const getCurrentUser = () => {
                     const userDocSnap = await getDoc(userDocRef);
                     if (!userDocSnap.exists()) {
                         console.warn("Usuario no encontrado en Firestore:", user.email);
+                         // Fallback to default image and anonymous user
                         resolve({
                             email: user.email,
-                            profileImage: "url_por_defecto.jpg",  // Default URL
-                            userName: user.displayName || "Usuario Anónimo"
+                            profileImage: "url_por_defecto.jpg",  // Default URL if user not found
+                            userName:  "Usuario Anónimo"
                         });
                         return;
                     }
                     const userData = userDocSnap.data();
-                    let profileImageUrl = "url_por_defecto.jpg"; // Default
+                    let profileImageUrl = "url_por_defecto.jpg"; // Default image
 
-                    // Use 'Foto de Perfil' field
+                    // Get the profile image URL *if it exists*
                     if (userData['Foto de Perfil']) {
-                        profileImageUrl = userData['Foto de Perfil'];
+                        profileImageUrl = userData['Foto de Perfil']; // Use the URL from Firestore
                     }
 
                     resolve({
                         email: user.email,
-                        profileImage: profileImageUrl,
+                        profileImage: profileImageUrl, // This is the key: using the stored URL
                         userName: userData.name + " " + userData.lastName || user.displayName || "Usuario Anónimo"
                     });
                 } catch (error) {
@@ -67,25 +69,6 @@ function ForumPage() {
     const [newForumTitle, setNewForumTitle] = useState("");
     const [newForumDescription, setNewForumDescription] = useState("");
 
-    // --- Helper Function to Fetch Profile Image URL ---
-    const fetchProfileImage = async (email) => {
-        try {
-            const userDocRef = doc(db, "Lista de Usuarios", email);
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
-                if (userData['Foto de Perfil']) {
-                    return userData['Foto de Perfil'];
-                }
-            }
-            return "url_por_defecto.jpg"; // Default URL
-        } catch (error) {
-            console.error("Error fetching profile image:", error);
-            return "url_por_defecto.jpg"; // Default URL on error
-        }
-    };
-
 
     useEffect(() => {
         const fetchForums = async () => {
@@ -96,15 +79,26 @@ function ForumPage() {
                 const q = query(forumsRef, orderBy("ID"));
                 const querySnapshot = await getDocs(q);
                 const fetchedForums = [];
-
                 for (const docSnap of querySnapshot.docs) {
                     const forumData = docSnap.data();
-                    const profileImageUrl = await fetchProfileImage(forumData.Email); // Use helper function
+                    let profileImageUrl = "url_por_defecto.jpg"; // Default
 
+                    // Fetch profile image URL from "Lista de Usuarios"
+                    if (forumData.Email) {
+                        const userDocRef = doc(db, "Lista de Usuarios", forumData.Email);
+                        const userDocSnap = await getDoc(userDocRef);
+                        if (userDocSnap.exists()) {
+                            const userData = userDocSnap.data();
+                            // Use 'Foto de Perfil' if it exists
+                            if (userData['Foto de Perfil']) {
+                                profileImageUrl = userData['Foto de Perfil']; // Use the URL
+                            }
+                        }
+                    }
                     fetchedForums.push({
                         ...forumData,
                         firestoreId: docSnap.id,
-                        profileImage: profileImageUrl,
+                        profileImage: profileImageUrl, // Set the profile image URL
                     });
                 }
                 setForums(fetchedForums);
@@ -127,15 +121,25 @@ function ForumPage() {
                 const q = query(commentsRef, orderBy("ID"));
                 const querySnapshot = await getDocs(q);
                 const fetchedComments = [];
-
                 for (const docSnap of querySnapshot.docs) {
                     const commentData = docSnap.data();
-                    const profileImageUrl = await fetchProfileImage(commentData.Email);  // Use helper function
+                    let profileImageUrl = "url_por_defecto.jpg"; // Default
 
+                    if (commentData.Email) {
+                        const userDocRef = doc(db, "Lista de Usuarios", commentData.Email);
+                        const userDocSnap = await getDoc(userDocRef);
+                        if (userDocSnap.exists()) {
+                            const userData = userDocSnap.data();
+                             // Use 'Foto de Perfil'
+                            if (userData['Foto de Perfil']) {
+                                profileImageUrl = userData['Foto de Perfil']; // Use the URL
+                            }
+                        }
+                    }
                     fetchedComments.push({
                         ...commentData,
                         firestoreId: docSnap.id,
-                        profileImage: profileImageUrl,
+                        profileImage: profileImageUrl,  // Set the profile image URL
                     });
                 }
                 setComments(fetchedComments);
@@ -146,15 +150,12 @@ function ForumPage() {
                 setLoadingComments(false);
             }
         };
-
         if (showComments) {
             fetchComments(showComments);
         } else {
             setComments([]);
         }
     }, [showComments]);
-
-    // ... (rest of your component methods: scrollLeft, scrollRight, handleViewComments, etc.) ...
 
     const scrollLeft = () => {
         if (forumContainerRef.current) {
@@ -248,12 +249,12 @@ function ForumPage() {
                 Date: new Date().toLocaleDateString('es-ES'),
                 replyingTo: replyingToUserName || null,
                 userName: user.userName,
-                profileImage: user.profileImage, // Correct URL
+                profileImage: user.profileImage, // Use stored URL
             };
             await setDoc(doc(commentsRef, newCommentId), newCommentData);
             setComments([...comments, { ...newCommentData, firestoreId: newCommentId }]);
             setShowCommentPopup(false);
-            setNewComment(""); //Clear the comment input after publishing
+            setNewComment("");
             setReplyingTo(null);
             setReplyingToUserName(null);
         } catch (err) {
@@ -313,7 +314,7 @@ function ForumPage() {
                 Email: user.email,
                 Date: new Date().toLocaleDateString('es-ES'),
                 userName: user.userName,
-                profileImage: user.profileImage,  // Correct URL
+                profileImage: user.profileImage,  // Use stored URL
             };
             await setDoc(doc(db, "Foros", newForumId), newForumData);
             setForums([...forums, { ...newForumData, firestoreId: newForumId }]);
@@ -325,6 +326,7 @@ function ForumPage() {
             setError("Error al publicar el foro: " + err.message);
         }
     };
+
     const selectedForum = forums.find(f => f.firestoreId === showComments);
 
     if (loadingForums) {
@@ -347,6 +349,7 @@ function ForumPage() {
                         {selectedForum ? (
                             <div className="original-post-forum">
                                 <div className="profile-image-container-forum">
+                                    {/* Display the image using the stored URL */}
                                     <img src={selectedForum.profileImage} alt="Profile" className="profile-image-forum" />
                                 </div>
                                 <div className="forum-content-forum">
@@ -370,6 +373,7 @@ function ForumPage() {
                                 comments.map(comment => (
                                     <div className="comment-item-forum" key={comment.firestoreId}>
                                         <div className="profile-image-container-forum">
+                                            {/* Display image using stored URL */}
                                             <img src={comment.profileImage} alt="Profile" className="profile-image-forum" />
                                         </div>
                                         <div className="comment-content-forum">
@@ -423,6 +427,7 @@ function ForumPage() {
                             {forums.map((forum) => (
                                 <div className="forum-item-forum" key={forum.firestoreId}>
                                     <div className="profile-image-container-forum">
+                                        {/*  Display the image using stored URL */}
                                         <img src={forum.profileImage} alt="Profile" className="profile-image-forum" />
                                     </div>
                                     <div className="forum-content-forum">
