@@ -1,6 +1,10 @@
 // CrearExperiencia.jsx
 import React, { useState, useRef } from 'react';
 import './CrearExperiencia.css';
+import { db, storage } from '../../../firebase-config'; // Import your Firebase configuration
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 function CrearExperiencia() {
   const [nombre, setNombre] = useState('');
@@ -21,71 +25,113 @@ function CrearExperiencia() {
   const fileInputRef = useRef(null); // Ref to the hidden file input
 
 
-  const handleAgregar = () => {
-    // Handle the "Agregar" action
-    console.log({
-      nombre,
-      precio,
-      fecha,
-      descripcion,
-      horario,
-      puntoSalida,
-      longitudRecorrido,
-      duracionRecorrido,
-      guiasRequeridos,
-      minimoUsuarios,
-      maximoUsuarios,
-      incluidosExperiencia,
-      tipoActividad,
-      imageFile, // Include imageFile in the data
-    });
+    const handleAgregar = async () => {  // Make the function async
+        // 1. Data Validation (Important!):  Always validate user input on the server-side as well,
+        //    but client-side validation provides a better user experience.
+        if (!nombre || !precio || !fecha || !descripcion || !horario || !puntoSalida ||
+            !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
+            !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad) {
+            alert('Por favor, complete todos los campos.'); // Basic validation, replace with a better UI
+            return;
+        }
 
-     // *** IMPORTANT: Data Sending to Backend ***
-     // In a real application, you'd send this data to your backend API here,
-     // likely using a POST request with fetch() or a library like axios.
-     //  The imageFile would be sent as part of a FormData object.
+        if (isNaN(parseFloat(precio)) || parseFloat(precio) <=0)
+        {
+            alert('Por favor ingrese un número valido y mayor que 0 para el precio.');
+            return;
+        }
+        if (isNaN(parseInt(minimoUsuarios)) || parseInt(minimoUsuarios) <=0)
+        {
+            alert('Por favor ingrese un número valido y mayor que 0 para el minimo de usuarios.');
+            return;
+        }
+        if (isNaN(parseInt(maximoUsuarios)) || parseInt(maximoUsuarios) <=0)
+        {
+            alert('Por favor ingrese un número valido y mayor que 0 para el maximo de usuarios.');
+            return;
+        }
+        if (parseInt(minimoUsuarios) > parseInt(maximoUsuarios))
+        {
+            alert('El minimo de usuarios no puede ser mayor que el máximo.');
+            return;
+        }
 
-     // Example (using fetch and FormData):
+        if (isNaN(parseInt(guiasRequeridos)) || parseInt(guiasRequeridos) <0)
+        {
+            alert('Por favor ingrese un número valido y no negativo para los guias requeridos.');
+            return;
+        }
 
-     const formData = new FormData();
-     formData.append('nombre', nombre);
-     formData.append('precio', precio);
-     formData.append('fecha', fecha);
-     formData.append('descripcion', descripcion);
-     formData.append('horario', horario);
-     formData.append('puntoSalida', puntoSalida);
-     formData.append('longitudRecorrido', longitudRecorrido);
-     formData.append('duracionRecorrido', duracionRecorrido);
-     formData.append('guiasRequeridos', guiasRequeridos);
-     formData.append('minimoUsuarios', minimoUsuarios);
-     formData.append('maximoUsuarios', maximoUsuarios);
-     formData.append('incluidosExperiencia', incluidosExperiencia);
-     formData.append('tipoActividad', tipoActividad);
-    if (imageFile) {  // Only append if an image was selected.
-        formData.append('imagen', imageFile); // 'imagen' is the field name the backend expects
-    }
+        if (isNaN(parseFloat(longitudRecorrido)) || parseFloat(longitudRecorrido) <0)
+        {
+            alert('Por favor ingrese un número valido no negativo para la longitud del recorrido.');
+            return;
+        }
+        if (isNaN(parseFloat(duracionRecorrido)) || parseFloat(duracionRecorrido) <0)
+        {
+            alert('Por favor ingrese un número valido no negativo para la duración del recorrido.');
+            return;
+        }
+        try {
+            // 2. Upload the image to Firebase Storage (if an image was selected)
+            let imageUrl = null; // Initialize imageUrl
+            if (imageFile) {
+                const storageRef = ref(storage, `experiences/${imageFile.name}`);
+                const snapshot = await uploadBytes(storageRef, imageFile);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
 
+            // 3. Create the data object to be saved in Firestore.
+            const experienciaData = {
+                nombre,
+                precio: parseFloat(precio), // Convert to number, VERY IMPORTANT
+                fecha,
+                descripcion,
+                horario,
+                puntoSalida,
+                longitudRecorrido: parseFloat(longitudRecorrido), //Convert to number
+                duracionRecorrido: parseFloat(duracionRecorrido), //Convert to number
+                guiasRequeridos: parseInt(guiasRequeridos),  //Convert to number
+                minimoUsuarios: parseInt(minimoUsuarios),     //Convert to number
+                maximoUsuarios: parseInt(maximoUsuarios),     //Convert to number
+                incluidosExperiencia,
+                tipoActividad,
+                imageUrl,  //  Include image URL, can be null.  Firestore handles nulls well.
+            };
 
-    /*  fetch('YOUR_BACKEND_API_ENDPOINT', {
-       method: 'POST',
-       body: formData,  // No need for headers like 'Content-Type' when using FormData
-     })
-     .then(response => {
-         if (!response.ok) {
-             throw new Error('Network response was not ok');
-         }
-         return response.json(); //  Parse JSON response, or response.text() if it's text
-     })
-     .then(data => {
-         console.log('Success:', data);
-         // Handle success (e.g., show a success message, redirect, etc.)
-     })
-     .catch(error => {
-         console.error('Error:', error);
-         // Handle errors (e.g., show an error message)
-     });  */
-  };
+            // 4. Add a new document with a generated ID to the "Experiencias" collection
+            const docRef = await addDoc(collection(db, "Experiencias"), experienciaData);
+             // *and* create a doc with the name of the experience
+            await setDoc(doc(db, "Experiencias", nombre), experienciaData);
 
+            console.log("Document written with ID: ", docRef.id);
+
+            // 5.  Clear the form (reset state)
+            setNombre('');
+            setPrecio('');
+            setFecha('');
+            setDescripcion('');
+            setHorario('');
+            setPuntoSalida('');
+            setLongitudRecorrido('');
+            setDuracionRecorrido('');
+            setGuiasRequeridos('');
+            setMinimoUsuarios('');
+            setMaximoUsuarios('');
+            setIncluidosExperiencia('');
+            setTipoActividad('');
+            setImageFile(null);
+            setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
+
+            // 6.  (Optional) Show a success message to the user.  Consider using a more sophisticated
+            //     notification method than alert().
+            alert('Experiencia creada exitosamente!');
+
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("Error al crear la experiencia.  Por favor, inténtelo de nuevo."); // Show error to user
+        }
+    };
 
 
     const handleImageClick = () => {
