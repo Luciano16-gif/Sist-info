@@ -1,4 +1,4 @@
-// CrearExperiencia.jsx
+// CrearExperiencia.jsx (UPDATED)
 import React, { useState, useRef } from 'react';
 import './CrearExperiencia.css';
 import { db, storage } from '../../../firebase-config';
@@ -23,12 +23,13 @@ function CrearExperiencia() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
   const fileInputRef = useRef(null);
+  const [dificultad, setDificultad] = useState(0); // New state for difficulty
 
     const handleAgregar = async () => {
         // 1. Data Validation (moved most validations before image upload)
         if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
-            !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad) {
+            !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad || !dificultad) {
             alert('Por favor, complete todos los campos.');
             return;
         }
@@ -138,6 +139,7 @@ function CrearExperiencia() {
                 incluidosExperiencia,
                 tipoActividad,
                 imageUrl,
+                dificultad,
             };
 
 
@@ -164,6 +166,7 @@ function CrearExperiencia() {
             setTipoActividad('');
             setImageFile(null);
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
+            setDificultad(0);
 
             // 6. Success message (remains the same)
             alert('Experiencia creada exitosamente!');
@@ -251,6 +254,30 @@ function CrearExperiencia() {
         setter(value);
     };
 
+    // --- Difficulty Circle Handlers ---
+    const handleDificultadClick = (level) => {
+      if (dificultad === level && dificultad === 1){
+        setDificultad(0);
+      }
+      else{
+        setDificultad(level);
+      }
+    };
+
+    const renderDifficultyCircles = () => {
+        const circles = [];
+        for (let i = 1; i <= 5; i++) {
+            circles.push(
+                <div
+                    key={i}
+                    className={`difficulty-circle ${i <= dificultad ? 'selected' : ''}`}
+                    onClick={() => handleDificultadClick(i)}
+                ></div>
+            );
+        }
+        return circles;
+    };
+
     return (
         <div className="crear-experiencia-container-crear-experiencia">
             <h1 className="titulo-crear-experiencia">Agregar una nueva Experiencia</h1>
@@ -277,15 +304,21 @@ function CrearExperiencia() {
                     </div>
 
                     <div className="campo-row-crear-experiencia">
-                        <div className="campo-crear-experiencia">
+                        <div className="campo-crear-experiencia campo-crear-experiencia-precio">
                             <label htmlFor="precio">Precio</label>
                             <input type="text" id="precio" value={precio} onChange={handlePrecioChange} />
                         </div>
-                        <div className="campo-crear-experiencia">
-                            <label htmlFor="fecha">Fecha</label>
-                              <div className="date-buttons-container">
-                                {renderDateButtons()}
+                        <div className="campo-crear-experiencia campo-crear-experiencia-dificultad">
+                            <label>Dificultad</label>
+                            <div className="difficulty-container">
+                                {renderDifficultyCircles()}
                             </div>
+                        </div>
+                    </div>
+                    <div className="campo-crear-experiencia">
+                        <label htmlFor="fecha">Fecha</label>
+                          <div className="date-buttons-container">
+                            {renderDateButtons()}
                         </div>
                     </div>
 

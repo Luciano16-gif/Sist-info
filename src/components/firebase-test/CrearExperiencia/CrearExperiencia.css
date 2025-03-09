@@ -1,4 +1,4 @@
-/* CrearExperiencia.css */
+/* CrearExperiencia.css (UPDATED) */
 
 .crear-experiencia-container-crear-experiencia {
     background-color: #1a2a1a;
@@ -157,13 +157,12 @@
 }
 
 .boton-agregar-crear-experiencia:hover {
-    background-color: #eee;
+    background-color: #ebff86;
 }
 
-.boton-agregar-crear-experiencia .material-symbols-outlined {
-    color: #1a2a1a;
-    margin-left: 4px;
-    font-size: 1em;
+.boton-agregar-crear-experiencia:active {
+    background-color: #f3ffa4;
+    transform: translateY(2px);
 }
 
 /* Responsive adjustments (optional, adjust as needed) */
@@ -181,6 +180,10 @@
     }
     .boton-agregar-crear-experiencia {
         align-self: center; /* Center on smaller screens */
+    }
+    .campo-crear-experiencia-precio,
+    .campo-crear-experiencia-dificultad{
+      width: 100%;
     }
 }
 
@@ -203,4 +206,29 @@
     background-color: #007bff; /* Or any color you like */
     color: white;
     border-color: #007bff;
+}
+
+/* Difficulty Circles */
+.difficulty-container {
+    display: flex;
+    gap: 5px;
+    align-items: center; /* Vertically center the circles */
+}
+
+.difficulty-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ccc; /* Default (unselected) color */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.difficulty-circle.selected {
+    background-color: #4CAF50; /* Selected color (adjust as needed) */
+}
+
+.difficulty-circle:hover {
+  transform: scale(1.1);
+  background-color: #45a049;
 }
