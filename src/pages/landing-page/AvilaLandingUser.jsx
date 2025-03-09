@@ -1,24 +1,25 @@
-import React, { useEffect } from 'react'; // Add useEffect
+import React, { useEffect } from 'react';
 import HeroSection from '../../components/landing-page-user/HeroSection';
 import Divider from '../../components/landing-page-user/Divider';
 import FeatureSection from '../../components/landing-page-user/FeatureSection';
-import RouteCards from '../../components/landing-page-user/RouteCards'; 
+import RouteCards from '../../components/landing-page-user/RouteCards';
+import StackedCards from '../../components/landing-page-user/StackedCards'; // Nuevo import
+import { gallery2 } from '../../constants/LandingUserData'; // Importamos las imágenes
 
 const AvilaLandingUser = () => {
-  useEffect(() => {
-    // Idk what the ***** is happening but we need to force document and body to be scrollable
-    document.documentElement.style.overflow = 'auto';
-    document.documentElement.style.height = 'auto';
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
-    
-    return () => {
-      document.documentElement.style.overflow = '';
-      document.documentElement.style.height = '';
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-    };
-  }, []);
+    useEffect(() => {
+        document.documentElement.style.overflow = 'auto';
+        document.documentElement.style.height = 'auto';
+        document.body.style.overflow = 'auto';
+        document.body.style.height = 'auto';
+        
+        return () => {
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.height = '';
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+        };
+    }, []);
 
   return (
     // Use auto height and make sure overflow works
@@ -35,12 +36,14 @@ const AvilaLandingUser = () => {
         <FeatureSection />
       </div>
 
-      <div>
+      <div className="py-0">
         <RouteCards />
       </div>
 
       {/* Divider */}
       <Divider />
+
+      <StackedCards images={gallery2} />
 
     </div>
   );
