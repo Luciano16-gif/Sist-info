@@ -226,3 +226,66 @@
     height: auto;
   }
 }
+
+/* Field-level error messages */
+.auth-field-error {
+  color: #ff3333;
+  font-size: 0.875rem;
+  font-weight: bold;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  text-align: left;
+  font-family: 'Ysabeau SC', sans-serif;
+  text-shadow: 0 0 1px #000;
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Password strength container */
+.password-strength-container {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Password strength bar background */
+.password-strength-bar {
+  height: 6px;
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* Password strength bar fill */
+.password-strength-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Password strength text */
+.password-strength-text {
+  font-size: 0.875rem;
+  font-weight: bold;
+  margin-top: 4px;
+  font-family: 'Ysabeau SC', sans-serif;
+}
+
+/* Add loading/disabled state to buttons */
+.auth-button:disabled,
+.google-auth-button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+/* Input validation states */
+.auth-input.invalid {
+  border-color: #ff3333;
+  border-width: 5px;
+  /* Removed shake animation */
+}
+
+.auth-input.valid {
+  border-color: #2ECC40;
+}
