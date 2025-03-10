@@ -5,6 +5,8 @@ import FeatureSection from '../../components/landing-page/FeatureSection';
 import ExploreSection from '../../components/landing-page/ExploreSection';
 import TestimonySection from '../../components/landing-page/Testimonials';
 import RoutesSection from '../../components/landing-page/RoutesSection/index'; 
+import FunFactSection from '../../components/landing-page/FunFactSection';
+import ForumSection from '../../components/landing-page/forum_section';
 
 const test = true;
 
@@ -69,7 +71,11 @@ const AvilaLanding = () => {
       
       {/* Routes Section*/}
       <div>
-        <RoutesSection />
+        <FunFactSection/>
+      </div>
+
+      <div>
+        <ForumSection/>
       </div>
 
     </div>
