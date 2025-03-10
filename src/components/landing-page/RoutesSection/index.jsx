@@ -1,10 +1,10 @@
 import { routes_background, routesData } from '../../../constants/LandingData';
 import { RouteCard } from './RouteCard';
 import { useRef, useMemo } from 'react';
-
-const test = false;
+import { useAuth } from '../../contexts/AuthContext';
 
 const RoutesSection = () => {
+  const { currentUser } = useAuth();
   const scrollContainerRef = useRef(null);
 
   // Limit routes to maximum of 8
@@ -138,7 +138,7 @@ const RoutesSection = () => {
             </button>
           </div>
         </div>
-        { !test ? (
+        { !currentUser ? (
           <div className="text-center pb-6 pt-12">
             <div className="text-sm">
               ©2025 | ÁvilaVenturas all right reserved

@@ -1,17 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { gallery_no_session, gallery_with_session, EXPLORE_TEXTS, HIKING_TIPS_TEXTS, explore_image } from '../../constants/LandingData';
-
-let gallery;
-let texts;
-let test = false;
-
-if (test) {
-  gallery = gallery_with_session;
-  texts = HIKING_TIPS_TEXTS;
-} else {
-  gallery = gallery_no_session;
-  texts = EXPLORE_TEXTS;
-}
+import { useAuth } from '../contexts/AuthContext';
 
 // Define keyframes style string outside component to prevent recreation on each render
 const keyframesStyle = `
@@ -29,6 +18,10 @@ const keyframesStyle = `
 `;
 
 const ExploreSection = () => {
+  const { currentUser } = useAuth();
+  const gallery = currentUser ? gallery_with_session : gallery_no_session;
+  const texts = currentUser ? HIKING_TIPS_TEXTS : EXPLORE_TEXTS;
+
   // Enhanced animation states for smoother transitions
   const [imageOrder, setImageOrder] = useState([...Array(gallery.length).keys()]);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -242,7 +235,7 @@ const ExploreSection = () => {
           <img 
             src={gallery[imgIndex]} 
             alt={`Aventura en El Ávila ${imgIndex + 1}`}
-            className={test ? "w-fit h-fit object-contain max-w-full max-h-full" : "w-full h-full object-cover"}
+            className={currentUser ? "w-fit h-fit object-contain max-w-full max-h-full" : "w-full h-full object-cover"}
             loading={orderIndex === 0 ? "eager" : "lazy"} // Optimize image loading
           />
         </div>
@@ -290,7 +283,7 @@ const ExploreSection = () => {
           
           {/* Gallery carousel - responsive for all screen sizes */}
           <div className={`relative 
-              ${test 
+              ${currentUser 
                 ? "w-full h-[400px] sm:w-4/5 sm:h-[450px] md:w-1/2 md:h-[70vh] lg:w-1/4 lg:mr-[20%]" 
                 : "w-full h-[250px] sm:h-[300px] md:w-1/2 md:h-[350px] lg:h-[400px]"
               }

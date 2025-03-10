@@ -1,9 +1,10 @@
-const test = false;
+import { useAuth } from "../contexts/AuthContext";
 
 const HeroText = () => {
+  const { currentUser } = useAuth();
     return (
         <div className="min-h-screen text-white relative">
-            { test ? (
+            { currentUser ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 sm:space-y-3 md:space-y-4 px-4 sm:px-6 md:px-8 lg:px-16 z-10 text-center">
                     <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wide">
                         The call of the
