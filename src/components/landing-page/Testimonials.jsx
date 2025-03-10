@@ -31,7 +31,7 @@ const Testimonios = () => {
   return (
     <div className="text-white py-10 px-6"> 
       <div className="max-w-6xl mx-auto">
-        <div className="mb-4">
+        <div className="mb-4" style={{position: 'relative', zIndex: 20}}>
           <h2 className="text-4xl font-bold mb-1">Algunos comentarios y</h2>
           <h2 className="text-3xl font-bold mb-6">publicaciones de nuestros usuarios...</h2>
           <div className="w-72 h-0.5 bg-white mb-8"></div>
