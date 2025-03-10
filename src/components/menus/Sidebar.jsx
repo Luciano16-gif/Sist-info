@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import useScrollDetection from "./useScrollDetection";
 
 const Sidebar = () => {
 
@@ -18,13 +17,21 @@ const Sidebar = () => {
 
     return (
         <nav className={`
-            z-50
-            flex
-            gap-3
-            p-3
-            justify-around
+            hidden
             bg-green-500
-        `}>
+            text-white
+            p-1
+            justify-start
+            shadow-lg
+            fixed
+            top-0
+            left-3
+            min-w-9
+
+        `}
+        style={{ zIndex: 9999 }}>
+            <div className="w-full flex flex-wrap items-center justify-between px-4">
+            </div>
         </nav>
     );
 };
