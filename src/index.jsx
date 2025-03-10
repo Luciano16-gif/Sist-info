@@ -10,6 +10,7 @@ import { AuthProvider } from './components/contexts/AuthContext';
 
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
+import LayoutUser from './components/layout/LayoutUser';
 
 // ========== Page Components ==========
 // Authentication Pages
@@ -22,6 +23,8 @@ import OldSignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // Main Pages
 //import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
+import AvilaLandingUser from './pages/landing-page/AvilaLandingUser';
+
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
@@ -55,6 +58,18 @@ root.render(
           </Route>
         </Routes>
       </AuthProvider>
+
+          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+          <Route path="/gallery-page" element={<GalleryPage />} />
+        </Route>
+
+        {/* Routes with LayoutUser */}
+        <Route element={<LayoutUser />}>
+          {/* Main Routes */}
+          <Route path="/landing-page-user" element={<AvilaLandingUser />} />
+        </Route>
+      </Routes>
+
     </BrowserRouter>
   </React.StrictMode>
 );

@@ -8,7 +8,7 @@ export const RouteCard = ({ image, index, difficulty, length, rating, spots, max
         <img src={image} alt={`Ruta ${index}`} className="w-full h-40 object-cover rounded-t-2xl" />
   
         {/* Card content with white transparent background and more rounded bottom */}
-        <div className="bg-white bg-opacity-10 p-4 rounded-b-2xl"> 
+        <div className="bg-[rgba(45,55,41,255)] p-4 rounded-b-2xl"> 
           <h3 className="text-2xl font-bold text-center mb-4">Ruta {index}</h3>
   
           {/* Route details */}

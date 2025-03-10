@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Ysabeau+SC:wght@500&display=swap');
 
 body {
@@ -138,3 +139,4 @@ button.google-button-signup:active {
 .login-link-signup a:active {
     color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
+

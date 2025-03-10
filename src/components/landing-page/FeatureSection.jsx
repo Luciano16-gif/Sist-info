@@ -3,7 +3,6 @@ import FeatureCard from './FeatureCard';
 import { FEATURES } from '../../constants/LandingData';
 
 const FeatureSection = () => (
-  // Added w-full to ensure full width
   <div className="relative w-full px-4 sm:px-8 md:px-16 py-12 md:py-24 bg-[rgba(13,24,6,1)]">
     {/* Background wrapper that extends beyond the content */}
     <div className="absolute inset-0 w-full h-full left-0 top-0">
