@@ -3,8 +3,9 @@ import HeroSection from '../../components/landing-page-user/HeroSection';
 import Divider from '../../components/landing-page-user/Divider';
 import FeatureSection from '../../components/landing-page-user/FeatureSection';
 import RouteCards from '../../components/landing-page-user/RouteCards';
-import StackedCards from '../../components/landing-page-user/StackedCards'; // Nuevo import
-import { gallery2 } from '../../constants/LandingUserData'; // Importamos las imágenes
+import StackedCards from '../../components/landing-page-user/StackedCards';
+import { gallery2 } from '../../constants/LandingUserData'; 
+import EventCalendar from '../../components/landing-page-user/EventCalendar';
 
 const AvilaLandingUser = () => {
     useEffect(() => {
@@ -22,9 +23,7 @@ const AvilaLandingUser = () => {
     }, []);
 
   return (
-    // Use auto height and make sure overflow works
     <div className="w-full bg-[rgba(13,24,6,1)] text-white relative scroll-smooth overflow-hidden">
-      {/* Feature Section - add explicit height */}
       <div>
         <HeroSection />
       </div>
@@ -41,6 +40,12 @@ const AvilaLandingUser = () => {
       </div>
 
       {/* Divider */}
+      <Divider />
+
+      <div>
+        <EventCalendar />
+      </div>
+      
       <Divider />
 
       <StackedCards images={gallery2} />
