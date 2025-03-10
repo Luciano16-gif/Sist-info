@@ -326,3 +326,11 @@ export const routesData = [
     totalSlots: 50,
   }
 ];
+
+// ========== Fun fact section ==========
+
+export { default as fun_fact_background } from "../assets/images/landing-page/fun_fact/fun_fact_background.webp";
+export { default as fun_fact_image } from "../assets/images/landing-page/fun_fact/fun_fact_image.webp";
+export { default as fun_fact_icon } from "../assets/images/landing-page/fun_fact/fun_fact_icon.svg";
+
+export { default as forum_background } from "../assets/images/landing-page/explore/gallery/gallery_3.webp"

@@ -2,6 +2,8 @@ import { routes_background, routesData } from '../../../constants/LandingData';
 import { RouteCard } from './RouteCard';
 import { useRef, useMemo } from 'react';
 
+const test = true;
+
 const RoutesSection = () => {
   const scrollContainerRef = useRef(null);
 
@@ -136,14 +138,14 @@ const RoutesSection = () => {
             </button>
           </div>
         </div>
-        
-        {/* Footer */}
-        <div className="text-center pb-6 pt-12">
-          {/* Copyright Text */}
-          <div className="text-sm">
-            ©2025 | ÁvilaVenturas all right reserved
+        { !test ? (
+          <div className="text-center pb-6 pt-12">
+            <div className="text-sm">
+              ©2025 | ÁvilaVenturas all right reserved
+            </div>
           </div>
-        </div>
+        ) : null }
+          
       </div>
     </div>
   );
