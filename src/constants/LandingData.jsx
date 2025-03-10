@@ -1,6 +1,7 @@
 // ========== HERO SECTION ==========
 
-export { default as HERO_IMAGE } from "../assets/images/landing-page/HERO/avila.webp";
+export { default as HERO_IMAGE_NO_SESSION } from "../assets/images/landing-page/HERO/avila.webp";
+export { default as HERO_IMAGE_SESSION } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
 
 // ========== Features section ==========
 

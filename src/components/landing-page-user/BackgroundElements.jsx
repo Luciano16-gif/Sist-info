@@ -12,7 +12,8 @@ export const BackgroundCircle = ({ size, top, left, opacity }) => (
       }}
     />
   );
-  
+
+
   export const BackgroundCircles = () => (
     <div className="absolute inset-0 w-full h-full">
       {/* Main large circle on the left, vertically centered */}

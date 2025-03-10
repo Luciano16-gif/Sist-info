@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Ysabeau+SC:wght@500&display=swap');
 
 body {
@@ -7,6 +8,9 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #021200; /* Fondo oscuro */
+    background-image: url('../public/background_login_signin.png');
+    background-repeat: no-repeat;
+    background-size: cover;
     position: relative;
     overflow: hidden; /* Evitar que el texto se salga del viewport */
 }
@@ -135,3 +139,4 @@ button.google-button-signup:active {
 .login-link-signup a:active {
     color: #dcffa1; /* Cambia el color del enlace cuando se le hace click */
 }
+

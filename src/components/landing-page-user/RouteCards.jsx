@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackgroundCircles } from './BackgroundElements';
+//import { BackgroundCircles } from './BackgroundElements';
 import RouteCard from './RouteCard';
 import { routesData } from '../../constants/LandingUserData';
 
