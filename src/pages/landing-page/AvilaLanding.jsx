@@ -7,6 +7,7 @@ import TestimonySection from '../../components/landing-page/Testimonials';
 import RoutesSection from '../../components/landing-page/RoutesSection/index'; 
 import FunFactSection from '../../components/landing-page/FunFactSection';
 import ForumSection from '../../components/landing-page/forum_section';
+import EventCalendar from '../../components/landing-page/EventCalendar';
 
 const test = true;
 
@@ -49,6 +50,13 @@ const AvilaLanding = () => {
         </div>
       )}
         
+
+      {/* Divider */}
+      <Divider />
+
+      <div>
+        <EventCalendar />
+      </div>
 
       {/* Divider */}
       <Divider />
