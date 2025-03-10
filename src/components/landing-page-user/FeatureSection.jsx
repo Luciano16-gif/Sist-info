@@ -1,4 +1,4 @@
-import { BackgroundCircles } from './BackgroundElements';
+//import { BackgroundCircles } from './BackgroundElements';
 import FeatureCard from './FeatureCard';
 import { FEATURES } from '../../constants/LandingUserData';
 

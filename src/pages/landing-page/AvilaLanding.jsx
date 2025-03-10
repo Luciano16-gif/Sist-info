@@ -6,6 +6,8 @@ import ExploreSection from '../../components/landing-page/ExploreSection';
 import TestimonySection from '../../components/landing-page/Testimonials';
 import RoutesSection from '../../components/landing-page/RoutesSection/index'; 
 
+const test = true;
+
 const AvilaLanding = () => {
   useEffect(() => {
     // Idk what the ***** is happening but we need to force document and body to be scrollable
@@ -24,20 +26,27 @@ const AvilaLanding = () => {
 
   return (
     // Use auto height and make sure overflow works
-    <div className="w-full bg-[rgba(13,24,6,1)] text-white relative scroll-smooth overflow-hidden">
-      {/* Feature Section - add explicit height */}
+    <div className="min-w-screen w-full bg-[rgba(13,24,6,1)] text-white relative scroll-smooth overflow-hidden">
+      {/* Hero Section */}
       <div>
         <HeroSection />
       </div>
 
       {/* Divider */}
       <Divider />
-      
-      {/* Hero Section - add explicit height */}
-      
-      <div>
-        <FeatureSection />
-      </div>
+
+      { !test ? (
+        /* Feature Section */
+        <div>
+          <FeatureSection />
+        </div>
+      ) : (
+        /* Routes Section*/
+        <div>
+          <RoutesSection />
+        </div>
+      )}
+        
 
       {/* Divider */}
       <Divider />

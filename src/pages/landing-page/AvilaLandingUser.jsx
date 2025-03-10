@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import HeroSection from '../../components/landing-page-user/HeroSection';
+import HeroSection from '../../components/landing-page/HeroSection';
 import Divider from '../../components/landing-page-user/Divider';
 import FeatureSection from '../../components/landing-page-user/FeatureSection';
 import RouteCards from '../../components/landing-page-user/RouteCards';
