@@ -1,6 +1,6 @@
-// ForumPage.jsx
+// ForumPage.jsx (Updated)
 import React, { useState, useRef, useEffect } from 'react';
-import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, setDoc, updateDoc } from "firebase/firestore";
 import { db } from './../../../firebase-config';
 import './ForumPage.css';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -68,12 +68,35 @@ function ForumPage() {
     const [showCreateForumPopup, setShowCreateForumPopup] = useState(false);
     const [newForumTitle, setNewForumTitle] = useState("");
     const [newForumDescription, setNewForumDescription] = useState("");
+    const [reportedForums, setReportedForums] = useState([]);  // Store reported forum IDs
+    const [reportedComments, setReportedComments] = useState([]); // Store reported comment IDs
+
+
+    // Load reported forums and comments on component mount and user login
+    useEffect(() => {
+        const loadReportedData = async () => {
+            const user = await getCurrentUser();
+            if (user) {
+                const userDocRef = doc(db, "Lista de Usuarios", user.email);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    setReportedForums(userData.reportedForums || []);
+                    setReportedComments(userData.reportedComments || []);
+                }
+            }
+        };
+        loadReportedData();
+    }, []);
+
 
 
     useEffect(() => {
         const fetchForums = async () => {
             setLoadingForums(true);
             setError(null);
+            const user = await getCurrentUser(); // Get the current user
+
             try {
                 const forumsRef = collection(db, "Foros");
                 const q = query(forumsRef, orderBy("ID")); // Keep ordering for consistency
@@ -81,6 +104,13 @@ function ForumPage() {
                 const fetchedForums = [];
                 for (const docSnap of querySnapshot.docs) {
                     const forumData = docSnap.data();
+
+                    // Check if the forum is reported by the current user.
+                    if (user && reportedForums.includes(docSnap.id)) {
+                        continue; // Skip this forum if reported
+                    }
+
+
                     let profileImageUrl = "url_por_defecto.jpg"; // Default
 
                     // Fetch profile image URL from "Lista de Usuarios"
@@ -110,12 +140,13 @@ function ForumPage() {
             }
         };
         fetchForums();
-    }, []);
+    }, [reportedForums]); // Reload forums when reportedForums changes
 
     useEffect(() => {
         const fetchComments = async (forumId) => {
             setLoadingComments(true);
             setError(null);
+            const user = await getCurrentUser();
             try {
                 const commentsRef = collection(db, "Foros", forumId, "comments");
                 const q = query(commentsRef, orderBy("ID"));
@@ -123,6 +154,13 @@ function ForumPage() {
                 const fetchedComments = [];
                 for (const docSnap of querySnapshot.docs) {
                     const commentData = docSnap.data();
+
+                    // Check if the comment is reported by the current user
+                    if (user && reportedComments.includes(docSnap.id)) {
+                        continue; // Skip reported comments
+                    }
+
+
                     let profileImageUrl = "url_por_defecto.jpg"; // Default
 
                     if (commentData.Email) {
@@ -155,7 +193,8 @@ function ForumPage() {
         } else {
             setComments([]);
         }
-    }, [showComments]);
+    }, [showComments, reportedComments]); // Reload comments when reportedComments changes
+
 
     const scrollLeft = () => {
         if (forumContainerRef.current) {
@@ -340,18 +379,78 @@ function ForumPage() {
         }
     };
 
+   // --- Report Forum/Comment Functions ---
+const handleReportForum = async (forumId) => {
+    const user = await getCurrentUser();
+    if (!user) {
+        setError("Debes iniciar sesión para reportar un foro.");
+         setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+        return;
+    }
+
+    const forumToReport = forums.find(f => f.firestoreId === forumId);
+    if (forumToReport && forumToReport.Email === user.email) {
+        setError("No puedes reportar tu propio foro.");
+        setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, "Lista de Usuarios", user.email);
+        await updateDoc(userDocRef, {
+            reportedForums: [...reportedForums, forumId]
+        });
+        setReportedForums([...reportedForums, forumId]); // Update local state
+        setShowComments(null); // Go back to forum list
+    } catch (error) {
+        console.error("Error al reportar el foro:", error);
+        setError("Error al reportar el foro: " + error.message);
+        setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+    }
+};
+
+const handleReportComment = async (commentId) => {
+    const user = await getCurrentUser();
+    if (!user) {
+        setError("Debes iniciar sesión para reportar un comentario.");
+        setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+        return;
+    }
+    const commentToReport = comments.find(c => c.firestoreId === commentId);
+
+    if (commentToReport && commentToReport.Email === user.email) {
+        setError("No puedes reportar tu propio comentario.");
+        setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+        return;
+    }
+
+
+    try {
+        const userDocRef = doc(db, "Lista de Usuarios", user.email);
+        await updateDoc(userDocRef, {
+            reportedComments: [...reportedComments, commentId]
+        });
+        setReportedComments([...reportedComments, commentId]);  // Update local state
+
+    } catch (error) {
+        console.error("Error al reportar el comentario:", error);
+        setError("Error al reportar el comentario: " + error.message);
+        setTimeout(() => setError(null), 2000); // Clear error after 5 seconds
+    }
+};
+// --- End Report Functions ---
+
+
     const selectedForum = forums.find(f => f.firestoreId === showComments);
 
     if (loadingForums) {
         return <div>Cargando foros...</div>;
     }
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
 
     return (
         <div className="forum-page-forum">
+             {error && <div>Error: {error}</div>} {/* Display error message */}
             <h1 className="forum-title-forum">Foros</h1>
             <div className="forum-wrapper-forum">
                 {showComments ? (
@@ -372,6 +471,9 @@ function ForumPage() {
                                     <div className="forum-buttons-forum" style={{ marginLeft: "auto", marginRight: "auto", marginTop: "10px" }}>
                                         <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.firestoreId, selectedForum.userName)}>
                                             Comentar
+                                        </span>
+                                         <span className="forum-button-forum" onClick={() => handleReportForum(selectedForum.firestoreId)}>
+                                            Reportar Foro
                                         </span>
                                     </div>
                                 </div>
@@ -398,6 +500,9 @@ function ForumPage() {
                                             <p className="comment-text-forum">{comment.description}</p>
                                             <div className="comment-button-container-forum">
                                                 <span className="forum-button-forum" onClick={() => handleAddCommentToComment(selectedForum.firestoreId, comment.firestoreId, comment.userName)}>Comentar</span>
+                                                <span className="forum-button-forum" onClick={() => handleReportComment(comment.firestoreId)}>
+                                                     Reportar
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
