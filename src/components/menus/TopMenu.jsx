@@ -12,7 +12,7 @@ const TopMenu = () => {
   ];
 
   const sesionItems = [
-    { href: "/sign-up-page", label: "Registrarse"},
+    { href: "/signUpPage", label: "Registrarse"},
     { href: "/login-page", label: "Iniciar Sesión"},
   ];
 

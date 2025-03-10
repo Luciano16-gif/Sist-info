@@ -102,7 +102,7 @@ function LoginPage() {
         
         <AuthLink 
           className="auth-link"
-          to="/sign-up-page"
+          to="/signUpPage"
           text="¿No tienes cuenta?"
           linkText="Registrarse"
         />
