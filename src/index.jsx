@@ -24,6 +24,9 @@ import ProfileManagementPage from './components/Buttons/ProfileManagementPage/Pr
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import OurTeam from './components/nuestro-equipo/OurTeam';
 
+//Admin Pages
+import AdminLanding from './pages/Admin-tools/Admin-landing/AdminLanding'
+
 // Test Components
 import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
 import AuthTest from './components/firebase-test/AuthTest/AuthTest';
@@ -50,6 +53,9 @@ root.render(
           <Route path="/foro" element={<Foro />} />
           <Route path="/equipo" element={<OurTeam />} />
           
+          {/* Admin Routes */}
+          <Route path="/admin-landing" element={<AdminLanding />} />
+
           {/* Testing Routes */}
           <Route path="/firestore-test" element={<FirestoreTest />} />
           <Route path="/auth-test" element={<AuthTest />} />
