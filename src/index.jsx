@@ -25,10 +25,8 @@ import AvilaLanding from './pages/landing-page/AvilaLanding';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
-import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
-
-// Test Components
 import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearExperiencia';
+import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 
 // ========== Styles ==========
 import './index.css';
@@ -48,16 +46,17 @@ root.render(
           <Route path="/signUpPage" element={<SignUpPage />} />
           <Route path="/OldSignUp" element={<OldSignUpPage />} />
           
-          {/* Testing Routes */}
-          <Route path="/crear-experiencia" element={<CrearExperiencia />} />
-
-          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
-          <Route path="/galeria" element={<GalleryPage />} />
-          <Route path="/experiencias" element={<ExperiencesPage />} />
-          <Route path="/forum" element={<ForumPage />} />
-          <Route path="/" element={<AvilaLanding />} />
-
-      </Routes>
+          {/* Routes with Layout */}
+          <Route element={<Layout />}>
+            {/* Main Routes */}
+            <Route path="/" element={<AvilaLanding />} />
+            <Route path="/foro" element={<ForumPage />} />
+            <Route path="/experiencias" element={<ExperiencesPage />} />
+            <Route path="/crear-experiencia" element={<CrearExperiencia />} />
+            <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+            <Route path="/galeria" element={<GalleryPage />} />
+          </Route>
+        </Routes>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

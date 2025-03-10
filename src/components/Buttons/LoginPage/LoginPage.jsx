@@ -132,7 +132,7 @@ function LoginPage() {
                 <img src="/google-logo.png" alt="Google Logo" style={{ width: '24px', marginRight: '8px' }} />
                 Iniciar Sesión con Google
             </button>
-            <p className="signup-link-login" style={{ marginTop: '20px' }}>¿No tienes cuenta? <a href="/sign-up-page">Registrarse</a></p>
+            <p className="signup-link-login" style={{ marginTop: '20px' }}>¿No tienes cuenta? <a href="/signUpPage">Registrarse</a></p>
         </div>
     );
 }

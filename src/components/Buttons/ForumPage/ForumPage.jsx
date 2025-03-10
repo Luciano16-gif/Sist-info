@@ -18,11 +18,11 @@ const getCurrentUser = () => {
                     const userDocSnap = await getDoc(userDocRef);
                     if (!userDocSnap.exists()) {
                         console.warn("Usuario no encontrado en Firestore:", user.email);
-                         // Fallback to default image and anonymous user
+                        // Fallback to default image and anonymous user
                         resolve({
                             email: user.email,
                             profileImage: "url_por_defecto.jpg",  // Default URL if user not found
-                            userName:  "Usuario Anónimo"
+                            userName: "Usuario Anónimo"
                         });
                         return;
                     }
@@ -76,7 +76,7 @@ function ForumPage() {
             setError(null);
             try {
                 const forumsRef = collection(db, "Foros");
-                const q = query(forumsRef, orderBy("ID"));
+                const q = query(forumsRef, orderBy("ID")); // Keep ordering for consistency
                 const querySnapshot = await getDocs(q);
                 const fetchedForums = [];
                 for (const docSnap of querySnapshot.docs) {
@@ -130,7 +130,7 @@ function ForumPage() {
                         const userDocSnap = await getDoc(userDocRef);
                         if (userDocSnap.exists()) {
                             const userData = userDocSnap.data();
-                             // Use 'Foto de Perfil'
+                            // Use 'Foto de Perfil'
                             if (userData['Foto de Perfil']) {
                                 profileImageUrl = userData['Foto de Perfil']; // Use the URL
                             }
@@ -305,8 +305,18 @@ function ForumPage() {
         }
         try {
             const forumsRef = collection(db, "Foros");
+            // --- KEY CHANGE: Find the highest existing ID ---
             const forumsSnap = await getDocs(forumsRef);
-            const newForumId = String(forumsSnap.size + 1);
+            let highestId = 0;
+            forumsSnap.forEach(docSnap => {
+                const id = parseInt(docSnap.data().ID);
+                if (!isNaN(id) && id > highestId) {
+                    highestId = id;
+                }
+            });
+            const newForumId = String(highestId + 1); // Increment the highest ID.
+            // --- END KEY CHANGE ---
+
             const newForumData = {
                 ID: newForumId,
                 Title: newForumTitle,
@@ -317,7 +327,10 @@ function ForumPage() {
                 profileImage: user.profileImage,  // Use stored URL
             };
             await setDoc(doc(db, "Foros", newForumId), newForumData);
+
+            // Add to the local state *using the correct firestoreId*
             setForums([...forums, { ...newForumData, firestoreId: newForumId }]);
+
             setShowCreateForumPopup(false);
             setNewForumTitle("");
             setNewForumDescription("");
