@@ -10,21 +10,16 @@ import { AuthProvider } from './components/contexts/AuthContext';
 
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
-import LayoutUser from './components/layout/LayoutUser';
 
 // ========== Page Components ==========
 // Authentication Pages
-import OldLoginPage from './components/Buttons/LoginPage/LoginPage';
 import LoginPage from './components/Auth/LoginPage';
 import SignUpPage from './components/Auth/SignUpPage';
-import OldSignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
 //import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
-import AvilaLandingUser from './pages/landing-page/AvilaLandingUser';
-
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
@@ -42,10 +37,8 @@ root.render(
         <Routes>
           {/* Authentication Routes (without Layout) */}
           <Route path="/login-page" element={<LoginPage />} />
-          <Route path="/Old" element={<OldLoginPage />} />
           {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
           <Route path="/signUpPage" element={<SignUpPage />} />
-          <Route path="/OldSignUp" element={<OldSignUpPage />} />
           
           {/* Routes with Layout */}
           <Route element={<Layout />}>
@@ -56,20 +49,14 @@ root.render(
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
           </Route>
+
+          {/* Routes with LayoutUser 
+          <Route element={<LayoutUser />}>
+            
+            <Route path="/landing-page-user" element={<AvilaLandingUser />} />
+          </Route>*/}
         </Routes>
       </AuthProvider>
-
-          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
-          <Route path="/gallery-page" element={<GalleryPage />} />
-        </Route>
-
-        {/* Routes with LayoutUser */}
-        <Route element={<LayoutUser />}>
-          {/* Main Routes */}
-          <Route path="/landing-page-user" element={<AvilaLandingUser />} />
-        </Route>
-      </Routes>
-
     </BrowserRouter>
   </React.StrictMode>
 );
