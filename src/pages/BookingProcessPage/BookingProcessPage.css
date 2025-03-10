@@ -8,7 +8,6 @@
     justify-content: center;
     align-items: center;
     overflow: auto;
-
 }
 
 .back-button-booking-process {
@@ -47,7 +46,7 @@
     width: 90%;
     max-width: 900px;
     align-items: flex-start;
-    margin-top: 10px; /* Increased margin-top significantly */
+    margin-top: 10px;
 }
 
 .left-side-booking-process {
@@ -55,8 +54,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    /* Removed margin-top from here */
-
 }
 
 .pasarela-de-pago-title-container-booking-process {
@@ -87,7 +84,6 @@
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-
 }
 
 .selection-box-booking-process label {
@@ -118,68 +114,122 @@
     font-weight: bold;
     transition: background-color 0.3s ease;
 }
-.time-buttons-booking-process button:hover, .quantity-buttons-booking-process button:hover{
-      background-color: #ffce66;
 
+.time-buttons-booking-process button:hover,
+.quantity-buttons-booking-process button:hover {
+    background-color: #ffce66;
 }
+
+
+/* --- Guide Selection Styles --- */
+
+.guide-selection-wrapper-booking-process {
+  display: flex;
+  align-items: center;
+  width: 100%; /* Ensure it takes the full width */
+}
+
 .guide-selection-booking-process {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: space-between;
+  display: flex;
+  overflow-x: auto;  /* Enable horizontal scrolling */
+  gap: 15px;        /* Space between guide cards */
+  padding: 10px 0;  /* Add some padding */
+  width: calc(100% - 80px); /* Adjust width to account for the scroll buttons, adjust 80px if needed*/
+  scroll-behavior: smooth; /*Smooth Scroll*/
 }
+
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.guide-selection-booking-process::-webkit-scrollbar {
+    width: 8px;  /* Adjust as needed */
+    height: 8px;
+}
+
+.guide-selection-booking-process::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.guide-selection-booking-process::-webkit-scrollbar-thumb {
+    background: #888;
+}
+.guide-selection-booking-process::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.guide-selection-booking-process {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: thin;  /* Firefox */ /* "auto" or "thin"  */
+    scrollbar-color: #888 #f1f1f1;
+}
+
 
 .guide-card-booking-process {
-  width: 160px;  /* Significantly reduced width */
-  height: 220px; /* Significantly reduced height */
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    flex-shrink: 0;
-    display: flex;
-    background: rgba(217, 217, 217, 0.3);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    overflow: hidden;
+  min-width: 150px; /* Adjust as needed */
+    flex: 0 0 auto;         /* Prevent shrinking and growing */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+    background-color: white;
 }
 
 
-.guide-card-booking-process img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    margin-bottom: auto;
-    border-radius: 20px;
+.scroll-button-booking-process {
+  background-color: #e8ffe9;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+   margin: 0px 5px; /*Add more styles if you consider*/
+}
 
+.left-scroll-booking-process {
+    border-radius: 20px 0 0 20px;
+}
+
+.right-scroll-booking-process{
+    border-radius: 0 20px 20px 0;
+}
+
+.scroll-button-booking-process:hover {
+  background-color: #f4ffc6;
+}
+
+.guide-card-booking-process img {
+    width: 80px; /* Adjust size as needed */
+    height: 80px;
+    border-radius: 50%; /* Make image circular */
+    margin-bottom: 5px; /* Space between image and name */
+    object-fit: cover; /* Ensure the image covers the area */
 }
 
 .guide-info-booking-process {
-    width: 100%;
-    padding: 5px;  /* Further reduced padding */
-    box-sizing: border-box;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    text-align: center; /* Center the text */
 }
+/* --- End Guide Selection Styles --- */
 
 .guide-info-booking-process p {
-    margin: 2px 0;  /* Further reduced margin */
-    color: white;
-    font-size: 0.7rem; /* Further reduced font size */
+     margin: 2px 0;
+    color: black; /* Changed color to black */
+    font-size: 0.7rem;
 }
 
 .rating-dots-booking-process {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 2px; /* Further Reduced margin */
-    margin-bottom: 8px; /* Further Reduced margin */
+    margin-top: 2px;
+    margin-bottom: 8px;
 }
 
 .dot-booking-process {
-    width: 7px;   /* Further reduced dots size */
-    height: 7px;  /* Further reduced dots size */
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     margin: 0 1px;
     display: inline-block;
@@ -192,7 +242,6 @@
 .white-dot-booking-process {
     background-color: white;
 }
-
 .details-box-booking-process {
     width: 450px;
     height: auto;
@@ -202,7 +251,7 @@
     border-radius: 20px;
     display: flex;
     flex-direction: column;
-    margin-top: 142px;
+    margin-top: 112px;
 }
 
 .detalles-title-container-booking-process {
@@ -240,7 +289,6 @@
 
 .user-details-container-booking-process {
     margin-bottom: 15px;
-
 }
 
 .realizar-pago-button-container-booking-process {
@@ -263,6 +311,5 @@
 }
 
 .payment-button-booking-process:hover {
-      background-color: #ffce66;
-
+    background-color: #ffce66;
 }

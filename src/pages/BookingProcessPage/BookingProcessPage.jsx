@@ -1,5 +1,5 @@
 // BookingProcessPage.jsx
-import React from 'react';
+import React, { useRef } from 'react'; // Import useRef
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -8,11 +8,18 @@ function BookingProcessPage() {
     const location = useLocation();
     const experience = location.state?.experience;
     const navigate = useNavigate();
+    const guideContainerRef = useRef(null); // Ref for the guide container
 
     // Dummy guide data (replace with actual guide data from API or context)
     const guides = [
-        { id: 1, name: 'Jorge Pérez', rating: 4, image: '/path/to/jorge.jpg' }, // Replace placeholders
-        { id: 2, name: 'Clara Carrasquel', rating: 5, image: '/path/to/clara.jpg' },
+        { id: 1, name: 'Jorge Pérez', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' }, // Replace placeholders
+        { id: 2, name: 'Clara Carrasquel', rating: 5, image: '/../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 3, name: 'Guía 3', rating: 3, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 4, name: 'Guía 4', rating: 2, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 5, name: 'Guía 5', rating: 5, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 6, name: 'Guía 6', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 7, name: 'Guía 7', rating: 3, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
+        { id: 8, name: 'Guía 8', rating: 5, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
     ];
 
      // --- NAVIGATION HANDLER ---
@@ -30,6 +37,16 @@ function BookingProcessPage() {
         }
         return dots;
     };
+
+
+    const handleScroll = (direction) => {
+        const container = guideContainerRef.current;
+        if (container) {
+            const scrollAmount = direction === 'left' ? -200 : 200; // Adjust scroll amount as needed
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
+
 
     if (!experience) {
         return <div>No experience data found.</div>; // Or redirect, show error, etc.
@@ -64,18 +81,22 @@ function BookingProcessPage() {
 
                     <div className="selection-box-booking-process">
                         <label>SELECCIONA UN GUÍA</label>
-                        <div className="guide-selection-booking-process">
-                            {guides.map(guide => (
-                                <div key={guide.id} className="guide-card-booking-process">
-                                    <img src={guide.image} alt={guide.name} />
-                                    <div className="guide-info-booking-process">
-                                        <p>{guide.name}</p>
-                                        <div className="rating-dots-booking-process">
-                                            {renderRatingDots(guide.rating)}
+                        <div className="guide-selection-wrapper-booking-process">
+                            <button className="scroll-button-booking-process left-scroll-booking-process" onClick={() => handleScroll('left')}></button>
+                            <div className="guide-selection-booking-process" ref={guideContainerRef}>
+                                {guides.map(guide => (
+                                    <div key={guide.id} className="guide-card-booking-process">
+                                        <img src={guide.image} alt={guide.name} />
+                                        <div className="guide-info-booking-process">
+                                            <p>{guide.name}</p>
+                                            <div className="rating-dots-booking-process">
+                                                {renderRatingDots(guide.rating)}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                            <button className="scroll-button-booking-process right-scroll-booking-process" onClick={() => handleScroll('right')}></button>
                         </div>
                     </div>
                 </div>
