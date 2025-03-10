@@ -1,0 +1,268 @@
+/* BookingProcessPage.css */
+
+.container-booking-process {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+
+}
+
+.back-button-booking-process {
+    position: absolute;
+    top: 100px;
+    left: 50px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.back-button-booking-process:hover {
+    color: #ffcb5b;
+    font-weight: 700;
+}
+
+.background-image-booking-process {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.content-booking-process {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 30px;
+    padding: 10px;
+    width: 90%;
+    max-width: 900px;
+    align-items: flex-start;
+    margin-top: 10px; /* Increased margin-top significantly */
+}
+
+.left-side-booking-process {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Removed margin-top from here */
+
+}
+
+.pasarela-de-pago-title-container-booking-process {
+    width: auto;
+    height: auto;
+}
+
+.title-booking-process {
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-style: normal;
+    font-weight: 800;
+    line-height: normal;
+    margin-bottom: 4px;
+    word-wrap: break-word;
+    text-align: center;
+    width: 460px;
+}
+
+.selection-box-booking-process {
+    width: auto;
+    max-width: 450px;
+    height: auto;
+    background: rgba(217, 217, 217, 0.30);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.selection-box-booking-process label {
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 18px;
+    font-weight: 700;
+    line-height: normal;
+    margin-bottom: 8px;
+}
+
+.time-buttons-booking-process,
+.quantity-buttons-booking-process {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.time-buttons-booking-process button,
+.quantity-buttons-booking-process button {
+    background-color: #D9D9D9;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+.time-buttons-booking-process button:hover, .quantity-buttons-booking-process button:hover{
+      background-color: #ffce66;
+
+}
+.guide-selection-booking-process {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.guide-card-booking-process {
+  width: 160px;  /* Significantly reduced width */
+  height: 220px; /* Significantly reduced height */
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0;
+    display: flex;
+    background: rgba(217, 217, 217, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+
+.guide-card-booking-process img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-bottom: auto;
+    border-radius: 20px;
+
+}
+
+.guide-info-booking-process {
+    width: 100%;
+    padding: 5px;  /* Further reduced padding */
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.guide-info-booking-process p {
+    margin: 2px 0;  /* Further reduced margin */
+    color: white;
+    font-size: 0.7rem; /* Further reduced font size */
+}
+
+.rating-dots-booking-process {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2px; /* Further Reduced margin */
+    margin-bottom: 8px; /* Further Reduced margin */
+}
+
+.dot-booking-process {
+    width: 7px;   /* Further reduced dots size */
+    height: 7px;  /* Further reduced dots size */
+    border-radius: 50%;
+    margin: 0 1px;
+    display: inline-block;
+}
+
+.yellow-dot-booking-process {
+    background-color: yellow;
+}
+
+.white-dot-booking-process {
+    background-color: white;
+}
+
+.details-box-booking-process {
+    width: 450px;
+    height: auto;
+    background: rgba(217, 217, 217, 0.30);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 142px;
+}
+
+.detalles-title-container-booking-process {
+    width: auto;
+}
+
+.details-title-booking-process {
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 24px;
+    font-weight: 700;
+    line-height: normal;
+    margin-bottom: 15px;
+    display: flex;
+    width: auto;
+    height: auto;
+}
+
+.details-booking-process-p {
+    color: #FFF;
+    font-family: "Ysabeau SC";
+    font-size: 14px;
+}
+
+.codigo-participacion-booking-process {
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 12px;
+    font-weight: bold;
+    font-family: "Ysabeau SC";
+    display: flex;
+    width: auto;
+    height: auto;
+}
+
+.user-details-container-booking-process {
+    margin-bottom: 15px;
+
+}
+
+.realizar-pago-button-container-booking-process {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.payment-button-booking-process {
+    width: 160px;
+    height: 35px;
+    background-color: #D9D9D9;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.payment-button-booking-process:hover {
+      background-color: #ffce66;
+
+}

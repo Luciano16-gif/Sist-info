@@ -39,6 +39,11 @@ function BookingPage() {
         );
     };
 
+    // --- NAVIGATION HANDLER ---
+    const handleBookingClick = () => {
+        navigate('/booking-process', { state: { experience } });
+    };
+
     return (
         <div className="container-booking">
             <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
@@ -72,7 +77,7 @@ function BookingPage() {
                         </div>
                     </div>
 
-                    <button className="reserve-button-booking">Reserva tu Cupo</button>
+                    <button className="reserve-button-booking" onClick={handleBookingClick}>Reserva tu Cupo</button>
                 </div>
             </div>
         </div>

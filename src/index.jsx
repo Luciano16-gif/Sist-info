@@ -28,6 +28,7 @@ import ForumPage from './components/Buttons/ForumPage/ForumPage';
 import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearExperiencia';
 import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 import BookingPage from './pages/BookingPage/BookingPage';
+import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
 
 // ========== Styles ==========
 import './index.css';
@@ -57,6 +58,7 @@ root.render(
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking-process" element={<BookingProcessPage />} />
           </Route>
         </Routes>
       </AuthProvider>
