@@ -13,10 +13,8 @@ import Layout from './components/layout/Layout';
 
 // ========== Page Components ==========
 // Authentication Pages
-import OldLoginPage from './components/Buttons/LoginPage/LoginPage';
 import LoginPage from './components/Auth/LoginPage';
 import SignUpPage from './components/Auth/SignUpPage';
-import OldSignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
@@ -39,10 +37,8 @@ root.render(
         <Routes>
           {/* Authentication Routes (without Layout) */}
           <Route path="/login-page" element={<LoginPage />} />
-          <Route path="/Old" element={<OldLoginPage />} />
           {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
           <Route path="/signUpPage" element={<SignUpPage />} />
-          <Route path="/OldSignUp" element={<OldSignUpPage />} />
           
           {/* Routes with Layout */}
           <Route element={<Layout />}>

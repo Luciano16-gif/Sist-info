@@ -73,23 +73,25 @@ function LoginPage() {
         
         {errorMessage && <ErrorMessage message={errorMessage} />}
         
-        <div className="input-container">
+        <div className="input-container w-full max-w-sm mx-auto">
           <FormInput 
             type="email"
             value={email}
             onChange={handleEmailChange}
             placeholder="Email"
+            className="w-full max-w-sm mx-auto"
           />
           <FormInput 
             type="password"
             value={password}
             onChange={handlePasswordChange}
             placeholder="Password"
+            className="w-full max-w-sm mx-auto"
           />
         </div>
         
         <AuthButton 
-          className="auth-button"
+          className="auth-button lg:w-1/3"
           onClick={handleLogin}
         >
           Iniciar Sesión
@@ -102,7 +104,7 @@ function LoginPage() {
         
         <AuthLink 
           className="auth-link"
-          to="/signUpPage"
+          to="/SignUpPage"
           text="¿No tienes cuenta?"
           linkText="Registrarse"
         />
