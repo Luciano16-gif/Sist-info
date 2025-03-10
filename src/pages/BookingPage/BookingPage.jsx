@@ -41,17 +41,18 @@ function BookingPage() {
 
     return (
         <div className="container-booking">
-            {/* ... rest of your BookingPage content ... */}
-             <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
+            <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
             <div className="content-booking">
                 <div className='left-side-booking'>
-                    <h1 className="title-booking">{experience.id}</h1>
-                    <p className="description-booking">
-                        {experience.description}
-                    </p>
-                    <div className='buttons-div-booking'>
-                        <button className="button-booking">Ver Calendario</button>
-                        <button className="button-booking">Ver Mapa</button>
+                    {/* Wrap title, description, and button in a new div */}
+                    <div className="title-description-box">
+                        <h1 className="title-booking">{experience.id}</h1>
+                        <p className="description-booking">
+                            {experience.description}
+                        </p>
+                        <div className='buttons-div-booking'>
+                            <button className="button-booking">Ver Calendario</button>
+                        </div>
                     </div>
                 </div>
 
@@ -79,7 +80,7 @@ function BookingPage() {
 }
 
 function BookingDetail({ title, value }) {
-    console.log(`Rendering BookingDetail: title=${title}, value=${value}`); // Add this
+    console.log(`Rendering BookingDetail: title=${title}, value=${value}`);
     return (
         <div className="detail-booking">
             {title && <h3 className='detail-title-booking'>{title}</h3>}

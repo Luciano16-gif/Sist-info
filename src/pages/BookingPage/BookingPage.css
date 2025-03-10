@@ -37,51 +37,62 @@
     width: 50%; /*  Give left side a defined width */
 }
 
+/* New style for the title/description box */
+.title-description-box {
+    width: auto;  /* Adjust as needed */
+    max-width: 700px; /*  Match with description max-width */
+    height: auto;
+    background: rgba(217, 217, 217, 0.30);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+     /* Keep button inside this box */
+}
+
+
+
 .title-booking {
     color: #FFF;
     font-family: "Ysabeau SC";
-    /* Responsive font size using clamp(), adjusted for better scaling */
-    font-size: clamp(2rem, 6vw, 5.3rem);  /*  Reduced min to 2rem, adjusted preferred size */
-    width: 100%; /* Use the full width available */
-    max-width: 100%; /* Added max-width to prevent overflow */
+    font-size: clamp(2rem, 6vw, 5.3rem);
+    width: 100%;
+    max-width: 100%;
     font-style: normal;
     font-weight: 800;
     line-height: normal;
     margin-bottom: 8px;
-    word-wrap: break-word; /*  Handles long words in the title */
+    word-wrap: break-word;
 }
 
 .description-booking {
     display: flex;
     width: 100%; /* Use full width of parent */
-    max-width: 700px; /*  Increased max-width */
+    max-width: 700px;
     height: auto;
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     color: #FFF;
     font-family: "Ysabeau SC";
-    font-size: clamp(1rem, 2vw, 1.5rem);  /* Responsive font size. Adjust values as needed */
+    font-size: clamp(1rem, 2vw, 1.5rem);
     font-style: normal;
     font-weight: 500;
     line-height: normal;
-    margin-bottom: 175px;
-    overflow-wrap: break-word; /*  Essential for handling long words */
-    /* Optional: Ellipsis for long descriptions */
-    /* display: -webkit-box;
-    -webkit-line-clamp: 3;  Limit to 3 lines
-    -webkit-box-orient: vertical;
-    overflow: hidden; */
+    margin-bottom: 20px; /* Reduce bottom margin to bring button closer*/
+    overflow-wrap: break-word;
 }
 
 .buttons-div-booking {
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 .button-booking,
-.reserve-button-booking { /* Combined styles for brevity */
+.reserve-button-booking {
     width: 200px;
     height: 45px;
     flex-shrink: 0;
@@ -93,6 +104,11 @@
     font-size: 15px;
     font-weight: bold;
     transition: background-color 0.3s ease;
+}
+
+.button-booking {
+    margin-top: 20px;
+    margin-left: 70px;
 }
 
 .reserve-button-booking {
@@ -140,7 +156,7 @@
 .details-grid-booking {
     display: flex;
     flex-direction: row;
-    gap: 15px; /* Add some gap between columns */
+    gap: 15px;
 }
 
 .details-column-booking {
@@ -181,5 +197,5 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-    overflow-wrap: break-word; /*  CRITICAL:  Handle long text in details */
+    overflow-wrap: break-word;
 }

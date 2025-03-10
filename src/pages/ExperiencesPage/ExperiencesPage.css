@@ -171,7 +171,7 @@
 .dot-experiences {
     height: 8px;
     width: 8px;
-    background-color: #ffffff;
+    background-color: #d5ffcf;
     border-radius: 50%;
     display: inline-block;
     margin-left: 2px;
@@ -180,7 +180,7 @@
 .dot-gray-experiences {
     height: 8px;
     width: 8px;
-    background-color: #686868;
+    background-color: #8e8e8e;
     border-radius: 50%;
     display: inline-block;
     margin-left: 2px;
