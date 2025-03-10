@@ -1,5 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { gallery, EXPLORE_TEXTS, explore_image } from '../../constants/LandingData';
+import { gallery_no_session, gallery_with_session, EXPLORE_TEXTS, HIKING_TIPS_TEXTS, explore_image } from '../../constants/LandingData';
+
+let gallery;
+let texts;
+let test = true;
+
+if (test) {
+  gallery = gallery_with_session;
+  texts = HIKING_TIPS_TEXTS;
+} else {
+  gallery = gallery_no_session;
+  texts = EXPLORE_TEXTS;
+}
 
 // Define keyframes style string outside component to prevent recreation on each render
 const keyframesStyle = `
@@ -218,20 +230,19 @@ const ExploreSection = () => {
       return (
         <div
           key={imgIndex}
-          className="absolute top-0 left-0 w-full h-full transition-all duration-500 ease-in-out rounded-lg shadow-2xl"
+          className="absolute top-0 left-0 w-full h-full transition-all duration-500 ease-in-out rounded-lg overflow-hidden flex items-center justify-center"
           style={{
             zIndex,
             opacity,
             transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
             transformOrigin: 'center center',
-            boxShadow: orderIndex === 0 ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none',
             ...animationStyles
           }}
         >
           <img 
             src={gallery[imgIndex]} 
             alt={`Aventura en El Ávila ${imgIndex + 1}`}
-            className="w-full h-full object-cover"
+            className={test ? "w-fit h-fit object-contain max-w-full max-h-full" : "w-full h-full object-cover"}
             loading={orderIndex === 0 ? "eager" : "lazy"} // Optimize image loading
           />
         </div>
@@ -261,13 +272,13 @@ const ExploreSection = () => {
           <div className="w-full md:w-1/2 mb-12 md:mb-0 flex flex-col justify-center">
             <div className={`transition-opacity duration-300 ease-in-out ${textFade ? 'opacity-0' : 'opacity-100'}`}>
               <h2 className="text-4xl md:text-6xl font-bold leading-tight">
-                {EXPLORE_TEXTS[currentTextIndex].title}
+                {texts[currentTextIndex].title}
               </h2>
               <h3 className="text-3xl md:text-5xl font-bold leading-tight mt-2">
-                {EXPLORE_TEXTS[currentTextIndex].subtitle}
+                {texts[currentTextIndex].subtitle}
               </h3>
               <p className="text-base md:text-lg mt-6 text-gray-300">
-                {EXPLORE_TEXTS[currentTextIndex].description}
+                {texts[currentTextIndex].description}
               </p>
               <div className="pt-8">
                 <a href="#gallery" className="text-sm md:text-base hover:underline">
@@ -277,14 +288,20 @@ const ExploreSection = () => {
             </div>
           </div>
           
-          {/* Gallery carousel - improved spacing */}
-          <div className="w-full md:w-1/2 h-[350px] md:h-[400px] relative">
+          {/* Gallery carousel - responsive for all screen sizes */}
+          <div className={`relative 
+              ${test 
+                ? "w-full h-[400px] sm:w-4/5 sm:h-[450px] md:w-1/2 md:h-[70vh] lg:w-1/4 lg:mr-[20%]" 
+                : "w-full h-[250px] sm:h-[300px] md:w-1/2 md:h-[350px] lg:h-[400px]"
+              }
+              mx-auto md:mx-0
+            `}>
             {/* Images with better depth effect and smooth animation */}
             <div className="relative w-full h-full perspective-1000">
               {imageElements}
             </div>
             
-            {/* Navigation arrows with better disabling during animation */}
+            {/* Navigation arrows with disabling during animation */}
             <div 
               role="button"
               tabIndex={isAnimating ? -1 : 0}

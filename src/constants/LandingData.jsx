@@ -62,7 +62,7 @@ import gallery_4 from "../assets/images/landing-page/explore/gallery/gallery_4.w
 import gallery_5 from "../assets/images/landing-page/explore/gallery/gallery_5.webp";
 import gallery_6 from "../assets/images/landing-page/explore/gallery/gallery_6.webp";
 
-export const gallery = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
+export const gallery_no_session = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
 
 export const EXPLORE_TEXTS = [
   {
@@ -94,6 +94,48 @@ export const EXPLORE_TEXTS = [
     title: "AVENTURAS",
     subtitle: "EN GRUPO",
     description: "Comparte la experiencia con amigos y familiares."
+  }
+];
+
+import TipCard1 from "../assets/images/landing-page-user-photos/tip-cards/TipCard1.png";
+import TipCard2 from "../assets/images/landing-page-user-photos/tip-cards/TipCard2.png";
+import TipCard3 from "../assets/images/landing-page-user-photos/tip-cards/TipCard3.png";
+import TipCard4 from "../assets/images/landing-page-user-photos/tip-cards/TipCard4.png";
+import TipCard5 from "../assets/images/landing-page-user-photos/tip-cards/TipCard5.png";
+import TipCard6 from "../assets/images/landing-page-user-photos/tip-cards/TipCard6.png";
+
+export const gallery_with_session = [TipCard1, TipCard2, TipCard3, TipCard4, TipCard5, TipCard6];
+
+export const HIKING_TIPS_TEXTS = [
+  {
+    title: "TIP #1",
+    subtitle: "CON EQUIPO ADECUADO",
+    description: "Viste capas de ropa ajustables y lleva una mochila con agua, comida y botiquín."
+  },
+  {
+    title: "TIP #2",
+    subtitle: "BIEN HIDRATADO",
+    description: "Bebe agua regularmente, la altitud y el esfuerzo pueden deshidratarte rápidamente."
+  },
+  {
+    title: "TIP #3",
+    subtitle: "LA NATURALEZA",
+    description: "Permanece en los senderos marcados y lleva tu basura de vuelta al terminar."
+  },
+  {
+    title: "TIP #4",
+    subtitle: "TECNOLÓGICA",
+    description: "Un teléfono o GPS puede salvarte en emergencias, lleva batería extra."
+  },
+  {
+    title: "TIP #5",
+    subtitle: "TUS LÍMITES",
+    description: "Escucha las señales de tu cuerpo y descansa cuando sea necesario."
+  },
+  {
+    title: "TIP #6",
+    subtitle: "TU PIEL",
+    description: "Aplica protector solar de amplio espectro, incluso en días nublados."
   }
 ];
 
