@@ -1,21 +1,14 @@
 /* ExperiencesPage.css */
 
 .container-experiences {
-    /* Existing styles */
     background-color: none;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: auto;  /*  Important:  Enable scrolling if content overflows */
-    margin-top: 100px; /* Keep your existing margin-top */
-
-    /* NEW STYLES FOR HEIGHT CONSTRAINT */
-    /* Calculate the available height: 100vh (viewport height) - height of top menu */
-    /* Assuming TopMenu height is approximately 60px.  ADJUST THIS IF NEEDED! */
-    max-height: calc(100vh - 60px);  /*  KEY CHANGE:  Set a maximum height */
-    /* 100vh is the total height, 60 px the navbar and 40px is the h1 margin top */
-    max-height: calc(100vh - 100px);  /* Corrected height */
+    overflow: auto;
+    margin-top: 100px;
+    max-height: calc(100vh - 100px);
 }
 
 .title-experiences {
@@ -27,7 +20,6 @@
     line-height: normal;
 }
 
-/* ... (rest of your existing CSS) ... */
 
 .experience-card-experiences {
     display: flex;
@@ -38,7 +30,7 @@
     gap: 20px;
     width: 100%;
     max-width: 1000px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /*  Important: Allows wrapping on smaller screens */
 }
 
 .image-experiences {
@@ -54,7 +46,8 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    max-width: 50%;
+    max-width: 50%;  /*  Limits width on larger screens */
+    width: 100%; /* Take full width when wrapped */
 }
 
 .rating-box-experiences {
@@ -67,8 +60,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    /* Añadido para el rectángulo */
-    background-color: rgba(119, 119, 119, 0.5); /* Fondo semitransparente */
+    background-color: rgba(119, 119, 119, 0.5);
     padding: 5px 10px;
     border-radius: 5px;
     margin-top: 20px;
@@ -78,14 +70,14 @@
 
 .subtitle-experiences {
     display: flex;
-    width: auto;
+    width: 100%; /* Important: Use full width of parent */
     height: auto;
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     color: #FFF;
     font-family: "Ysabeau SC";
-    font-size: 32px;
+    font-size: clamp(1.5rem, 5vw, 2rem); /* Responsive font size: min 24px, pref 5vw, max 32px */
     font-weight: 600;
     line-height: normal;
     margin-bottom: 5px;
@@ -94,17 +86,25 @@
 
 .description-experiences {
     display: flex;
-    width: auto;
+    width: 100%;  /* Crucial: Use the full width of the parent */
+    max-width: 100%; /* Also important */
     height: auto;
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     color: #FFF;
     font-family: "Ysabeau SC";
-    font-size: 14px;
+    font-size: clamp(0.875rem, 2vw, 0.9rem); /* Responsive font size: min 14px, pref 3vw, max 24px */
     font-weight: 400;
     line-height: 1.2;
     margin-bottom: 10px;
+    overflow-wrap: break-word; /*  ESSENTIAL: Break long words */
+
+    /*  Highly Recommended:  Truncate with ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /*  Limit to 3 lines (adjust as needed) */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .data-container-experiences {
@@ -113,11 +113,12 @@
     align-items: flex-start;
     margin-bottom: 10px;
     gap: 2px;
+    width: 100%; /* Take full width */
 }
 
 .data-text-experiences {
     display: flex;
-    width: auto;
+    width: 100%;  /*  Important: Use full width available */
     height: auto;
     flex-direction: row;
     justify-content: flex-start;
@@ -129,6 +130,7 @@
     font-weight: 400;
     line-height: normal;
     gap: 5px;
+    margin-bottom: 30px; /* Keep existing margin */
 }
 
 .data-text-experiences i {
@@ -198,12 +200,6 @@
     vertical-align: middle;
 }
 
-.data-text-experiences {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-
-}
 
 .image-container-experiences {
     position: relative;

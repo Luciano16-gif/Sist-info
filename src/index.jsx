@@ -27,6 +27,7 @@ import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
 import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearExperiencia';
 import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
+import BookingPage from './pages/BookingPage/BookingPage';
 
 // ========== Styles ==========
 import './index.css';
@@ -55,6 +56,7 @@ root.render(
             <Route path="/crear-experiencia" element={<CrearExperiencia />} />
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
+            <Route path="/booking" element={<BookingPage />} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -1,4 +1,4 @@
-// CrearExperiencia.jsx (UPDATED - Corrected Doc ID)
+// CrearExperiencia.jsx (UPDATED - Multiple Selection for "Incluidos")
 import React, { useState, useRef, useEffect } from 'react';
 import './CrearExperiencia.css';
 import { db, storage } from '../../../firebase-config';
@@ -18,7 +18,7 @@ function CrearExperiencia() {
     const [guiasRequeridos, setGuiasRequeridos] = useState('');
     const [minimoUsuarios, setMinimoUsuarios] = useState('');
     const [maximoUsuarios, setMaximoUsuarios] = useState('');
-    const [incluidosExperiencia, setIncluidosExperiencia] = useState('');
+    const [incluidosExperiencia, setIncluidosExperiencia] = useState([]);  // Now an array
     const [tipoActividad, setTipoActividad] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
@@ -176,7 +176,7 @@ function CrearExperiencia() {
         // 1. Data Validation
         if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
-            !minimoUsuarios || !maximoUsuarios || !incluidosExperiencia || !tipoActividad || !dificultad) {
+            !minimoUsuarios || !maximoUsuarios || incluidosExperiencia.length === 0 || !tipoActividad || !dificultad) { //incluidosExperiencia should be > 0
             alert('Por favor, complete todos los campos.');
             return;
         }
@@ -282,7 +282,7 @@ function CrearExperiencia() {
                 guiasRequeridos: parseInt(guiasRequeridos),
                 minimoUsuarios: minUsers,
                 maximoUsuarios: maxUsers,
-                incluidosExperiencia,
+                incluidosExperiencia,  // Already an array
                 tipoActividad,
                 imageUrl,
                 dificultad,
@@ -313,7 +313,7 @@ function CrearExperiencia() {
             setGuiasRequeridos('');
             setMinimoUsuarios('');
             setMaximoUsuarios('');
-            setIncluidosExperiencia('');
+            setIncluidosExperiencia([]); // Clear the array
             setTipoActividad('');
             setImageFile(null);
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
@@ -421,6 +421,18 @@ function CrearExperiencia() {
         }
         return circles;
     };
+
+
+    // --- Incluidos Handling (Multiple Selection) ---
+
+      const handleIncluidosChange = (option) => {
+        if (incluidosExperiencia.includes(option)) {
+          setIncluidosExperiencia(incluidosExperiencia.filter((item) => item !== option));
+        } else {
+          setIncluidosExperiencia([...incluidosExperiencia, option]);
+        }
+      };
+
 
     return (
         <div className="crear-experiencia-container-crear-experiencia">
@@ -535,19 +547,21 @@ function CrearExperiencia() {
                         </div>
 
                         <div className="campo-crear-experiencia campo-incluidos-experiencia">
-                            <label htmlFor="incluidosExperiencia">Incluidos en la Experiencia</label>
-                            <select
-                                id="incluidosExperiencia"
-                                value={incluidosExperiencia}
-                                onChange={(e) => setIncluidosExperiencia(e.target.value)}
-                            >
-                                <option value="">Seleccione...</option>
-                                {opcionesIncluidos.map((incluido) => (
-                                    <option key={incluido} value={incluido}>
-                                        {incluido}
-                                    </option>
-                                ))}
-                            </select>
+                            <label>Incluidos en la Experiencia</label>
+                                <div className="incluidos-options-container">
+                                    {opcionesIncluidos.map((incluido) => (
+                                        <div key={incluido} className="incluido-option">
+                                        <input
+                                            type="checkbox"
+                                            id={`incluido-${incluido}`}
+                                            value={incluido}
+                                            checked={incluidosExperiencia.includes(incluido)}
+                                            onChange={() => handleIncluidosChange(incluido)}
+                                        />
+                                        <label htmlFor={`incluido-${incluido}`}>{incluido}</label>
+                                        </div>
+                                    ))}
+                                </div>
 
                             <div className="add-activity-container">
                                 <input

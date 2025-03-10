@@ -4,10 +4,13 @@ import './ExperiencesPage.css';
 import { db, storage } from '../../firebase-config';
 import { collection, getDocs } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
 
 function ExperiencesPage() {
     const [experiences, setExperiences] = useState([]);
     const experienceRefs = useRef([]);
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         const fetchExperiences = async () => {
@@ -17,6 +20,8 @@ function ExperiencesPage() {
 
             for (const doc of experiencesSnapshot.docs) {
                 const data = doc.data();
+                console.log("Raw data from Firestore:", data); // Add this line for debugging
+
                 let imageUrl = '';
                 try {
                     const imageRef = ref(storage, data.imageUrl);
@@ -26,11 +31,11 @@ function ExperiencesPage() {
                     imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
                 }
 
-                experiencesList.push({
+                const experience = {
                     id: doc.id,
                     name: data.nombre,
                     description: data.descripcion,
-                    difficulty: data.dificultad, //  <-- USE THE difficulty FIELD
+                    difficulty: data.dificultad,
                     price: data.precio,
                     distance: data.longitudRecorrido + " km",
                     duracion: data.duracionRecorrido,
@@ -38,16 +43,20 @@ function ExperiencesPage() {
                     days: data.fechas.join(', '),
                     maxPeople: data.maximoUsuarios,
                     minPeople: data.minimoUsuarios,
-                    availableSlots: data.cuposDisponibles, // Keep this if you still use it
+                    availableSlots: data.cuposDisponibles,
                     imageUrl: imageUrl,
                     rating: data.puntuacion,
-                    dificultad: data.dificultad, // Redundant, but kept for clarity in initial fetch
-                    registeredUsers: data.usuariosInscritos, //  <--  FETCH THE REGISTERED USERS
-                });
+                    registeredUsers: data.usuariosInscritos,
+                    incluidos: data.incluidosExperiencia,
+                    puntoDeSalida: data.puntoSalida,
+                };
+
+                experiencesList.push(experience);
             }
 
             setExperiences(experiencesList);
             experienceRefs.current = experiencesList.map((_, i) => experienceRefs.current[i] || React.createRef());
+            setLoading(false); // Set loading to false after data is fetched
         };
 
         fetchExperiences();
@@ -65,7 +74,6 @@ function ExperiencesPage() {
     const renderRatingStars = (rating) => {
         const fullStars = Math.floor(rating);
         const stars = [];
-
         for (let i = 0; i < fullStars; i++) {
             stars.push(<span key={`full-${i}`} className='dot-experiences'></span>);
         }
@@ -75,13 +83,12 @@ function ExperiencesPage() {
         return stars;
     };
 
-    //  NEW FUNCTION TO RENDER DIFFICULTY
     const renderDifficultyDots = (difficulty) => {
-        const difficultyLevel = parseInt(difficulty, 10); // Ensure it's a number
+        const difficultyLevel = parseInt(difficulty, 10);
         const dots = [];
 
         if (isNaN(difficultyLevel)) {
-          return <span>Invalid difficulty</span>; // Or some other error handling
+          return <span>Invalid difficulty</span>;
         }
 
         for (let i = 0; i < difficultyLevel; i++) {
@@ -93,7 +100,18 @@ function ExperiencesPage() {
         return dots;
     };
 
+    const handleViewMore = (experience) => {
+        if (loading) { // Check if data is still loading
+            console.log("Data is still loading. Cannot view details yet.");
+            return;
+        }
+        console.log("Experience ID being passed:", experience.id); // Add this line
+        navigate('/booking', { state: { experience } });
+    };
 
+    if (loading) {
+        return <div>Loading experiences...</div>; // Show a loading message
+    }
 
     return (
         <div className="container-experiences" style={{ marginTop: "60px" }}>
@@ -101,6 +119,7 @@ function ExperiencesPage() {
 
             {experiences.map((experience, index) => (
                 <div className="experience-card-experiences" key={experience.id} ref={experienceRefs.current[index]}>
+                    {/* ... rest of your ExperienceCard content ... */}
                     <div className="image-container-experiences">
                         <img src={experience.imageUrl} alt={experience.name} className="image-experiences" />
                         <div className="price-overlay-experiences">{experience.price} $</div>
@@ -110,7 +129,6 @@ function ExperiencesPage() {
                             <span>Puntuación: </span>
                             {renderRatingStars(experience.rating)}
                         </div>
-                        {/*  NEW DIFFICULTY SECTION */}
                         <div className="rating-box-experiences">
                             <span>Dificultad: </span>
                             {renderDifficultyDots(experience.difficulty)}
@@ -129,11 +147,10 @@ function ExperiencesPage() {
                             </p>
                             <p className="data-text-experiences">
                                 <img src="../../src/assets/images/ExperiencesPage/participantes.png" alt="Participantes" className="participantes-icon-experiences" />
-                                {/* DISPLAY REGISTERED USERS / MAX PEOPLE */}
                                 {experience.registeredUsers} / {experience.maxPeople} Cupos
                             </p>
                         </div>
-                        <button className="button-experiences" onClick={index < experiences.length - 1 ? () => scrollToExperience(index + 1) : undefined}>Ver más</button>
+                        <button className="button-experiences" onClick={() => handleViewMore(experience)}>Ver más</button>
                     </div>
                 </div>
             ))}

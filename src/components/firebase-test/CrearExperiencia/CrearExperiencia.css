@@ -1,4 +1,4 @@
-/* CrearExperiencia.css (UPDATED) */
+/* CrearExperiencia.css (UPDATED - Incluidos Styling) */
 
 .crear-experiencia-container-crear-experiencia {
     background-color: #1a2a1a;
@@ -235,44 +235,95 @@
 }
 
 .difficulty-circle:hover {
-  transform: scale(1.1);
-  background-color: #45a049;
-}
-
-.add-activity-container {
+    transform: scale(1.1);
+    background-color: #45a049;
+  }
+  
+  .add-activity-container {
+      display: flex;
+      gap: 5px;
+      align-items: center; /* Center items vertically */
+      margin-top: 5px; /* Add some space above the input */
+  }
+  
+  .nuevo-tipo-input {
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: "Ysabeau SC", sans-serif;
+      font-size: 14px;
+      box-sizing: border-box;
+      background-color: #3a4a3a;
+      color: white;
+      flex: 1; /* Allow the input to grow */
+  }
+  
+  .add-activity-button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: #ffffff;
+      color: #1a2a1a;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+  }
+  
+  .add-activity-button:hover {
+      background-color: #ffef5f;
+  }
+  
+  .add-activity-button:active {
+      transform: translateY(2px);
+  }
+  
+  
+  /* New styles for multiple selection of "Incluidos" */
+  
+  .incluidos-options-container {
     display: flex;
-    gap: 5px;
-    align-items: center; /* Center items vertically */
-    margin-top: 5px; /* Add some space above the input */
-}
-
-.nuevo-tipo-input {
-    padding: 6px;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 5px; /* Space between options and the "add" section */
+  }
+  
+  .incluido-option {
+    display: flex;
+    align-items: center; /* Vertically center checkbox and label */
+    padding: 4px 8px;    /* Padding around each option */
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-family: "Ysabeau SC", sans-serif;
-    font-size: 14px;
-    box-sizing: border-box;
-    background-color: #3a4a3a;
+    background-color: #3a4a3a;  /* Same as input fields */
     color: white;
-    flex: 1; /* Allow the input to grow */
-}
-
-.add-activity-button {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    background-color: #ffffff;
-    color: #1a2a1a;
+  }
+  
+  .incluido-option input[type="checkbox"] {
+    margin-right: 8px; /* Space between checkbox and label */
+    /*  Optional: Style the checkbox itself (cross-browser is tricky) */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-radius: 3px;
+    outline: none; /* Remove default focus outline */
     cursor: pointer;
+  }
+  
+  .incluido-option input[type="checkbox"]:checked {
+      background-color: #9cff9c; /* Checkbox color when selected */
+      border-color: #9cff9c;
+  }
+  
+  .incluido-option input[type="checkbox"]:checked + label {
+      /* Style adjustments for the label *when checked* */
+       color: #9cff9c; /* Label text color */
+  }
+  
+  
+  .incluido-option label {
+    cursor: pointer; /* Make the label clickable too */
+    user-select: none; /* Prevent text selection */
     font-size: 14px;
-    font-weight: bold;
-}
-
-.add-activity-button:hover {
-    background-color: #ffef5f;
-}
-
-.add-activity-button:active {
-    transform: translateY(2px);
-}
+  }
