@@ -9,7 +9,7 @@ import FunFactSection from '../../components/landing-page/FunFactSection';
 import ForumSection from '../../components/landing-page/forum_section';
 import EventCalendar from '../../components/landing-page/EventCalendar';
 
-const test = true;
+const test = false;
 
 const AvilaLanding = () => {
   useEffect(() => {
@@ -28,64 +28,88 @@ const AvilaLanding = () => {
   }, []);
 
   return (
-    // Use auto height and make sure overflow works
     <div className="min-w-screen w-full bg-[rgba(13,24,6,1)] text-white relative scroll-smooth overflow-hidden">
-      {/* Hero Section */}
-      <div>
-        <HeroSection />
-      </div>
+      { test ? (
+        <>
+          {/* Hero Section */}
+          <div>
+            <HeroSection />
+          </div>
 
-      {/* Divider */}
-      <Divider />
+          {/* Divider */}
+          <Divider />
 
-      { !test ? (
-        /* Feature Section */
-        <div>
-          <FeatureSection />
-        </div>
+          {/* Routes Section */}
+          <div>
+            <RoutesSection />
+          </div>
+            
+          {/* Divider */}
+          <Divider />
+
+          {/* Calendar Section */}
+          <div>
+            <EventCalendar />
+          </div>
+          
+          {/* Divider */}
+          <Divider />
+
+          {/* Tips Section */}
+          <div>
+            <ExploreSection />
+          </div>
+
+          {/* fun fact Section*/}
+          <div>
+            <FunFactSection />
+          </div>
+
+          {/* forum Section*/}
+          <div>
+            <ForumSection />
+          </div>
+        </>
       ) : (
-        /* Routes Section*/
-        <div>
-          <RoutesSection />
-        </div>
+        <>
+          {/* Hero Section */}
+          <div>
+            <HeroSection />
+          </div>
+
+          {/* Divider */}
+          <Divider />
+
+          {/* Feature Section */}
+          <div>
+            <FeatureSection />
+          </div>
+            
+          {/* Divider */}
+          <Divider />
+
+          {/* Explore Section */}
+          <div>
+            <ExploreSection />
+          </div>
+          
+          {/* Divider */}
+          <Divider />
+
+          {/* Comments and Posts Section */}
+          <div>
+            <TestimonySection/>
+          </div>
+
+          {/* Divider */}
+          <Divider />
+          
+          {/* Routes Section*/}
+          <div>
+            <RoutesSection/>
+          </div>
+        </>
       )}
-        
-
-      {/* Divider */}
-      <Divider />
-
-      <div>
-        <EventCalendar />
-      </div>
-
-      {/* Divider */}
-      <Divider />
-
-       {/* Explore Section */}
-       <div>
-        <ExploreSection />
-      </div>
-      
-      {/* Divider */}
-      <Divider />
-
-      {/* Comments and Posts Section */}
-      <div>
-        <TestimonySection/>
-      </div>
-
-      {/* Divider */}
-      <Divider />
-      
-      {/* Routes Section*/}
-      <div>
-        <FunFactSection/>
-      </div>
-
-      <div>
-        <ForumSection/>
-      </div>
-
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { HERO_IMAGE_NO_SESSION, HERO_IMAGE_SESSION } from '../../constants/LandingData'; 
 import HeroText from './HeroText';
 
-const test = true;
+const test = false;
 
 function HERO_IMAGE() {
   if (test) {

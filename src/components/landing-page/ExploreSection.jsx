@@ -3,7 +3,7 @@ import { gallery_no_session, gallery_with_session, EXPLORE_TEXTS, HIKING_TIPS_TE
 
 let gallery;
 let texts;
-let test = true;
+let test = false;
 
 if (test) {
   gallery = gallery_with_session;
