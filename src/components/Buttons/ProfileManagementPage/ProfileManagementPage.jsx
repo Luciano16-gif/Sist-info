@@ -1,3 +1,4 @@
+// ProfileManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { auth, db, storage } from '../../../firebase-config';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -171,6 +172,13 @@ function ProfileManagementPage() {
 
         let fotoPerfilUrl = '';
         if (file) {
+          // --- FILE TYPE CHECK ---
+          const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+          if (!allowedTypes.includes(file.type)) {
+            alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
+            return; // Stop the upload
+          }
+
           const storageRef = ref(storage, `profile-pictures/${file.name}`);
           const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -245,7 +253,7 @@ function ProfileManagementPage() {
             <div className="content-container">
                 <img src={fotoPerfilUrl || "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png"} alt="Perfil" className={`profile-image ${isEditing ? 'editable' : ''}`} onClick={() => isEditing && document.getElementById('file-input').click()} />
                 {isEditing && (
-                    <input id="file-input" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
+                    <input id="file-input" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
                 )}
                 <div className="info-container">
                     <div className="info-item">

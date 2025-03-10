@@ -5,28 +5,29 @@ import ReactDOM from 'react-dom/client';
 // ========== Routing Imports ==========
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// ========== Auth Context Import ==========
+import { AuthProvider } from './components/contexts/AuthContext';
+
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
 import LayoutUser from './components/layout/LayoutUser';
 
 // ========== Page Components ==========
 // Authentication Pages
-import LoginPage from './components/Buttons/LoginPage/LoginPage';
-import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
+import OldLoginPage from './components/Buttons/LoginPage/LoginPage';
+import LoginPage from './components/Auth/LoginPage';
+import SignUpPage from './components/Auth/SignUpPage';
+import OldSignUpPage from './components/Buttons/SignUpPage/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
 //import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
 import AvilaLandingUser from './pages/landing-page/AvilaLandingUser';
-import Foro from './components/firebase-test/Foro';
+
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
-
-// Test Components
-import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
-import AuthTest from './components/firebase-test/AuthTest/AuthTest';
-import StorageTest from './components/firebase-test/StorageTest/StorageTest';
+import ForumPage from './components/Buttons/ForumPage/ForumPage';
 
 // ========== Styles ==========
 import './index.css';
@@ -36,22 +37,27 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        {/* Authentication Routes (without Layout) */}
-        <Route path="/login-page" element={<LoginPage />} />
-        {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
-        <Route path="/sign-up-page" element={<SignUpPage />} />
-        
-        {/* Routes with Layout */}
-        <Route element={<Layout />}>
-          {/* Main Routes */}
-          <Route path="/" element={<AvilaLanding />} />
-          <Route path="/foro" element={<Foro />} />
+      {/* Wrap everything in AuthProvider so context is available throughout the app */}
+      <AuthProvider>
+        <Routes>
+          {/* Authentication Routes (without Layout) */}
+          <Route path="/login-page" element={<LoginPage />} />
+          <Route path="/Old" element={<OldLoginPage />} />
+          {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
+          <Route path="/signUpPage" element={<SignUpPage />} />
+          <Route path="/OldSignUp" element={<OldSignUpPage />} />
           
-          {/* Testing Routes */}
-          <Route path="/firestore-test" element={<FirestoreTest />} />
-          <Route path="/auth-test" element={<AuthTest />} />
-          <Route path="/storage-test" element={<StorageTest />} />
+          {/* Routes with Layout */}
+          <Route element={<Layout />}>
+            {/* Main Routes */}
+            <Route path="/" element={<AvilaLanding />} />
+            <Route path="/foro" element={<ForumPage />} />
+
+            <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+            <Route path="/galeria" element={<GalleryPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
 
           <Route path="/profile-management-page" element={<ProfileManagementPage />} />
           <Route path="/gallery-page" element={<GalleryPage />} />

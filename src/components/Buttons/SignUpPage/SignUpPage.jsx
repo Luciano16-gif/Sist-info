@@ -5,7 +5,7 @@ import { collection, getDocs, query, where, addDoc, setDoc, doc } from 'firebase
 import { useNavigate } from 'react-router-dom';
 import './SignUpPage.css';
 
-function SignUpPage() {
+function OldSignUpPage() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -170,4 +170,4 @@ function SignUpPage() {
   );
 }
 
-export default SignUpPage;
+export default OldSignUpPage;

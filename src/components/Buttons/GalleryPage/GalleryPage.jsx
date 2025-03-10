@@ -149,6 +149,13 @@ function GalleryPage() {
         const file = event.target.files[0];
         if (!file) return;
 
+        // --- FILE TYPE CHECK ---
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
+            return;
+        }
+
         setUploading(true);
         setUploadProgress(0);
 
