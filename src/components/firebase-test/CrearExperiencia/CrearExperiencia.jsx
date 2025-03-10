@@ -566,7 +566,7 @@ function CrearExperiencia() {
                             <div className="add-activity-container">
                                 <input
                                     type="text"
-                                    placeholder="Nuevo incluido..."
+                                    placeholder="Nuevo Item..."
                                     value={nuevoIncluido}
                                     onChange={(e) => setNuevoIncluido(e.target.value)}
                                     className="nuevo-tipo-input"

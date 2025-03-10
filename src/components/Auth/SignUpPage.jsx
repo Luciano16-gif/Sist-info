@@ -141,12 +141,13 @@ function SignUpPage() {
               value={formData.password}
               onChange={handleInputChange('password')}
               placeholder="Password"
+              className="lg:w-1/2"
             />
           </div>
         </div>
         
         <AuthButton 
-          className="auth-button"
+          className="auth-button lg:w-1/3"
           onClick={handleSignUp}
         >
           Registrarse
