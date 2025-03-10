@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
 import LayoutUser from './components/layout/LayoutUser';
+import LayoutAdmin from './components/layout/LayoutAdmin';
 
 // ========== Page Components ==========
 // Authentication Pages
@@ -52,9 +53,6 @@ root.render(
           <Route path="/" element={<AvilaLanding />} />
           <Route path="/foro" element={<Foro />} />
           <Route path="/equipo" element={<OurTeam />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin-landing" element={<AdminLanding />} />
 
           {/* Testing Routes */}
           <Route path="/firestore-test" element={<FirestoreTest />} />
@@ -70,7 +68,14 @@ root.render(
           {/* Main Routes */}
           <Route path="/landing-page-user" element={<AvilaLandingUser />} />
         </Route>
+
+        {/* Routes with LayoutAdmin */}
+        <Route element={<LayoutAdmin />}>
+          {/* Admin Routes */}
+          <Route path="/admin-landing" element={<AdminLanding />} />
+        </Route>
       </Routes>
+
 
     </BrowserRouter>
   </React.StrictMode>
