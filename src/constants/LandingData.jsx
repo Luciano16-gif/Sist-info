@@ -202,7 +202,7 @@ export const publicaciones = [
 // ========== Routes section ==========
 
 export { default as routes_background } from "../assets/images/landing-page/ideal-routes/routes-background.webp";
-
+/*
 import card_1 from "../assets/images/landing-page/ideal-routes/cards/card_1.webp";
 import card_2 from "../assets/images/landing-page/ideal-routes/cards/card_2.webp";
 import card_3 from "../assets/images/landing-page/ideal-routes/cards/card_3.webp";
@@ -214,4 +214,115 @@ export const routesData = [
   { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 },
   { difficulty: 4, length: 4, rating: 5, spots: 20, maxSpots: 40 },
   { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 }
+];
+*/
+import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.jpg";
+import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.jpg";
+import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.jpg";
+import photo4 from "../assets/images/landing-page-user-photos/route-bubbles/photo4.webp";
+import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.jpg";
+import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.jpg";
+import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.jpg";
+import photo8 from "../assets/images/landing-page-user-photos/route-bubbles/photo8.webp";
+
+export const routesData = [
+  {
+    id: 1,
+    image: photo1,
+    title: "Ruta 1",
+    difficulty: 3,
+    length: 4,
+    rating: 5,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 30,
+    totalSlots: 40,
+  },
+  {
+    id: 2,
+    image: photo2,
+    title: "Ruta 2",
+    difficulty: 4,
+    length: 5,
+    rating: 4,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 20,
+    totalSlots: 40,
+  },
+  {
+    id: 3,
+    image: photo3,
+    title: "Ruta 3",
+    difficulty: 2,
+    length: 3,
+    rating: 5,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 8,
+    totalSlots: 40,
+  },
+  {
+    id: 4,
+    image: photo4,
+    title: "Ruta 4",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 20,
+    totalSlots: 40,
+  },
+  {
+    id: 5,
+    image: photo5,
+    title: "Ruta 5",
+    difficulty: 3,
+    length: 4,
+    rating: 5,
+    time: "8:00AM - 4:00PM",
+    availableSlots: 15,
+    totalSlots: 30,
+  },
+  {
+    id: 6,
+    image: photo6,
+    title: "Ruta 6",
+    difficulty: 4,
+    length: 5,
+    rating: 4,
+    time: "9:00AM - 5:00PM",
+    availableSlots: 25,
+    totalSlots: 40,
+  },
+  {
+    id: 7,
+    image: photo7,
+    title: "Ruta 7",
+    difficulty: 2,
+    length: 3,
+    rating: 5,
+    time: "10:00AM - 6:00PM",
+    availableSlots: 10,
+    totalSlots: 20,
+  },
+  {
+    id: 8,
+    image: photo8,
+    title: "Ruta 8",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "11:00AM - 7:00PM",
+    availableSlots: 30,
+    totalSlots: 50,
+  },
+  {
+    id: 9,
+    image: photo8,
+    title: "Ruta 8",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "11:00AM - 7:00PM",
+    availableSlots: 30,
+    totalSlots: 50,
+  }
 ];

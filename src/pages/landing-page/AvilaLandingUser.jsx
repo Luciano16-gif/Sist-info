@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import HeroSection from '../../components/landing-page/HeroSection';
-import Divider from '../../components/landing-page-user/Divider';
+import Divider from '../../components/landing-page/Divider';
 import FeatureSection from '../../components/landing-page-user/FeatureSection';
 import RouteCards from '../../components/landing-page-user/RouteCards';
 import StackedCards from '../../components/landing-page-user/StackedCards'; // Nuevo import

@@ -1,7 +1,3 @@
-//import { BackgroundCircles } from './BackgroundElements';
-import FeatureCard from './FeatureCard';
-import { FEATURES } from '../../constants/LandingUserData';
-
 const FeatureSection = () => (
   // Added w-full to ensure full width
   <div className="relative w-full md:px-16 bg-[rgba(13,24,6,1)]">    

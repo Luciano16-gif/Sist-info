@@ -18,7 +18,6 @@ import SignUpPage from './components/Auth/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
-//import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
@@ -49,12 +48,6 @@ root.render(
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
           </Route>
-
-          {/* Routes with LayoutUser 
-          <Route element={<LayoutUser />}>
-            
-            <Route path="/landing-page-user" element={<AvilaLandingUser />} />
-          </Route>*/}
         </Routes>
       </AuthProvider>
     </BrowserRouter>
