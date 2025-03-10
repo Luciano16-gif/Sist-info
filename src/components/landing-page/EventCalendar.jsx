@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 const EventCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(2025);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [focusedCell, setFocusedCell] = useState(null);
+  
+  // Reference to store the grid of day cell refs for keyboard navigation
+  const dayRefs = useRef([]);
   
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -74,7 +78,8 @@ const EventCalendar = () => {
     { date: '2025-12-10', title: 'Yoga matutino', description: 'Sesión de yoga al amanecer en el mirador', color: 'bg-pink-400' }
   ];
 
-  const getDaysInMonth = () => {
+  // Memoize calendar days calculation to prevent recalculation on every render
+  const daysInMonth = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const days = [];
@@ -94,31 +99,145 @@ const EventCalendar = () => {
       days.push(week);
     }
     return days;
+  }, [currentMonth, currentYear]);
+
+  // Memoize the events for the current month to avoid recalculation
+  const currentMonthEvents = useMemo(() => {
+    const monthStr = String(currentMonth + 1).padStart(2, '0');
+    const yearStr = String(currentYear);
+    // Filter events for current month only
+    return events.filter(event => 
+      event.date.startsWith(`${yearStr}-${monthStr}`)
+    );
+  }, [currentMonth, currentYear, events]);
+
+  // Memoize the getEventsForDay function to improve performance
+  const getEventsForDay = useMemo(() => {
+    return (day) => {
+      if (!day) return [];
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return currentMonthEvents.filter(event => event.date === dateStr);
+    };
+  }, [currentMonthEvents, currentMonth, currentYear]);
+
+  // Adjust selectedDate when changing months to handle months with different number of days
+  const adjustSelectedDate = (newMonth, newYear) => {
+    if (selectedDate) {
+      // Get days in the new month
+      const daysInNewMonth = new Date(newYear, newMonth + 1, 0).getDate();
+      
+      // If selectedDate is greater than the days in the new month, adjust it
+      if (selectedDate > daysInNewMonth) {
+        setSelectedDate(daysInNewMonth);
+      }
+    }
   };
 
   const handlePrevMonth = () => {
+    let newMonth, newYear;
+    
     if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
+      newMonth = 11;
+      newYear = currentYear - 1;
     } else {
-      setCurrentMonth(currentMonth - 1);
+      newMonth = currentMonth - 1;
+      newYear = currentYear;
     }
+    
+    adjustSelectedDate(newMonth, newYear);
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
   };
 
   const handleNextMonth = () => {
+    let newMonth, newYear;
+    
     if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
+      newMonth = 0;
+      newYear = currentYear + 1;
     } else {
-      setCurrentMonth(currentMonth + 1);
+      newMonth = currentMonth + 1;
+      newYear = currentYear;
+    }
+    
+    adjustSelectedDate(newMonth, newYear);
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e, weekIndex, dayIndex, day) => {
+    if (!day) return; // Skip empty cells
+    
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        if (dayIndex < 6) {
+          const nextDay = daysInMonth[weekIndex][dayIndex + 1];
+          if (nextDay) {
+            setFocusedCell({ weekIndex, dayIndex: dayIndex + 1 });
+            dayRefs.current[`${weekIndex}-${dayIndex + 1}`]?.focus();
+          }
+        } else if (weekIndex < daysInMonth.length - 1) {
+          const nextDay = daysInMonth[weekIndex + 1][0];
+          if (nextDay) {
+            setFocusedCell({ weekIndex: weekIndex + 1, dayIndex: 0 });
+            dayRefs.current[`${weekIndex + 1}-0`]?.focus();
+          }
+        }
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (dayIndex > 0) {
+          const prevDay = daysInMonth[weekIndex][dayIndex - 1];
+          if (prevDay) {
+            setFocusedCell({ weekIndex, dayIndex: dayIndex - 1 });
+            dayRefs.current[`${weekIndex}-${dayIndex - 1}`]?.focus();
+          }
+        } else if (weekIndex > 0) {
+          const prevDay = daysInMonth[weekIndex - 1][6];
+          if (prevDay) {
+            setFocusedCell({ weekIndex: weekIndex - 1, dayIndex: 6 });
+            dayRefs.current[`${weekIndex - 1}-6`]?.focus();
+          }
+        }
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (weekIndex < daysInMonth.length - 1) {
+          const downDay = daysInMonth[weekIndex + 1][dayIndex];
+          if (downDay) {
+            setFocusedCell({ weekIndex: weekIndex + 1, dayIndex });
+            dayRefs.current[`${weekIndex + 1}-${dayIndex}`]?.focus();
+          }
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (weekIndex > 0) {
+          const upDay = daysInMonth[weekIndex - 1][dayIndex];
+          if (upDay) {
+            setFocusedCell({ weekIndex: weekIndex - 1, dayIndex });
+            dayRefs.current[`${weekIndex - 1}-${dayIndex}`]?.focus();
+          }
+        }
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (day) {
+          setSelectedDate(day);
+        }
+        break;
+      default:
+        break;
     }
   };
 
-  const getEventsForDay = (day) => {
-    if (!day) return [];
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return events.filter(event => event.date === dateStr);
-  };
+  // Initialize the ref array when the calendar days change
+  useEffect(() => {
+    dayRefs.current = {};
+  }, [daysInMonth]);
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-12">
@@ -129,67 +248,82 @@ const EventCalendar = () => {
             <button 
               onClick={handlePrevMonth}
               className="text-white text-2xl focus:outline-none"
+              aria-label={`Ir al mes anterior: ${months[currentMonth === 0 ? 11 : currentMonth - 1]}`}
             >
               ←
             </button>
-            <h2 className="text-white text-3xl font-bold">
+            <h2 className="text-white text-3xl font-bold" id="current-month">
               {months[currentMonth]} {currentYear}
             </h2>
             <button 
               onClick={handleNextMonth}
               className="text-white text-2xl focus:outline-none"
+              aria-label={`Ir al mes siguiente: ${months[currentMonth === 11 ? 0 : currentMonth + 1]}`}
             >
               →
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-2 mb-6 text-center">
+          <div className="grid grid-cols-7 gap-2 mb-6 text-center" role="row">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-              <div key={day} className="text-white font-semibold">
+              <div key={day} className="text-white font-semibold" role="columnheader">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
-            {getDaysInMonth().map((week, weekIndex) => (
-              week.map((day, dayIndex) => {
-                const currentDate = new Date();
-                const isToday = 
-                  currentYear === currentDate.getFullYear() &&
-                  currentMonth === currentDate.getMonth() &&
-                  day === currentDate.getDate();
+          <div className="grid grid-cols-7 gap-2" role="grid" aria-labelledby="current-month">
+            {daysInMonth.map((week, weekIndex) => (
+              <React.Fragment key={`week-${weekIndex}`}>
+                {week.map((day, dayIndex) => {
+                  const currentDate = new Date();
+                  const isToday = 
+                    currentYear === currentDate.getFullYear() &&
+                    currentMonth === currentDate.getMonth() &&
+                    day === currentDate.getDate();
+                    
+                  const dayEvents = day ? getEventsForDay(day) : [];
+                  const isSelected = day && day === selectedDate;
+                  const cellId = `${weekIndex}-${dayIndex}`;
                   
-                const dayEvents = getEventsForDay(day);
-                
-                return (
-                  <div 
-                    key={`${weekIndex}-${dayIndex}`}
-                    className={`relative rounded-lg p-2 cursor-pointer transition-colors ${
-                      isToday ? 'bg-green-500' : 'hover:bg-gray-700'
-                    }`}
-                    onClick={() => day && setSelectedDate(day)}
-                  >
-                    {day && (
-                      <>
-                        <div className="text-white text-center">
-                          {day}
-                        </div>
-                        {dayEvents.length > 0 && (
-                          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                            {dayEvents.map((event, index) => (
-                              <div 
-                                key={index}
-                                className={`w-2 h-2 rounded-full ${event.color}`}
-                              />
-                            ))}
+                  return (
+                    <div 
+                      key={cellId}
+                      ref={el => day && (dayRefs.current[cellId] = el)}
+                      role={day ? "gridcell" : "presentation"}
+                      tabIndex={day ? 0 : -1}
+                      aria-selected={isSelected}
+                      aria-label={day ? `${day} de ${months[currentMonth]} de ${currentYear}${dayEvents.length > 0 ? `, ${dayEvents.length} eventos` : ''}` : undefined}
+                      className={`relative rounded-lg p-2 transition-colors ${
+                        isToday ? 'bg-green-500' : 
+                        isSelected ? 'bg-blue-500' :
+                        day ? 'hover:bg-gray-700' : ''
+                      } ${day ? 'cursor-pointer' : ''}`}
+                      onClick={() => day && setSelectedDate(day)}
+                      onKeyDown={(e) => handleKeyDown(e, weekIndex, dayIndex, day)}
+                    >
+                      {day && (
+                        <>
+                          <div className="text-white text-center">
+                            {day}
                           </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })
+                          {dayEvents.length > 0 && (
+                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                              {dayEvents.map((event, index) => (
+                                <div 
+                                  key={index}
+                                  className={`w-2 h-2 rounded-full ${event.color}`}
+                                  aria-hidden="true"
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
             ))}
           </div>
         </div>
@@ -219,6 +353,9 @@ const EventCalendar = () => {
                   </p>
                 </div>
               ))}
+              {getEventsForDay(selectedDate).length === 0 && (
+                <p className="text-gray-300">No hay eventos para esta fecha</p>
+              )}
               </div>
             </>
           )}
