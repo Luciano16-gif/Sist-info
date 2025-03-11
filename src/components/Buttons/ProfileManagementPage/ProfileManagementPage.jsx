@@ -13,7 +13,7 @@ function ProfileManagementPage() {
     const [correoElectronico, setCorreoElectronico] = useState('');
     const [numeroTelefonico, setNumeroTelefonico] = useState('');
     const [fechaRegistro, setFechaRegistro] = useState('');
-    const [contraseña, setContraseña] = useState('');
+    // const [contraseña, setContraseña] = useState('');  // REMOVED
     const [file, setFile] = useState(null); // Stores the selected file
     const [fotoPerfilUrl, setFotoPerfilUrl] = useState(''); // Stores the URL of the profile picture
     const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ function ProfileManagementPage() {
                          setFechaRegistro('');
                     }
 
-                    setContraseña(userData.password || '');
+                    // setContraseña(userData.password || ''); // REMOVED
                     setFotoPerfilUrl(userData['Foto de Perfil'] || '');
 
                     // Activities Performed
@@ -165,10 +165,10 @@ function ProfileManagementPage() {
                 alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
                 return;
             }
-            if (contraseña && contraseña.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres.');
-                return;
-             }
+            // if (contraseña && contraseña.length < 6) {  // REMOVED Password Validation
+            //     alert('La contraseña debe tener al menos 6 caracteres.');
+            //     return;
+            //  }
 
             // --- File Upload Logic ---
             let fotoPerfilUrl = ''; // Variable to store the download URL
@@ -208,10 +208,10 @@ function ProfileManagementPage() {
                             phone: numeroTelefonico,
                         };
 
-                        // Conditionally update password
-                        if (contraseña) {
-                            updateData.password = contraseña;
-                        }
+                        // // Conditionally update password  // REMOVED Password Update
+                        // if (contraseña) {
+                        //     updateData.password = contraseña;
+                        // }
                         await updateDoc(userRef, updateData);
                          window.location.reload();
                     }
@@ -224,10 +224,10 @@ function ProfileManagementPage() {
                     phone: numeroTelefonico,
                     // Don't include 'Foto de Perfil' here
                 };
-                 // Conditionally update password
-                if (contraseña) {
-                  updateData.password = contraseña;
-                }
+                //  // Conditionally update password // REMOVED Password Update
+                // if (contraseña) {
+                //   updateData.password = contraseña;
+                // }
                 await updateDoc(userRef, updateData);
                 window.location.reload();
             }
@@ -306,7 +306,8 @@ function ProfileManagementPage() {
                         <p className="subtitle">FECHA DE REGISTRO</p>
                         <p className="subtext">{fechaRegistro}</p>
                     </div>
-                    {isEditing && (
+                    {/* REMOVED Password Section */}
+                    {/* {isEditing && (
                         <div className="info-item">
                             <p className="subtitle">CONTRASEÑA</p>
                             <input
@@ -316,7 +317,7 @@ function ProfileManagementPage() {
                                 className="subtext-input"
                             />
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Stats and Conditional Rendering */}
