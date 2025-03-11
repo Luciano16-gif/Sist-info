@@ -17,7 +17,7 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
 // Separator Component (Best practice: put this in a separate file, e.g., Separator.js)
 const Separator = () => (
-    <hr className="border-t border-gray-600 mx-4" />
+    <hr className="border-t border-white-600 mx-4" />
 );
 
 const Sidebar = () => {
@@ -100,7 +100,7 @@ const Sidebar = () => {
 
             {/* Logo (Centered) */}
             <div className="mb-8 flex flex-wrap items-center justify-center m-1">
-                <img src={logoImage} alt="Logo" className="w-full h-full max-w-48 mr-2" />
+                <img src={logoImage} alt="Logo" className="w-full h-full max-w-40 mr-2" />
                 {/* Show text on expand{isExpanded && <span className="text-2xl font-bold">Admin Panel</span>} */}
             </div>
 
