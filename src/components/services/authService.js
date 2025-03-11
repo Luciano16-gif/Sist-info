@@ -100,28 +100,43 @@ export const emailSignUp = async (userData) => {
       throw new Error('Este correo ya está registrado.');
     }
 
-    // Create the Firebase auth user
+    // Create the Firebase auth user first
     const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
+    const user = userCredential.user;
     
-    // Create user document - IMPORTANT: Don't store the password
-    const docRef = doc(usersCollection, trimmedEmail);
-    
-    await setDoc(docRef, {
-      email: trimmedEmail,
-      name,
-      lastName,
-      phone,
-      'Registro/Inicio de Sesión': 'Correo-Contraseña',
-      userType: "usuario",
-      days: [],
-      actualRoute: [],
-      activitiesPerformed: [],
-      mostPerformedActivity: {Actividad:"", timesPerformed: 0},
-      schedule: [],
-      activitiesCreated: []
-    });
-    
-    return userCredential.user;
+    try {
+      // Create user document only after authentication is successful
+      const docRef = doc(usersCollection, trimmedEmail);
+      
+      await setDoc(docRef, {
+        email: trimmedEmail,
+        name,
+        lastName,
+        phone,
+        'Registro/Inicio de Sesión': 'Correo-Contraseña',
+        userType: "usuario",
+        days: [],
+        actualRoute: [],
+        activitiesPerformed: [],
+        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+        schedule: [],
+        activitiesCreated: []
+      });
+      
+      return user;
+    } catch (firestoreError) {
+      // If Firestore write fails, delete the auth user to avoid orphaned accounts
+      console.error("Error writing to Firestore: ", firestoreError);
+      
+      try {
+        await user.delete();
+      } catch (deleteError) {
+        console.error("Failed to delete auth user after Firestore error: ", deleteError);
+      }
+      
+      // Rethrow the original error with more specific information
+      throw new Error(`Error al guardar datos de usuario: ${firestoreError.message || firestoreError.code || 'Revise los permisos de Firestore'}`);
+    }
   } catch (error) {
     console.error("Sign up error:", error);
     const errorMessage = getAuthErrorMessage(error.code) || error.message;

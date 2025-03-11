@@ -26,10 +26,15 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "headers": [
       {
         "source": "**",
-        "destination": "/index.html"
+        "headers": [
+          {
+            "key": "Cross-Origin-Opener-Policy",
+            "value": "same-origin-allow-popups"
+          }
+        ]
       }
     ]
   },
