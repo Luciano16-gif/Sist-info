@@ -97,12 +97,12 @@ export const EXPLORE_TEXTS = [
   }
 ];
 
-import TipCard1 from "../assets/images/landing-page-user-photos/tip-cards/TipCard1.png";
-import TipCard2 from "../assets/images/landing-page-user-photos/tip-cards/TipCard2.png";
-import TipCard3 from "../assets/images/landing-page-user-photos/tip-cards/TipCard3.png";
-import TipCard4 from "../assets/images/landing-page-user-photos/tip-cards/TipCard4.png";
-import TipCard5 from "../assets/images/landing-page-user-photos/tip-cards/TipCard5.png";
-import TipCard6 from "../assets/images/landing-page-user-photos/tip-cards/TipCard6.png";
+import TipCard1 from "../assets/images/landing-page-user-photos/tip-cards/TipCard1.webp";
+import TipCard2 from "../assets/images/landing-page-user-photos/tip-cards/TipCard2.webp";
+import TipCard3 from "../assets/images/landing-page-user-photos/tip-cards/TipCard3.webp";
+import TipCard4 from "../assets/images/landing-page-user-photos/tip-cards/TipCard4.webp";
+import TipCard5 from "../assets/images/landing-page-user-photos/tip-cards/TipCard5.webp";
+import TipCard6 from "../assets/images/landing-page-user-photos/tip-cards/TipCard6.webp";
 
 export const gallery_with_session = [TipCard1, TipCard2, TipCard3, TipCard4, TipCard5, TipCard6];
 
@@ -216,13 +216,13 @@ export const routesData = [
   { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 }
 ];
 */
-import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.jpg";
-import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.jpg";
-import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.jpg";
+import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.webp";
+import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.webp";
+import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.webp";
 import photo4 from "../assets/images/landing-page-user-photos/route-bubbles/photo4.webp";
-import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.jpg";
-import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.jpg";
-import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.jpg";
+import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.webp";
+import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.webp";
+import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.webp";
 import photo8 from "../assets/images/landing-page-user-photos/route-bubbles/photo8.webp";
 
 export const routesData = [
