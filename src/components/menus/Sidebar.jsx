@@ -77,7 +77,7 @@ const Sidebar = () => {
                 flex-col
                 h-screen
                 ${isExpanded ? 'w-64' : (isMobile ? 'w-0' : 'w-16')}
-                bg-gray-800
+                bg-[#3A4C2E] 
                 text-white
                 py-4
                 transition-all
@@ -100,8 +100,8 @@ const Sidebar = () => {
 
             {/* Logo (Centered) */}
             <div className="mb-8 flex flex-wrap items-center justify-center m-1">
-                <img src={logoImage} alt="Logo" className="w-full h-full mr-2" />
-                {isExpanded && <span className="text-2xl font-bold">Admin Panel</span>} {/* Show text on expand */}
+                <img src={logoImage} alt="Logo" className="w-full h-full max-w-48 mr-2" />
+                {/* Show text on expand{isExpanded && <span className="text-2xl font-bold">Admin Panel</span>} */}
             </div>
 
             {/* Separator */}
