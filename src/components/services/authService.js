@@ -36,7 +36,9 @@ const getAuthErrorMessage = (errorCode) => {
     'auth/user-not-found': 'Usuario no encontrado.',
     'auth/invalid-email': 'Por favor, utiliza un correo electrónico válido.',
     'auth/email-already-in-use': 'Este correo electrónico ya está en uso.',
-    'auth/popup-closed-by-user': null, // No message needed
+    'auth/popup-closed-by-user': 'Se cerró la ventana de autenticación de Google.',
+    'auth/cancelled-popup-request': 'Operación cancelada. Por favor, inténtalo de nuevo.',
+    'auth/network-request-failed': 'Error de conexión. Verifica tu conexión a internet.',
     'default': 'Ocurrió un error durante la autenticación.'
   };
   
@@ -133,8 +135,13 @@ export const googleAuth = async (isSignUp = false) => {
     const user = result.user;
     const trimmedEmail = user.email.trim();
 
+    // Validate email - important check!
     if (!validateEmail(trimmedEmail)) {
+      // Sign out immediately to prevent any auth state changes
       await signOut(auth);
+      // Wait a moment for the signOut to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      // Throw an error with clear messaging
       throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
     }
 
@@ -181,8 +188,20 @@ export const googleAuth = async (isSignUp = false) => {
     return user;
   } catch (error) {
     console.error("Google auth error:", error);
+    
+    // This is important - if we receive any error, ensure we're signed out
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await signOut(auth);
+      }
+    } catch (signOutError) {
+      console.error("Error signing out after auth error:", signOutError);
+    }
+    
+    // Special handling for user closing the popup - no need for error
     if (error.code === 'auth/popup-closed-by-user') {
-      return null; // User closed the popup, no need for error
+      throw new Error('Se cerró la ventana de autenticación.');
     }
     
     const errorMessage = getAuthErrorMessage(error.code) || error.message;
