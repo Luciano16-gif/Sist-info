@@ -10,6 +10,7 @@ import { AuthProvider } from './components/contexts/AuthContext';
 
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
+import LayoutAdmin from './components/layout/LayoutAdmin';
 
 // ========== Page Components ==========
 // Authentication Pages
@@ -26,6 +27,10 @@ import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearE
 import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 import BookingPage from './pages/BookingPage/BookingPage';
 import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
+import OurTeam from './components/nuestro-equipo/OurTeam';
+
+// Admin Pages
+import AdminLanding from './pages/Admin-landing/AdminLanding';
 
 // ========== Styles ==========
 import './index.css';
@@ -48,6 +53,7 @@ root.render(
             {/* Main Routes */}
             <Route path="/" element={<AvilaLanding />} />
             <Route path="/foro" element={<ForumPage />} />
+            <Route path="/equipo" element={<OurTeam />} />
             <Route path="/experiencias" element={<ExperiencesPage />} />
             <Route path="/crear-experiencia" element={<CrearExperiencia />} />
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
@@ -55,6 +61,13 @@ root.render(
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking-process" element={<BookingProcessPage />} />
           </Route>
+
+          {/* Routes with LayoutAdmin */}
+          <Route element={<LayoutAdmin />}>
+            {/* Admin Routes */}
+            <Route path="/admin-landing" element={<AdminLanding />} />
+          </Route>
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
