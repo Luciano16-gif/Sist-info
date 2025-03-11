@@ -6,6 +6,10 @@
 
 html, body {
   @apply font-ysabeau;
+  height: 100%;  /* O elimina si causa problemas.  A veces es mejor sin esto. */
+  overflow: auto;
+  margin: 0;
+
 }
 
 .app-container {

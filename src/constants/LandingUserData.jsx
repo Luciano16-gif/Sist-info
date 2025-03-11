@@ -2,6 +2,8 @@
 
 export { default as HERO_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
 
+export { default as TIP_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
+
 // ========== Features section ==========
 
 export const FEATURES = [
@@ -50,133 +52,17 @@ export const FEATURES = [
   }
 ];
 
-// ========== Explore section ==========
-
-export { default as explore_image } from "../assets/images/landing-page/explore/explore.webp";
-
-
-import gallery_1 from "../assets/images/landing-page/explore/gallery/gallery_1.webp";
- 
-import gallery_2 from "../assets/images/landing-page/explore/gallery/gallery_2.webp";
- 
-import gallery_3 from "../assets/images/landing-page/explore/gallery/gallery_3.webp";
- 
-import gallery_4 from "../assets/images/landing-page/explore/gallery/gallery_4.webp";
- 
-import gallery_5 from "../assets/images/landing-page/explore/gallery/gallery_5.webp";
- 
-import gallery_6 from "../assets/images/landing-page/explore/gallery/gallery_6.webp";
-
-export const gallery = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
-
-export const EXPLORE_TEXTS = [
-  {
-    title: "EXPLORA E",
-    subtitle: "INSPIRA TU VIDA",
-    description: "La belleza del Ávila en cada foto..."
-  },
-  {
-    title: "DESCUBRE",
-    subtitle: "NUEVAS RUTAS",
-    description: "Senderos de ensueño que te llevan a paisajes increíbles."
-  },
-  {
-    title: "CONECTA CON",
-    subtitle: "LA NATURALEZA",
-    description: "Flora y fauna única en un entorno natural impresionante."
-  },
-  {
-    title: "SUPERA TUS",
-    subtitle: "LÍMITES",
-    description: "Desafíos que transforman y elevan tu espíritu aventurero."
-  },
-  {
-    title: "MEMORIAS",
-    subtitle: "INOLVIDABLES",
-    description: "Momentos para recordar en este maravilloso parque natural."
-  },
-  {
-    title: "AVENTURAS",
-    subtitle: "EN GRUPO",
-    description: "Comparte la experiencia con amigos y familiares."
-  }
-];
-
-// ========== Testimonials section ==========
-
- 
-import user471 from "../assets/images/landing-page/publications/user471.webp";
- 
-import user1982 from "../assets/images/landing-page/publications/user1982.webp";
- 
-import user2567 from "../assets/images/landing-page/publications/user2567.webp";
-
- 
-import andrea from "../assets/images/landing-page/publications/andrea.webp";
- 
-import carlos from "../assets/images/landing-page/publications/carlos.webp";
- 
-import victoria from "../assets/images/landing-page/publications/victoria.webp";
-
-export const testimonios = [
-  {
-    id: 1,
-    usuario: 'Usuario #1982:',
-    comentario: '¡Una experiencia increíble! Las rutas son impresionantes y los guías son muy profesionales. Sin duda, volveré a esta área más del Ávila con ustedes.',
-    avatar: user1982,
-    estrellas: 5
-  },
-  {
-    id: 2,
-    usuario: 'Usuario #471:',
-    comentario: 'Me encantó cada minuto de la excursión. La belleza del parque es incomparable y los senderos que todo turista ama nos esperaba. ¡Totalmente recomendado!',
-    avatar: user471,
-    estrellas: 5
-  },
-  {
-    id: 3,
-    usuario: 'Usuario #2567:',
-    comentario: 'Perfecto para desconectar. Las rutas son bien señalizadas y el servicio fue excepcional. Gracias por una aventura inolvidable en el Ávila.',
-    avatar: user2567,
-    estrellas: 5
-  }
-];
-
-export const publicaciones = [
-  {
-    id: 1,
-    usuario: 'Victoria G.',
-    fechaPublicacion: '08/12/2024',
-    imagen: victoria,
-    hashtags: '#Ávila #Venezuela #Montaña #Ejercicio #ÁvilaAventuras #Motivacion'
-  },
-  {
-    id: 2,
-    usuario: 'Carlos T.',
-    fechaPublicacion: '12/01/2025',
-    imagen: carlos,
-    hashtags: '#Diversion #Naturaleza #Ávila #ParqueElÁvila #Excursion #ÁvilaAventuras'
-  },
-  {
-    id: 3,
-    usuario: 'Andrea P.',
-    fechaPublicacion: '25/11/2024',
-    imagen: andrea,
-    hashtags: '#Aventura #Ávila #Excursion #Ruta #ÁvilaAventuras #AmoVenezuela'
-  }
-];
-
 
 // ========== Route Cards section ==========
 
  
-import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.jpg";
-import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.jpg";
-import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.jpg";
+import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.webp";
+import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.webp";
+import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.webp";
 import photo4 from "../assets/images/landing-page-user-photos/route-bubbles/photo4.webp";
-import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.jpg";
-import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.jpg";
-import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.jpg";
+import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.webp";
+import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.webp";
+import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.webp";
 import photo8 from "../assets/images/landing-page-user-photos/route-bubbles/photo8.webp";
 
 export const routesData = [
@@ -269,3 +155,23 @@ export const routesData = [
     totalSlots: 50,
   }
 ];
+
+
+// ========== Tip section ==========
+
+export { default as explore_image } from "../assets/images/landing-page/explore/explore.webp";
+
+
+import TipCard1 from "../assets/images/landing-page-user-photos/tip-cards/TipCard1.webp";
+ 
+import TipCard2 from "../assets/images/landing-page-user-photos/tip-cards/TipCard2.webp";
+ 
+import TipCard3 from "../assets/images/landing-page-user-photos/tip-cards/TipCard3.webp";
+ 
+import TipCard4 from "../assets/images/landing-page-user-photos/tip-cards/TipCard4.webp";
+ 
+import TipCard5 from "../assets/images/landing-page-user-photos/tip-cards/TipCard5.webp";
+ 
+import TipCard6 from "../assets/images/landing-page-user-photos/tip-cards/TipCard6.webp";
+
+export const gallery2 = [TipCard1, TipCard2, TipCard3, TipCard4, TipCard5, TipCard6];

@@ -1,6 +1,7 @@
 // ========== HERO SECTION ==========
 
-export { default as HERO_IMAGE } from "../assets/images/landing-page/HERO/avila.webp";
+export { default as HERO_IMAGE_NO_SESSION } from "../assets/images/landing-page/HERO/avila.webp";
+export { default as HERO_IMAGE_SESSION } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
 
 // ========== Features section ==========
 
@@ -61,7 +62,7 @@ import gallery_4 from "../assets/images/landing-page/explore/gallery/gallery_4.w
 import gallery_5 from "../assets/images/landing-page/explore/gallery/gallery_5.webp";
 import gallery_6 from "../assets/images/landing-page/explore/gallery/gallery_6.webp";
 
-export const gallery = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
+export const gallery_no_session = [gallery_1, gallery_2, gallery_3, gallery_4, gallery_5, gallery_6];
 
 export const EXPLORE_TEXTS = [
   {
@@ -93,6 +94,48 @@ export const EXPLORE_TEXTS = [
     title: "AVENTURAS",
     subtitle: "EN GRUPO",
     description: "Comparte la experiencia con amigos y familiares."
+  }
+];
+
+import TipCard1 from "../assets/images/landing-page-user-photos/tip-cards/TipCard1.webp";
+import TipCard2 from "../assets/images/landing-page-user-photos/tip-cards/TipCard2.webp";
+import TipCard3 from "../assets/images/landing-page-user-photos/tip-cards/TipCard3.webp";
+import TipCard4 from "../assets/images/landing-page-user-photos/tip-cards/TipCard4.webp";
+import TipCard5 from "../assets/images/landing-page-user-photos/tip-cards/TipCard5.webp";
+import TipCard6 from "../assets/images/landing-page-user-photos/tip-cards/TipCard6.webp";
+
+export const gallery_with_session = [TipCard1, TipCard2, TipCard3, TipCard4, TipCard5, TipCard6];
+
+export const HIKING_TIPS_TEXTS = [
+  {
+    title: "TIP #1",
+    subtitle: "CON EQUIPO ADECUADO",
+    description: "Viste capas de ropa ajustables y lleva una mochila con agua, comida y botiquín."
+  },
+  {
+    title: "TIP #2",
+    subtitle: "BIEN HIDRATADO",
+    description: "Bebe agua regularmente, la altitud y el esfuerzo pueden deshidratarte rápidamente."
+  },
+  {
+    title: "TIP #3",
+    subtitle: "LA NATURALEZA",
+    description: "Permanece en los senderos marcados y lleva tu basura de vuelta al terminar."
+  },
+  {
+    title: "TIP #4",
+    subtitle: "TECNOLÓGICA",
+    description: "Un teléfono o GPS puede salvarte en emergencias, lleva batería extra."
+  },
+  {
+    title: "TIP #5",
+    subtitle: "TUS LÍMITES",
+    description: "Escucha las señales de tu cuerpo y descansa cuando sea necesario."
+  },
+  {
+    title: "TIP #6",
+    subtitle: "TU PIEL",
+    description: "Aplica protector solar de amplio espectro, incluso en días nublados."
   }
 ];
 
@@ -159,7 +202,7 @@ export const publicaciones = [
 // ========== Routes section ==========
 
 export { default as routes_background } from "../assets/images/landing-page/ideal-routes/routes-background.webp";
-
+/*
 import card_1 from "../assets/images/landing-page/ideal-routes/cards/card_1.webp";
 import card_2 from "../assets/images/landing-page/ideal-routes/cards/card_2.webp";
 import card_3 from "../assets/images/landing-page/ideal-routes/cards/card_3.webp";
@@ -172,3 +215,122 @@ export const routesData = [
   { difficulty: 4, length: 4, rating: 5, spots: 20, maxSpots: 40 },
   { difficulty: 3, length: 3, rating: 5, spots: 20, maxSpots: 40 }
 ];
+*/
+import photo1 from "../assets/images/landing-page-user-photos/route-bubbles/photo1.webp";
+import photo2 from "../assets/images/landing-page-user-photos/route-bubbles/photo2.webp";
+import photo3 from "../assets/images/landing-page-user-photos/route-bubbles/photo3.webp";
+import photo4 from "../assets/images/landing-page-user-photos/route-bubbles/photo4.webp";
+import photo5 from "../assets/images/landing-page-user-photos/route-bubbles/photo5.webp";
+import photo6 from "../assets/images/landing-page-user-photos/route-bubbles/photo6.webp";
+import photo7 from "../assets/images/landing-page-user-photos/route-bubbles/photo7.webp";
+import photo8 from "../assets/images/landing-page-user-photos/route-bubbles/photo8.webp";
+
+export const routesData = [
+  {
+    id: 1,
+    image: photo1,
+    title: "Ruta 1",
+    difficulty: 3,
+    length: 4,
+    rating: 5,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 30,
+    totalSlots: 40,
+  },
+  {
+    id: 2,
+    image: photo2,
+    title: "Ruta 2",
+    difficulty: 4,
+    length: 5,
+    rating: 4,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 20,
+    totalSlots: 40,
+  },
+  {
+    id: 3,
+    image: photo3,
+    title: "Ruta 3",
+    difficulty: 2,
+    length: 3,
+    rating: 5,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 8,
+    totalSlots: 40,
+  },
+  {
+    id: 4,
+    image: photo4,
+    title: "Ruta 4",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "7:00AM - 3:00PM",
+    availableSlots: 20,
+    totalSlots: 40,
+  },
+  {
+    id: 5,
+    image: photo5,
+    title: "Ruta 5",
+    difficulty: 3,
+    length: 4,
+    rating: 5,
+    time: "8:00AM - 4:00PM",
+    availableSlots: 15,
+    totalSlots: 30,
+  },
+  {
+    id: 6,
+    image: photo6,
+    title: "Ruta 6",
+    difficulty: 4,
+    length: 5,
+    rating: 4,
+    time: "9:00AM - 5:00PM",
+    availableSlots: 25,
+    totalSlots: 40,
+  },
+  {
+    id: 7,
+    image: photo7,
+    title: "Ruta 7",
+    difficulty: 2,
+    length: 3,
+    rating: 5,
+    time: "10:00AM - 6:00PM",
+    availableSlots: 10,
+    totalSlots: 20,
+  },
+  {
+    id: 8,
+    image: photo8,
+    title: "Ruta 8",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "11:00AM - 7:00PM",
+    availableSlots: 30,
+    totalSlots: 50,
+  },
+  {
+    id: 9,
+    image: photo8,
+    title: "Ruta 8",
+    difficulty: 5,
+    length: 6,
+    rating: 4,
+    time: "11:00AM - 7:00PM",
+    availableSlots: 30,
+    totalSlots: 50,
+  }
+];
+
+// ========== Fun fact section ==========
+
+export { default as fun_fact_background } from "../assets/images/landing-page/fun_fact/fun_fact_background.webp";
+export { default as fun_fact_image } from "../assets/images/landing-page/fun_fact/fun_fact_image.webp";
+export { default as fun_fact_icon } from "../assets/images/landing-page/fun_fact/fun_fact_icon.svg";
+
+export { default as forum_background } from "../assets/images/landing-page/explore/gallery/gallery_3.webp"

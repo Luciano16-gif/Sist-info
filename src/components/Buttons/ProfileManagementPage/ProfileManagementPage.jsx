@@ -1,7 +1,8 @@
+// ProfileManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { auth, db, storage } from '../../../firebase-config';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Correct Imports
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
@@ -13,8 +14,8 @@ function ProfileManagementPage() {
     const [numeroTelefonico, setNumeroTelefonico] = useState('');
     const [fechaRegistro, setFechaRegistro] = useState('');
     const [contraseña, setContraseña] = useState('');
-    const [file, setFile] = useState(null);
-    const [fotoPerfilUrl, setFotoPerfilUrl] = useState('');
+    const [file, setFile] = useState(null); // Stores the selected file
+    const [fotoPerfilUrl, setFotoPerfilUrl] = useState(''); // Stores the URL of the profile picture
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [tipoUsuario, setTipoUsuario] = useState('');
@@ -143,80 +144,103 @@ function ProfileManagementPage() {
     };
 
     const handleSaveChanges = async () => {
-      try {
-        if (!auth.currentUser) {
-          console.error("No user logged in.");
-          return;
-        }
-
-        const usersCollection = collection(db, 'Lista de Usuarios');
-        const q = query(usersCollection, where("email", "==", auth.currentUser.email));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-          console.error('Usuario no encontrado para actualizar.');
-          return;
-        }
-
-        const userRef = querySnapshot.docs[0].ref;
-
-        if (numeroTelefonico && !/^\d{11}$/.test(numeroTelefonico)) {
-          alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
-          return;
-        }
-        if (contraseña && contraseña.length < 6) {
-          alert('La contraseña debe tener al menos 6 caracteres.');
-          return;
-        }
-
-        let fotoPerfilUrl = '';
-        if (file) {
-          const storageRef = ref(storage, `profile-pictures/${file.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, file);
-
-          uploadTask.on('state_changed', (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Progress: ' + progress + '%');
-          }, (error) => {
-            console.error('Error al subir la imagen:', error);
-          }, async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            fotoPerfilUrl = downloadURL;
-            console.log('File available at', downloadURL);
-
-            const updateData = {
-              'Foto de Perfil': downloadURL,
-              'Nombre de Archivo': file.name,
-              name: nombreCompleto.split(' ')[0],
-              lastName: nombreCompleto.split(' ').slice(1).join(' '),
-              phone: numeroTelefonico,
-            };
-            if (contraseña) {
-              updateData.password = contraseña;
+        try {
+            if (!auth.currentUser) {
+                console.error("No user logged in.");
+                return;
             }
 
-            await updateDoc(userRef, updateData);
-            window.location.reload();
-          });
-        } else {
-          const updateData = {
-            name: nombreCompleto.split(' ')[0],
-            lastName: nombreCompleto.split(' ').slice(1).join(' '),
-            phone: numeroTelefonico,
-          };
-          if (contraseña) {
-            updateData.password = contraseña;
-          }
-          await updateDoc(userRef, updateData);
-          window.location.reload();
+            const usersCollection = collection(db, 'Lista de Usuarios');
+            const q = query(usersCollection, where("email", "==", auth.currentUser.email));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.error('Usuario no encontrado para actualizar.');
+                return;
+            }
+
+            const userRef = querySnapshot.docs[0].ref;
+
+             if (numeroTelefonico && !/^\d{11}$/.test(numeroTelefonico)) {
+                alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
+                return;
+            }
+            if (contraseña && contraseña.length < 6) {
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return;
+             }
+
+            // --- File Upload Logic ---
+            let fotoPerfilUrl = ''; // Variable to store the download URL
+            if (file) {
+                // --- FILE TYPE CHECK ---
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                   alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
+                   return; // Stop the upload
+                }
+
+                const storageRef = ref(storage, `profile-pictures/${auth.currentUser.uid}/${file.name}`); // Unique path
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Progress
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Progress: ' + progress + '%');
+                    },
+                    (error) => {
+                        // Handle error
+                        console.error('Error al subir la imagen:', error);
+                    },
+                    async () => {
+                        // Completion - Get URL and update Firestore
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        fotoPerfilUrl = downloadURL; // Store the URL
+                        console.log('File available at', downloadURL);
+
+                        // Update user data in Firestore *after* successful upload
+                        const updateData = {
+                            ['Foto de Perfil']: downloadURL, // Store URL
+                            'Nombre de Archivo': file.name, // Store filename (optional)
+                            name: nombreCompleto.split(' ')[0],
+                            lastName: nombreCompleto.split(' ').slice(1).join(' '),
+                            phone: numeroTelefonico,
+                        };
+
+                        // Conditionally update password
+                        if (contraseña) {
+                            updateData.password = contraseña;
+                        }
+                        await updateDoc(userRef, updateData);
+                         window.location.reload();
+                    }
+                );
+            } else {
+                // If no new file is selected, update other fields but keep the existing profile picture
+                const updateData = {
+                    name: nombreCompleto.split(' ')[0],
+                    lastName: nombreCompleto.split(' ').slice(1).join(' '),
+                    phone: numeroTelefonico,
+                    // Don't include 'Foto de Perfil' here
+                };
+                 // Conditionally update password
+                if (contraseña) {
+                  updateData.password = contraseña;
+                }
+                await updateDoc(userRef, updateData);
+                window.location.reload();
+            }
+
+            setIsEditing(false);
+
+        } catch (error) {
+            console.error('Error al guardar los cambios:', error);
         }
-
-        setIsEditing(false);
-
-      } catch (error) {
-        console.error('Error al guardar los cambios:', error);
-      }
     };
+
+
+
     const handleLogout = async () => {
         try {
             await signOut(auth);
@@ -245,7 +269,7 @@ function ProfileManagementPage() {
             <div className="content-container">
                 <img src={fotoPerfilUrl || "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png"} alt="Perfil" className={`profile-image ${isEditing ? 'editable' : ''}`} onClick={() => isEditing && document.getElementById('file-input').click()} />
                 {isEditing && (
-                    <input id="file-input" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
+                    <input id="file-input" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
                 )}
                 <div className="info-container">
                     <div className="info-item">
