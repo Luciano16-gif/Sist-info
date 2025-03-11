@@ -13,6 +13,7 @@ import ideaIcon from "../../assets/images/landing-page-admin/idea.webp";
 import discussionIcon from "../../assets/images/landing-page-admin/discussion.webp";
 import locationIcon from "../../assets/images/landing-page-admin/location.webp";
 import reviewIcon from "../../assets/images/landing-page-admin/review.webp";
+import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
 // Separator Component (Best practice: put this in a separate file, e.g., Separator.js)
 const Separator = () => (
@@ -98,8 +99,8 @@ const Sidebar = () => {
             )}
 
             {/* Logo (Centered) */}
-            <div className="mb-8 flex items-center justify-center">
-                <img src="/logo.png" alt="Logo" className="h-8 w-8 mr-2" />
+            <div className="mb-8 flex flex-wrap items-center justify-center m-1">
+                <img src={logoImage} alt="Logo" className="w-full h-full mr-2" />
                 {isExpanded && <span className="text-2xl font-bold">Admin Panel</span>} {/* Show text on expand */}
             </div>
 
