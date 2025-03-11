@@ -103,8 +103,8 @@ export const emailSignUp = async (userData) => {
     // Create the Firebase auth user
     const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
     
-    // Add a small delay to ensure auth state updates
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Force token refresh before Firestore operations
+    await userCredential.user.getIdToken(true);
     
     // Create user document - IMPORTANT: Don't store the password
     const docRef = doc(usersCollection, trimmedEmail);
