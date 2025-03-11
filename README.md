@@ -6,3 +6,4 @@ Luciano Minardo
 Ricardo Paez 
 Sofia Machado
 Pablo Pellicioni
+Esteban Acosta

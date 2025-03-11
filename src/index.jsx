@@ -5,29 +5,32 @@ import ReactDOM from 'react-dom/client';
 // ========== Routing Imports ==========
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// ========== Auth Context Import ==========
+import { AuthProvider } from './components/contexts/AuthContext';
+
 // ========== Layout Components ==========
 import Layout from './components/layout/Layout';
-import LayoutUser from './components/layout/LayoutUser';
+import LayoutAdmin from './components/layout/LayoutAdmin';
 
 // ========== Page Components ==========
 // Authentication Pages
-import LoginPage from './components/Buttons/LoginPage/LoginPage';
-import SignUpPage from './components/Buttons/SignUpPage/SignUpPage';
+import LoginPage from './components/Auth/LoginPage';
+import SignUpPage from './components/Auth/SignUpPage';
 // import AdminLoginPage from './components/Buttons/AdminLoginPage/AdminLoginPage';
 
 // Main Pages
-//import Home from './components/firebase-test/Home';
 import AvilaLanding from './pages/landing-page/AvilaLanding';
-import AvilaLandingUser from './pages/landing-page/AvilaLandingUser';
-import Foro from './components/firebase-test/Foro';
 import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
+import ForumPage from './components/Buttons/ForumPage/ForumPage';
+import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearExperiencia';
+import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
+import BookingPage from './pages/BookingPage/BookingPage';
+import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
 import OurTeam from './components/nuestro-equipo/OurTeam';
 
-// Test Components
-import FirestoreTest from './components/firebase-test/FirestoreTest/FirestoreTest';
-import AuthTest from './components/firebase-test/AuthTest/AuthTest';
-import StorageTest from './components/firebase-test/StorageTest/StorageTest';
+// Admin Pages
+import AdminLanding from './pages/Admin-landing/AdminLanding';
 
 // ========== Styles ==========
 import './index.css';
@@ -37,35 +40,36 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
-        {/* Authentication Routes (without Layout) */}
-        <Route path="/login-page" element={<LoginPage />} />
-        {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
-        <Route path="/sign-up-page" element={<SignUpPage />} />
-        
-        {/* Routes with Layout */}
-        <Route element={<Layout />}>
-          {/* Main Routes */}
-          <Route path="/" element={<AvilaLanding />} />
-          <Route path="/foro" element={<Foro />} />
-          <Route path="/equipo" element={<OurTeam />} />
+      {/* Wrap everything in AuthProvider so context is available throughout the app */}
+      <AuthProvider>
+        <Routes>
+          {/* Authentication Routes (without Layout) */}
+          <Route path="/login-page" element={<LoginPage />} />
+          {/* <Route path="/guia-login-page" element={<AdminLoginPage />} /> */}
+          <Route path="/signUpPage" element={<SignUpPage />} />
           
-          {/* Testing Routes */}
-          <Route path="/firestore-test" element={<FirestoreTest />} />
-          <Route path="/auth-test" element={<AuthTest />} />
-          <Route path="/storage-test" element={<StorageTest />} />
+          {/* Routes with Layout */}
+          <Route element={<Layout />}>
+            {/* Main Routes */}
+            <Route path="/" element={<AvilaLanding />} />
+            <Route path="/foro" element={<ForumPage />} />
+            <Route path="/equipo" element={<OurTeam />} />
+            <Route path="/experiencias" element={<ExperiencesPage />} />
+            <Route path="/crear-experiencia" element={<CrearExperiencia />} />
+            <Route path="/profile-management-page" element={<ProfileManagementPage />} />
+            <Route path="/galeria" element={<GalleryPage />} />
+            <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking-process" element={<BookingProcessPage />} />
+          </Route>
 
-          <Route path="/profile-management-page" element={<ProfileManagementPage />} />
-          <Route path="/gallery-page" element={<GalleryPage />} />
-        </Route>
+          {/* Routes with LayoutAdmin */}
+          <Route element={<LayoutAdmin />}>
+            {/* Admin Routes */}
+            <Route path="/admin-landing" element={<AdminLanding />} />
+          </Route>
 
-        {/* Routes with LayoutUser */}
-        <Route element={<LayoutUser />}>
-          {/* Main Routes */}
-          <Route path="/landing-page-user" element={<AvilaLandingUser />} />
-        </Route>
-      </Routes>
-
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

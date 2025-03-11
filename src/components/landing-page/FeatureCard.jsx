@@ -1,5 +1,5 @@
 const FeatureCard = ({ icon, title, description }) => (
-    <div className="flex flex-col items-start text-left space-y-2 md:space-y-4 p-4">
+    <div className="flex flex-col items-start text-left space-y-2 md:grid-cols-2 md:grid-rows-2 md:space-y-4 p-4">
       {/* Icon */}
       <div className="flex items-center justify-center">
         {icon}
