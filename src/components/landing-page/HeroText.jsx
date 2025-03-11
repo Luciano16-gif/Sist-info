@@ -9,7 +9,7 @@ const HeroText = () => {
                     <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wide">
                         The call of the
                     </h1>
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
+                    <h1 className="xltext-5xl sm:text-6 md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
                         MOUNTAINS
                     </h1>
                     <div className="mt-2 sm:mt-4 md:mt-6">
