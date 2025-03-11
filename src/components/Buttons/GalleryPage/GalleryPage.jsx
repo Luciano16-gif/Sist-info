@@ -1,4 +1,4 @@
-// GalleryPage.jsx
+// GalleryPage.jsx (No changes needed here)
 import React, { useState, useEffect, useRef } from 'react';
 import { storage, db, auth } from '../../../firebase-config';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -19,15 +19,7 @@ function GalleryPage() {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [showDeleteImages, setShowDeleteImages] = useState(false);
 
-    const [mockImages, setMockImages] = useState([
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-        { url: "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png", uploadedBy: "Mock User", uploadDate: "01/01/2023/12:00" },
-    ]);
-
+    // REMOVED mockImages - No longer needed.
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -330,8 +322,9 @@ const loadAllImages = async () => {
         });
 
 
-        // Combine Firestore images with mock images, avoiding duplicates
-        const allImages = [...mockImages];
+        // Combine Firestore images with mock images, avoiding duplicates  (NO MOCK IMAGES NOW)
+        //const allImages = [...mockImages];
+        let allImages = []; // Start with an empty array
         firestoreImages.forEach(firestoreImage => {
             if (!allImages.some(img => img.url === firestoreImage.url)) {
                 allImages.push(firestoreImage);
@@ -469,70 +462,60 @@ const reportImage = async (image) => {
 
 
     return (
-        <div className="galeria-page">
-            <h1 className="title">GALERIA</h1>
-            <div className="gallery-content">
-                <button className="scroll-button left" onClick={scrollLeft}>
+        <div className="galeria-page-gallery">
+            <h1 className="title-gallery">GALERIA</h1>
+            <div className="gallery-content-gallery">
+                <button className="scroll-button-gallery left-gallery" onClick={scrollLeft}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 </button>
-                <div className="image-container" ref={imageContainerRef}>
+                <div className="image-container-gallery" ref={imageContainerRef}>
                     {images.map((image, index) => (
                         <img
                             key={index}
                             src={image.url}
                             alt={`Imagen ${index}`}
-                            className={`gallery-image ${selectedImage?.url === image.url && showDeleteImages ? 'selected' : ''}`}
+                            className={`gallery-image-gallery ${selectedImage?.url === image.url && showDeleteImages ? 'selected-gallery' : ''}`}
                             onClick={() => openImage(image)}
                         />
                     ))}
                 </div>
-                <button className="scroll-button right" onClick={scrollRight}>
+                <button className="scroll-button-gallery right-gallery" onClick={scrollRight}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </button>
             </div>
-            <div className="button-container">
+            <div className="button-container-gallery">
                 {!showDeleteImages ? (
                     <>
                         <input type="file" id="file-upload" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
-                        <button className="mount-archive-button" onClick={() => document.getElementById('file-upload').click()}>
+                        <button className="mount-archive-button-gallery" onClick={() => document.getElementById('file-upload').click()}>
                             Subir Archivo
                         </button>
                     </>
                 ) : (
-                    <button className="delete-archive-button" onClick={handleDeleteImage}>
+                    <button className="delete-archive-button-gallery" onClick={handleDeleteImage}>
                         Borrar Imagen
                     </button>
                 )}
-                <button className="delete-archive-button" onClick={toggleDeleteMode}>
+                <button className="delete-archive-button-gallery" onClick={toggleDeleteMode}>
                     {showDeleteImages ? "Cancelar" : "Borrar Archivo"}
                 </button>
             </div>
 
             {uploading && (
-                <div className="upload-progress-bar-container">
-                    <div className="upload-progress-bar" style={{ width: `${uploadProgress}%` }}></div>
+                <div className="upload-progress-bar-container-gallery">
+                    <div className="upload-progress-bar-gallery" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
             )}
 
             {selectedImage && !showDeleteImages && (
-                <div className="modal-overlay" onWheel={handleWheel}>
-                    <button className="close-button" onClick={(e) => { e.stopPropagation(); closeImage(e); }}>
-                        X
-                    </button>
-                    <button
-                        className="report-button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            reportImage(selectedImage);
-                        }}
-                    >
-                        Reportar imagen
-                    </button>
-                    <div className="modal-content-container"
+                <div className="modal-overlay-gallery" onWheel={handleWheel}>
+                    {/* Close button (ensured it's always visible) */}
+
+                    <div className="modal-content-container-gallery"
                         onMouseDown={handleMouseDown}
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
@@ -542,10 +525,22 @@ const reportImage = async (image) => {
                         onTouchEnd={handleTouchEnd}
                         onClick={(e) => e.stopPropagation()}
                     >
+                        <button className="close-button-gallery" onClick={(e) => { e.stopPropagation(); closeImage(e); }}>
+                            X
+                        </button>
+                        <button
+                            className="report-button-gallery"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                reportImage(selectedImage);
+                            }}
+                        >
+                            Reportar imagen
+                        </button>
                         <img
                             src={selectedImage.url}
                             alt="Imagen Ampliada"
-                            className="modal-image"
+                            className="modal-image-gallery"
                             style={{
                                 transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
                                 cursor: isDragging ? 'grabbing' : 'grab',
@@ -554,12 +549,12 @@ const reportImage = async (image) => {
                             onClick={(e) => e.stopPropagation()}
                         />
 
-                        <div className="image-info">
+                        <div className="image-info-gallery">
                             <p>Publicado por: {selectedImage.uploadedBy}</p>
                             <p>Fecha: {selectedImage.uploadDate}</p>
                         </div>
 
-                        <div className="zoom-controls">
+                        <div className="zoom-controls-gallery">
                             <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}>+</button>
                             <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}>-</button>
                         </div>

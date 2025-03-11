@@ -1,6 +1,6 @@
 
 
-.galeria-page {
+.galeria-page-gallery {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,7 +11,7 @@
     overflow: hidden;
 }
 
-.title {
+.title-gallery {
     color: #FFF;
     font-size: 90px;
     font-style: normal;
@@ -21,7 +21,7 @@
     margin-bottom: 35px;
 }
 
-.gallery-content {
+.gallery-content-gallery {
     display: flex;
     align-items: center;
     width: 100%;
@@ -29,7 +29,7 @@
     margin-bottom: 60px;
 }
 
-.image-container {
+.image-container-gallery {
     display: flex;
     overflow-x: auto;
     gap: 40px;
@@ -40,28 +40,28 @@
 }
 
 /* Hide scrollbar (optional) */
-.image-container::-webkit-scrollbar {
+.image-container-gallery::-webkit-scrollbar {
     width: 12px;
 }
 
-.image-container::-webkit-scrollbar-track {
+.image-container-gallery::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
 }
 
-.image-container::-webkit-scrollbar-thumb {
+.image-container-gallery::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.5);
     border-radius: 10px;
     border: 3px solid rgba(255, 255, 255, 0.1);
 }
 
-.image-container {
+.image-container-gallery {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
 }
 
 
-.gallery-image {
+.gallery-image-gallery {
     width: 400px;
     height: 258px;
     object-fit: cover;
@@ -73,20 +73,20 @@
 }
 
 /* Style for the selected image in delete mode */
-.gallery-image.selected {
+.gallery-image-gallery.selected-gallery {
     border: 4px solid #00a3a1; /* Highlight color - adjust as needed */
 }
 
 
-.button-container{
+.button-container-gallery{
     display: flex;
     gap: 61px;
     flex-wrap: wrap; /* allows buttons to wrap on smaller screens*/
     justify-content: center; /*centers the buttons*/
 }
 
-.mount-archive-button,
-.delete-archive-button {
+.mount-archive-button-gallery,
+.delete-archive-button-gallery {
     width: 270px;
     height: 52px;
     background-color: #bdbdbdde;
@@ -101,25 +101,25 @@
     margin-bottom: 70px;
 }
 
-.mount-archive-button:hover {
+.mount-archive-button-gallery:hover {
     background-color: #00a3a1;
 }
 
-.mount-archive-button:active {
+.mount-archive-button-gallery:active {
     background-color: #dbffca;
     transform: translateY(2px);
 }
 
-.delete-archive-button:hover {
+.delete-archive-button-gallery:hover {
     background-color: #e80000;
 }
 
-.delete-archive-button:active {
+.delete-archive-button-gallery:active {
     background-color: #ffdbdb;
     transform: translateY(2px);
 }
 
-.scroll-button {
+.scroll-button-gallery {
     background: none;
     border: none;
     color: white;
@@ -128,16 +128,16 @@
     z-index: 2;
     position: relative;
 }
-.scroll-button.left{
+.left-gallery{
     margin-right: 10px;
 
 }
-.scroll-button.right{
+.right-gallery{
     margin-left: 10px;
 }
 
 /* Modal styles */
-.modal-overlay {
+.modal-overlay-gallery {
     position: fixed;
     top: 0;
     left: 0;
@@ -152,17 +152,19 @@
 }
 
 /* Container for image and zoom controls */
-.modal-content-container {
+.modal-content-container-gallery {
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative; /*  For close button positioning */
     max-width: 90%;  /* Limit width - good for responsiveness */
     max-height: 90vh; /* Limit height - good for responsiveness */
+    padding: 20px; /* Add padding */
+    box-sizing: border-box; /* Include padding in width/height */
 
 }
 
-.modal-image {
+.modal-image-gallery {
     max-width: 100%;  /* Use 100% of container width */
     max-height: 70vh; /* Reduce max-height to make room for buttons */
     object-fit: contain;
@@ -173,26 +175,26 @@
 }
 
 /* Image info styles */
-.image-info {
+.image-info-gallery {
   text-align: center;
   color: white;
   margin-bottom: 10px; /* Space between info and zoom controls */
   font-size: 0.9rem;
 }
 
-.image-info p {
+.image-info-gallery p {
     margin: 0.2rem 0; /* Reduce margin between lines */
 }
 
 
-.zoom-controls {
+.zoom-controls-gallery {
     display: flex;
     gap: 10px;
     z-index: 102;
     margin-bottom: 1rem;
 }
 
-.zoom-controls button {
+.zoom-controls-gallery button {
     background-color: rgba(255, 255, 255, 0.9);
     border: none;
     border-radius: 5px;
@@ -205,70 +207,74 @@
     transition: background-color 0.2s ease;
 }
 
-.zoom-controls button:hover {
+.zoom-controls-gallery button:hover {
     background-color: rgba(255, 255, 255, 1);
 }
-.zoom-controls button:active{
+.zoom-controls-gallery button:active{
     transform: translateY(2px);
 }
-/* Close button styles */
-.close-button {
-    position: absolute;
-    top: 60px;      /* Position below TopMenu - Adjust as needed */
-    right: 10px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px; /*  Larger size */
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 103;     /* Ensure it's on top */
-    padding: 5px;      /* Smaller padding */
-}
 
-.close-button:hover {
+/* Close button styles */
+.close-button-gallery {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* Keep at 10px from the right */
+  background: gray;
+  border: none;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 103;
+  padding: 5px;
+  opacity: 0.9;
+}
+.close-button-gallery:hover {
     color: #ffffff;
     background-color: #e80000;
 }
-.close-button:active{
-    transform: translateY(2px);
+
+.close-button-gallery:active {
+  transform: translateY(2px);
 }
- .upload-progress-bar-container {
+
+.upload-progress-bar-container-gallery {
   width: 100%;
   height: 10px;
   background-color: #ddd;
-  margin-bottom: 10px; /* Add some spacing */
+  margin-bottom: 10px;
   border-radius: 5px;
 }
 
-.upload-progress-bar {
+.upload-progress-bar-gallery {
   height: 100%;
-  background-color: #4CAF50; /* Or any color you like */
+  background-color: #4CAF50;
   text-align: center;
-  line-height: 30px; /* Vertically center the text */
+  line-height: 30px;
   color: white;
   border-radius: 5px;
 }
 
-.report-button {
+.report-button-gallery {
     position: absolute;
-    top: 60px;
-    left: 10px;
-    background: none;
+    top: 10px;
+    left: 10px; /* Keep at 10px from the left*/
+    background: gray;
     border: none;
-    color: white;
+    color: white;   
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     z-index: 103;
     padding: 5px;
+    opacity: 0.9;
 }
 
-.report-button:hover {
-    color: #ffffff; 
+.report-button-gallery:hover {
+    color: #ffffff;
     background-color: #e80000;
 }
 
-.report-button:active {
+.report-button-gallery:active {
     transform: translateY(2px);
 }
