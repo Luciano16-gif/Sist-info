@@ -27,9 +27,10 @@ import CrearExperiencia from './components/firebase-test/CrearExperiencia/CrearE
 import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 import BookingPage from './pages/BookingPage/BookingPage';
 import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
+import OurTeam from './components/nuestro-equipo/OurTeam';
 
 // Admin Pages
-import AdminLanding from './pages/Admin-tools/Admin-landing/AdminLanding';
+import AdminLanding from './pages/Admin-landing/AdminLanding';
 
 // ========== Styles ==========
 import './index.css';
