@@ -34,7 +34,16 @@ export const AuthProvider = ({ children }) => {
 
   // Error handling helper
   const handleAuthError = (error, callback) => {
-    setError(error.message);
+    // Check if the error is a Firebase error with a code or a custom error
+    if (error.code) {
+      // This is a Firebase auth error
+      const errorMessage = authService.getAuthErrorMessage(error.code);
+      setError(errorMessage);
+    } else {
+      // This is a custom error or other error type
+      setError(error.message || 'Ocurrió un error durante la autenticación.');
+    }
+    
     setTimeout(() => setError(null), 5000); // Auto-clear error after 5 seconds
     if (callback) callback(error);
   };

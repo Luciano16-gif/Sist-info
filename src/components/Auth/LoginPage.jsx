@@ -15,7 +15,7 @@ function LoginPage() {
   const navigate = useNavigate();
   
   // Use our auth hooks
-  const { login, loginWithGoogle, error: contextError } = useAuth();
+  const { login, error: contextError } = useAuth();
   
   // Google sign-in handler
   const handleGoogleAuth = useGoogleAuth();
@@ -64,7 +64,12 @@ function LoginPage() {
         <h2 className="auth-title login-title">Iniciar Sesión</h2>
         
         {/* Error message - prominently displayed */}
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        {errorMessage && (
+          <ErrorMessage 
+            message={errorMessage} 
+            className="auth-error-prominent" 
+          />
+        )}
         
         <div className="input-container w-full max-w-sm mx-auto">
           <FormField

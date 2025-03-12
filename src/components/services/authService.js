@@ -31,7 +31,7 @@ export const validatePhone = (phone) => {
 };
 
 // Error message handling
-const getAuthErrorMessage = (errorCode) => {
+export const getAuthErrorMessage = (errorCode) => {
   const errorMessages = {
     'auth/wrong-password': 'Contraseña incorrecta.',
     'auth/user-not-found': 'Usuario no encontrado.',
@@ -40,6 +40,8 @@ const getAuthErrorMessage = (errorCode) => {
     'auth/popup-closed-by-user': 'Se cerró la ventana de autenticación de Google.',
     'auth/cancelled-popup-request': 'Operación cancelada. Por favor, inténtalo de nuevo.',
     'auth/network-request-failed': 'Error de conexión. Verifica tu conexión a internet.',
+    'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta más tarde.',
+    'auth/invalid-credential': 'Credenciales inválidas. Verifica tu correo y contraseña.',
     'default': 'Ocurrió un error durante la autenticación.'
   };
   

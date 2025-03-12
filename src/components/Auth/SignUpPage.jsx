@@ -80,13 +80,18 @@ function SignUpPage() {
         <h2 className="auth-title signup-title">Registrarse</h2>
         
         {/* Error message - prominently displayed */}
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        {errorMessage && (
+          <ErrorMessage 
+            message={errorMessage} 
+            className="auth-error-prominent" 
+          />
+        )}
         
         <div className="input-container">
           <div className="signup-input-row">
             <FormField
               type="text"
-              name="name"
+
               value={formData.name}
               onChange={handleInputChange('name')}
               onBlur={handleBlur('name')}
@@ -96,7 +101,6 @@ function SignUpPage() {
             
             <FormField
               type="text"
-              name="lastName"
               value={formData.lastName}
               onChange={handleInputChange('lastName')}
               onBlur={handleBlur('lastName')}
@@ -108,7 +112,6 @@ function SignUpPage() {
           <div className="signup-input-row">
             <FormField
               type="tel"
-              name="phone"
               value={formData.phone}
               onChange={handleInputChange('phone')}
               onBlur={handleBlur('phone')}
@@ -118,7 +121,6 @@ function SignUpPage() {
             
             <FormField
               type="email"
-              name="email"
               value={formData.email}
               onChange={handleInputChange('email')}
               onBlur={handleBlur('email')}
@@ -130,7 +132,6 @@ function SignUpPage() {
           <div className="signup-input-row">
             <FormField
               type="password"
-              name="password"
               value={formData.password}
               onChange={handleInputChange('password')}
               onBlur={handleBlur('password')}
@@ -142,7 +143,6 @@ function SignUpPage() {
             
             <FormField
               type="password"
-              name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange('confirmPassword')}
               onBlur={handleBlur('confirmPassword')}
