@@ -31,7 +31,7 @@ function ProfileManagementPage() {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
-                    const usersCollection = collection(db, 'Lista de Usuarios');
+                    const usersCollection = collection(db, 'lista-de-usuarios');
                     const q = query(usersCollection, where("email", "==", user.email));
                     const querySnapshot = await getDocs(q);
 

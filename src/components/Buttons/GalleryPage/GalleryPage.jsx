@@ -159,7 +159,7 @@ function GalleryPage() {
             if (auth.currentUser) {
                 try {
                     const user = auth.currentUser;
-                    const usersCollection = collection(db, 'Lista de Usuarios');
+                    const usersCollection = collection(db, 'lista-de-usuarios');
                     const userQuery = query(usersCollection, where("email", "==", user.email));
                     const userQuerySnapshot = await getDocs(userQuery);
 
