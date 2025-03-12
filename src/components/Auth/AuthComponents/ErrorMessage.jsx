@@ -1,3 +1,6 @@
+// In src/components/Auth/AuthComponents/ErrorMessage.jsx
+// A simpler enhancement to the ErrorMessage component
+
 export const ErrorMessage = ({ message, className = '' }) => {
   if (!message) return null;
   
@@ -18,7 +21,8 @@ export const ErrorMessage = ({ message, className = '' }) => {
       fontFamily: 'Ysabeau SC, sans-serif',
       fontSize: '1rem',
       border: '1px solid rgba(255, 0, 0, 0.3)',
-      textShadow: '0 0 1px #000'
+      textShadow: '0 0 1px #000',
+      animation: 'fadeIn 0.3s ease-in-out, fadeOut 0.5s ease-in-out 4.5s forwards'
     }}>
       {message}
     </div>

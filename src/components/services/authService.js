@@ -54,7 +54,10 @@ export const emailSignIn = async (email, password) => {
   
   // Validate email
   if (!validateEmail(trimmedEmail)) {
-    throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+    return {
+      error: true,
+      message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
+    };
   }
 
   try {
@@ -63,20 +66,28 @@ export const emailSignIn = async (email, password) => {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      throw new Error('Usuario no encontrado.');
+      return {
+        error: true,
+        message: 'Usuario no encontrado.'
+      };
     }
 
     const userData = userDoc.data();
     if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
-      throw new Error('Este correo está registrado con Google Authentication. Por favor, use la opción de Google para iniciar sesión.');
+      return {
+        error: true,
+        message: 'Este correo está registrado con Google Authentication. Por favor, use la opción de Google para iniciar sesión.'
+      };
     }
 
     const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
     return userCredential.user;
   } catch (error) {
     console.error("Login error:", error);
-    const errorMessage = getAuthErrorMessage(error.code) || error.message;
-    throw new Error(errorMessage);
+    return { 
+      error: true, 
+      message: error.code ? getAuthErrorMessage(error.code) : error.message 
+    };
   }
 };
 
@@ -86,11 +97,17 @@ export const emailSignUp = async (userData) => {
   
   // Validate email and phone
   if (!validateEmail(trimmedEmail)) {
-    throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+    return {
+      error: true,
+      message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
+    };
   }
   
   if (!validatePhone(phone)) {
-    throw new Error('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
+    return {
+      error: true,
+      message: 'El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.'
+    };
   }
 
   try {
@@ -99,7 +116,10 @@ export const emailSignUp = async (userData) => {
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
-      throw new Error('Este correo ya está registrado.');
+      return {
+        error: true,
+        message: 'Este correo ya está registrado.'
+      };
     }
 
     // Create the Firebase auth user first
@@ -134,13 +154,17 @@ export const emailSignUp = async (userData) => {
         console.error("Failed to delete auth user after Firestore error: ", deleteError);
       }
       
-      // Rethrow the original error with more specific information
-      throw new Error(`Error al guardar datos de usuario: ${firestoreError.message || firestoreError.code || 'Revise los permisos de Firestore'}`);
+      return {
+        error: true,
+        message: `Error al guardar datos de usuario: ${firestoreError.message || firestoreError.code || 'Revise los permisos de Firestore'}`
+      };
     }
   } catch (error) {
     console.error("Sign up error:", error);
-    const errorMessage = getAuthErrorMessage(error.code) || error.message;
-    throw new Error(errorMessage);
+    return { 
+      error: true, 
+      message: error.code ? getAuthErrorMessage(error.code) : error.message 
+    };
   }
 };
 
@@ -156,8 +180,11 @@ export const googleAuth = async (isSignUp = false) => {
       await signOut(auth);
       // Wait a moment for the signOut to complete
       await new Promise(resolve => setTimeout(resolve, 100));
-      // Throw an error with clear messaging
-      throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
+      
+      return {
+        error: true,
+        message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
+      };
     }
 
     // Use direct document access instead of queries
@@ -167,13 +194,19 @@ export const googleAuth = async (isSignUp = false) => {
     // For sign up, check if user already exists
     if (isSignUp && userDoc.exists()) {
       await signOut(auth);
-      throw new Error('Ya ha registrado un usuario con ese correo.');
+      return {
+        error: true,
+        message: 'Ya ha registrado un usuario con ese correo.'
+      };
     }
 
     // For login, check if user doesn't exist
     if (!isSignUp && !userDoc.exists()) {
       await signOut(auth);
-      throw new Error('No existe una cuenta con este correo. Por favor, regístrese primero.');
+      return {
+        error: true,
+        message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
+      };
     }
 
     // If user doesn't exist in Firestore and this is signup, create them
@@ -216,11 +249,16 @@ export const googleAuth = async (isSignUp = false) => {
     
     // Special handling for user closing the popup - no need for error
     if (error.code === 'auth/popup-closed-by-user') {
-      throw new Error('Se cerró la ventana de autenticación.');
+      return {
+        error: true,
+        message: 'Se cerró la ventana de autenticación.'
+      };
     }
     
-    const errorMessage = getAuthErrorMessage(error.code) || error.message;
-    throw new Error(errorMessage);
+    return { 
+      error: true, 
+      message: error.code ? getAuthErrorMessage(error.code) : error.message 
+    };
   }
 };
 
@@ -230,6 +268,9 @@ export const logOut = async () => {
     return true;
   } catch (error) {
     console.error("Logout error:", error);
-    throw new Error('Error al cerrar sesión.');
+    return {
+      error: true,
+      message: 'Error al cerrar sesión.'
+    };
   }
 };
