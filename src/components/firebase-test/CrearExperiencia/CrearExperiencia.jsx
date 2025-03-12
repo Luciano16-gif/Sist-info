@@ -1,9 +1,10 @@
-// CrearExperiencia.jsx (UPDATED - Multiple Selection for "Incluidos")
+// CrearExperiencia.jsx (ACTUALIZADO para usar Cloudinary)
 import React, { useState, useRef, useEffect } from 'react';
 import './CrearExperiencia.css';
-import { db, storage } from '../../../firebase-config';
+import { db, /* storage  <-- ELIMINAR */ } from '../../../firebase-config'; // Eliminamos storage
 import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';  <-- ELIMINAR ESTAS IMPORTACIONES
+import storageService from '../../../services/storage-service'; // IMPORTAR storageService
 
 function CrearExperiencia() {
     const [nombre, setNombre] = useState('');
@@ -245,7 +246,7 @@ function CrearExperiencia() {
         const longitudNumerica = parseFloat(longitudRecorrido);
         if (longitudNumerica <= 0) {
             alert("La longitud debe ser mayor que cero");
-            return
+            return;
         }
 
         if (parseInt(guiasRequeridos) < 0 || isNaN(parseInt(guiasRequeridos))) {
@@ -260,12 +261,13 @@ function CrearExperiencia() {
             const querySnapshot = await getDocs(q);
 
 
-            // 2. Upload the image
+            // 2. Subir la imagen a Cloudinary usando storageService
             let imageUrl = null;
+            let publicId = null; //  Guardaremos también el publicId
             if (imageFile) {
-                const storageRef = ref(storage, `experiences/${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                const uploadResult = await storageService.uploadFile(`experiences`, imageFile); // Usa storageService
+                imageUrl = uploadResult.downloadURL;
+                publicId = uploadResult.publicId; //  Guarda el publicId
             }
 
             // 3. Create the data object
@@ -284,7 +286,8 @@ function CrearExperiencia() {
                 maximoUsuarios: maxUsers,
                 incluidosExperiencia,  // Already an array
                 tipoActividad,
-                imageUrl,
+                imageUrl, // URL de Cloudinary
+                publicId,  //  Guarda el publicId en Firestore
                 dificultad,
             };
 
