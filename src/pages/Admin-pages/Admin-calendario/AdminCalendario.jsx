@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'; // Add useEffect
 
 const AdminCalendario = () => {
   return (
-    <div className="absolute inset-0 mx-24 my-16 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
+    <div className="absolute inset-0 mx-32 my-16 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Calendario
       </h1>
