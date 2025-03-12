@@ -26,7 +26,7 @@ const Sidebar = () => {
 
     const SidebarItems = [
         { href: "/homeAdmin", label: "Inicio", icon: homeIcon },
-        { href: "/adminGuias", label: "Gestion Guias", icon: groupIcon },
+        { href: "/gestion-guias", label: "Gestion Guias", icon: groupIcon },
         { href: "/admin-galeria", label: "Galería", icon: applicationIcon },
         { href: "/admin-rutas", label: "Rutas", icon: wayIcon },
         { href: "/admin-calendario", label: "Calendario", icon: calendarIcon },
@@ -36,7 +36,7 @@ const Sidebar = () => {
         { href: "/admin-tips", label: "Tips", icon: ideaIcon },
         { href: "/admin-foro", label: "Foro", icon: discussionIcon },
         { href: "/admin-mapa", label: "Mapa", icon: locationIcon },
-        { href: "/admin-reseña", label: "Reseña", icon: reviewIcon },
+        { href: "/admin-resena", label: "Reseña", icon: reviewIcon },
     ];
 
     // --- RESPONSIVE BEHAVIOR (Mobile Toggle) ---
