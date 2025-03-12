@@ -6,6 +6,10 @@ const AdminActividades = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Actividades
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        En nuestro sistema de experiencias existen diversos tipos de actividades que nuestros
+        guías hacen realidad a nuestros usuarios.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

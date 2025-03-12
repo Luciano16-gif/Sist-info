@@ -6,6 +6,10 @@ const AdminTips = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Tips
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Consejos y recomendaciones ofrecidas a nuestros usuarios para mejorar y perfeccionar
+        su experiencia junto a nosotros.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

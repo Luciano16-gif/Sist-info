@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom'; // Importante
 
 const AdminProfileB = () => {
+    const AdminNumber = 0;
     return (
         <div style={{
             position: 'relative',
@@ -10,29 +11,29 @@ const AdminProfileB = () => {
         }}>
             <div style={{
                 position: 'absolute',
-                top: '20px',
-                right: '20px',
-                width: '282px',
-                height: '70px',
+                top: '1rem',
+                right: '1rem',
+                width: '17.3rem',
+                height: '4.5rem',
                 flexShrink: '0',
-                borderRadius: '20px',
+                borderRadius: '1.2rem',
                 background: '#3A4C2E',
-                padding: '10px',
+                padding: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 zIndex: 20,
             }}>
                 <div style={{ color: 'white' }}>
-                    <span style={{ fontSize: '24px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>ADMIN #52</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>ADMIN #{AdminNumber}</span>
                     <br />
-                    <a href="#" style={{ textDecoration: 'underline', color: 'white', fontSize: '14px' }} onClick={(e) => e.preventDefault()}>
+                    <a href="#" style={{ textDecoration: 'underline', color: 'white', fontSize: '0.8rem' }} onClick={(e) => e.preventDefault()}>
                     VER PERFIL COMPLETO 
                     </a>
                 </div>
                 <div style={{
-                    width: '48px',
-                    height: '48px',
+                    width: '3rem',
+                    height: '3rem',
                     borderRadius: '50%',
                     backgroundColor: '#d9d9d9',
                     display: 'flex',

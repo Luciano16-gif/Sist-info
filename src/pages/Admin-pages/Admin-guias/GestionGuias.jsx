@@ -6,6 +6,10 @@ const GestionGuias = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Gestión de Guías
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Administra a los guías actuales responsables de nuestras experiencias
+        y revisa sus solicitudes.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

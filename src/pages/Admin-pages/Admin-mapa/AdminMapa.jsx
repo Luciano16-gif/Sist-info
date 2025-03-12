@@ -6,6 +6,9 @@ const AdminMapa = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Mapas
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Lista de los mapas de todas las rutas disponibles.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

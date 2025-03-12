@@ -6,6 +6,10 @@ const AdminMensajes = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Mensajes
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Aquí puedes consultar y responder los mensajes y comentarios enviados por 
+        nuestros guías.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

@@ -6,6 +6,10 @@ const AdminRutas = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Rutas y Excursiones
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Ofrecemos diversos servicios para todo tipo de personas y niveles de exigencia
+        con calidad y amor por nuestro parque nacional.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

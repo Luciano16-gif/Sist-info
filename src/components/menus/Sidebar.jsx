@@ -107,11 +107,11 @@ const Sidebar = () => {
                     width: expandedWidth,
                     height: menuHeight,
                     flexShrink: '0',
-                    borderRadius: '20px',
-                    boxShadow: '2px 2px 10px 0px rgba(0, 0, 0, 0.25)',
+                    borderRadius: '1rem',
+                    boxShadow: '1rem 1rem 2rem 0rem rgba(0, 0, 0, 0.25)',
                     position: 'absolute', 
-                    top: '20px',        
-                    left: '20px',      
+                    top: '1.2rem',        
+                    left: '1.2rem',      
                 }}
                 className={`
                     z-50

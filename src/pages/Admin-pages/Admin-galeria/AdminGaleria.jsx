@@ -6,6 +6,10 @@ const AdminGaleria = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Galería
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Representa el espacio donde nuestros usuarios y guías podrán echar un vistazo
+        de cómo son las actividades que ofrecemos.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );

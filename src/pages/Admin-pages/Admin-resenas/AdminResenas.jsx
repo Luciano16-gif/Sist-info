@@ -6,6 +6,10 @@ const AdminResenas = () => {
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Reseñas
       </h1>
+      <h1 className=" text-white text-lg md:text-lg">
+        Nuestros usuarios nos dejan su puntuación y su opinión con respecto a su experiencia
+        junto a nosotros.
+      </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
     </div>
   );
