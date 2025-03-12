@@ -120,6 +120,11 @@
     background-color: #ffce66;
 }
 
+.time-buttons-booking-process button.selected {
+    background-color: #ffce66; /* Or any other highlight style */
+   
+}
+
 
 /* --- Guide Selection Styles --- */
 
