@@ -17,7 +17,7 @@ import {
 
 const googleProvider = new GoogleAuthProvider();
 const UNIMET_DOMAIN = 'correo.unimet.edu.ve';
-const USERS_COLLECTION = 'lista-de-usuarios';
+const USERS_COLLECTION = 'Lista de Usuarios';
 
 // Validation utilities
 export const validateEmail = (email) => {
