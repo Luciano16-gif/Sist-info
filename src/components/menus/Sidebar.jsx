@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Correct import
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import homeIcon from "../../assets/images/landing-page-admin/home.webp";
@@ -15,14 +15,14 @@ import locationIcon from "../../assets/images/landing-page-admin/location.webp";
 import reviewIcon from "../../assets/images/landing-page-admin/review.webp";
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
-// Separator Component (Best practice: put this in a separate file, e.g., Separator.js)
 const Separator = () => (
     <hr className="border-t border-white-600 mx-4" />
 );
 
 const Sidebar = () => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isMobile, setIsMobile] = useState(false); // For responsive behavior
+    const [isMobile, setIsMobile] = useState(false);
+    const [menuHeight, setMenuHeight] = useState('auto');
 
     const SidebarItems = [
         { href: "/homeAdmin", label: "Inicio", icon: homeIcon },
@@ -39,19 +39,25 @@ const Sidebar = () => {
         { href: "/admin-resena", label: "Reseña", icon: reviewIcon },
     ];
 
-    // --- RESPONSIVE BEHAVIOR (Mobile Toggle) ---
     const handleResize = () => {
         setIsMobile(window.innerWidth <= 768);
         if (window.innerWidth > 768) {
-            setIsExpanded(false); // Prevent expansion bug on resize
+            setIsExpanded(false);
         }
+         calculateMenuHeight();
     };
 
     useEffect(() => {
-        handleResize(); // Initial check
+        handleResize();
         window.addEventListener('resize', handleResize);
+         calculateMenuHeight();
         return () => window.removeEventListener('resize', handleResize);
+
     }, []);
+
+     useEffect(() => {
+        calculateMenuHeight();
+    }, [isExpanded]);
 
     const toggleMobileSidebar = () => {
         setIsExpanded(!isExpanded);
@@ -69,60 +75,94 @@ const Sidebar = () => {
         }
     };
 
+    const calculateMenuHeight = () => {
+        const items = document.querySelectorAll('.sidebar-item');
+        let totalHeight = 0;
+
+        items.forEach(item => {
+            totalHeight += item.offsetHeight;
+        });
+
+        const logoContainer = document.querySelector('.logo-container');
+        const separator = document.querySelector('.separator-container');
+
+         if (logoContainer) {
+            totalHeight += logoContainer.offsetHeight;
+        }
+        if (separator) {
+            totalHeight += separator.offsetHeight;
+        }
+        totalHeight += 32;
+
+        setMenuHeight(`${totalHeight}px`);
+    };
+
+    const expandedWidth = isExpanded ? '160px' : '70px';
+    const logoWidth = isExpanded ? '60px' : '55px';
+
     return (
-        <nav
-            className={`
-                z-50
-                flex
-                flex-col
-                h-screen
-                ${isExpanded ? 'w-64' : (isMobile ? 'w-0' : 'w-16')}
-                bg-[#3A4C2E] 
-                text-white
-                py-4
-                transition-all
-                duration-500
-                ease-in-out
-                overflow-hidden
-            `}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {/* Mobile Toggle Button */}
-            {isMobile && (
-                <button
-                    onClick={toggleMobileSidebar}
-                    className="absolute top-4 right-4 text-white text-2xl z-50"
-                >
-                    ☰ {/* Hamburger icon */}
-                </button>
-            )}
+        <div style={{ position: 'relative', width: 'fit-content' }}>
+            <nav
+                style={{
+                    width: expandedWidth,
+                    height: menuHeight,
+                    flexShrink: '0',
+                    borderRadius: '20px',
+                    boxShadow: '2px 2px 10px 0px rgba(0, 0, 0, 0.25)',
+                    position: 'absolute', 
+                    top: '20px',        
+                    left: '20px',      
+                }}
+                className={`
+                    z-50
+                    flex
+                    flex-col
+                    bg-[#3A4C2E]
+                    text-white
+                    transition-all
+                    duration-300  
+                    ease-in-out
+                    overflow-hidden
+                `}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                {/* Mobile Toggle Button */}
+                {isMobile && (
+                    <button
+                        onClick={toggleMobileSidebar}
+                        className="absolute top-4 right-4 text-white text-2xl z-50"
+                    >
+                        ☰
+                    </button>
+                )}
 
-            {/* Logo (Centered) */}
-            <div className="mb-8 flex flex-wrap items-center justify-center m-1">
-                <img src={logoImage} alt="Logo" className="w-full h-full max-w-40 mr-2" />
-                {/* Show text on expand{isExpanded && <span className="text-2xl font-bold">Admin Panel</span>} */}
-            </div>
+                {/* Logo (Centered) */}
+                <div className="py-4 flex items-center justify-center logo-container">
+                    <img src={logoImage} alt="Logo" style={{ width: logoWidth, height: 'auto' }} />
+                </div>
 
-            {/* Separator */}
-            <Separator />
+                <div className='separator-container'>
+                    <Separator />
+                </div>
 
-            {/* Menu Items */}
-            <ul className={`flex flex-col gap-2 ${isMobile && !isExpanded ? 'hidden' : ''}`}>
-                {SidebarItems.map((item, index) => (
-                    <li key={index} className="hover:bg-gray-700 rounded transition duration-200 w-full">
-                        <Link
-                            to={item.href}
-                            className="flex items-center py-2 px-4 w-full"
-                            onClick={isMobile ? toggleMobileSidebar : undefined} // Toggle on mobile click
-                        >
-                            <img src={item.icon} alt={item.label} className="h-6 w-6" />
-                            {isExpanded && <span className="ml-3">{item.label}</span>} {/* Show text on expand */}
-                        </Link>
-                    </li>
-                ))}
-            </ul>
-        </nav>
+                {/* Menu Items */}
+                <ul className={`flex flex-col  ${isMobile && !isExpanded ? 'hidden' : ''} w-full`}>
+                    {SidebarItems.map((item, index) => (
+                        <li key={index} className="hover:bg-gray-700 rounded transition duration-200 w-full sidebar-item">
+                            <Link
+                                to={item.href}
+                                className={`flex items-center py-3 pl-4  w-full `}
+                                onClick={isMobile ? toggleMobileSidebar : undefined}
+                            >
+                                <img src={item.icon} alt={item.label} className="h-6 w-6" />
+                                {isExpanded && <span className="ml-3">{item.label}</span>}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+        </div>
     );
 };
 
