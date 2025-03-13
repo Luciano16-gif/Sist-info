@@ -170,16 +170,21 @@ export const emailSignUp = async (userData) => {
 
 export const googleAuth = async (isSignUp = false) => {
   try {
+    // First step: complete the popup flow
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
     const trimmedEmail = user.email.trim();
 
-    // Validate email - important check!
+    // Immediately validate email before any database operations
     if (!validateEmail(trimmedEmail)) {
+      console.log("Invalid email domain detected, signing out...");
+      
       // Sign out immediately to prevent any auth state changes
       await signOut(auth);
-      // Wait a moment for the signOut to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Add a longer delay to ensure sign-out completes fully
+      // This is critical to prevent race conditions with Firestore writes
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       return {
         error: true,
@@ -187,6 +192,8 @@ export const googleAuth = async (isSignUp = false) => {
       };
     }
 
+    // Only proceed with Firestore operations if email is valid
+    
     // Use direct document access instead of queries
     const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
     const userDoc = await getDoc(userDocRef);
@@ -194,6 +201,7 @@ export const googleAuth = async (isSignUp = false) => {
     // For sign up, check if user already exists
     if (isSignUp && userDoc.exists()) {
       await signOut(auth);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return {
         error: true,
         message: 'Ya ha registrado un usuario con ese correo.'
@@ -203,13 +211,14 @@ export const googleAuth = async (isSignUp = false) => {
     // For login, check if user doesn't exist
     if (!isSignUp && !userDoc.exists()) {
       await signOut(auth);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return {
         error: true,
         message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
       };
     }
 
-    // If user doesn't exist in Firestore and this is signup, create them
+    // Only create user document if all validations pass
     if (!userDoc.exists() && isSignUp) {
       const displayName = user.displayName || '';
       const nameParts = displayName.split(' ');
@@ -237,17 +246,18 @@ export const googleAuth = async (isSignUp = false) => {
   } catch (error) {
     console.error("Google auth error:", error);
     
-    // This is important - if we receive any error, ensure we're signed out
+    // Always ensure we're signed out on any error
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
         await signOut(auth);
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (signOutError) {
       console.error("Error signing out after auth error:", signOutError);
     }
     
-    // Special handling for user closing the popup - no need for error
+    // Special handling for user closing the popup
     if (error.code === 'auth/popup-closed-by-user') {
       return {
         error: true,
