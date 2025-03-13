@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import BusquedaGuias from "../../../components/Admin-components/admin-gestionGuias/BusquedaGuias";
+import NuestrosGuias from "../../../components/Admin-components/admin-gestionGuias/NuestrosGuias";
 
 const GestionGuias = () => {
 
@@ -29,6 +31,8 @@ const GestionGuias = () => {
         <RelevantInfoS number = {GuiasNAsignados} description ="Guías sin Asignaciones" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <BusquedaGuias />
+      <NuestrosGuias />
     </div>
   );
 };
