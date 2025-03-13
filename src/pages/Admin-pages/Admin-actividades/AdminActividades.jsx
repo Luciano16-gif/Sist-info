@@ -39,9 +39,16 @@ const AdminActividades = () => {
         />
         <RelevantInfoS number={ActividadesRealizadas} description="Actividades Realizadas" />
       </div>
+      {/*Section List Activities*/}
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
       <ActivitiesList />
+      
+      {/*Section Request Activities*/}
+      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
       <ActivityRequests />
+      
+      {/*Section Add Activity Form*/}
+      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
       <AddActivityForm />
     </div>
   );
