@@ -1,7 +1,13 @@
 // ProfileManagementPage.jsx
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { auth, db } from '../../../firebase-config';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+=======
+import { auth, db, storage } from '../../../firebase-config';
+import { collection, query, where, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Correct Imports
+>>>>>>> revised-backend
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
@@ -30,6 +36,7 @@ function ProfileManagementPage() {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
+<<<<<<< HEAD
                 try {
                     const usersCollection = collection(db, 'lista-de-usuarios');
                     const q = query(usersCollection, where("email", "==", user.email));
@@ -44,6 +51,14 @@ function ProfileManagementPage() {
                     }
 
                     const userDoc = querySnapshot.docs[0];
+=======
+                // User is signed in. Proceed to fetch data.
+                try {
+                    // Use direct document access with email as document ID
+                    const userDocRef = doc(db, 'lista-de-usuarios', user.email);
+                    const userDoc = await getDoc(userDocRef);
+    
+>>>>>>> revised-backend
                     if (!userDoc.exists()) {
                         console.error('El documento del usuario no existe en Firestore.');
                         setLoading(false);
@@ -51,14 +66,19 @@ function ProfileManagementPage() {
                         navigate('/login-page');
                         return;
                     }
-
+    
                     const userData = userDoc.data();
-
+    
                     setNombreCompleto(`${userData.name} ${userData.lastName}`);
                     setCorreoElectronico(userData.email);
                     setNumeroTelefonico(userData.phone);
                     setTipoUsuario(userData.userType);
+<<<<<<< HEAD
 
+=======
+    
+                    // Format creationTime to "day of month of year"
+>>>>>>> revised-backend
                     if (user.metadata.creationTime) {
                         const date = new Date(user.metadata.creationTime);
                         const day = date.getDate();
@@ -71,9 +91,17 @@ function ProfileManagementPage() {
                     } else {
                         setFechaRegistro('');
                     }
+<<<<<<< HEAD
 
                     setFotoPerfilUrl(userData['Foto de Perfil'] || '');
 
+=======
+    
+                    setContraseña(userData.password || '');
+                    setFotoPerfilUrl(userData['Foto de Perfil'] || '');
+    
+                    // Activities Performed
+>>>>>>> revised-backend
                     if (Array.isArray(userData.activitiesPerformed)) {
                         setActivitiesPerformed(userData.activitiesPerformed);
                     } else if (userData.activitiesPerformed) {
@@ -81,15 +109,26 @@ function ProfileManagementPage() {
                     } else {
                         setActivitiesPerformed([]);
                     }
+<<<<<<< HEAD
 
+=======
+    
+                    // Most Performed Activity
+>>>>>>> revised-backend
                     if (userData.mostPerformedActivity && typeof userData.mostPerformedActivity === 'object'
                         && userData.mostPerformedActivity.Actividad !== undefined && userData.mostPerformedActivity.timesPerformed !== undefined) {
                         setMostPerformedActivity(userData.mostPerformedActivity);
                     } else {
                         setMostPerformedActivity({ Actividad: '', timesPerformed: 0 });
                     }
+<<<<<<< HEAD
 
                     let fetchedActivities = [];
+=======
+    
+                    // Guide-specific activities. Extract, but DON'T set state yet.
+                    let fetchedActivities = []; // Initialize here
+>>>>>>> revised-backend
                     if (userData.userType === 'Guia') {
                         if (userData.actualRoute && userData.days && userData.schedule) {
                             if (Array.isArray(userData.actualRoute) && Array.isArray(userData.days) && Array.isArray(userData.schedule)
@@ -107,13 +146,22 @@ function ProfileManagementPage() {
                         }
                     }
                     setActivities(fetchedActivities);
+<<<<<<< HEAD
 
+=======
+    
+                    // Activities created Count
+>>>>>>> revised-backend
                     if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
                         setActivitiesCreatedCount(userData.activitiesCreated.length);
                     } else {
                         setActivitiesCreatedCount(0);
                     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> revised-backend
                 } catch (error) {
                     console.error('Error al obtener los datos del usuario:', error);
                     setLoading(false);
@@ -126,7 +174,7 @@ function ProfileManagementPage() {
                 navigate('/login-page');
             }
         });
-
+    
         return () => unsubscribe();
     }, [navigate]);
 
@@ -144,7 +192,7 @@ function ProfileManagementPage() {
 
             const usersCollection = collection(db, 'lista-de-usuarios');
             const q = query(usersCollection, where("email", "==", auth.currentUser.email));
-            const querySnapshot = await getDocs(q);
+            const querySnapshot = await getDoc(q);
 
             if (querySnapshot.empty) {
                 console.error('Usuario no encontrado para actualizar.');
