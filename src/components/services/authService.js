@@ -175,16 +175,25 @@ export const googleAuth = async (isSignUp = false) => {
     const user = result.user;
     const trimmedEmail = user.email.trim();
 
-    // Immediately validate email before any database operations
+    // Validate email domain immediately
     if (!validateEmail(trimmedEmail)) {
-      console.log("Invalid email domain detected, signing out...");
+      console.log("Invalid email domain detected, deleting user and signing out...");
       
-      // Sign out immediately to prevent any auth state changes
-      await signOut(auth);
-      
-      // Add a longer delay to ensure sign-out completes fully
-      // This is critical to prevent race conditions with Firestore writes
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      try {
+        // DELETE the user account completely (im tired of this)
+        await user.delete();
+        
+        // Also sign out to be safe (had an error and had to add it back)
+        await signOut(auth);
+        
+        // Wait for operations to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } catch (deleteError) {
+        console.error("Error deleting invalid user:", deleteError);
+        // Still try to sign out (just in case)
+        await signOut(auth);
+      }
       
       return {
         error: true,
@@ -192,72 +201,88 @@ export const googleAuth = async (isSignUp = false) => {
       };
     }
 
-    // Only proceed with Firestore operations if email is valid
-    
-    // Use direct document access instead of queries
-    const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
-    const userDoc = await getDoc(userDocRef);
+    // Email is valid, now check Firestore
+    try {
+      const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
+      const userDoc = await getDoc(userDocRef);
 
-    // For sign up, check if user already exists
-    if (isSignUp && userDoc.exists()) {
-      await signOut(auth);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return {
-        error: true,
-        message: 'Ya ha registrado un usuario con ese correo.'
-      };
-    }
+      // For sign up, check if user already exists
+      if (isSignUp && userDoc.exists()) {
+        await user.delete(); // Delete the auth user
+        await signOut(auth);
+        return {
+          error: true,
+          message: 'Ya ha registrado un usuario con ese correo.'
+        };
+      }
 
-    // For login, check if user doesn't exist
-    if (!isSignUp && !userDoc.exists()) {
-      await signOut(auth);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return {
-        error: true,
-        message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
-      };
-    }
+      // For login, check if user doesn't exist in Firestore
+      if (!isSignUp && !userDoc.exists()) {
+        await user.delete(); // Delete the auth user
+        await signOut(auth);
+        return {
+          error: true,
+          message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
+        };
+      }
 
-    // Only create user document if all validations pass
-    if (!userDoc.exists() && isSignUp) {
-      const displayName = user.displayName || '';
-      const nameParts = displayName.split(' ');
+      // All validation passed, now create the document if needed
+      if (!userDoc.exists() && isSignUp) {
+        const displayName = user.displayName || '';
+        const nameParts = displayName.split(' ');
+        
+        const userData = {
+          email: trimmedEmail,
+          name: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(' ') || "",
+          'Foto de Perfil': user.photoURL || "",
+          phone: "",
+          userType: "usuario",
+          'Registro/Inicio de Sesión': 'Google Authentication',
+          days: [],
+          actualRoute: [],
+          activitiesPerformed: [],
+          mostPerformedActivity: {Actividad:"", timesPerformed: 0},
+          schedule: [],
+          activitiesCreated: []
+        };
+
+        // Create the Firestore document
+        await setDoc(userDocRef, userData);
+      }
+
+      return user;
+    } catch (firestoreError) {
+      console.error("Firestore operation failed:", firestoreError);
       
-      const userData = {
-        email: trimmedEmail,
-        name: nameParts[0] || "",
-        lastName: nameParts.slice(1).join(' ') || "",
-        'Foto de Perfil': user.photoURL || "",
-        phone: "",
-        userType: "usuario",
-        'Registro/Inicio de Sesión': 'Google Authentication',
-        days: [],
-        actualRoute: [],
-        activitiesPerformed: [],
-        mostPerformedActivity: {Actividad:"", timesPerformed: 0},
-        schedule: [],
-        activitiesCreated: []
+      // Delete the auth user if Firestore operations fail
+      try {
+        await user.delete();
+        await signOut(auth);
+      } catch (cleanupError) {
+        console.error("Failed to clean up auth user:", cleanupError);
+      }
+      
+      return {
+        error: true,
+        message: 'Error al procesar tu cuenta. Por favor, intenta de nuevo.'
       };
-
-      await setDoc(userDocRef, userData);
     }
-
-    return user;
   } catch (error) {
     console.error("Google auth error:", error);
     
-    // Always ensure we're signed out on any error
+    // For any initial auth error, ensure no user is left behind
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
+        await currentUser.delete();
         await signOut(auth);
-        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (signOutError) {
-      console.error("Error signing out after auth error:", signOutError);
+    } catch (cleanupError) {
+      console.error("Error cleaning up after auth error:", cleanupError);
     }
     
-    // Special handling for user closing the popup
+    // Handle specific errors
     if (error.code === 'auth/popup-closed-by-user') {
       return {
         error: true,
