@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import GraficoAdmin from "../../../components/Admin-components/admin-estadisticas/GraficoAdmin"; 
 
 const AdminEstadisticas = () => {
 
@@ -30,6 +31,10 @@ const AdminEstadisticas = () => {
         <RelevantInfoS number = {Comentarios} description ="Comentarios y resenas recopiladas" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+
+      {/* Añadir componente de gráfico */}
+      <GraficoAdmin />
+      
     </div>
     
   );
