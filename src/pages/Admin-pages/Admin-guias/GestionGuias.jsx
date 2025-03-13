@@ -4,10 +4,10 @@ import RelevantInfoS from "../../../components/Admin-components/admin-buttons/In
 const GestionGuias = () => {
 
   //Variables de información relevante:
-  let GuiasRegistrados = 67;
-  let Solicitudes = 164;
-  let Sugerencias = 70;
-  let GuiasNAsignados = 30;
+  const GuiasRegistrados = 67;
+  const Solicitudes = 164;
+  const Sugerencias = 70;
+  const GuiasNAsignados = 30;
 
   return (
     <div className="absolute inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
@@ -22,7 +22,7 @@ const GestionGuias = () => {
       <h1 className=" text-white text-xl md:text-3xl font-bold">
         Información relevante
       </h1>
-      <div className="flex justify-start space-x-10 overflow-x-auto">
+      <div className="flex justify-start space-x-10">
         <RelevantInfoS number = {GuiasRegistrados} description ="Guías Registrados" />
         <RelevantInfoS number = {Solicitudes} description ="Solicitudes de Edición" />
         <RelevantInfoS number = {Sugerencias} description ="Sugerencias de Adición" />
