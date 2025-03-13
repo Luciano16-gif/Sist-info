@@ -9,6 +9,7 @@
     "@firebase/firestore": "^4.7.9",
     "@firebase/storage": "^0.13.7",
     "autoprefixer": "^10.4.20",
+    "cloudify": "^1.4.0",
     "cra-template": "1.2.0",
     "crypto-js": "^4.2.0",
     "firebase": "^11.4.0",
