@@ -1,16 +1,19 @@
 // ExperiencesPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './ExperiencesPage.css';
-import { db, storage } from '../../firebase-config';
+import { db } from '../../firebase-config'; // Ya no importamos storage de firebase
 import { collection, getDocs } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
+// import { ref, getDownloadURL } from 'firebase/storage';  <-- Eliminamos esto
 import { useNavigate } from 'react-router-dom';
+import storageService from '../../services/storage-service'; // Importamos nuestro nuevo servicio
+
+
 
 function ExperiencesPage() {
     const [experiences, setExperiences] = useState([]);
     const experienceRefs = useRef([]);
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true); // Add loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchExperiences = async () => {
@@ -20,16 +23,18 @@ function ExperiencesPage() {
 
             for (const doc of experiencesSnapshot.docs) {
                 const data = doc.data();
-                console.log("Raw data from Firestore:", data); // Add this line for debugging
+                console.log("Raw data from Firestore:", data);
 
                 let imageUrl = '';
                 try {
-                    const imageRef = ref(storage, data.imageUrl);
-                    imageUrl = await getDownloadURL(imageRef);
+                    // Usamos storageService.getDownloadURL() en lugar de Firebase Storage
+                    imageUrl = storageService.getDownloadURL(data.imageUrl); // Mucho más simple!
+
                 } catch (error) {
                     console.error("Error al obtener la URL de la imagen:", error);
-                    imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                    imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png'; // Imagen por defecto si falla
                 }
+
 
                 const experience = {
                     id: doc.id,
@@ -56,7 +61,7 @@ function ExperiencesPage() {
 
             setExperiences(experiencesList);
             experienceRefs.current = experiencesList.map((_, i) => experienceRefs.current[i] || React.createRef());
-            setLoading(false); // Set loading to false after data is fetched
+            setLoading(false);
         };
 
         fetchExperiences();
@@ -101,16 +106,16 @@ function ExperiencesPage() {
     };
 
     const handleViewMore = (experience) => {
-        if (loading) { // Check if data is still loading
-            console.log("Data is still loading. Cannot view details yet.");
+        if (loading) {
+            console.log("Data is still loading.  Cannot view details yet.");
             return;
         }
-        console.log("Experience ID being passed:", experience.id); // Add this line
+        console.log("Experience ID being passed:", experience.id);
         navigate('/booking', { state: { experience } });
     };
 
     if (loading) {
-        return <div>Loading experiences...</div>; // Show a loading message
+        return <div>Loading experiences...</div>;
     }
 
     return (
@@ -119,7 +124,6 @@ function ExperiencesPage() {
 
             {experiences.map((experience, index) => (
                 <div className="experience-card-experiences" key={experience.id} ref={experienceRefs.current[index]}>
-                    {/* ... rest of your ExperienceCard content ... */}
                     <div className="image-container-experiences">
                         <img src={experience.imageUrl} alt={experience.name} className="image-experiences" />
                         <div className="price-overlay-experiences">{experience.price} $</div>

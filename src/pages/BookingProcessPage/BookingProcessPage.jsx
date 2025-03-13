@@ -2,9 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { db, storage } from '../../firebase-config'; // Import Firebase
+import { db } from '../../firebase-config'; // Import Firebase
 import { doc, getDoc } from 'firebase/firestore'; // Import specific Firestore functions
-import { getDownloadURL, ref } from 'firebase/storage';
+// import { getDownloadURL, ref } from 'firebase/storage'; // REMOVE: No longer needed
+import storageService from '../../services/storage-service'; // Import the new storage service
+
 
 function BookingProcessPage() {
     const location = useLocation();
@@ -49,16 +51,17 @@ function BookingProcessPage() {
                 if (experienceSnap.exists()) {
                     const data = experienceSnap.data();
 
-                    // Get image URL (similar to ExperiencesPage.jsx)
+                    // Get image URL (using Cloudinary now)
                     let imageUrl = '';
                     try {
-                      const imageRef = ref(storage, data.imageUrl);
-                      imageUrl = await getDownloadURL(imageRef);
+                        // Assuming data.imageUrl contains the *path* or *publicId*
+                        imageUrl = storageService.getDownloadURL(data.imageUrl); //  Use the new service
                     } catch (imageError) {
-                      console.error("Error fetching image URL:", imageError);
-                      // Provide a fallback image if fetching fails.  IMPORTANT!
-                      imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                        console.error("Error fetching image URL:", imageError);
+                         // Fallback is still important!  Provide a path, not a full URL here
+                        imageUrl = 'src/assets/images/landing-page/profile_managemente/profile_picture_1.png'; //Relative path.
                     }
+
 
 
                     const experienceData = {
