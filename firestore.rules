@@ -1,24 +1,24 @@
+// firestore.rules
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User documents - direct access pattern for better security
-    match /lista-de-usuarios/{email} {
-      // Allow reading a specific user document (needed for checking existence)
-      allow get: if true;
+    // Allow authenticated users to read their own user document
+    match /Lista de Usuarios/{email} {
+      // Allow create if the user is authenticated and the document ID matches their email
+      allow create: if request.auth != null && 
+                      request.auth.token.email == email;
       
-      // Allow creating new user documents with validated email format
-      allow create: if request.resource.data.email is string && 
-                     request.resource.data.email.matches('^[^@]+@correo\\.unimet\\.edu\\.ve$');
-      
-      // Allow updates and deletes only by the document owner
-      allow update, delete: if request.auth != null && 
+      // Allow read/update if the user is authenticated and owns the document
+      allow read, update: if request.auth != null && 
                             request.auth.token.email == email;
+                            
+      // For admins, you might want to add additional rules later
     }
     
-    // All other collections require authentication
-    match /{collection}/{document=**} {
-      allow read: if request.auth != null && collection != "lista-de-usuarios";
-      allow write: if request.auth != null && collection != "lista-de-usuarios";
+    // Default deny all other operations
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

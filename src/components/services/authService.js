@@ -12,8 +12,7 @@ import {
   query, 
   where, 
   doc, 
-  setDoc,
-  getDoc // Add this import
+  setDoc 
 } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
@@ -56,15 +55,15 @@ export const emailSignIn = async (email, password) => {
   }
 
   try {
-    // Check if user exists by directly accessing the document
-    const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
-    const userDoc = await getDoc(userDocRef);
+    const usersCollection = collection(db, USERS_COLLECTION);
+    const q = query(usersCollection, where("email", "==", trimmedEmail));
+    const querySnapshot = await getDocs(q);
 
-    if (!userDoc.exists()) {
+    if (querySnapshot.empty) {
       throw new Error('Usuario no encontrado.');
     }
 
-    const userData = userDoc.data();
+    const userData = querySnapshot.docs[0].data();
     if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
       throw new Error('Este correo está registrado con Google Authentication. Por favor, use la opción de Google para iniciar sesión.');
     }
@@ -92,11 +91,12 @@ export const emailSignUp = async (userData) => {
   }
 
   try {
-    // Check if user already exists by direct document access
-    const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
-    const userDoc = await getDoc(userDocRef);
+    // Check if user already exists
+    const usersCollection = collection(db, USERS_COLLECTION);
+    const q = query(usersCollection, where("email", "==", trimmedEmail));
+    const querySnapshot = await getDocs(q);
 
-    if (userDoc.exists()) {
+    if (!querySnapshot.empty) {
       throw new Error('Este correo ya está registrado.');
     }
 
@@ -105,8 +105,10 @@ export const emailSignUp = async (userData) => {
     const user = userCredential.user;
     
     try {
-      // Create user document with the document ID as the email
-      await setDoc(userDocRef, {
+      // Create user document only after authentication is successful
+      const docRef = doc(usersCollection, trimmedEmail);
+      
+      await setDoc(docRef, {
         email: trimmedEmail,
         name,
         lastName,
@@ -158,24 +160,24 @@ export const googleAuth = async (isSignUp = false) => {
       throw new Error('Por favor, utiliza un correo electrónico de la Universidad Metropolitana.');
     }
 
-    // Use direct document access instead of queries
-    const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
-    const userDoc = await getDoc(userDocRef);
+    const usersCollection = collection(db, USERS_COLLECTION);
+    const q = query(usersCollection, where("email", "==", trimmedEmail));
+    const querySnapshot = await getDocs(q);
 
     // For sign up, check if user already exists
-    if (isSignUp && userDoc.exists()) {
+    if (isSignUp && !querySnapshot.empty) {
       await signOut(auth);
       throw new Error('Ya ha registrado un usuario con ese correo.');
     }
 
     // For login, check if user doesn't exist
-    if (!isSignUp && !userDoc.exists()) {
+    if (!isSignUp && querySnapshot.empty) {
       await signOut(auth);
       throw new Error('No existe una cuenta con este correo. Por favor, regístrese primero.');
     }
 
     // If user doesn't exist in Firestore and this is signup, create them
-    if (!userDoc.exists() && isSignUp) {
+    if (querySnapshot.empty && isSignUp) {
       const displayName = user.displayName || '';
       const nameParts = displayName.split(' ');
       
@@ -195,7 +197,7 @@ export const googleAuth = async (isSignUp = false) => {
         activitiesCreated: []
       };
 
-      await setDoc(userDocRef, userData);
+      await setDoc(doc(usersCollection, trimmedEmail), userData);
     }
 
     return user;
