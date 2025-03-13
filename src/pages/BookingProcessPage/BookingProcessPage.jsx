@@ -2,26 +2,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { db } from '../../firebase-config'; // Import Firebase
-import { doc, getDoc } from 'firebase/firestore'; // Import specific Firestore functions
-// import { getDownloadURL, ref } from 'firebase/storage'; // REMOVE: No longer needed
-import storageService from '../../services/storage-service'; // Import the new storage service
-
+import { db, storage } from '../../firebase-config';
+import { doc, getDoc } from 'firebase/firestore';
+import { getDownloadURL, ref } from 'firebase/storage';
 
 function BookingProcessPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const guideContainerRef = useRef(null);
-    const [experience, setExperience] = useState(null); // Store the fetched experience data
-    const [loading, setLoading] = useState(true); // Loading state
-    const [error, setError] = useState(null); // Error state
+    const [experience, setExperience] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedPeople, setSelectedPeople] = useState('');
-    const [selectedGuide, setSelectedGuide] = useState(null);  // Store the selected guide
+    const [selectedGuide, setSelectedGuide] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null); // Add selectedDate state
 
-    // Dummy guide data (replace with actual guide data from an API or, ideally, Firestore)
+
       const guides = [
-        { id: 1, name: 'Jorge Pérez', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' }, // Replace placeholders
+        { id: 1, name: 'Jorge Pérez', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
         { id: 2, name: 'Clara Carrasquel', rating: 5, image: '/../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
         { id: 3, name: 'Guía 3', rating: 3, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
         { id: 4, name: 'Guía 4', rating: 2, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
@@ -36,7 +35,7 @@ function BookingProcessPage() {
             setLoading(true);
             setError(null);
 
-            const experienceId = location.state?.experience?.id;  // Get ID from navigation state
+            const experienceId = location.state?.experience?.id;
 
             if (!experienceId) {
                 setError("No experience ID provided.");
@@ -50,19 +49,14 @@ function BookingProcessPage() {
 
                 if (experienceSnap.exists()) {
                     const data = experienceSnap.data();
-
-                    // Get image URL (using Cloudinary now)
                     let imageUrl = '';
                     try {
-                        // Assuming data.imageUrl contains the *path* or *publicId*
-                        imageUrl = storageService.getDownloadURL(data.imageUrl); //  Use the new service
+                      const imageRef = ref(storage, data.imageUrl);
+                      imageUrl = await getDownloadURL(imageRef);
                     } catch (imageError) {
-                        console.error("Error fetching image URL:", imageError);
-                         // Fallback is still important!  Provide a path, not a full URL here
-                        imageUrl = 'src/assets/images/landing-page/profile_managemente/profile_picture_1.png'; //Relative path.
+                      console.error("Error fetching image URL:", imageError);
+                      imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
                     }
-
-
 
                     const experienceData = {
                       id: experienceSnap.id,
@@ -77,14 +71,20 @@ function BookingProcessPage() {
                       maxPeople: data.maximoUsuarios,
                       minPeople: data.minimoUsuarios,
                       availableSlots: data.cuposDisponibles,
-                      imageUrl: imageUrl, // Use the fetched URL
+                      imageUrl: imageUrl,
                       rating: data.puntuacion,
                       registeredUsers: data.usuariosInscritos,
                       incluidos: data.incluidosExperiencia,
                       puntoDeSalida: data.puntoSalida,
-                      // Add other fields as needed
+
                   };
                     setExperience(experienceData);
+
+                    // Retrieve selectedDate from location.state
+                    if (location.state?.selectedDate) {
+                        setSelectedDate(new Date(location.state.selectedDate)); // Convert to Date object
+                    }
+
                 } else {
                     setError("Experience not found.");
                 }
@@ -97,7 +97,7 @@ function BookingProcessPage() {
         };
 
         fetchExperienceDetails();
-    }, [location.state]); // Depend on location.state to re-fetch if needed
+    }, [location.state]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -134,10 +134,6 @@ function BookingProcessPage() {
     };
 
     const handlePayment = () => {
-        // Implement your payment logic here.  This is a placeholder.
-        // You'll likely interact with a payment gateway (Stripe, PayPal, etc.)
-        // and update the Firestore database to reflect the booking.
-
         if (!selectedTime) {
           alert("Please select a time.");
           return;
@@ -150,41 +146,21 @@ function BookingProcessPage() {
           alert("Please select a guide.");
           return;
         }
+        if (!selectedDate) {
+            alert("Please select a date.");
+            return;
+        }
 
         console.log("Payment initiated with:", {
           experienceId: experience?.id,
           selectedTime,
           selectedPeople,
           selectedGuideId: selectedGuide.id,
+          selectedDate, // Include selectedDate
         });
-
-        // Example: Update Firestore to mark the experience as booked (VERY simplified)
-        // In a real application, you would need to handle:
-        // - Transaction management (to ensure atomicity)
-        // - User authentication
-        // - Inventory management (reducing available slots)
-        // - Error handling (what if the payment fails?)
-
-        /*  //This is just a placeholder, transaction is important
-        const experienceRef = doc(db, "Experiencias", experience.id);
-        updateDoc(experienceRef, {
-            cuposDisponibles: experience.availableSlots - parseInt(selectedPeople), // VERY simplified
-            // Add other fields to update (e.g., user bookings)
-        })
-        .then(() => {
-            alert("Booking successful!");
-            // Navigate to a confirmation page or back to the experiences list
-        })
-        .catch((error) => {
-            console.error("Error updating booking:", error);
-            alert("Booking failed. Please try again.");
-        });
-        */
-
        alert("Payment functionality not implemented yet.");
 
     };
-
 
     if (loading) {
         return <div>Loading experience details...</div>;
@@ -195,13 +171,16 @@ function BookingProcessPage() {
     }
 
     if (!experience) {
-        return <div>No experience data found.</div>; // This should rarely happen now
+        return <div>No experience data found.</div>;
     }
+    // Format selectedDate for display
+    const formattedDate = selectedDate ? selectedDate.toLocaleDateString() : "XX / XX / XXXX";
 
     return (
         <div className="container-booking-process">
             <button className="back-button-booking-process" onClick={handleGoBack}> VOLVER AL MENÚ DE RUTAS </button>
-            <img src={experience.imageUrl} alt="Background" className="background-image-booking-process" /> {/* Dynamic background */}
+            {/* Use dynamic background image */}
+            <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking-process" />
             <div className="content-booking-process">
                 <div className="left-side-booking-process">
                     <div className='pasarela-de-pago-title-container-booking-process'>
@@ -252,12 +231,12 @@ function BookingProcessPage() {
                         <h2 className="details-title-booking-process">DETALLES</h2>
                     </div>
                     <p className='details-booking-process-p'>CÓDIGO DE PARTICIPACIÓN</p>
-                    <h2 className='codigo-participacion-booking-process'>S912AP</h2>  {/*  Consider making this dynamic */}
+                    <h2 className='codigo-participacion-booking-process'>S912AP</h2>
                     <div className='user-details-container-booking-process'>
-                        <p className='details-booking-process-p'>USUARIO:  XXXXXXX XXXXX</p> {/* Replace with actual user data */}
+                        <p className='details-booking-process-p'>USUARIO:  XXXXXXX XXXXX</p>
                         <p className='details-booking-process-p'>CANTIDAD DE PERSONAS : {selectedPeople}</p>
                         <p className='details-booking-process-p'>RUTA: {experience.name}</p>
-                        <p className='details-booking-process-p'>FECHA: XX / XX / XXXX</p>  {/*  TODO:  Integrate a date picker */}
+                        <p className='details-booking-process-p date-container-booking-process'>FECHA: {formattedDate}</p>
                         <p className='details-booking-process-p'>HORARIO: {selectedTime}</p>
                         <p className='details-booking-process-p'>GUÍA: {selectedGuide?.name}</p>
                     </div>

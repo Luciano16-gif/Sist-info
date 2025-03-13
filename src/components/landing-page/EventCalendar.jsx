@@ -1,21 +1,21 @@
+// components/landing-page/EventCalendar.jsx
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
-const EventCalendar = () => {
+const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDateSelect and showSelectButton
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(2025);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null); // Local selectedDate state
   const [focusedCell, setFocusedCell] = useState(null);
-  
-  // Reference to store the grid of day cell refs for keyboard navigation
+
   const dayRefs = useRef([]);
-  
+
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  //Ejemplos de eventos para la visualización del calendario
-  const events = [
+  // ... (events array remains the same)
+    const events = [
     // Enero
     { date: '2025-01-15', title: 'Ruta nocturna al Ávila', description: 'Excursión guiada nocturna con observación de estrellas', color: 'bg-green-400' },
     { date: '2025-01-15', title: 'Taller de fotografía', description: 'Aprende a capturar paisajes nocturnos', color: 'bg-blue-400' },
@@ -78,7 +78,7 @@ const EventCalendar = () => {
     { date: '2025-12-10', title: 'Yoga matutino', description: 'Sesión de yoga al amanecer en el mirador', color: 'bg-pink-400' }
   ];
 
-  // Memoize calendar days calculation to prevent recalculation on every render
+
   const daysInMonth = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -101,17 +101,16 @@ const EventCalendar = () => {
     return days;
   }, [currentMonth, currentYear]);
 
-  // Memoize the events for the current month to avoid recalculation
+
   const currentMonthEvents = useMemo(() => {
     const monthStr = String(currentMonth + 1).padStart(2, '0');
     const yearStr = String(currentYear);
-    // Filter events for current month only
-    return events.filter(event => 
+    return events.filter(event =>
       event.date.startsWith(`${yearStr}-${monthStr}`)
     );
   }, [currentMonth, currentYear, events]);
 
-  // Memoize the getEventsForDay function to improve performance
+
   const getEventsForDay = useMemo(() => {
     return (day) => {
       if (!day) return [];
@@ -120,13 +119,10 @@ const EventCalendar = () => {
     };
   }, [currentMonthEvents, currentMonth, currentYear]);
 
-  // Adjust selectedDate when changing months to handle months with different number of days
+
   const adjustSelectedDate = (newMonth, newYear) => {
     if (selectedDate) {
-      // Get days in the new month
       const daysInNewMonth = new Date(newYear, newMonth + 1, 0).getDate();
-      
-      // If selectedDate is greater than the days in the new month, adjust it
       if (selectedDate > daysInNewMonth) {
         setSelectedDate(daysInNewMonth);
       }
@@ -135,7 +131,7 @@ const EventCalendar = () => {
 
   const handlePrevMonth = () => {
     let newMonth, newYear;
-    
+
     if (currentMonth === 0) {
       newMonth = 11;
       newYear = currentYear - 1;
@@ -143,7 +139,7 @@ const EventCalendar = () => {
       newMonth = currentMonth - 1;
       newYear = currentYear;
     }
-    
+
     adjustSelectedDate(newMonth, newYear);
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
@@ -151,7 +147,7 @@ const EventCalendar = () => {
 
   const handleNextMonth = () => {
     let newMonth, newYear;
-    
+
     if (currentMonth === 11) {
       newMonth = 0;
       newYear = currentYear + 1;
@@ -159,16 +155,16 @@ const EventCalendar = () => {
       newMonth = currentMonth + 1;
       newYear = currentYear;
     }
-    
+
     adjustSelectedDate(newMonth, newYear);
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
   };
 
-  // Handle keyboard navigation
+
   const handleKeyDown = (e, weekIndex, dayIndex, day) => {
-    if (!day) return; // Skip empty cells
-    
+    if (!day) return;
+
     switch (e.key) {
       case 'ArrowRight':
         e.preventDefault();
@@ -226,7 +222,7 @@ const EventCalendar = () => {
       case ' ':
         e.preventDefault();
         if (day) {
-          setSelectedDate(day);
+          setSelectedDate(day);  // Update local selectedDate
         }
         break;
       default:
@@ -234,7 +230,19 @@ const EventCalendar = () => {
     }
   };
 
-  // Initialize the ref array when the calendar days change
+    const handleDayClick = (day) => {
+        setSelectedDate(day); //Update local selectedDate
+    }
+
+  const handleConfirmDate = () => {
+    if (selectedDate) {
+      // Construct the full date string in "YYYY-MM-DD" format
+      const fullDate = new Date(currentYear, currentMonth, selectedDate);
+      onDateSelect(fullDate); // Call onDateSelect with the Date object
+    }
+  };
+
+
   useEffect(() => {
     dayRefs.current = {};
   }, [daysInMonth]);
@@ -242,10 +250,10 @@ const EventCalendar = () => {
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-12">
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Calendario */}
+        {/* Calendar Container */}
         <div className="w-full md:w-7/12 bg-[rgba(25,39,15,0.8)] rounded-2xl p-6">
           <div className="flex justify-between items-center mb-6">
-            <button 
+            <button
               onClick={handlePrevMonth}
               className="text-white text-2xl focus:outline-none"
               aria-label={`Ir al mes anterior: ${months[currentMonth === 0 ? 11 : currentMonth - 1]}`}
@@ -255,7 +263,7 @@ const EventCalendar = () => {
             <h2 className="text-white text-3xl font-bold" id="current-month">
               {months[currentMonth]} {currentYear}
             </h2>
-            <button 
+            <button
               onClick={handleNextMonth}
               className="text-white text-2xl focus:outline-none"
               aria-label={`Ir al mes siguiente: ${months[currentMonth === 11 ? 0 : currentMonth + 1]}`}
@@ -277,17 +285,17 @@ const EventCalendar = () => {
               <React.Fragment key={`week-${weekIndex}`}>
                 {week.map((day, dayIndex) => {
                   const currentDate = new Date();
-                  const isToday = 
+                  const isToday =
                     currentYear === currentDate.getFullYear() &&
                     currentMonth === currentDate.getMonth() &&
                     day === currentDate.getDate();
-                    
+
                   const dayEvents = day ? getEventsForDay(day) : [];
-                  const isSelected = day && day === selectedDate;
+                  const isSelected = day && day === selectedDate; // Check against local state
                   const cellId = `${weekIndex}-${dayIndex}`;
-                  
+
                   return (
-                    <div 
+                    <div
                       key={cellId}
                       ref={el => day && (dayRefs.current[cellId] = el)}
                       role={day ? "gridcell" : "presentation"}
@@ -295,11 +303,11 @@ const EventCalendar = () => {
                       aria-selected={isSelected}
                       aria-label={day ? `${day} de ${months[currentMonth]} de ${currentYear}${dayEvents.length > 0 ? `, ${dayEvents.length} eventos` : ''}` : undefined}
                       className={`relative rounded-lg p-2 transition-colors ${
-                        isToday ? 'bg-green-500' : 
-                        isSelected ? 'bg-blue-500' :
+                        isToday ? 'bg-green-500' :
+                        isSelected ? 'bg-blue-500' :  // Highlight selected date
                         day ? 'hover:bg-gray-700' : ''
                       } ${day ? 'cursor-pointer' : ''}`}
-                      onClick={() => day && setSelectedDate(day)}
+                      onClick={() => handleDayClick(day)}  //Use new handler
                       onKeyDown={(e) => handleKeyDown(e, weekIndex, dayIndex, day)}
                     >
                       {day && (
@@ -310,7 +318,7 @@ const EventCalendar = () => {
                           {dayEvents.length > 0 && (
                             <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-1">
                               {dayEvents.map((event, index) => (
-                                <div 
+                                <div
                                   key={index}
                                   className={`w-2 h-2 rounded-full ${event.color}`}
                                   aria-hidden="true"
@@ -328,34 +336,34 @@ const EventCalendar = () => {
           </div>
         </div>
 
-        {/* Sección de eventos */}
+        {/* Event Details and Button Container */}
         <div className="w-full md:w-5/12 space-y-4">
           <h2 className="text-5xl font-bold text-white mb-4">
             Calendario de actividades
           </h2>
-          
+
           {selectedDate && (
             <>
               <h3 className="text-xl text-white font-semibold mb-2">
                 Eventos para el {selectedDate}/{currentMonth + 1}/{currentYear}
               </h3>
               <div className="space-y-4">
-              {getEventsForDay(selectedDate).map((event, index) => (
-                <div 
-                  key={`${event.date}-${index}`}
-                  className="bg-[rgba(25,39,15,0.8)] p-4 rounded-lg"
-                >
-                  <h4 className="text-xl text-white font-semibold mb-2">
-                    {event.title}
-                  </h4>
-                  <p className="text-gray-300">
-                    {event.description}
-                  </p>
-                </div>
-              ))}
-              {getEventsForDay(selectedDate).length === 0 && (
-                <p className="text-gray-300">No hay eventos para esta fecha</p>
-              )}
+                {getEventsForDay(selectedDate).map((event, index) => (
+                  <div
+                    key={`${event.date}-${index}`}
+                    className="bg-[rgba(25,39,15,0.8)] p-4 rounded-lg"
+                  >
+                    <h4 className="text-xl text-white font-semibold mb-2">
+                      {event.title}
+                    </h4>
+                    <p className="text-gray-300">
+                      {event.description}
+                    </p>
+                  </div>
+                ))}
+                {getEventsForDay(selectedDate).length === 0 && (
+                  <p className="text-gray-300">No hay eventos para esta fecha</p>
+                )}
               </div>
             </>
           )}
@@ -364,6 +372,19 @@ const EventCalendar = () => {
             <p className="text-gray-300">
               Selecciona una fecha para ver los eventos
             </p>
+          )}
+
+            {/* Conditionally render the button with increased margin-top */}
+          {showSelectButton && (
+            <div className="flex justify-end mt-20"> {/* Increased mt to lower the button */}
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleConfirmDate}
+                disabled={!selectedDate}
+              >
+                Seleccionar Fecha
+              </button>
+            </div>
           )}
         </div>
       </div>
