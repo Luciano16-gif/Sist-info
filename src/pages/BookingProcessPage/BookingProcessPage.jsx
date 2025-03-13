@@ -4,7 +4,7 @@ import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase-config';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import storage from '../../services/storage-service';
+import storage from '../../cloudinary-services/storage-service';
 
 function BookingProcessPage() {
     const location = useLocation();

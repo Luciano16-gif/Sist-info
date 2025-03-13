@@ -5,7 +5,7 @@ import { db } from '../../firebase-config'; // Ya no importamos storage de fireb
 import { collection, getDocs } from 'firebase/firestore';
 // import { ref, getDownloadURL } from 'firebase/storage';  <-- Eliminamos esto
 import { useNavigate } from 'react-router-dom';
-import storageService from '../../services/storage-service'; // Importamos nuestro nuevo servicio
+import storageService from '../../cloudinary-services/storage-service'; // Importamos nuestro nuevo servicio
 
 
 
