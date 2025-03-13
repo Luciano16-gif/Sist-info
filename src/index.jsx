@@ -32,6 +32,9 @@ import OurTeam from './components/nuestro-equipo/OurTeam';
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
 
+//test
+// import PayPalTest from './pages/BookingProcessPage/PalPayTest';
+
 // ========== Styles ==========
 import './index.css';
 
@@ -66,6 +69,7 @@ root.render(
           <Route element={<LayoutAdmin />}>
             {/* Admin Routes */}
             <Route path="/admin-landing" element={<AdminLanding />} />
+            {/* <Route path="/paypal-test" element={<PayPalTest />} /> */}
           </Route>
 
         </Routes>
