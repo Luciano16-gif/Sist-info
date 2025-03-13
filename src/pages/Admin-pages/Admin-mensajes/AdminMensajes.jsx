@@ -16,6 +16,9 @@ const AdminMensajes = () => {
         nuestros guías.
       </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <h1 className=" text-white text-3xl md:text-3xl font-bold">
+        Informacion Relevante
+      </h1>
       <div className="flex justify-start space-x-10">
         <RelevantInfoS number = {Mensajes} description ="Mensajes sin leer" />
         <RelevantInfoS number = {MensajesNContestado} description ="Mensajes sin contestar" />

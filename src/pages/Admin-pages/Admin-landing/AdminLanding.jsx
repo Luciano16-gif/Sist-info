@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // Add useEffect (Not strictly needed for this specific change, but good practice to keep)
+import React, { useEffect } from 'react'; 
 
 const AdminLanding = () => {
   return (

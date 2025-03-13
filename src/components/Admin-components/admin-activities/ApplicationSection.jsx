@@ -46,7 +46,7 @@ const ActivityRequests = () => {
       <p className="text-sm text-white mb-4">APRUEBA O RECHAZA LAS SUGERENCIAS DE NUESTROS GUÍAS PARA EXPANDIR NUESTRA DIVERSIDAD EN ACTIVIDADES</p>
 
       <div
-        className="w-full  h-auto md:h-[434px] rounded-[20px] bg-[#16260C] shadow-[5px_5px_15px_5px_rgba(0,0,0,0.40)] p-6 mb-8"  // Changed classes here
+        className="w-full  h-auto md:h-[434px] rounded-[20px] bg-[#16260C] shadow-[5px_5px_15px_5px_rgba(0,0,0,0.40)] p-6 mb-8"
       >
         <div className="overflow-x-auto h-full">
           <div className="flex space-x-4">
