@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // Add useEffect
+import React, { useEffect } from 'react'; // Add useEffect (Not strictly needed for this specific change, but good practice to keep)
 
 const AdminLanding = () => {
   return (
@@ -7,7 +7,7 @@ const AdminLanding = () => {
         Bienvenido Administrador
       </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-      <h1 className=" text-white text-lg md:text-lg">
+      <h1 className=" text-white text-lg md:text-lg text-justify">
         Como administrador de la página de excursiones al Ávila,
         tus responsabilidades incluyen supervisar y moderar el foro, asegurando que las interacciones
         entre los usuarios sean constructivas y respetuosas. Además, deberás responder a las consultas
