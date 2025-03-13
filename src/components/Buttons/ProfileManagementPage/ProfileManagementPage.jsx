@@ -142,7 +142,7 @@ function ProfileManagementPage() {
                 return;
             }
 
-            const usersCollection = collection(db, 'Lista de Usuarios');
+            const usersCollection = collection(db, 'lista-de-usuarios');
             const q = query(usersCollection, where("email", "==", auth.currentUser.email));
             const querySnapshot = await getDocs(q);
 

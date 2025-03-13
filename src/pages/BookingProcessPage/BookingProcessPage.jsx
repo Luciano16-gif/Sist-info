@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { db, storage } from '../../firebase-config';
-import { doc, getDoc } from 'firebase/firestore';
-import { getDownloadURL, ref } from 'firebase/storage';
+import { db } from '../../firebase-config';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import storage from '../../services/storage-service';
 
 function BookingProcessPage() {
     const location = useLocation();
@@ -16,19 +16,9 @@ function BookingProcessPage() {
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedPeople, setSelectedPeople] = useState('');
     const [selectedGuide, setSelectedGuide] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(null); // Add selectedDate state
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [guides, setGuides] = useState([]);
 
-
-      const guides = [
-        { id: 1, name: 'Jorge Pérez', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 2, name: 'Clara Carrasquel', rating: 5, image: '/../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 3, name: 'Guía 3', rating: 3, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 4, name: 'Guía 4', rating: 2, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 5, name: 'Guía 5', rating: 5, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 6, name: 'Guía 6', rating: 4, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 7, name: 'Guía 7', rating: 3, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-        { id: 8, name: 'Guía 8', rating: 5, image: '../../src/assets/images/ExperiencesPage/paisajeReserva.png' },
-    ];
 
     useEffect(() => {
         const fetchExperienceDetails = async () => {
@@ -50,40 +40,86 @@ function BookingProcessPage() {
                 if (experienceSnap.exists()) {
                     const data = experienceSnap.data();
                     let imageUrl = '';
-                    try {
-                      const imageRef = ref(storage, data.imageUrl);
-                      imageUrl = await getDownloadURL(imageRef);
-                    } catch (imageError) {
-                      console.error("Error fetching image URL:", imageError);
-                      imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                    if (data.imageUrl) {
+                        try {
+                            imageUrl = await storage.getDownloadURL(data.imageUrl);
+                        } catch (imageError) {
+                            console.error("Error fetching experience image URL:", imageError);
+                            imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                        }
+                    } else {
+                        console.warn("Experience does not have an imageUrl field.");
+                        imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
                     }
+
 
                     const experienceData = {
-                      id: experienceSnap.id,
-                      name: data.nombre,
-                      description: data.descripcion,
-                      difficulty: data.dificultad,
-                      price: data.precio,
-                      distance: data.longitudRecorrido + " km",
-                      duracion: data.duracionRecorrido,
-                      time: data.horarioInicio + " - " + data.horarioFin,
-                      days: data.fechas.join(', '),
-                      maxPeople: data.maximoUsuarios,
-                      minPeople: data.minimoUsuarios,
-                      availableSlots: data.cuposDisponibles,
-                      imageUrl: imageUrl,
-                      rating: data.puntuacion,
-                      registeredUsers: data.usuariosInscritos,
-                      incluidos: data.incluidosExperiencia,
-                      puntoDeSalida: data.puntoSalida,
-
-                  };
+                        id: experienceSnap.id,
+                        name: data.name,
+                        description: data.descripcion,
+                        difficulty: data.dificultad,
+                        price: data.precio,
+                        distance: data.longitudRecorrido + " km",
+                        duracion: data.duracionRecorrido,
+                        time: data.horarioInicio + " - " + data.horarioFin,
+                        days: data.fechas.join(', '),
+                        maxPeople: data.maximoUsuarios,
+                        minPeople: data.minimoUsuarios,
+                        availableSlots: data.cuposDisponibles,
+                        imageUrl: imageUrl,
+                        rating: data.puntuacion,
+                        registeredUsers: data.usuariosInscritos,
+                        incluidos: data.incluidosExperiencia,
+                        puntoDeSalida: data.puntoSalida,
+                    };
                     setExperience(experienceData);
 
-                    // Retrieve selectedDate from location.state
                     if (location.state?.selectedDate) {
-                        setSelectedDate(new Date(location.state.selectedDate)); // Convert to Date object
+                        setSelectedDate(new Date(location.state.selectedDate));
                     }
+
+                    if (data.guias && Array.isArray(data.guias)) {
+                        const fetchedGuides = [];
+                        for (const guideRef of data.guias) {
+                            if (guideRef && guideRef.email) {
+                                const usersRef = collection(db, "lista-de-usuarios");
+                                const q = query(usersRef, where("email", "==", guideRef.email));
+                                const querySnapshot = await getDocs(q);
+
+                                if (!querySnapshot.empty) {
+                                    const guideDoc = querySnapshot.docs[0];
+                                    const guideData = guideDoc.data();
+
+                                    let guideImageUrl = '';
+                                    if (guideData["Foto de Perfil"]) {
+                                        try {
+                                            guideImageUrl = await storage.getDownloadURL(guideData["Foto de Perfil"]);
+                                        } catch (guideImageError) {
+                                            console.error("Error fetching guide image URL:", guideImageError);
+                                            guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                        }
+                                    } else {
+                                        console.warn(`Guide ${guideData.name} does not have a fotoPerfil field.`);
+                                        guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                    }
+
+                                    fetchedGuides.push({
+                                        id: guideDoc.id,
+                                        name: guideData.name,
+                                        lastName: guideData.lastName,
+                                        rating: guideData.puntuacion || 0,
+                                        image: guideImageUrl,
+                                    });
+                                } else {
+                                    console.warn("Guide not found for email:", guideRef.email);
+                                }
+                            } else {
+                                console.warn("Invalid guide reference:", guideRef);
+                            }
+                        }
+                        setGuides(fetchedGuides);
+                    }
+
 
                 } else {
                     setError("Experience not found.");
@@ -122,29 +158,29 @@ function BookingProcessPage() {
     };
 
     const handleTimeSelection = (time) => {
-      setSelectedTime(time);
+        setSelectedTime(time);
     };
 
     const handlePeopleSelection = (people) => {
-      setSelectedPeople(people);
+        setSelectedPeople(people);
     };
 
     const handleGuideSelection = (guide) => {
-      setSelectedGuide(guide);
+        setSelectedGuide(guide);
     };
 
     const handlePayment = () => {
         if (!selectedTime) {
-          alert("Please select a time.");
-          return;
+            alert("Please select a time.");
+            return;
         }
         if (!selectedPeople) {
-          alert("Please select the number of people.");
-          return;
+            alert("Please select the number of people.");
+            return;
         }
         if (!selectedGuide) {
-          alert("Please select a guide.");
-          return;
+            alert("Please select a guide.");
+            return;
         }
         if (!selectedDate) {
             alert("Please select a date.");
@@ -152,13 +188,13 @@ function BookingProcessPage() {
         }
 
         console.log("Payment initiated with:", {
-          experienceId: experience?.id,
-          selectedTime,
-          selectedPeople,
-          selectedGuideId: selectedGuide.id,
-          selectedDate, // Include selectedDate
+            experienceId: experience?.id,
+            selectedTime,
+            selectedPeople,
+            selectedGuideId: selectedGuide.id,
+            selectedDate,
         });
-       alert("Payment functionality not implemented yet.");
+        alert("Payment functionality not implemented yet.");
 
     };
 
@@ -173,13 +209,12 @@ function BookingProcessPage() {
     if (!experience) {
         return <div>No experience data found.</div>;
     }
-    // Format selectedDate for display
+
     const formattedDate = selectedDate ? selectedDate.toLocaleDateString() : "XX / XX / XXXX";
 
     return (
         <div className="container-booking-process">
             <button className="back-button-booking-process" onClick={handleGoBack}> VOLVER AL MENÚ DE RUTAS </button>
-            {/* Use dynamic background image */}
             <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking-process" />
             <div className="content-booking-process">
                 <div className="left-side-booking-process">
@@ -214,6 +249,7 @@ function BookingProcessPage() {
                                         <img src={guide.image} alt={guide.name} />
                                         <div className="guide-info-booking-process">
                                             <p>{guide.name}</p>
+                                            <p>{guide.lastName}</p> {/* Display lastName */}
                                             <div className="rating-dots-booking-process">
                                                 {renderRatingDots(guide.rating)}
                                             </div>
@@ -238,7 +274,7 @@ function BookingProcessPage() {
                         <p className='details-booking-process-p'>RUTA: {experience.name}</p>
                         <p className='details-booking-process-p date-container-booking-process'>FECHA: {formattedDate}</p>
                         <p className='details-booking-process-p'>HORARIO: {selectedTime}</p>
-                        <p className='details-booking-process-p'>GUÍA: {selectedGuide?.name}</p>
+                        <p className='details-booking-process-p'>GUÍA: {selectedGuide?.name} {selectedGuide?.lastName}</p> {/* Display full name */}
                     </div>
                     <div className='realizar-pago-button-container-booking-process'>
                         <button className="payment-button-booking-process" onClick={handlePayment}>REALIZAR PAGO</button>

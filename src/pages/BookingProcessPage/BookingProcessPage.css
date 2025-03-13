@@ -135,7 +135,7 @@
 
 .time-buttons-booking-process button.selected {
     background-color: #ffce66; /* Or any other highlight style */
-   
+
 }
 
 
@@ -184,16 +184,22 @@
 
 
 .guide-card-booking-process {
-  min-width: 150px; /* Adjust as needed */
-    flex: 0 0 auto;         /* Prevent shrinking and growing */
+  min-width: 200px; /* Increased min-width */
+  max-width: 250px; /*  Added max-width for safety */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content horizontally */
+  align-items: center;
   border: 1px solid #ddd;
   padding: 10px;
   border-radius: 8px;
-    background-color: white;
+  background-color: white;
+  /* Add word wrapping to prevent overflow */
+  word-wrap: break-word;  /* Standard, breaks anywhere */
+  overflow-wrap: break-word; /* For older browsers */
+  hyphens: auto;          /* Enables hyphenation if needed */
 }
+
 
 
 .scroll-button-booking-process {
@@ -235,6 +241,10 @@
      margin: 2px 0;
     color: black; /* Changed color to black */
     font-size: 0.7rem;
+      width: 100%; /* Add this line */
+    text-align: center; /* Add this to ensure text is centered */
+    white-space: normal; /* Allow text to wrap */
+
 }
 
 .rating-dots-booking-process {
