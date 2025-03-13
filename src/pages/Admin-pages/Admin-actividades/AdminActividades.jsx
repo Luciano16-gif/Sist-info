@@ -1,8 +1,9 @@
-// AdminActividades.jsx
+//AdminActividades.jsx
 import React from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
-import ActivitiesList from '../../../components/Admin-components/admin-activities/ActivitiesSection'; // Import the ActivitiesList component
-import ActivityRequests from  "../../../components/Admin-components/admin-activities/ApplicationSection"; // Import the ActivityRequests component"
+import ActivitiesList from '../../../components/Admin-components/admin-activities/ActivitiesSection';
+import ActivityRequests from  "../../../components/Admin-components/admin-activities/ApplicationSection";
+import AddActivityForm from "../../../components/Admin-components/admin-activities/FormActivities";
 
 const AdminActividades = () => {
 
@@ -10,11 +11,11 @@ const AdminActividades = () => {
   const Actividades = 21;
   const Solicitudes = 4;
   const ActividadesSExperiencia = 3;
-  const ActividadMasRealizada = "Caminata y Senderismo"; // Nombre más descriptivo
+  const ActividadMasRealizada = "Caminata y Senderismo";
   const ActividadesRealizadas = 217;
 
   return (
-    <div className="absolute inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
+    <div className="absolute inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10 pb-8"> {/* Added pb-8 */}
       <h1 className="text-white text-4xl md:text-5xl font-bold">
         Actividades
       </h1>
@@ -39,13 +40,9 @@ const AdminActividades = () => {
         <RelevantInfoS number={ActividadesRealizadas} description="Actividades Realizadas" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-
-      {/*ActivitiesSection*/}
       <ActivitiesList />
-
-      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-
       <ActivityRequests />
+      <AddActivityForm />
     </div>
   );
 };
