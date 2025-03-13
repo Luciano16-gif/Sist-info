@@ -30,7 +30,18 @@ import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
 import OurTeam from './components/nuestro-equipo/OurTeam';
 
 // Admin Pages
-import AdminLanding from './pages/Admin-landing/AdminLanding';
+import AdminLanding from './pages/Admin-pages/Admin-landing/AdminLanding';
+import GestionGuias from './pages/Admin-pages/Admin-guias/GestionGuias';
+import AdminActividades from './pages/Admin-pages/Admin-actividades/AdminActividades';
+import AdminCalendario from './pages/Admin-pages/Admin-calendario/AdminCalendario';
+import AdminEstadisticas from './pages/Admin-pages/Admin-estadisticas/AdminEstadisticas';
+import AdminForo from './pages/Admin-pages/Admin-foro/AdminForo';
+import AdminGaleria from './pages/Admin-pages/Admin-galeria/AdminGaleria';
+import AdminMapa from './pages/Admin-pages/Admin-mapa/AdminMapa';
+import AdminMensajes from './pages/Admin-pages/Admin-mensajes/AdminMensajes';
+import AdminResenas from './pages/Admin-pages/Admin-resenas/AdminResenas';
+import AdminRutas from './pages/Admin-pages/Admin-rutas/AdminRutas';
+import AdminTips from './pages/Admin-pages/Admin-tips/AdminTips';
 
 // ========== Styles ==========
 import './index.css';
@@ -65,7 +76,18 @@ root.render(
           {/* Routes with LayoutAdmin */}
           <Route element={<LayoutAdmin />}>
             {/* Admin Routes */}
-            <Route path="/admin-landing" element={<AdminLanding />} />
+            <Route path="/homeAdmin" element={<AdminLanding />} />
+            <Route path="/gestion-guias" element={<GestionGuias />} />
+            <Route path="/admin-galeria" element={<AdminGaleria />} />
+            <Route path="/admin-rutas" element={<AdminRutas />} />
+            <Route path="/admin-calendario" element={<AdminCalendario />} />
+            <Route path="/admin-actividades" element={<AdminActividades />} />
+            <Route path="/admin-mensajes" element={<AdminMensajes />} />
+            <Route path="/admin-estadisticas" element={<AdminEstadisticas />} />
+            <Route path="/admin-tips" element={<AdminTips />} />
+            <Route path="/admin-foro" element={<AdminForo />} />
+            <Route path="/admin-mapa" element={<AdminMapa />} />
+            <Route path="/admin-resena" element={<AdminResenas />} />
           </Route>
 
         </Routes>
