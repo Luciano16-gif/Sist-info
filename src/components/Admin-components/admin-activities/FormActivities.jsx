@@ -14,22 +14,39 @@ const AddActivityForm = () => {
             <input
               type="text"
               id="activityName"
-              className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline bg-[#D9D9D9] text-black"
+              className="shadow appearance-none  rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline text-black"
+              style={{
+                borderRadius: '10px',
+                border: '3px solid #FFF',
+                background: 'rgba(255, 255, 255, 0.20)',
+              }}
               placeholder=""
             />
             {/* Button placed directly below the input field */}
-            <button className="bg-white hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center mt-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="mr-2">
+            <button
+              className=" hover:bg-gray-100  font-bold py-2 px-4  inline-flex items-center mt-2 text-white"
+              style={{
+                borderRadius: '30px',
+                border: '4px solid #FFF',
+                background: 'rgba(217, 217, 217, 0.50)',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="mr-2 fill-white"> {/*Added fill-white */}
                 <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6 13h-5v5h-2v-5h-5v-2h5v-5h2v5h5v2z"/>
               </svg>
               <span>AGREGAR ACTIVIDAD</span>
             </button>
           </div>
-          <div className="md:row-span-2"> {/* Added md:row-span-2 back */}
+          <div className="md:row-span-2">
             <label htmlFor="activityDescription" className="block text-white text-sm font-bold mb-2">DESCRIPCIÓN DE LA ACTIVIDAD</label>
             <textarea
               id="activityDescription"
-              className="shadow appearance-none border rounded w-full py-2 px-2 leading-tight focus:outline-none focus:shadow-outline bg-[#D9D9D9] text-black h-32 md:h-full" // Added md:h-full back
+              className="shadow appearance-none  rounded w-full py-2 px-2 leading-tight focus:outline-none focus:shadow-outline  text-black h-32 md:h-full"
+              style={{
+                borderRadius: '10px',
+                border: '3px solid #FFF',
+                background: 'rgba(255, 255, 255, 0.20)',
+              }}
               placeholder=""
             />
           </div>
