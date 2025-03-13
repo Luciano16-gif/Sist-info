@@ -18,10 +18,12 @@ function BookingProcessPage() {
     const [selectedGuide, setSelectedGuide] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [guides, setGuides] = useState([]);
+    const [availableTimes, setAvailableTimes] = useState([]); // Nuevo estado para los turnos
 
 
     useEffect(() => {
         const fetchExperienceDetails = async () => {
+            // ... (código existente para obtener los detalles de la experiencia) ...
             setLoading(true);
             setError(null);
 
@@ -61,7 +63,7 @@ function BookingProcessPage() {
                         price: data.precio,
                         distance: data.longitudRecorrido + " km",
                         duracion: data.duracionRecorrido,
-                        time: data.horarioInicio + " - " + data.horarioFin,
+                        time: data.horarioInicio + " - " + data.horarioFin,  //Lo usaremos para los turnos
                         days: data.fechas.join(', '),
                         maxPeople: data.maximoUsuarios,
                         minPeople: data.minimoUsuarios,
@@ -135,11 +137,52 @@ function BookingProcessPage() {
         fetchExperienceDetails();
     }, [location.state]);
 
+    // Nueva función para generar los turnos
+    useEffect(() => {
+        if (experience) {
+            const generateTimeSlots = (startTime, endTime, durationMinutes) => {
+                const slots = [];
+                const [startHour, startMinute] = startTime.split(':').map(Number);
+                const [endHour, endMinute] = endTime.split(':').map(Number);
+
+                let currentHour = startHour;
+                let currentMinute = startMinute;
+
+                while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
+                    const formattedHour = String(currentHour).padStart(2, '0');
+                    const formattedMinute = String(currentMinute).padStart(2, '0');
+                    slots.push(`${formattedHour}:${formattedMinute}`);
+
+                    currentMinute += durationMinutes;
+                    currentHour += Math.floor(currentMinute / 60);
+                    currentMinute %= 60;
+                }
+                //Elimina el último turno si es identico a la hora de finalización, para que no se duplique.
+                if(slots.length > 0){
+                    const lastSlot = slots[slots.length -1];
+                    if(lastSlot === endTime){
+                        slots.pop();
+                    }
+                }
+
+                return slots;
+            };
+
+
+            const [startTime, endTime] = experience.time.split(' - ');
+             //duracion es en minutos.
+            const timeSlots = generateTimeSlots(startTime, endTime, parseInt(experience.duracion));
+            setAvailableTimes(timeSlots);
+        }
+    }, [experience]);
+
+
     const handleGoBack = () => {
         navigate(-1);
     };
 
     const renderRatingDots = (rating) => {
+         // ... (código existente) ...
         const dots = [];
         for (let i = 0; i < 5; i++) {
             dots.push(
@@ -150,6 +193,7 @@ function BookingProcessPage() {
     };
 
     const handleScroll = (direction) => {
+        // ... (código existente) ...
         const container = guideContainerRef.current;
         if (container) {
             const scrollAmount = direction === 'left' ? -200 : 200;
@@ -162,14 +206,17 @@ function BookingProcessPage() {
     };
 
     const handlePeopleSelection = (people) => {
+        // ... (código existente) ...
         setSelectedPeople(people);
     };
 
     const handleGuideSelection = (guide) => {
+        // ... (código existente) ...
         setSelectedGuide(guide);
     };
 
     const handlePayment = () => {
+        // ... (código existente, validaciones, etc.) ...
         if (!selectedTime) {
             alert("Please select a time.");
             return;
@@ -224,9 +271,16 @@ function BookingProcessPage() {
                     <div className="selection-box-booking-process">
                         <label>SELECCIONA UN HORARIO</label>
                         <div className="time-buttons-booking-process">
-                            <button onClick={() => handleTimeSelection('7:00AM')} className={selectedTime === '7:00AM' ? 'selected' : ''}>7:00AM</button>
-                            <button onClick={() => handleTimeSelection('10:00AM')} className={selectedTime === '10:00AM' ? 'selected' : ''}>10:00AM</button>
-                            <button onClick={() => handleTimeSelection('1:00PM')} className={selectedTime === '1:00PM' ? 'selected' : ''}>1:00PM</button>
+                            {/* Genera los botones dinámicamente */}
+                            {availableTimes.map((time) => (
+                                <button
+                                    key={time}
+                                    onClick={() => handleTimeSelection(time)}
+                                    className={selectedTime === time ? 'selected' : ''}
+                                >
+                                    {time}
+                                </button>
+                            ))}
                         </div>
                     </div>
                     <div className="selection-box-booking-process">
