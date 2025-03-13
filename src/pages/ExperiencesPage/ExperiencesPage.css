@@ -102,8 +102,10 @@
 
     /*  Highly Recommended:  Truncate with ellipsis */
     display: -webkit-box;
-    -webkit-line-clamp: 3; /*  Limit to 3 lines (adjust as needed) */
+    -webkit-line-clamp: 3;
+    line-clamp: 3; 
     -webkit-box-orient: vertical;
+    box-orient: vertical; 
     overflow: hidden;
 }
 
