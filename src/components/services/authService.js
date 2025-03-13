@@ -13,24 +13,25 @@ import {
   where, 
   doc, 
   setDoc,
-  getDoc // Add this import
+  getDoc 
 } from 'firebase/firestore';
 
+// Import the unified validation utilities
+import { validateEmail as validateEmailUtil, validatePhone as validatePhoneUtil } from '../utils/validationUtils';
+
 const googleProvider = new GoogleAuthProvider();
-const UNIMET_DOMAIN = 'correo.unimet.edu.ve';
 const USERS_COLLECTION = 'lista-de-usuarios';
 
-// Validation utilities
-export const validateEmail = (email) => {
-  const trimmedEmail = email.trim();
-  return trimmedEmail.endsWith(`@${UNIMET_DOMAIN}`);
+// Helper functions that convert between validation formats
+export const isEmailValid = (email) => {
+  return validateEmailUtil(email).isValid;
 };
 
-export const validatePhone = (phone) => {
-  return phone ? /^\d{11}$/.test(phone) : true;
+export const isPhoneValid = (phone) => {
+  return validatePhoneUtil(phone).isValid;
 };
 
-// Error message handling
+// Error message handling - unchanged
 export const getAuthErrorMessage = (errorCode) => {
   const errorMessages = {
     'auth/wrong-password': 'Contraseña incorrecta.',
@@ -48,20 +49,91 @@ export const getAuthErrorMessage = (errorCode) => {
   return errorMessages[errorCode] || errorMessages.default;
 };
 
-// Authentication functions
-export const emailSignIn = async (email, password) => {
-  const trimmedEmail = email.trim();
+/**
+ * Common error handler for auth operations
+ * @param {Error} error - Original error 
+ * @param {string} defaultMessage - Fallback message
+ * @returns {Object} - Standardized error object
+ */
+const handleAuthError = (error, defaultMessage = 'Ocurrió un error durante la autenticación.') => {
+  console.error("Auth error:", error);
+  return { 
+    error: true, 
+    message: error.code ? getAuthErrorMessage(error.code) : (error.message || defaultMessage)
+  };
+};
+
+/**
+ * Clean up user after failed auth 
+ * @param {Object} user - Firebase user object to clean up
+ * @returns {Promise<void>}
+ */
+const cleanupAuthUser = async (user) => {
+  try {
+    // Delete the user if provided
+    if (user) {
+      await user.delete();
+    }
+    
+    // Always try to sign out
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await signOut(auth);
+    }
+  } catch (cleanupError) {
+    console.error("Error during auth cleanup:", cleanupError);
+    // Still try to sign out if delete fails
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Failed to sign out during cleanup:", e);
+    }
+  }
+};
+
+/**
+ * Pre-validates user data before auth operations
+ * @param {string} email - User email
+ * @param {Object} options - Additional validation options
+ * @returns {Object|null} - Error object or null if valid
+ */
+const preValidateAuth = (email, options = {}) => {
+  const { checkPhone = false, phone = null } = options;
   
   // Validate email
-  if (!validateEmail(trimmedEmail)) {
+  const trimmedEmail = email?.trim();
+  const emailValidation = validateEmailUtil(trimmedEmail);
+  if (!emailValidation.isValid) {
     return {
       error: true,
-      message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
+      message: emailValidation.message
     };
   }
+  
+  // Validate phone if required
+  if (checkPhone && phone) {
+    const phoneValidation = validatePhoneUtil(phone);
+    if (!phoneValidation.isValid) {
+      return {
+        error: true,
+        message: phoneValidation.message
+      };
+    }
+  }
+  
+  return null; // No validation errors
+};
+
+// Authentication functions - refactored
+export const emailSignIn = async (email, password) => {
+  const trimmedEmail = email?.trim();
+  
+  // Pre-validate
+  const validationError = preValidateAuth(trimmedEmail);
+  if (validationError) return validationError;
 
   try {
-    // Check if user exists by directly accessing the document
+    // Check if user exists
     const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
     const userDoc = await getDoc(userDocRef);
 
@@ -83,35 +155,20 @@ export const emailSignIn = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
     return userCredential.user;
   } catch (error) {
-    console.error("Login error:", error);
-    return { 
-      error: true, 
-      message: error.code ? getAuthErrorMessage(error.code) : error.message 
-    };
+    return handleAuthError(error);
   }
 };
 
 export const emailSignUp = async (userData) => {
   const { email, password, name, lastName, phone } = userData;
-  const trimmedEmail = email.trim();
+  const trimmedEmail = email?.trim();
   
-  // Validate email and phone
-  if (!validateEmail(trimmedEmail)) {
-    return {
-      error: true,
-      message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
-    };
-  }
-  
-  if (!validatePhone(phone)) {
-    return {
-      error: true,
-      message: 'El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.'
-    };
-  }
+  // Pre-validate
+  const validationError = preValidateAuth(trimmedEmail, { checkPhone: true, phone });
+  if (validationError) return validationError;
 
   try {
-    // Check if user already exists by direct document access
+    // Check if user already exists
     const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
     const userDoc = await getDoc(userDocRef);
 
@@ -122,12 +179,12 @@ export const emailSignUp = async (userData) => {
       };
     }
 
-    // Create the Firebase auth user first
+    // Create the Firebase auth user
     const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
     const user = userCredential.user;
     
     try {
-      // Create user document with the document ID as the email
+      // Create user document
       await setDoc(userDocRef, {
         email: trimmedEmail,
         name,
@@ -145,14 +202,8 @@ export const emailSignUp = async (userData) => {
       
       return user;
     } catch (firestoreError) {
-      // If Firestore write fails, delete the auth user to avoid orphaned accounts
-      console.error("Error writing to Firestore: ", firestoreError);
-      
-      try {
-        await user.delete();
-      } catch (deleteError) {
-        console.error("Failed to delete auth user after Firestore error: ", deleteError);
-      }
+      // If Firestore write fails, clean up the auth user
+      await cleanupAuthUser(user);
       
       return {
         error: true,
@@ -160,41 +211,23 @@ export const emailSignUp = async (userData) => {
       };
     }
   } catch (error) {
-    console.error("Sign up error:", error);
-    return { 
-      error: true, 
-      message: error.code ? getAuthErrorMessage(error.code) : error.message 
-    };
+    return handleAuthError(error, 'Error al crear la cuenta.');
   }
 };
 
 export const googleAuth = async (isSignUp = false) => {
+  let user = null;
+  
   try {
-    // First step: complete the popup flow
+    // Start the popup flow
     const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    const trimmedEmail = user.email.trim();
+    user = result.user;
+    const trimmedEmail = user.email?.trim();
 
-    // Validate email domain immediately
-    if (!validateEmail(trimmedEmail)) {
-      console.log("Invalid email domain detected, deleting user and signing out...");
-      
-      try {
-        // DELETE the user account completely (im tired of this)
-        await user.delete();
-        
-        // Also sign out to be safe (had an error and had to add it back)
-        await signOut(auth);
-        
-        // Wait for operations to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-      } catch (deleteError) {
-        console.error("Error deleting invalid user:", deleteError);
-        // Still try to sign out (just in case)
-        await signOut(auth);
-      }
-      
+    // Validate email domain after getting it from the popup
+    const emailValidation = validateEmailUtil(trimmedEmail);
+    if (!emailValidation.isValid) {
+      await cleanupAuthUser(user);
       return {
         error: true,
         message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
@@ -208,8 +241,7 @@ export const googleAuth = async (isSignUp = false) => {
 
       // For sign up, check if user already exists
       if (isSignUp && userDoc.exists()) {
-        await user.delete(); // Delete the auth user
-        await signOut(auth);
+        await cleanupAuthUser(user);
         return {
           error: true,
           message: 'Ya ha registrado un usuario con ese correo.'
@@ -218,15 +250,14 @@ export const googleAuth = async (isSignUp = false) => {
 
       // For login, check if user doesn't exist in Firestore
       if (!isSignUp && !userDoc.exists()) {
-        await user.delete(); // Delete the auth user
-        await signOut(auth);
+        await cleanupAuthUser(user);
         return {
           error: true,
           message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
         };
       }
 
-      // All validation passed, now create the document if needed
+      // All validation passed, now create the document if needed for signup
       if (!userDoc.exists() && isSignUp) {
         const displayName = user.displayName || '';
         const nameParts = displayName.split(' ');
@@ -254,32 +285,21 @@ export const googleAuth = async (isSignUp = false) => {
       return user;
     } catch (firestoreError) {
       console.error("Firestore operation failed:", firestoreError);
-      
-      // Delete the auth user if Firestore operations fail
-      try {
-        await user.delete();
-        await signOut(auth);
-      } catch (cleanupError) {
-        console.error("Failed to clean up auth user:", cleanupError);
-      }
-      
+      await cleanupAuthUser(user);
       return {
         error: true,
         message: 'Error al procesar tu cuenta. Por favor, intenta de nuevo.'
       };
     }
   } catch (error) {
-    console.error("Google auth error:", error);
-    
-    // For any initial auth error, ensure no user is left behind
-    try {
+    // For any initial auth error, clean up if needed
+    if (user) {
+      await cleanupAuthUser(user);
+    } else {
       const currentUser = auth.currentUser;
       if (currentUser) {
-        await currentUser.delete();
-        await signOut(auth);
+        await cleanupAuthUser(currentUser);
       }
-    } catch (cleanupError) {
-      console.error("Error cleaning up after auth error:", cleanupError);
     }
     
     // Handle specific errors
@@ -290,10 +310,7 @@ export const googleAuth = async (isSignUp = false) => {
       };
     }
     
-    return { 
-      error: true, 
-      message: error.code ? getAuthErrorMessage(error.code) : error.message 
-    };
+    return handleAuthError(error);
   }
 };
 
@@ -302,10 +319,6 @@ export const logOut = async () => {
     await signOut(auth);
     return true;
   } catch (error) {
-    console.error("Logout error:", error);
-    return {
-      error: true,
-      message: 'Error al cerrar sesión.'
-    };
+    return handleAuthError(error, 'Error al cerrar sesión.');
   }
 };
