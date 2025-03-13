@@ -1,5 +1,8 @@
+// AdminActividades.jsx
 import React from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import ActivitiesList from '../../../components/Admin-components/admin-activities/ActivitiesSection'; // Import the ActivitiesList component
+import ActivityRequests from  "../../../components/Admin-components/admin-activities/ApplicationSection"; // Import the ActivityRequests component"
 
 const AdminActividades = () => {
 
@@ -31,11 +34,18 @@ const AdminActividades = () => {
           number={ActividadMasRealizada}
           description="Actividad más realizada"
           descriptionFontSize="text-sm"
-          numberFontSize="text-lg md:text-1xl" 
+          numberFontSize="text-lg md:text-1xl"
         />
         <RelevantInfoS number={ActividadesRealizadas} description="Actividades Realizadas" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+
+      {/*ActivitiesSection*/}
+      <ActivitiesList />
+
+      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+
+      <ActivityRequests />
     </div>
   );
 };
