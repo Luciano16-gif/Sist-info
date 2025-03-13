@@ -75,17 +75,14 @@ function SignUpPage() {
   const errorMessage = contextError;
 
   return (
-    <div className="auth-page signup-page">
+    <div className="auth-page signup-page overflow-hidden">
       <div className="auth-container">
         <h2 className="auth-title signup-title">Registrarse</h2>
         
-        {/* Error message - prominently displayed */}
-        {errorMessage && (
-          <ErrorMessage 
-            message={errorMessage} 
-            className="auth-error-prominent" 
-          />
-        )}
+        {/* Error container with a signup-specific class */}
+        <div className="error-container signup-error-container">
+          {errorMessage && <ErrorMessage message={errorMessage} />}
+        </div>
         
         <div className="input-container">
           <div className="signup-input-row">

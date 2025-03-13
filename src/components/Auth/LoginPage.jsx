@@ -63,13 +63,10 @@ function LoginPage() {
       <div className="auth-container">
         <h2 className="auth-title login-title">Iniciar Sesión</h2>
         
-        {/* Error message - prominently displayed */}
-        {errorMessage && (
-          <ErrorMessage 
-            message={errorMessage} 
-            className="auth-error-prominent" 
-          />
-        )}
+        {/* Error container that flexibly handles the error message */}
+        <div className="error-container">
+          {errorMessage && <ErrorMessage message={errorMessage} />}
+        </div>
         
         <div className="input-container w-full max-w-sm mx-auto">
           <FormField
