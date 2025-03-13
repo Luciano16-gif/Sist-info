@@ -199,3 +199,68 @@
     line-height: normal;
     overflow-wrap: break-word;
 }
+
+.calendar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's above other content */
+  }
+  
+  .calendar-container {
+    background-color: rgb(20, 47, 20); /* Or whatever your calendar background is */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 90%;  /* Responsive width */
+    max-height: 90vh; /* Responsive height */
+    overflow-y: auto; /* In case the content is too tall */
+    position: relative; /*for the close button*/
+  
+      /*  Make the calendar responsive  */
+    width: 80%;
+    opacity: 0.9;
+  }
+  
+  .close-button-calendar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #f44336;
+      color: rgb(255, 255, 255);
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+  }
+  
+  .close-button-calendar:hover{
+      background-color: #d32f2f;
+  }
+
+  .select-date-button {
+    margin-top: 80px;
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.select-date-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.select-date-button:hover:not(:disabled) {
+    background-color: #3e8e41;
+}

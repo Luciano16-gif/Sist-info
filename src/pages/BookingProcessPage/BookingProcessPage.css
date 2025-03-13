@@ -11,21 +11,34 @@
 }
 
 .back-button-booking-process {
-    position: absolute;
-    top: 100px;
-    left: 50px;
-    background: none;
+    /* Use the same styles as the payment button */
+    width: 190px;          /*  Same width */
+    height: 35px;         /*  Same height */
+    background-color: #D9D9D9;
+    color: black;
     border: none;
-    color: white;
-    font-size: 0.8rem;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    /* Positioning adjustments */
+    position: absolute;
+    top: 40px;  /* Keep this */
+    left: 50px;  /* Keep this */
+    /* Removed background: none; and color: white; */
     z-index: 2;
+     /* Optionally center text if you prefer */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .back-button-booking-process:hover {
-    color: #ffcb5b;
-    font-weight: 700;
+    background-color: #ffce66; /* Same hover effect */
+    /* Removed font-weight: 700;  and  color: #ffcb5b; */
 }
+
 
 .background-image-booking-process {
     position: absolute;
@@ -120,6 +133,11 @@
     background-color: #ffce66;
 }
 
+.time-buttons-booking-process button.selected {
+    background-color: #ffce66; /* Or any other highlight style */
+
+}
+
 
 /* --- Guide Selection Styles --- */
 
@@ -166,16 +184,22 @@
 
 
 .guide-card-booking-process {
-  min-width: 150px; /* Adjust as needed */
-    flex: 0 0 auto;         /* Prevent shrinking and growing */
+  min-width: 200px; /* Increased min-width */
+  max-width: 250px; /*  Added max-width for safety */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center content horizontally */
+  align-items: center;
   border: 1px solid #ddd;
   padding: 10px;
   border-radius: 8px;
-    background-color: white;
+  background-color: white;
+  /* Add word wrapping to prevent overflow */
+  word-wrap: break-word;  /* Standard, breaks anywhere */
+  overflow-wrap: break-word; /* For older browsers */
+  hyphens: auto;          /* Enables hyphenation if needed */
 }
+
 
 
 .scroll-button-booking-process {
@@ -217,6 +241,10 @@
      margin: 2px 0;
     color: black; /* Changed color to black */
     font-size: 0.7rem;
+      width: 100%; /* Add this line */
+    text-align: center; /* Add this to ensure text is centered */
+    white-space: normal; /* Allow text to wrap */
+
 }
 
 .rating-dots-booking-process {

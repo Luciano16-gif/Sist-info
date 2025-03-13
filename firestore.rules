@@ -6,9 +6,20 @@ service cloud.firestore {
       // Allow reading a specific user document (needed for checking existence)
       allow get: if true;
       
-      // Allow creating new user documents with validated email format
-      allow create: if request.resource.data.email is string && 
-                     request.resource.data.email.matches('^[^@]+@correo\\.unimet\\.edu\\.ve$');
+      // Enhanced create rule with explicit email domain validation
+      allow create: if 
+        // Ensure email is valid string and matches university domain
+        request.resource.data.email is string && 
+        request.resource.data.email.matches('^[^@]+@correo\\.unimet\\.edu\\.ve$') &&
+        (
+          // Either the document ID matches the authenticated user's email...
+          request.auth.token.email == email ||
+          
+          // ...or this is a Google Auth user and emails match (double validation)
+          (request.resource.data['Registro/Inicio de Sesión'] == 'Google Authentication' && 
+           request.auth.token.firebase.sign_in_provider == 'google.com' &&
+           request.auth.token.email == email)
+        );
       
       // Allow updates and deletes only by the document owner
       allow update, delete: if request.auth != null && 

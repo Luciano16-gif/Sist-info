@@ -1,11 +1,13 @@
 // ProfileManagementPage.jsx
 import React, { useState, useEffect } from 'react';
-import { auth, db, storage } from '../../../firebase-config';
-import { collection, query, where, getDoc, updateDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Correct Imports
+
+import { auth, db } from '../../../firebase-config';
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
+import storageService from '../../../cloudinary-services/storage-service'; // Importa el nuevo servicio
+
 
 function ProfileManagementPage() {
     const [isEditing, setIsEditing] = useState(false);
@@ -13,16 +15,18 @@ function ProfileManagementPage() {
     const [correoElectronico, setCorreoElectronico] = useState('');
     const [numeroTelefonico, setNumeroTelefonico] = useState('');
     const [fechaRegistro, setFechaRegistro] = useState('');
-    const [contraseña, setContraseña] = useState('');
-    const [file, setFile] = useState(null); // Stores the selected file
-    const [fotoPerfilUrl, setFotoPerfilUrl] = useState(''); // Stores the URL of the profile picture
+    const [file, setFile] = useState(null);
+    const [fotoPerfilUrl, setFotoPerfilUrl] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [tipoUsuario, setTipoUsuario] = useState('');
     const [activities, setActivities] = useState([]);
     const [activitiesPerformed, setActivitiesPerformed] = useState([]);
     const [mostPerformedActivity, setMostPerformedActivity] = useState({ Actividad: '', timesPerformed: 0 });
-    const [activitiesCreatedCount, setActivitiesCreatedCount] = useState(0); // New state
+    const [activitiesCreatedCount, setActivitiesCreatedCount] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(0); // Progress bar state
+    const [isUploading, setIsUploading] = useState(false); // Control upload state
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -31,12 +35,11 @@ function ProfileManagementPage() {
                 try {
                     // Use direct document access with email as document ID
                     const userDocRef = doc(db, 'lista-de-usuarios', user.email);
-                    const userDoc = await getDoc(userDocRef);
-    
+                    const userDoc = await getDocs(userDocRef);
                     if (!userDoc.exists()) {
                         console.error('El documento del usuario no existe en Firestore.');
                         setLoading(false);
-                        await signOut(auth); // Sign out
+                        await signOut(auth);
                         navigate('/login-page');
                         return;
                     }
@@ -49,6 +52,7 @@ function ProfileManagementPage() {
                     setTipoUsuario(userData.userType);
     
                     // Format creationTime to "day of month of year"
+
                     if (user.metadata.creationTime) {
                         const date = new Date(user.metadata.creationTime);
                         const day = date.getDate();
@@ -59,12 +63,11 @@ function ProfileManagementPage() {
                         const year = date.getFullYear();
                         setFechaRegistro(`${day} de ${month} del ${year}`);
                     } else {
-                         setFechaRegistro('');
+                        setFechaRegistro('');
                     }
-    
-                    setContraseña(userData.password || '');
+
                     setFotoPerfilUrl(userData['Foto de Perfil'] || '');
-    
+
                     // Activities Performed
                     if (Array.isArray(userData.activitiesPerformed)) {
                         setActivitiesPerformed(userData.activitiesPerformed);
@@ -73,7 +76,6 @@ function ProfileManagementPage() {
                     } else {
                         setActivitiesPerformed([]);
                     }
-    
                     // Most Performed Activity
                     if (userData.mostPerformedActivity && typeof userData.mostPerformedActivity === 'object'
                         && userData.mostPerformedActivity.Actividad !== undefined && userData.mostPerformedActivity.timesPerformed !== undefined) {
@@ -100,16 +102,14 @@ function ProfileManagementPage() {
                             }
                         }
                     }
-                    // Set activities state *after* the conditional logic.
                     setActivities(fetchedActivities);
-    
+
                     // Activities created Count
                     if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
                         setActivitiesCreatedCount(userData.activitiesCreated.length);
                     } else {
-                        setActivitiesCreatedCount(0); // Default to 0 if not found or not an array
+                        setActivitiesCreatedCount(0);
                     }
-    
                 } catch (error) {
                     console.error('Error al obtener los datos del usuario:', error);
                     setLoading(false);
@@ -119,7 +119,6 @@ function ProfileManagementPage() {
                     setLoading(false);
                 }
             } else {
-                // No user is signed in.
                 navigate('/login-page');
             }
         });
@@ -141,7 +140,7 @@ function ProfileManagementPage() {
 
             const usersCollection = collection(db, 'lista-de-usuarios');
             const q = query(usersCollection, where("email", "==", auth.currentUser.email));
-            const querySnapshot = await getDoc(q);
+            const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
                 console.error('Usuario no encontrado para actualizar.');
@@ -150,84 +149,68 @@ function ProfileManagementPage() {
 
             const userRef = querySnapshot.docs[0].ref;
 
-             if (numeroTelefonico && !/^\d{11}$/.test(numeroTelefonico)) {
+            if (numeroTelefonico && !/^\d{11}$/.test(numeroTelefonico)) {
                 alert('El número telefónico debe tener exactamente 11 dígitos y no puede contener letras.');
                 return;
             }
-            if (contraseña && contraseña.length < 6) {
-                alert('La contraseña debe tener al menos 6 caracteres.');
-                return;
-             }
 
-            // --- File Upload Logic ---
-            let fotoPerfilUrl = ''; // Variable to store the download URL
+            // --- File Upload Logic with Cloudinary ---
+            let updateData = {
+                name: nombreCompleto.split(' ')[0],
+                lastName: nombreCompleto.split(' ').slice(1).join(' '),
+                phone: numeroTelefonico,
+            };
+
             if (file) {
-                // --- FILE TYPE CHECK ---
+                setIsUploading(true); // Start uploading
                 const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
                 if (!allowedTypes.includes(file.type)) {
-                   alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
-                   return; // Stop the upload
+                    alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
+                    setIsUploading(false);
+                    return;
                 }
 
-                const storageRef = ref(storage, `profile-pictures/${auth.currentUser.uid}/${file.name}`); // Unique path
-                const uploadTask = uploadBytesResumable(storageRef, file);
+                const path = `profile-pictures/${auth.currentUser.uid}`; // Use user ID for folder
 
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        // Progress
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        console.log('Progress: ' + progress + '%');
-                    },
-                    (error) => {
-                        // Handle error
-                        console.error('Error al subir la imagen:', error);
-                    },
-                    async () => {
-                        // Completion - Get URL and update Firestore
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        fotoPerfilUrl = downloadURL; // Store the URL
-                        console.log('File available at', downloadURL);
+              try {
+                const uploadedFileData = await storageService.uploadFile(path, file);
 
-                        // Update user data in Firestore *after* successful upload
-                        const updateData = {
-                            ['Foto de Perfil']: downloadURL, // Store URL
-                            'Nombre de Archivo': file.name, // Store filename (optional)
-                            name: nombreCompleto.split(' ')[0],
-                            lastName: nombreCompleto.split(' ').slice(1).join(' '),
-                            phone: numeroTelefonico,
-                        };
+                // Add Cloudinary URL and filename to updateData
+                updateData['Foto de Perfil'] = uploadedFileData.downloadURL;
+                updateData['Nombre de Archivo'] = file.name; // Or use a generated name if preferred
 
-                        // Conditionally update password
-                        if (contraseña) {
-                            updateData.password = contraseña;
-                        }
-                        await updateDoc(userRef, updateData);
-                         window.location.reload();
-                    }
-                );
-            } else {
-                // If no new file is selected, update other fields but keep the existing profile picture
-                const updateData = {
-                    name: nombreCompleto.split(' ')[0],
-                    lastName: nombreCompleto.split(' ').slice(1).join(' '),
-                    phone: numeroTelefonico,
-                    // Don't include 'Foto de Perfil' here
-                };
-                 // Conditionally update password
-                if (contraseña) {
-                  updateData.password = contraseña;
-                }
+                // Update Firestore document
                 await updateDoc(userRef, updateData);
+                setFotoPerfilUrl(uploadedFileData.downloadURL); // Update displayed image
+                alert('Perfil actualizado correctamente!'); //Success
+                setIsEditing(false);
                 window.location.reload();
+
+
+                } catch (uploadError) {
+                    console.error("Error uploading to Cloudinary:", uploadError);
+                    alert('Hubo un error al subir la imagen.  Por favor, inténtalo de nuevo.'); // User-friendly error
+
+                } finally {
+                   setIsUploading(false);
+                }
+
+            } else {
+                // No new file, just update other fields
+                await updateDoc(userRef, updateData);
+                alert('Perfil actualizado correctamente!');
+                setIsEditing(false);
+                window.location.reload(); // Or just update the local state
+
             }
 
-            setIsEditing(false);
+
 
         } catch (error) {
             console.error('Error al guardar los cambios:', error);
+             alert('Hubo un error al guardar los cambios.  Por favor, inténtalo de nuevo.'); // User friendly feedback.
         }
     };
-
 
 
     const handleLogout = async () => {
@@ -241,6 +224,8 @@ function ProfileManagementPage() {
 
     const handleFileChange = (event) => {
         setFile(event.target.files[0]);
+         // Reset progress when a new file is selected
+        setUploadProgress(0);
     };
 
     if (loading) {
@@ -258,7 +243,14 @@ function ProfileManagementPage() {
             <div className="content-container">
                 <img src={fotoPerfilUrl || "..//../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png"} alt="Perfil" className={`profile-image ${isEditing ? 'editable' : ''}`} onClick={() => isEditing && document.getElementById('file-input').click()} />
                 {isEditing && (
+                    <>
                     <input id="file-input" type="file" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
+                   {isUploading && (
+                       <div className="progress-bar-container">
+                       <div className="progress-bar" style={{ width: `${uploadProgress}%` }}></div>
+                        </div>
+                   )}
+                   </>
                 )}
                 <div className="info-container">
                     <div className="info-item">
@@ -295,22 +287,9 @@ function ProfileManagementPage() {
                         <p className="subtitle">FECHA DE REGISTRO</p>
                         <p className="subtext">{fechaRegistro}</p>
                     </div>
-                    {isEditing && (
-                        <div className="info-item">
-                            <p className="subtitle">CONTRASEÑA</p>
-                            <input
-                                type="password-profile"
-                                value={contraseña}
-                                onChange={(e) => setContraseña(e.target.value)}
-                                className="subtext-input"
-                            />
-                        </div>
-                    )}
                 </div>
 
-                {/* Stats and Conditional Rendering */}
                 <div className="stats-container">
-                    {/* Conditional Rendering based on userType */}
                     {tipoUsuario === 'admin' ? (
                         <>
                             <div className="stat-item">
@@ -331,13 +310,11 @@ function ProfileManagementPage() {
                         </>
                     )}
 
-
-                    {/* Conditional Rendering for Guides - Keep this as is */}
                     {tipoUsuario === 'Guia' && (
                         <div className="stat-item">
                             <p className="subtitle">EXPERIENCIAS ACTUALES</p>
                             {activities.map((activity, index) => (
-                                <div  key={index}>
+                                <div key={index}>
                                     <p className="subtext">{activity.route} - {activity.days} [{activity.schedule}]</p>
                                 </div>
                             ))}
