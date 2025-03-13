@@ -35,7 +35,7 @@ const AdminActividades = () => {
           number={ActividadMasRealizada}
           description="Actividad más realizada"
           descriptionFontSize="text-sm"
-          numberFontSize="text-lg md:text-1xl"
+          numberFontSize="text-lg md:text-3xl"
         />
         <RelevantInfoS number={ActividadesRealizadas} description="Actividades Realizadas" />
       </div>

@@ -19,6 +19,9 @@ const AdminEstadisticas = () => {
         Control de todas las estadísticas generadas.
       </h1>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <h1 className=" text-white text-4xl md:text-5xl font-bold">
+        Informacion Relevante
+      </h1>
       <div className="flex justify-start space-x-10">
         <RelevantInfoS number = {ExcursionesOfrecidas} description ="Excursiones Ofrecidas" />
         <RelevantInfoS number = {Participacion} description ="Participacion de los usuarios" />
