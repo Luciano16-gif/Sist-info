@@ -1,5 +1,10 @@
-import { HERO_IMAGE } from '../../constants/LandingData'; 
+import { HERO_IMAGE_NO_SESSION, HERO_IMAGE_SESSION } from '../../constants/LandingData'; 
+import HeroText from './HeroText';
+import { useAuth } from "../contexts/AuthContext";
+
 const HeroSection = () => {
+    const { currentUser } = useAuth();
+    const HERO_IMAGE = currentUser ? HERO_IMAGE_SESSION : HERO_IMAGE_NO_SESSION;
     return (
       <div className="min-h-screen bg-[rgba(13,24,6,1)] text-white relative">
         {/* Hero Section */}
@@ -11,19 +16,7 @@ const HeroSection = () => {
             backgroundColor: 'rgba(13,24,6,0.3)'
           }}
         >
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-8 md:px-16 space-y-4 z-10 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold">
-              Descubre la<br />
-              majestuosidad del<br />
-              Ávila
-            </h1>
-            <p className="text-sm md:text-base max-w-2xl">
-              Tu aventura comienza aquí. Reserva tu excursión hoy mismo y vive una experiencia inolvidable en Caracas.
-            </p>
-            <button className="bg-[#AAACA8] text-white px-6 py-3 rounded-full mt-4 hover:bg-opacity-90 transition-all">
-              Únete a la aventura
-            </button>
-          </div>
+          <HeroText />
           {/* Gradient overlay at the bottom */}
           <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-[rgba(13,24,6,1)] pointer-events-none z-0"></div>
         </div>

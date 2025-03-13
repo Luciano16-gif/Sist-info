@@ -1,9 +1,10 @@
-// GalleryPage.jsx (No changes needed here)
+// GalleryPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { storage, db, auth } from '../../../firebase-config';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, auth } from '../../../firebase-config'; // Remove 'storage' import
 import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove } from 'firebase/firestore';
 import './GalleryPage.css';
+import storageService from '../../../services/storage-service'; // Import the new storage service
+
 
 function GalleryPage() {
     const [images, setImages] = useState([]); // All images for display
@@ -16,10 +17,8 @@ function GalleryPage() {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [uploading, setUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(0); // Keep for visual feedback
     const [showDeleteImages, setShowDeleteImages] = useState(false);
-
-    // REMOVED mockImages - No longer needed.
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -129,7 +128,7 @@ function GalleryPage() {
     const handleTouchMove = (event) => {
         if (!isDragging) return;
         const x = event.touches[0].clientX - dragStart.x;
-        const y = event.touches[0].clientY - dragStart.y;
+        const y = event.touches[0].clientY - dragStart.y;  // Removed type annotation
         setDragOffset({ x, y });
     };
 
@@ -141,7 +140,6 @@ function GalleryPage() {
         const file = event.target.files[0];
         if (!file) return;
 
-        // --- FILE TYPE CHECK ---
         const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
             alert('Invalid file type. Only PNG, JPEG, and WebP images are allowed.');
@@ -149,104 +147,88 @@ function GalleryPage() {
         }
 
         setUploading(true);
-        setUploadProgress(0);
+        setUploadProgress(0); // Reset progress
 
-        const storageRef = ref(storage, `gallery/${file.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        try {
+            // Use the new storageService to upload
+            const uploadResult = await storageService.uploadFile('gallery', file);
+            setUploadProgress(100); // Instantly set to 100, since we don't have granular progress
+            alert('File uploaded successfully!');
 
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setUploadProgress(progress);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-                alert("Error uploading file: " + error.message);
-                setUploading(false);
-            },
-            async () => {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                setUploading(false);
-                alert('File uploaded successfully!');
 
-                if (auth.currentUser) {
-                    try {
-                        const user = auth.currentUser;
-                        const usersCollection = collection(db, 'Lista de Usuarios');
-                        const userQuery = query(usersCollection, where("email", "==", user.email));
-                        const userQuerySnapshot = await getDocs(userQuery);
+            if (auth.currentUser) {
+                try {
+                    const user = auth.currentUser;
+                    const usersCollection = collection(db, 'lista-de-usuarios');
+                    const userQuery = query(usersCollection, where("email", "==", user.email));
+                    const userQuerySnapshot = await getDocs(userQuery);
 
-                        if (userQuerySnapshot.empty) {
-                            console.error('User not found in Firestore.');
-                            return;
-                        }
-
-                        const userDoc = userQuerySnapshot.docs[0];
-                        const userData = userDoc.data();
-                        const userName = `${userData.name} ${userData.lastName}`;
-
-                        const now = new Date();
-                        const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}/${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-                        const galleryCollection = collection(db, 'Galeria de Imágenes');
-                        const userGalleryDocRef = doc(galleryCollection, userName);
-                        const userGalleryDocSnap = await getDoc(userGalleryDocRef);
-
-                        const imageData = {
-                            url: downloadURL,
-                            uploadedBy: userName,
-                            uploadDate: formattedDate
-                        };
-
-                        if (userGalleryDocSnap.exists()) {
-                            await updateDoc(userGalleryDocRef, {
-                                email: user.email, //Consider removing email, since the doc ID is the username
-                                images: arrayUnion(imageData)
-                            });
-                            console.log("Image URL added to existing gallery document.");
-                        } else {
-                            await setDoc(userGalleryDocRef, {
-                                email: user.email, //Consider removing email, since the doc ID is the username
-                                images: [imageData]
-                            });
-                            console.log("New gallery document created.");
-                        }
-
-                         // **CRUCIAL CHANGE:** Update the 'images' state to trigger a re-render
-                        const newImageData = {
-                            url: downloadURL,
-                            uploadedBy: userName,
-                            uploadDate: formattedDate
-                        };
-                        setImages(prevImages => [...prevImages, newImageData]);
-                        await loadUserImages(user.email); // Reload *user* images
-                    } catch (firestoreError) {
-                        console.error("Error updating Firestore:", firestoreError);
-                        alert("Error saving image to user's gallery: " + firestoreError.message);
+                    if (userQuerySnapshot.empty) {
+                        console.error('User not found in Firestore.');
+                        return;
                     }
-                } else {
-                    console.error("No user logged in.");
-                    alert("Please log in to upload images.");
+
+                    const userDoc = userQuerySnapshot.docs[0];
+                    const userData = userDoc.data();
+                    const userName = `${userData.name} ${userData.lastName}`;
+
+                    const now = new Date();
+                    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}/${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                    const galleryCollection = collection(db, 'Galeria de Imágenes');
+                    // *** CHANGE HERE: Use user.email as document ID ***
+                    const userGalleryDocRef = doc(galleryCollection, user.email);
+                    const userGalleryDocSnap = await getDoc(userGalleryDocRef);
+
+                    const imageData = {
+                        url: uploadResult.downloadURL, // Use the URL from Cloudinary
+                        uploadedBy: userName,  // Keep userName for display
+                        uploadDate: formattedDate
+                    };
+
+                    if (userGalleryDocSnap.exists()) {
+                        await updateDoc(userGalleryDocRef, {
+                            images: arrayUnion(imageData) //Removed the email field.
+                        });
+                        console.log("Image URL added to existing gallery document.");
+                    } else {
+                        await setDoc(userGalleryDocRef, {
+                            images: [imageData] //Removed the email field.
+                        });
+                        console.log("New gallery document created.");
+                    }
+
+                    const newImageData = {
+                        url: uploadResult.downloadURL,
+                        uploadedBy: userName,
+                        uploadDate: formattedDate
+                    };
+                    setImages(prevImages => [...prevImages, newImageData]);
+                    await loadUserImages(user.email); // Reload *user* images
+
+                } catch (firestoreError) {
+                    console.error("Error updating Firestore:", firestoreError);
+                    alert("Error saving image to user's gallery: " + firestoreError.message);
                 }
+            } else {
+                console.error("No user logged in.");
+                alert("Please log in to upload images.");
             }
-        );
+        } catch (uploadError) {
+            console.error("Upload failed:", uploadError);
+            alert("Error uploading file: " + uploadError.message);
+        } finally {
+            setUploading(false); // Ensure this is always reset
+            setUploadProgress(0);
+        }
     };
 
     const loadUserImages = async (userEmail) => {
         try {
-            const usersCollection = collection(db, 'Lista de Usuarios');
-            const userQuery = query(usersCollection, where("email", "==", userEmail));
-            const userQuerySnapshot = await getDocs(userQuery);
-            if (userQuerySnapshot.empty) {
-                console.error('User not found in Firestore when loading images');
-                return;
-            }
-            const userDoc = userQuerySnapshot.docs[0];
-            const userData = userDoc.data();
-            const userName = `${userData.name} ${userData.lastName}`;
-
+            // No need to query 'Lista de Usuarios' here, we have the email directly
             const galleryCollection = collection(db, 'Galeria de Imágenes');
-            const userGalleryDocRef = doc(galleryCollection, userName);
+             // *** CHANGE HERE: Use userEmail as document ID ***
+            const userGalleryDocRef = doc(galleryCollection, userEmail);
             const userGalleryDocSnap = await getDoc(userGalleryDocRef);
 
             if (userGalleryDocSnap.exists()) {
@@ -315,10 +297,10 @@ const loadAllImages = async () => {
 
         // Filter out reported images
         firestoreImages = firestoreImages.filter(image => {
-            // **FIX:**  Use optional chaining and nullish coalescing for safety
-            const imagePath = image.url?.split("/o/")[1]?.split("?")[0] ?? '';
-            const decodedImagePath = decodeURIComponent(imagePath);
-            return !reportedImageRefs.includes(decodedImagePath);
+            // Use the publicId for comparison if available, otherwise fallback to URL
+            const imageIdentifier = image.publicId || image.url;
+            return !reportedImageRefs.includes(imageIdentifier);
+
         });
 
 
@@ -350,40 +332,33 @@ const loadAllImages = async () => {
             alert("Por favor, inicia sesión para borrar imágenes.");
             return;
         }
-        const imageUrl = selectedImage.url;
+        const publicId = selectedImage.publicId || storageService.ref(selectedImage.url).fullPath
+
+        if (!publicId) {
+           console.error("Could not determine publicId for deletion.");
+           alert("Error: Could not determine image ID for deletion.");
+           return;
+         }
 
         try {
-            // 1. Delete from Firebase Storage
-            const imageRef = ref(storage, imageUrl);
-            await deleteObject(imageRef);
+            // 1. Delete from Cloudinary
+            await storageService.deleteFile(publicId);
 
             // 2. Delete from Firestore
             const user = auth.currentUser;
-            const usersCollection = collection(db, 'Lista de Usuarios');
-            const userQuery = query(usersCollection, where("email", "==", user.email));
-            const userQuerySnapshot = await getDocs(userQuery);
-
-            if (userQuerySnapshot.empty) {
-                console.error('User not found in Firestore.');
-                return;
-            }
-
-            const userDoc = userQuerySnapshot.docs[0];
-            const userData = userDoc.data();
-            const userName = `${userData.name} ${userData.lastName}`;
-
+             // *** CHANGE HERE: Use user.email as document ID ***
             const galleryCollection = collection(db, 'Galeria de Imágenes');
-            const userGalleryDocRef = doc(galleryCollection, userName);
+            const userGalleryDocRef = doc(galleryCollection, user.email); // Use email
 
             await updateDoc(userGalleryDocRef, {
                 images: arrayRemove(selectedImage)  // Remove the image object
             });
 
             // 3. Update Local State
-            setUserImages(prevImages => prevImages.filter(img => img.url !== imageUrl)); // Remove from userImages.
+            setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url)); // Remove from userImages.
 
             //Since now we are working with all images and user images, we have to filter in both states
-            setImages(prevImages => prevImages.filter(img => img.url !== imageUrl));
+            setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setSelectedImage(null);  // Clear selected image (close modal)
             alert("Imagen borrada exitosamente.");
             await loadUserImages(auth.currentUser.email); //  Reload images after adding
@@ -402,28 +377,17 @@ const reportImage = async (image) => {
 
     const reporterEmail = auth.currentUser.email;
     const uploaderEmail = image.uploadedBy;
-      //Get uploader email from 'Lista de Usuarios' collection
-    let uploaderEmailReal = "";
-    const usersCollection = collection(db, 'Lista de Usuarios');
-    const userQuery = query(usersCollection, where("name", "==", uploaderEmail.split(" ")[0])); // Assuming 'name' field contains the first name
-    const userQuerySnapshot = await getDocs(userQuery);
+    // *** CHANGE:  We now have the uploader's email directly ***
+    // No need to query the 'Lista de Usuarios' collection
 
-    if (!userQuerySnapshot.empty) {
-        const userDoc = userQuerySnapshot.docs[0];
-        uploaderEmailReal = userDoc.data().email;  // Get real email
-    } else {
-        console.error("Uploader not found");
-        return; // Stop the report action if no user founded
-    }
-    // **Prevent self-reporting:**
-    if (reporterEmail === uploaderEmailReal) {
+    // Prevent self-reporting:
+    if (reporterEmail === image.uploadedBy) { //uploadedBy now it's the email
         alert("No puedes reportar tus propias imágenes.");
         return;
     }
 
-    const imagePath = image.url.split("/o/")[1].split("?")[0];
-    const decodedImagePath = decodeURIComponent(imagePath);
-    const imageRef = decodedImagePath;
+     const imageIdentifier = image.publicId || image.url;
+    const imageRef = imageIdentifier;
 
     try {
         const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
@@ -432,9 +396,8 @@ const reportImage = async (image) => {
 
         const reportData = {
             imageRef: imageRef,
-            uploaderEmail: uploaderEmailReal // Store the uploader's email
+            uploaderEmail: image.uploadedBy // Store the uploader's email directly
         };
-
 
         if (reporterDocSnap.exists()) {
             await updateDoc(reporterDocRef, {
@@ -451,7 +414,6 @@ const reportImage = async (image) => {
         // Remove the image from the *current user's* view
         setImages(prevImages => prevImages.filter(img => img.url !== image.url));
         alert("Imagen reportada exitosamente.");
-
 
     } catch (error) {
         console.error("Error reporting image:", error);

@@ -2,6 +2,7 @@ export const FormInput = ({
   type = 'text', 
   value, 
   onChange, 
+  onBlur,
   placeholder, 
   className,
   style = {}
@@ -14,6 +15,7 @@ export const FormInput = ({
       type={type} 
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       placeholder={placeholder}
       className={inputClassName}
       style={style}

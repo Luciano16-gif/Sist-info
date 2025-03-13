@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../../firebase-config';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
 
 // Create the AuthContext
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -42,30 +43,39 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, onError) => {
     try {
       setError(null);
+      setIsAuthenticating(true);
       return await authService.emailSignIn(email, password);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
   const signup = async (userData, onError) => {
     try {
       setError(null);
+      setIsAuthenticating(true);
       return await authService.emailSignUp(userData);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
   const loginWithGoogle = async (isSignUp = false, onError) => {
     try {
       setError(null);
+      setIsAuthenticating(true);
       return await authService.googleAuth(isSignUp);
     } catch (error) {
       handleAuthError(error, onError);
       return null;
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -89,6 +99,7 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     loading,
+    isAuthenticating,
     setError
   };
 
@@ -99,16 +110,25 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom redirect hook
+// Custom redirect hook with improved logic to prevent unwanted redirects
 export const useAuthRedirect = (redirectPath = '/') => {
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticating, error } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (currentUser) {
+    // Only redirect if:
+    // 1. We have a current user
+    // 2. We're not in the middle of an authentication process
+    // 3. There are no authentication errors
+    // 4. We're not already on the redirectPath
+    if (currentUser && 
+        !isAuthenticating && 
+        !error && 
+        location.pathname !== redirectPath) {
       navigate(redirectPath);
     }
-  }, [currentUser, navigate, redirectPath]);
+  }, [currentUser, navigate, redirectPath, isAuthenticating, error, location]);
 
   return currentUser;
 };

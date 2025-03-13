@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import useScrollDetection from "./useScrollDetection";
 import { useAuth } from "../contexts/AuthContext";
+import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
+
 
 const TopMenu = () => {
   const scrolled = useScrollDetection();
@@ -16,7 +18,7 @@ const TopMenu = () => {
   ];
 
   const sesionItems = [
-    { href: "/sign-up-page", label: "Registrarse"},
+    { href: "/signUpPage", label: "Registrarse"},
     { href: "/login-page", label: "Iniciar Sesión"},
   ];
 
@@ -79,7 +81,7 @@ const TopMenu = () => {
         <div className="flex items-center">
           <img 
             className="max-h-10 min-w-16 min-h-6"
-            src="/src/assets/images/Logo_Avilaventuras.webp"
+            src={logoImage}
             alt="Avilaventuras"
           />
           {currentUser ? (

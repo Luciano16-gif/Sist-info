@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import useScrollDetection from "./useScrollDetection"; 
+import { useAuth } from "../contexts/AuthContext";
+import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
+  const { currentUser, logout } = useAuth();
 
   const menuItems = [
     { href: "/experiencias", label: "Experiencias" },
@@ -14,9 +17,24 @@ const HamburgerMenu = () => {
   ];
 
   const sesionItems = [
-    { href: "/sign-up-page", label: "Registrarse"},
+    { href: "/signUpPage", label: "Registrarse"},
     { href: "/login-page", label: "Iniciar Sesión"},
   ];
+
+  const userMenuItems = [
+    { href: "/profile-management-page", label: "Mi Perfil" },
+    { href: "/", label: "Cerrar Sesión", onClick: handleLogout },
+  ];
+
+  async function handleLogout() {
+    try {
+      await logout();
+      setIsOpen(false);
+      // No need to navigate - the AuthContext will handle the redirect
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  }
 
   function toggleMenu() {
     setIsOpen(!isOpen);
@@ -25,6 +43,25 @@ const HamburgerMenu = () => {
   function handleLinkClick() {
     setIsOpen(false);
   }
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!currentUser) return "V";
+    
+    // Try to get name from Firebase user
+    const displayName = currentUser.displayName || "";
+    if (displayName) {
+      return displayName
+        .split(" ")
+        .map(name => name.charAt(0))
+        .join("")
+        .toUpperCase()
+        .substring(0, 2);
+    }
+    
+    // Fallback to email
+    return currentUser.email.charAt(0).toUpperCase();
+  };
 
   return (
     <nav 
@@ -81,14 +118,34 @@ const HamburgerMenu = () => {
           </label>
         </div>
 
-        {/* Logo and Visitor text */}
+        {/* Logo and User Info */}
         <div className="flex items-center">
           <img 
             className="max-h-10 min-w-16 min-h-6"
-            src="/src/assets/images/Logo_Avilaventuras.webp"
+            src={logoImage}
             alt="Avilaventuras"
           />
-          <p className="uppercase font-ysabeau text-gray-400 text-xs ml-4">Visitante</p>
+          
+          {currentUser ? (
+            <div className="flex items-center ml-4">
+              {/* User Avatar */}
+              <div className="flex items-center">
+                {currentUser.photoURL ? (
+                  <img 
+                    src={currentUser.photoURL} 
+                    alt="User Profile" 
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-medium">
+                    {getUserInitials()}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="uppercase font-ysabeau text-gray-400 text-xs ml-4">Visitante</p>
+          )}
         </div>
       </div>
       
@@ -122,15 +179,36 @@ const HamburgerMenu = () => {
           {/* Separator */}
           <div className="w-32 h-px bg-white/50 my-6" />
           
-          {/* Session items */}
+          {/* Session items or User menu */}
           <ul className="flex flex-col uppercase font-ysabeau text-sm space-y-4 items-center">
-            {sesionItems.map((item) => (
-              <li key={item.href} className="bg-gray-800 box-border px-6 py-2.5 border-gray-200 border rounded-full hover:scale-110 transform transition-all duration-300">
-                <Link to={item.href} className="text-white text-center whitespace-nowrap">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {currentUser ? (
+              // User is logged in - show user menu
+              userMenuItems.map((item) => (
+                <li key={item.href} className="bg-gray-800 box-border px-6 py-2.5 border-gray-200 border rounded-full hover:scale-110 transform transition-all duration-300">
+                  {item.onClick ? (
+                    <button 
+                      onClick={item.onClick}
+                      className="text-white text-center whitespace-nowrap"
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <Link to={item.href} className="text-white text-center whitespace-nowrap">
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              ))
+            ) : (
+              // User is not logged in - show login/signup
+              sesionItems.map((item) => (
+                <li key={item.href} className="bg-gray-800 box-border px-6 py-2.5 border-gray-200 border rounded-full hover:scale-110 transform transition-all duration-300">
+                  <Link to={item.href} className="text-white text-center whitespace-nowrap">
+                    {item.label}
+                  </Link>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </div>

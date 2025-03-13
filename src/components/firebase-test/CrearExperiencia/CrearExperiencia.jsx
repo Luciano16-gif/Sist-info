@@ -1,9 +1,11 @@
-// CrearExperiencia.jsx (UPDATED - Multiple Selection for "Incluidos")
+// CrearExperiencia.jsx (ACTUALIZADO - Obtener Guías de Firestore)
+
 import React, { useState, useRef, useEffect } from 'react';
 import './CrearExperiencia.css';
-import { db, storage } from '../../../firebase-config';
+import { db, /* storage  <-- ELIMINAR */ } from '../../../firebase-config'; // Eliminamos storage
 import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';  <-- ELIMINAR ESTAS IMPORTACIONES
+import storageService from '../../../services/storage-service'; // IMPORTAR storageService
 
 function CrearExperiencia() {
     const [nombre, setNombre] = useState('');
@@ -15,7 +17,7 @@ function CrearExperiencia() {
     const [puntoSalida, setPuntoSalida] = useState('');
     const [longitudRecorrido, setLongitudRecorrido] = useState('');
     const [duracionRecorrido, setDuracionRecorrido] = useState('');
-    const [guiasRequeridos, setGuiasRequeridos] = useState('');
+    const [guiasRequeridos, setGuiasRequeridos] = useState('');  // <-- Mantener, para número *total*
     const [minimoUsuarios, setMinimoUsuarios] = useState('');
     const [maximoUsuarios, setMaximoUsuarios] = useState('');
     const [incluidosExperiencia, setIncluidosExperiencia] = useState([]);  // Now an array
@@ -30,6 +32,10 @@ function CrearExperiencia() {
     const [nuevoIncluido, setNuevoIncluido] = useState("");
     const [puntosSalida, setPuntosSalida] = useState([]);
     const [nuevoPuntoSalida, setNuevoPuntoSalida] = useState("");
+
+    // NUEVO: Estado para guías
+    const [guiasSeleccionados, setGuiasSeleccionados] = useState([]);
+    const [guiasDisponibles, setGuiasDisponibles] = useState([]);
 
 
     // --- Firestore Interaction for Activity Types ---
@@ -235,7 +241,7 @@ function CrearExperiencia() {
         const duracionNumerica = parseInt(duracionRecorrido);
         if (duracionNumerica <= 0) {
             alert("La duración debe ser mayor que cero.");
-            return
+            return;
         }
 
         if (!/^\d+(\.\d*)?$/.test(longitudRecorrido)) {
@@ -245,13 +251,20 @@ function CrearExperiencia() {
         const longitudNumerica = parseFloat(longitudRecorrido);
         if (longitudNumerica <= 0) {
             alert("La longitud debe ser mayor que cero");
-            return
+            return;
         }
 
         if (parseInt(guiasRequeridos) < 0 || isNaN(parseInt(guiasRequeridos))) {
             alert('Por favor ingrese un número valido y no negativo para los guias requeridos.');
             return;
         }
+
+      //Validar que se hayan escogido guías o que el número de guías escogidos sea igual al número de guías requerido
+        if (guiasSeleccionados.length !== parseInt(guiasRequeridos)) {
+            alert('La cantidad de guías seleccionados debe ser igual a la cantidad de guías requeridos.');
+            return;
+        }
+
 
         try {
             // Check for duplicate experience based on name (but allow if updating)
@@ -260,12 +273,13 @@ function CrearExperiencia() {
             const querySnapshot = await getDocs(q);
 
 
-            // 2. Upload the image
+            // 2. Subir la imagen a Cloudinary usando storageService
             let imageUrl = null;
+            let publicId = null; //  Guardaremos también el publicId
             if (imageFile) {
-                const storageRef = ref(storage, `experiences/${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                const uploadResult = await storageService.uploadFile(`experiences`, imageFile); // Usa storageService
+                imageUrl = uploadResult.downloadURL;
+                publicId = uploadResult.publicId; //  Guarda el publicId
             }
 
             // 3. Create the data object
@@ -280,11 +294,13 @@ function CrearExperiencia() {
                 longitudRecorrido: longitudNumerica,
                 duracionRecorrido: duracionNumerica,
                 guiasRequeridos: parseInt(guiasRequeridos),
+                guias: guiasSeleccionados, //  Añadir guías seleccionados
                 minimoUsuarios: minUsers,
                 maximoUsuarios: maxUsers,
                 incluidosExperiencia,  // Already an array
                 tipoActividad,
-                imageUrl,
+                imageUrl, // URL de Cloudinary
+                publicId,  //  Guarda el publicId en Firestore
                 dificultad,
             };
 
@@ -318,6 +334,7 @@ function CrearExperiencia() {
             setImageFile(null);
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
             setDificultad(0);
+            setGuiasSeleccionados([]); // Limpiar guías seleccionados
 
             // 6. Success message
             alert('Experiencia creada exitosamente!');
@@ -434,6 +451,36 @@ function CrearExperiencia() {
       };
 
 
+    // --- NUEVO: Obtener y manejar guías ---
+
+    useEffect(() => {
+        const fetchGuias = async () => {
+            try {
+                const guiasQuery = query(collection(db, "lista-de-usuarios"), where("userType", "==", "Guia"));
+                const querySnapshot = await getDocs(guiasQuery);
+                const guiasData = [];
+                querySnapshot.forEach((doc) => {
+                    //  Podrías querer más datos del guía, como el nombre, etc.
+                    guiasData.push({ id: doc.id, ...doc.data() });
+                });
+                setGuiasDisponibles(guiasData);
+            } catch (error) {
+                console.error("Error fetching guias:", error);
+            }
+        };
+
+        fetchGuias();
+    }, []);
+
+
+    const handleSeleccionarGuia = (guia) => {
+        if (guiasSeleccionados.some((g) => g.id === guia.id)) {
+          setGuiasSeleccionados(guiasSeleccionados.filter((g) => g.id !== guia.id));
+        } else {
+          setGuiasSeleccionados([...guiasSeleccionados, guia]);
+        }
+      };
+
     return (
         <div className="crear-experiencia-container-crear-experiencia">
             <h1 className="titulo-crear-experiencia">Agregar una nueva Experiencia</h1>
@@ -539,6 +586,26 @@ function CrearExperiencia() {
                             <input type="text" id="guiasRequeridos" value={guiasRequeridos} onChange={handleIntegerInputChange(setGuiasRequeridos)} />
                         </div>
                     </div>
+                    {/* Sección de Selección de Guías */}
+                    <div className="campo-crear-experiencia">
+                            <label>Seleccionar Guías:</label>
+                            <div className="guias-seleccion-container">
+                                {guiasDisponibles.map((guia) => (
+                                    <div key={guia.id} className="guia-item">
+                                        <input
+                                            type="checkbox"
+                                            id={`guia-${guia.id}`}
+                                            checked={guiasSeleccionados.some((g) => g.id === guia.id)}
+                                            onChange={() => handleSeleccionarGuia(guia)}
+                                        />
+                                         <label htmlFor={`guia-${guia.id}`}>
+                                            {/* Aquí, muestra el nombre del guía si lo tienes, o el ID */}
+                                             {guia.name || guia.email || guia.id} 
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                    </div>
 
                     <div className='campo-row-crear-experiencia'>
                         <div className="campo-crear-experiencia">
@@ -566,7 +633,7 @@ function CrearExperiencia() {
                             <div className="add-activity-container">
                                 <input
                                     type="text"
-                                    placeholder="Nuevo incluido..."
+                                    placeholder="Nuevo Item..."
                                     value={nuevoIncluido}
                                     onChange={(e) => setNuevoIncluido(e.target.value)}
                                     className="nuevo-tipo-input"
