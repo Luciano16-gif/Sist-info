@@ -8,14 +8,13 @@ const AdminCalendario = () => {
   };
 
   return (
-    <div className="absolute inset-0 mx-32 my-16 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
+    <div className="absolute inset-0 mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-8 flex flex-col justify-start items-start px-4 sm:px-8 md:px-16 space-y-4 z-10">
       {/* Encabezado del AdminCalendario */}
-      <h1 className="text-white text-4xl md:text-5xl font-bold">Calendario</h1>
-      <h1 className="text-white text-lg md:text-lg">
+      <h1 className="text-white text-3xl sm:text-4xl md:text-5xl font-bold">Calendario</h1>
+      <h1 className="text-white text-base sm:text-lg md:text-lg">
         Este calendario le enseña a nuestros usuarios y guías las diversas actividades y experiencias que ofrecemos cada mes de una forma compacta y organizada.
       </h1>
-      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-
+      <hr className="border-1 border-white-600 w-full sm:w-1/2 md:w-96" />
       {/* Integración del EventCalendar */}
       <div className="w-full mt-8">
         <EventCalendar onDateSelect={handleDateSelect} showSelectButton={true} />
@@ -24,22 +23,20 @@ const AdminCalendario = () => {
   );
 };
 
-
-const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDateSelect and showSelectButton
+const EventCalendar = ({ onDateSelect, showSelectButton }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(2025);
-  const [selectedDate, setSelectedDate] = useState(null); // Local selectedDate state
+  const [selectedDate, setSelectedDate] = useState(null); 
   const [focusedCell, setFocusedCell] = useState(null);
-
+  
   const dayRefs = useRef([]);
-
+  
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // ... (events array remains the same)
-    const events = [
+  const events = [
     // Enero
     { date: '2025-01-15', title: 'Ruta nocturna al Ávila', description: 'Excursión guiada nocturna con observación de estrellas', color: 'bg-green-400' },
     { date: '2025-01-15', title: 'Taller de fotografía', description: 'Aprende a capturar paisajes nocturnos', color: 'bg-blue-400' },
@@ -102,7 +99,6 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
     { date: '2025-12-10', title: 'Yoga matutino', description: 'Sesión de yoga al amanecer en el mirador', color: 'bg-pink-400' }
   ];
 
-
   const daysInMonth = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -124,7 +120,6 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
     }
     return days;
   }, [currentMonth, currentYear]);
-
 
   const currentMonthEvents = useMemo(() => {
     const monthStr = String(currentMonth + 1).padStart(2, '0');
@@ -184,7 +179,6 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
     setCurrentMonth(newMonth);
     setCurrentYear(newYear);
   };
-
 
   const handleKeyDown = (e, weekIndex, dayIndex, day) => {
     if (!day) return;
@@ -246,7 +240,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
       case ' ':
         e.preventDefault();
         if (day) {
-          setSelectedDate(day);  // Update local selectedDate
+          setSelectedDate(day);
         }
         break;
       default:
@@ -254,57 +248,54 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
     }
   };
 
-    const handleDayClick = (day) => {
-        setSelectedDate(day); //Update local selectedDate
-    }
+  const handleDayClick = (day) => {
+    setSelectedDate(day);
+  };
 
   const handleConfirmDate = () => {
     if (selectedDate) {
       // Construct the full date string in "YYYY-MM-DD" format
       const fullDate = new Date(currentYear, currentMonth, selectedDate);
-      onDateSelect(fullDate); // Call onDateSelect with the Date object
+      onDateSelect(fullDate);
     }
   };
-
 
   useEffect(() => {
     dayRefs.current = {};
   }, [daysInMonth]);
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-12">
+    <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-8">
       <div className="flex flex-col md:flex-row gap-8">
         {/* Calendar Container */}
-        <div className="w-full md:w-7/12 bg-[rgba(25,39,15,0.8)] rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-6">
+        <div className="w-full md:w-7/12 bg-[rgba(25,39,15,0.8)] rounded-2xl p-4 sm:p-6">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
             <button
               onClick={handlePrevMonth}
-              className="text-white text-2xl focus:outline-none"
+              className="text-white text-lg sm:text-2xl focus:outline-none"
               aria-label={`Ir al mes anterior: ${months[currentMonth === 0 ? 11 : currentMonth - 1]}`}
             >
               ←
             </button>
-            <h2 className="text-white text-3xl font-bold" id="current-month">
+            <h2 className="text-white text-2xl sm:text-3xl font-bold" id="current-month">
               {months[currentMonth]} {currentYear}
             </h2>
             <button
               onClick={handleNextMonth}
-              className="text-white text-2xl focus:outline-none"
+              className="text-white text-lg sm:text-2xl focus:outline-none"
               aria-label={`Ir al mes siguiente: ${months[currentMonth === 11 ? 0 : currentMonth + 1]}`}
             >
               →
             </button>
           </div>
-
-          <div className="grid grid-cols-7 gap-2 mb-6 text-center" role="row">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-4 sm:mb-6 text-center" role="row">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-              <div key={day} className="text-white font-semibold" role="columnheader">
+              <div key={day} className="text-white font-semibold text-xs sm:text-sm" role="columnheader">
                 {day}
               </div>
             ))}
           </div>
-
-          <div className="grid grid-cols-7 gap-2" role="grid" aria-labelledby="current-month">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2" role="grid" aria-labelledby="current-month">
             {daysInMonth.map((week, weekIndex) => (
               <React.Fragment key={`week-${weekIndex}`}>
                 {week.map((day, dayIndex) => {
@@ -313,7 +304,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
                     currentYear === currentDate.getFullYear() &&
                     currentMonth === currentDate.getMonth() &&
                     day === currentDate.getDate();
-
+                    
                   const dayEvents = day ? getEventsForDay(day) : [];
                   const isSelected = day && day === selectedDate; // Check against local state
                   const cellId = `${weekIndex}-${dayIndex}`;
@@ -326,17 +317,17 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
                       tabIndex={day ? 0 : -1}
                       aria-selected={isSelected}
                       aria-label={day ? `${day} de ${months[currentMonth]} de ${currentYear}${dayEvents.length > 0 ? `, ${dayEvents.length} eventos` : ''}` : undefined}
-                      className={`relative rounded-lg p-2 transition-colors ${
+                      className={`relative rounded-lg p-1 sm:p-2 transition-colors ${
                         isToday ? 'bg-green-500' :
-                        isSelected ? 'bg-blue-500' :  // Highlight selected date
+                        isSelected ? 'bg-blue-500' :
                         day ? 'hover:bg-gray-700' : ''
                       } ${day ? 'cursor-pointer' : ''}`}
-                      onClick={() => handleDayClick(day)}  //Use new handler
+                      onClick={() => handleDayClick(day)}
                       onKeyDown={(e) => handleKeyDown(e, weekIndex, dayIndex, day)}
                     >
                       {day && (
                         <>
-                          <div className="text-white text-center">
+                          <div className="text-white text-xs sm:text-base text-center">
                             {day}
                           </div>
                           {dayEvents.length > 0 && (
@@ -362,45 +353,45 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
 
         {/* Event Details and Button Container */}
         <div className="w-full md:w-5/12 space-y-4">
-          <h2 className="text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white mb-4">
             Calendario de actividades
           </h2>
 
           {selectedDate && (
             <>
-              <h3 className="text-xl text-white font-semibold mb-2">
+              <h3 className="text-base sm:text-xl text-white font-semibold mb-2">
                 Eventos para el {selectedDate}/{currentMonth + 1}/{currentYear}
               </h3>
               <div className="space-y-4">
                 {getEventsForDay(selectedDate).map((event, index) => (
                   <div
                     key={`${event.date}-${index}`}
-                    className="bg-[rgba(25,39,15,0.8)] p-4 rounded-lg"
+                    className="bg-[rgba(25,39,15,0.8)] p-2 sm:p-4 rounded-lg"
                   >
-                    <h4 className="text-xl text-white font-semibold mb-2">
+                    <h4 className="text-base sm:text-xl text-white font-semibold mb-2">
                       {event.title}
                     </h4>
-                    <p className="text-gray-300">
+                    <p className="text-gray-300 text-xs sm:text-base">
                       {event.description}
                     </p>
                   </div>
                 ))}
                 {getEventsForDay(selectedDate).length === 0 && (
-                  <p className="text-gray-300">No hay eventos para esta fecha</p>
+                  <p className="text-gray-300 text-xs sm:text-base">No hay eventos para esta fecha</p>
                 )}
               </div>
             </>
           )}
-
+          
           {!selectedDate && (
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-xs sm:text-base">
               Selecciona una fecha para ver los eventos
             </p>
           )}
 
-            {/* Conditionally render the button with increased margin-top */}
+          {/* Conditionally render the button with increased margin-top */}
           {showSelectButton && (
-            <div className="flex justify-end mt-20"> {/* Increased mt to lower the button */}
+            <div className="flex justify-end mt-8 sm:mt-20">
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleConfirmDate}
