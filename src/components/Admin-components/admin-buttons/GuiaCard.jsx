@@ -2,7 +2,7 @@ import star from "../../../assets/images/AdminLandingPage/profile_blank.webp";
 
 const GuiaCard = ({img, name, stars, number, status, solicitudes}) => {
     return (
-        <div className="bg-[#6b9e5a] text-black p-4 w-[28rem] h-full rounded-full flex-shrink-0 flex flex-row space-x-5">
+        <div className="bg-[#6b9e5a] text-black p-4 w-[27rem] h-full rounded-full flex-shrink-0 flex flex-row space-x-5">
             <img src={img} className="w-20 h-20 rounded-full"></img>
             <div className="flex flex-col">
                 <div className="flex flex-row space-x-5 w-auto">
