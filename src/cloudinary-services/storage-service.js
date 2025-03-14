@@ -1,4 +1,4 @@
-import cloudinaryService from "./cloudinary-service";
+import cloudinaryService from "./cloudinary-service.js";
 
 /**
  * Servicio de almacenamiento simple que utiliza Cloudinary

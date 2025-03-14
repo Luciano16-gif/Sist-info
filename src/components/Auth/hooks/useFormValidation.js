@@ -11,9 +11,10 @@ import {
  * Custom hook for form validation
  * @param {Object} initialValues - Initial form values
  * @param {Function} onSubmit - Form submission handler
+ * @param {boolean} isSignupForm - Whether this is a signup form (default: false)
  * @returns {Object} Form state and handlers
  */
-export const useFormValidation = (initialValues, onSubmit) => {
+export const useFormValidation = (initialValues, onSubmit, isSignupForm = false) => {
   const [formData, setFormData] = useState(initialValues);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,7 +78,7 @@ export const useFormValidation = (initialValues, onSubmit) => {
         result = validateEmail(formData.email);
         break;
       case 'password':
-        result = validatePassword(formData.password);
+        result = validatePassword(formData.password, isSignupForm);
         break;
       case 'confirmPassword':
         result = { 
@@ -99,28 +100,38 @@ export const useFormValidation = (initialValues, onSubmit) => {
   
   /**
    * Validate the entire form
-   * @param {boolean} isSignup - Whether this is the signup form
    * @returns {boolean} Whether form is valid
    */
-  const validateFormData = (isSignup = true) => {
-    // Validation rules for sign up
-    const validationRules = {
-      name: { validator: validateName },
-      lastName: { validator: validateName },
-      phone: { validator: validatePhone, params: [false] }, // Not required
-      email: { validator: validateEmail },
-      password: { validator: validatePassword, params: [isSignup] } // Strict for signup
-    };
+  const validateFormData = () => {
+    // Different validation rules based on form type
+    let validationRules = {};
+    
+    if (isSignupForm) {
+      // Signup form validation
+      validationRules = {
+        name: { validator: validateName },
+        lastName: { validator: validateName },
+        phone: { validator: validatePhone, params: [false] }, // Not required
+        email: { validator: validateEmail },
+        password: { validator: validatePassword, params: [true] } // Strict for signup
+      };
+    } else {
+      // Login form validation (only email and password)
+      validationRules = {
+        email: { validator: validateEmail },
+        password: { validator: validatePassword, params: [true] } // Less strict for login
+      };
+    }
     
     // Validate form
     const { isValid, errors } = validateForm(formData, validationRules);
     
-    // Additional validation for password confirmation
+    // Additional validation for password confirmation (signup only)
     let updatedErrors = { ...errors };
     let formIsValid = isValid;
     
     // Only check password confirmation for signup
-    if (isSignup && formData.password !== formData.confirmPassword) {
+    if (isSignupForm && formData.password !== formData.confirmPassword) {
       updatedErrors.confirmPassword = 'Las contraseñas no coinciden.';
       formIsValid = false;
     }

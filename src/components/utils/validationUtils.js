@@ -1,34 +1,37 @@
 // Validation utilities for authentication forms
 
 /**
- * Email validation with customizable domain requirement
+ * Email validation for UNIMET email domain
  * @param {string} email - Email to validate
- * @param {string} requiredDomain - Optional domain requirement (default: correo.unimet.edu.ve)
  * @returns {Object} - Validation result with isValid and message
  */
-export const validateEmail = (email, requiredDomain = 'correo.unimet.edu.ve') => {
-    if (!email || email.trim() === '') {
-      return { isValid: false, message: 'El correo electrónico es obligatorio.' };
-    }
+export const validateEmail = (email) => {
+  const UNIMET_DOMAIN = 'correo.unimet.edu.ve';
   
-    const trimmedEmail = email.trim();
-    
-    // Basic email format check using regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      return { isValid: false, message: 'Formato de correo electrónico inválido.' };
-    }
-    
-    // Check for required domain if specified
-    if (requiredDomain && !trimmedEmail.endsWith(`@${requiredDomain}`)) {
-      return { 
-        isValid: false, 
-        message: `Por favor, utiliza un correo electrónico de la Universidad Metropolitana (@${requiredDomain}).` 
-      };
-    }
-    
-    return { isValid: true, message: '' };
-  };
+  if (!email || email.trim() === '') {
+    return { isValid: false, message: 'El correo electrónico es obligatorio.' };
+  }
+  
+  const trimmedEmail = email.trim();
+  
+  // Check basic email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(trimmedEmail)) {
+    return { isValid: false, message: 'Formato de correo electrónico inválido.' };
+  }
+  
+  // Check for UNIMET domain - this is always required
+  if (!trimmedEmail.endsWith(`@${UNIMET_DOMAIN}`)) {
+    return { 
+      isValid: false, 
+      message: `Por favor, utiliza un correo electrónico de la Universidad Metropolitana (@${UNIMET_DOMAIN}).` 
+    };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
+
   
   /**
    * Password strength validation

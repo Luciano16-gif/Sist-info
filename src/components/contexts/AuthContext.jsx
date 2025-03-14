@@ -32,21 +32,26 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Error handling helper
-  const handleAuthError = (error, callback) => {
-    setError(error.message);
-    setTimeout(() => setError(null), 5000); // Auto-clear error after 5 seconds
-    if (callback) callback(error);
-  };
-
   // Define authentication methods using authService
   const login = async (email, password, onError) => {
     try {
       setError(null);
       setIsAuthenticating(true);
-      return await authService.emailSignIn(email, password);
+      
+      const result = await authService.emailSignIn(email, password);
+      
+      // Check if there was an error
+      if (result && result.error) {
+        setError(result.message);
+        if (onError) onError({ message: result.message });
+        return null;
+      }
+      
+      return result; // This will be the user object on success
     } catch (error) {
-      handleAuthError(error, onError);
+      // This should rarely happen now, but just in case
+      setError(error.message || 'Ocurrió un error durante la autenticación.');
+      if (onError) onError(error);
       return null;
     } finally {
       setIsAuthenticating(false);
@@ -57,9 +62,21 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setIsAuthenticating(true);
-      return await authService.emailSignUp(userData);
+      
+      const result = await authService.emailSignUp(userData);
+      
+      // Check if there was an error
+      if (result && result.error) {
+        setError(result.message);
+        if (onError) onError({ message: result.message });
+        return null;
+      }
+      
+      return result; // This will be the user object on success
     } catch (error) {
-      handleAuthError(error, onError);
+      // This should rarely happen now, but just in case
+      setError(error.message || 'Ocurrió un error durante la autenticación.');
+      if (onError) onError(error);
       return null;
     } finally {
       setIsAuthenticating(false);
@@ -70,9 +87,21 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setIsAuthenticating(true);
-      return await authService.googleAuth(isSignUp);
+      
+      const result = await authService.googleAuth(isSignUp);
+      
+      // Check if there was an error
+      if (result && result.error) {
+        setError(result.message);
+        if (onError) onError({ message: result.message });
+        return null;
+      }
+      
+      return result; // This will be the user object on success
     } catch (error) {
-      handleAuthError(error, onError);
+      // This should rarely happen now, but just in case
+      setError(error.message || 'Ocurrió un error durante la autenticación.');
+      if (onError) onError(error);
       return null;
     } finally {
       setIsAuthenticating(false);
@@ -82,10 +111,20 @@ export const AuthProvider = ({ children }) => {
   const logout = async (onError) => {
     try {
       setError(null);
-      await authService.logOut();
+      const result = await authService.logOut();
+      
+      // Check if there was an error
+      if (result && result.error) {
+        setError(result.message);
+        if (onError) onError({ message: result.message });
+        return false;
+      }
+      
       return true;
     } catch (error) {
-      handleAuthError(error, onError);
+      // This should rarely happen now, but just in case
+      setError(error.message || 'Ocurrió un error al cerrar sesión.');
+      if (onError) onError(error);
       return false;
     }
   };
