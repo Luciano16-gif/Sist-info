@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { auth, db } from '../../../firebase-config';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
@@ -35,7 +35,7 @@ function ProfileManagementPage() {
                 try {
                     // Use direct document access with email as document ID
                     const userDocRef = doc(db, 'lista-de-usuarios', user.email);
-                    const userDoc = await getDocs(userDocRef);
+                    const userDoc = await getDoc(userDocRef);
                     if (!userDoc.exists()) {
                         console.error('El documento del usuario no existe en Firestore.');
                         setLoading(false);
@@ -140,7 +140,7 @@ function ProfileManagementPage() {
 
             const usersCollection = collection(db, 'lista-de-usuarios');
             const q = query(usersCollection, where("email", "==", auth.currentUser.email));
-            const querySnapshot = await getDocs(q);
+            const querySnapshot = await getDoc(q);
 
             if (querySnapshot.empty) {
                 console.error('Usuario no encontrado para actualizar.');
