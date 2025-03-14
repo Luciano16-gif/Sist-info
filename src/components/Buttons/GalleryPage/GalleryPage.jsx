@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../../../firebase-config'; // Remove 'storage' import
 import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove } from 'firebase/firestore';
 import './GalleryPage.css';
-import storageService from '../../../services/storage-service'; // Import the new storage service
+import storageService from '../../../cloudinary-services/storage-service'; // Import the new storage service
 
 
 function GalleryPage() {

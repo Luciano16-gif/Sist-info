@@ -1,13 +1,10 @@
 // ExperiencesPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './ExperiencesPage.css';
-import { db } from '../../firebase-config'; // Ya no importamos storage de firebase
-import { collection, getDocs } from 'firebase/firestore';
-// import { ref, getDownloadURL } from 'firebase/storage';  <-- Eliminamos esto
+import { db } from '../../firebase-config';
+import { collection, getDocs } from 'firebase/firestore'; // Import query and where
 import { useNavigate } from 'react-router-dom';
-import storageService from '../../services/storage-service'; // Importamos nuestro nuevo servicio
-
-
+import storageService from '../../cloudinary-services/storage-service'; // Importa el nuevo servicio;
 
 function ExperiencesPage() {
     const [experiences, setExperiences] = useState([]);
@@ -23,21 +20,20 @@ function ExperiencesPage() {
 
             for (const doc of experiencesSnapshot.docs) {
                 const data = doc.data();
-                console.log("Raw data from Firestore:", data);
+                const experienceId = doc.id; // Get the experience ID
 
                 let imageUrl = '';
                 try {
-                    // Usamos storageService.getDownloadURL() en lugar de Firebase Storage
-                    imageUrl = storageService.getDownloadURL(data.imageUrl); // Mucho más simple!
-
+                    imageUrl = storageService.getDownloadURL(data.imageUrl);
                 } catch (error) {
                     console.error("Error al obtener la URL de la imagen:", error);
-                    imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png'; // Imagen por defecto si falla
+                    imageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
                 }
 
+                // REMOVED:  Fetching payment data (and paidUsersCount)
 
                 const experience = {
-                    id: doc.id,
+                    id: experienceId,
                     name: data.nombre,
                     description: data.descripcion,
                     difficulty: data.dificultad,
@@ -48,10 +44,11 @@ function ExperiencesPage() {
                     days: data.fechas.join(', '),
                     maxPeople: data.maximoUsuarios,
                     minPeople: data.minimoUsuarios,
-                    availableSlots: data.cuposDisponibles,
+                    availableSlots: data.cuposDisponibles,  //  Keep this, although you aren't *displaying* it in the card, it's still useful data.
                     imageUrl: imageUrl,
                     rating: data.puntuacion,
-                    registeredUsers: data.usuariosInscritos,
+                    registeredUsers: data.usuariosInscritos,  // Keep the original registered users count
+                    // REMOVED:  paidUsers: paidUsersCount,
                     incluidos: data.incluidosExperiencia,
                     puntoDeSalida: data.puntoSalida,
                 };
@@ -67,14 +64,20 @@ function ExperiencesPage() {
         fetchExperiences();
     }, []);
 
-    const scrollToExperience = (index) => {
-        if (experienceRefs.current[index] && experienceRefs.current[index].current) {
-            experienceRefs.current[index].current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start',
-            });
+
+
+     const handleViewMore = (experience) => {
+        if (loading) {
+            console.log("Data is still loading.  Cannot view details yet.");
+            return;
         }
+        console.log("Experience ID being passed:", experience.id);
+        navigate('/booking', { state: { experience } });
     };
+
+    if (loading) {
+        return <div>Loading experiences...</div>;
+    }
 
     const renderRatingStars = (rating) => {
         const fullStars = Math.floor(rating);
@@ -104,19 +107,6 @@ function ExperiencesPage() {
         }
         return dots;
     };
-
-    const handleViewMore = (experience) => {
-        if (loading) {
-            console.log("Data is still loading.  Cannot view details yet.");
-            return;
-        }
-        console.log("Experience ID being passed:", experience.id);
-        navigate('/booking', { state: { experience } });
-    };
-
-    if (loading) {
-        return <div>Loading experiences...</div>;
-    }
 
     return (
         <div className="container-experiences" style={{ marginTop: "60px" }}>
@@ -151,7 +141,8 @@ function ExperiencesPage() {
                             </p>
                             <p className="data-text-experiences">
                                 <img src="../../src/assets/images/ExperiencesPage/participantes.png" alt="Participantes" className="participantes-icon-experiences" />
-                                {experience.registeredUsers} / {experience.maxPeople} Cupos
+                                {/* Display min and max users */}
+                                {experience.minPeople} - {experience.maxPeople} Cupos
                             </p>
                         </div>
                         <button className="button-experiences" onClick={() => handleViewMore(experience)}>Ver más</button>

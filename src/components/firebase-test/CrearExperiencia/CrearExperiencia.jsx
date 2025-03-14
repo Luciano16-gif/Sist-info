@@ -5,7 +5,7 @@ import './CrearExperiencia.css';
 import { db, /* storage  <-- ELIMINAR */ } from '../../../firebase-config'; // Eliminamos storage
 import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
 // import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';  <-- ELIMINAR ESTAS IMPORTACIONES
-import storageService from '../../../services/storage-service'; // IMPORTAR storageService
+import storageService from '../../../cloudinary-services/storage-service'; // IMPORTAR storageService
 
 function CrearExperiencia() {
     const [nombre, setNombre] = useState('');

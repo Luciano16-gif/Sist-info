@@ -3,11 +3,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read their own user document
-    match /Lista de Usuarios/{email} {
-      // Allow create if the user is authenticated and the document ID matches their email
-      allow create: if request.auth != null && 
-                      request.auth.token.email == email;
+    // User documents - direct access pattern for better security
+    match /lista-de-usuarios/{email} {
+      // Allow reading a specific user document (needed for checking existence)
+      allow get: if true;
+      
+      // Enhanced create rule with explicit email domain validation
+      allow create: if 
+        // Ensure email is valid string and matches university domain
+        request.resource.data.email is string && 
+        request.resource.data.email.matches('^[^@]+@correo\\.unimet\\.edu\\.ve$') &&
+        (
+          // Either the document ID matches the authenticated user's email...
+          request.auth.token.email == email ||
+          
+          // ...or this is a Google Auth user and emails match (double validation)
+          (request.resource.data['Registro/Inicio de Sesión'] == 'Google Authentication' && 
+           request.auth.token.firebase.sign_in_provider == 'google.com' &&
+           request.auth.token.email == email)
+        );
       
       // Allow read/update if the user is authenticated and owns the document
       allow read, update: if request.auth != null && 

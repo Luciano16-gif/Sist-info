@@ -21,7 +21,7 @@ function LoginPage() {
   const navigate = useNavigate();
   
   // Use our auth hooks
-  const { login, loginWithGoogle, error: contextError } = useAuth();
+  const { login, error: contextError } = useAuth();
   
   // Redirect if already logged in
   useAuthRedirect('/');
@@ -118,8 +118,10 @@ function LoginPage() {
       <div className="auth-container">
         <h2 className="auth-title login-title">Iniciar Sesión</h2>
         
-        {/* Error message - prominently displayed */}
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        {/* Error container that flexibly handles the error message */}
+        <div className="error-container">
+          {errorMessage && <ErrorMessage message={errorMessage} />}
+        </div>
         
         <div className="input-container w-full max-w-sm mx-auto">
           <FormField
