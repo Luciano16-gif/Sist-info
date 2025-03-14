@@ -64,7 +64,7 @@ function LoginPage() {
         <h2 className="auth-title login-title">Iniciar Sesión</h2>
         
         {/* Error container that flexibly handles the error message */}
-        <div className="error-container">
+        <div className="auth-error-container">
           {errorMessage && <ErrorMessage message={errorMessage} />}
         </div>
         

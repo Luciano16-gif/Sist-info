@@ -80,7 +80,7 @@ function SignUpPage() {
         <h2 className="auth-title signup-title">Registrarse</h2>
         
         {/* Error container with a signup-specific class */}
-        <div className="error-container signup-error-container">
+        <div className="auth-error-container signup-error-container">
           {errorMessage && <ErrorMessage message={errorMessage} />}
         </div>
         
