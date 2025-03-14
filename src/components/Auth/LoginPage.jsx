@@ -7,8 +7,8 @@ import {
   AuthLink 
 } from './AuthComponents/index';
 import FormField from './AuthComponents/FormField';
-import { useFormValidation } from './hooks/useFormValidation';
-import { useGoogleAuth } from './hooks/useGoogleAuth';
+import { useFormValidation } from '../hooks/auth-hooks/useFormValidation';
+import { useGoogleAuth } from '../hooks/auth-hooks/useGoogleAuth';
 import './Auth.css';
 
 function LoginPage() {
