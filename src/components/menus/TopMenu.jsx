@@ -79,11 +79,14 @@ const TopMenu = () => {
     >
       <div className="w-full flex flex-wrap items-center justify-between px-4">
         <div className="flex items-center">
-          <img 
-            className="max-h-10 min-w-16 min-h-6"
-            src={logoImage}
-            alt="Avilaventuras"
-          />
+          <Link to={"/"}>
+            <img 
+              className="max-h-10 min-w-16 min-h-6"
+              src={logoImage}
+              alt="Avilaventuras"
+            />
+          </Link>
+
           {currentUser ? (
             <div className="ml-4 flex items-center">
               <span className="uppercase font-ysabeau text-white text-xs md:text-xs lg:text-sm">

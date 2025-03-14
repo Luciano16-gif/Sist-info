@@ -120,12 +120,13 @@ const HamburgerMenu = () => {
 
         {/* Logo and User Info */}
         <div className="flex items-center">
-          <img 
-            className="max-h-10 min-w-16 min-h-6"
-            src={logoImage}
-            alt="Avilaventuras"
-          />
-          
+          <Link to={"/"}>
+            <img 
+              className="max-h-10 min-w-16 min-h-6"
+              src={logoImage}
+              alt="Avilaventuras"
+            />
+          </Link>
           {currentUser ? (
             <div className="flex items-center ml-4">
               {/* User Avatar */}

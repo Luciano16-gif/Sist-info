@@ -341,3 +341,7 @@
 .payment-button-booking-process:hover {
     background-color: #ffce66;
 }
+
+.realizar-pago-button-container-booking-process {
+    color: rgb(232, 255, 27);
+}   
