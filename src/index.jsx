@@ -28,6 +28,7 @@ import ExperiencesPage from './pages/ExperiencesPage/ExperiencesPage';
 import BookingPage from './pages/BookingPage/BookingPage';
 import BookingProcessPage from './pages/BookingProcessPage/BookingProcessPage';
 import OurTeam from './components/nuestro-equipo/OurTeam';
+import Statistics from './components/firebase-test/Statistics/Statistics';
 
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
@@ -63,6 +64,7 @@ root.render(
             <Route path="/galeria" element={<GalleryPage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking-process" element={<BookingProcessPage />} />
+            <Route path="/estadisticas" element={<Statistics />} />
           </Route>
 
           {/* Routes with LayoutAdmin */}

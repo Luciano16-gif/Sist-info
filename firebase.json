@@ -60,5 +60,11 @@
       "port": 4000
     },
     "singleProjectMode": true
-  }
+  },
+  "rewrites": [
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ]
 }
