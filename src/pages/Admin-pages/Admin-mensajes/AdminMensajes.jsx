@@ -27,6 +27,7 @@ const AdminMensajes = () => {
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
       <BusquedaMensajes />
+      <MensajesGrid />
     </div>
   );
 };
