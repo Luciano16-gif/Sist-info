@@ -2,12 +2,12 @@
 
 const MensajeCard = ({img, name, who, asunto, context}) => {
     return (
-        <div className="bg-green-800 text-black p-4 w-[28rem] h-full rounded-full flex-shrink-0 flex flex-row space-x-5">
+        <div className="bg-[#3A4C2E] text-black p-4 max-w-full rounded-full flex-shrink-0 flex flex-row space-x-5">
             <img src={img} className="w-20 h-20 rounded-full"></img>
             <div className="flex flex-col">
                 <div className="flex flex-row space-x-5 w-auto">
                     <p className="font-bold whitespace-nowrap text-white w-auto">{name}</p>
-                    <div className="w-auto h-6 bg-green-900 rounded-full Justify-center">
+                    <div className="w-auto h-6 bg-[#293A1E] rounded-full Justify-center">
                         <p className="text-xs text-white">{who}</p>
                     </div>
                 </div>
