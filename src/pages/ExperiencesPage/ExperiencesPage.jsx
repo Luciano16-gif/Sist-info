@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ExperiencesPage.css';
 import { db } from '../../firebase-config';
-import { collection, getDocs, query, where } from 'firebase/firestore'; // Import query and where
+import { collection, getDocs } from 'firebase/firestore'; // Import query and where
 import { useNavigate } from 'react-router-dom';
-import storageService from '../../services/storage-service';
+import storageService from '../../cloudinary-services/storage-service';
 
 function ExperiencesPage() {
     const [experiences, setExperiences] = useState([]);

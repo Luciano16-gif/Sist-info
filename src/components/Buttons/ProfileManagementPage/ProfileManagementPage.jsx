@@ -1,11 +1,11 @@
 // ProfileManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../../../firebase-config';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
-import storageService from '../../../../src/services/storage-service'; // Importa el nuevo servicio
+import storageService from '../../../cloudinary-services/storage-service'; // Importa el nuevo servicio
 
 
 function ProfileManagementPage() {

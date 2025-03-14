@@ -4,7 +4,7 @@ import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db, auth } from '../../firebase-config';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
-import storage from '../../services/storage-service';
+import storage from '../../cloudinary-services/storage-service';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 function BookingProcessPage() {
