@@ -4,11 +4,7 @@ import './ExperiencesPage.css';
 import { db } from '../../firebase-config';
 import { collection, getDocs } from 'firebase/firestore'; // Import query and where
 import { useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
-import storageService from '../../cloudinary-services/storage-service';
-=======
-import storageService from '../../cloudinary-services/storage-service'; // Importamos nuestro nuevo servicio
->>>>>>> 565615151d2e20745bc79b1e663ba1a072903a83
+import storageService from '../../cloudinary-services/storage-service'; // Importa el nuevo servicio;
 
 function ExperiencesPage() {
     const [experiences, setExperiences] = useState([]);

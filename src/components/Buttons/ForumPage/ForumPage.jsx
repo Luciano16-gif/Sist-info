@@ -1,10 +1,11 @@
-// ForumPage.jsx (Updated)
+// ForumPage.jsx (Updated for Cloudinary - Primarily by removing unused Firebase Storage imports)
 import React, { useState, useRef, useEffect } from 'react';
 import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, setDoc, updateDoc } from "firebase/firestore";
 import { db } from './../../../firebase-config';
 import './ForumPage.css';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Imports are present but not directly used here
+// Removed:  Firebase Storage imports are no longer needed here.
+// import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 
 const getCurrentUser = () => {
@@ -14,7 +15,7 @@ const getCurrentUser = () => {
             unsubscribe();
             if (user) {
                 try {
-                    const userDocRef = doc(db, "Lista de Usuarios", user.email);
+                    const userDocRef = doc(db, "lista-de-usuarios", user.email);
                     const userDocSnap = await getDoc(userDocRef);
                     if (!userDocSnap.exists()) {
                         console.warn("Usuario no encontrado en Firestore:", user.email);
@@ -77,7 +78,7 @@ function ForumPage() {
         const loadReportedData = async () => {
             const user = await getCurrentUser();
             if (user) {
-                const userDocRef = doc(db, "Lista de Usuarios", user.email);
+                const userDocRef = doc(db, "lista-de-usuarios", user.email);
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
@@ -115,7 +116,7 @@ function ForumPage() {
 
                     // Fetch profile image URL from "Lista de Usuarios"
                     if (forumData.Email) {
-                        const userDocRef = doc(db, "Lista de Usuarios", forumData.Email);
+                        const userDocRef = doc(db, "lista-de-usuarios", forumData.Email);
                         const userDocSnap = await getDoc(userDocRef);
                         if (userDocSnap.exists()) {
                             const userData = userDocSnap.data();
@@ -164,7 +165,7 @@ function ForumPage() {
                     let profileImageUrl = "url_por_defecto.jpg"; // Default
 
                     if (commentData.Email) {
-                        const userDocRef = doc(db, "Lista de Usuarios", commentData.Email);
+                        const userDocRef = doc(db, "lista-de-usuarios", commentData.Email);
                         const userDocSnap = await getDoc(userDocRef);
                         if (userDocSnap.exists()) {
                             const userData = userDocSnap.data();
@@ -396,7 +397,7 @@ const handleReportForum = async (forumId) => {
     }
 
     try {
-        const userDocRef = doc(db, "Lista de Usuarios", user.email);
+        const userDocRef = doc(db, "lista-de-usuarios", user.email);
         await updateDoc(userDocRef, {
             reportedForums: [...reportedForums, forumId]
         });
@@ -426,7 +427,7 @@ const handleReportComment = async (commentId) => {
 
 
     try {
-        const userDocRef = doc(db, "Lista de Usuarios", user.email);
+        const userDocRef = doc(db, "lista-de-usuarios", user.email);
         await updateDoc(userDocRef, {
             reportedComments: [...reportedComments, commentId]
         });
