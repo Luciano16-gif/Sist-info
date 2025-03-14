@@ -37,7 +37,6 @@ import AdminCalendario from './pages/Admin-pages/Admin-calendario/AdminCalendari
 import AdminEstadisticas from './pages/Admin-pages/Admin-estadisticas/AdminEstadisticas';
 import AdminForo from './pages/Admin-pages/Admin-foro/AdminForo';
 import AdminGaleria from './pages/Admin-pages/Admin-galeria/AdminGaleria';
-import AdminMapa from './pages/Admin-pages/Admin-mapa/AdminMapa';
 import AdminMensajes from './pages/Admin-pages/Admin-mensajes/AdminMensajes';
 import AdminResenas from './pages/Admin-pages/Admin-resenas/AdminResenas';
 import AdminRutas from './pages/Admin-pages/Admin-rutas/AdminRutas';
@@ -86,7 +85,6 @@ root.render(
             <Route path="/admin-estadisticas" element={<AdminEstadisticas />} />
             <Route path="/admin-tips" element={<AdminTips />} />
             <Route path="/admin-foro" element={<AdminForo />} />
-            <Route path="/admin-mapa" element={<AdminMapa />} />
             <Route path="/admin-resena" element={<AdminResenas />} />
           </Route>
 

@@ -11,7 +11,6 @@ import messagesIcon from "../../assets/images/landing-page-admin/message.webp";
 import diagramIcon from "../../assets/images/landing-page-admin/diagram.webp";
 import ideaIcon from "../../assets/images/landing-page-admin/idea.webp";
 import discussionIcon from "../../assets/images/landing-page-admin/discussion.webp";
-import locationIcon from "../../assets/images/landing-page-admin/location.webp";
 import reviewIcon from "../../assets/images/landing-page-admin/review.webp";
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
@@ -35,7 +34,6 @@ const Sidebar = () => {
         { href: "/admin-estadisticas", label: "Estadísticas", icon: diagramIcon },
         { href: "/admin-tips", label: "Tips", icon: ideaIcon },
         { href: "/admin-foro", label: "Foro", icon: discussionIcon },
-        { href: "/admin-mapa", label: "Mapa", icon: locationIcon },
         { href: "/admin-resena", label: "Reseña", icon: reviewIcon },
     ];
 
