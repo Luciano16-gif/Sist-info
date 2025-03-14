@@ -30,7 +30,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
   const [focusedCell, setFocusedCell] = useState(null);
   
   const dayRefs = useRef([]);
-  
+
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -362,6 +362,19 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
               <h3 className="text-base sm:text-xl text-white font-semibold mb-2">
                 Eventos para el {selectedDate}/{currentMonth + 1}/{currentYear}
               </h3>
+              {/* Botones para agregar o remover una actividad/ruta */}
+              <div className="flex space-x-2 mb-4">
+                <button
+                  className="bg-gray-400 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Agregar +
+                </button>
+                <button
+                  className="bg-gray-400 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Remover -
+                </button>
+              </div>
               <div className="space-y-4">
                 {getEventsForDay(selectedDate).map((event, index) => (
                   <div
