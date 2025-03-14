@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import BusquedaMensajes from "../../../components/Admin-components/admin-mensajes/BusquedaMensajes";
+import MensajesGrid from "../../../components/Admin-components/admin-mensajes/MensajesGrid";
 
 const AdminMensajes = () => {
 
@@ -24,6 +26,7 @@ const AdminMensajes = () => {
         <RelevantInfoS number = {MensajesNContestado} description ="Mensajes sin contestar" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <BusquedaMensajes />
     </div>
   );
 };
