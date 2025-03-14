@@ -1,20 +1,20 @@
 // cloudinary-config.js
-// Unified Cloudinary configuration that supports both profiles
+// Unified Cloudinary configuration that supports both profiles using environment variables
 // Define both configurations
 const cloudinaryConfigs = {
   // Chano's configuration
   chano: {
-    cloudName: "dvuxh6hdz",
-    apiKey: "655451124663453",
-    apiSecret: "GieHcKFOIkmouZStsau6ownuXsQ",
+    cloudName: import.meta.env.VITE_CLOUDINARY_CHANO_CLOUD_NAME,
+    apiKey: import.meta.env.VITE_CLOUDINARY_CHANO_API_KEY,
+    apiSecret: import.meta.env.VITE_CLOUDINARY_CHANO_API_SECRET,
     secure: true,
   },
   
   // Santi's configuration
   santi: {
-    cloudName: "dhzpcvjg6",
-    apiKey: "627681417512586",
-    apiSecret: "rT7PY90ZM7LXO6sCy7TD-5zHZ6o",
+    cloudName: import.meta.env.VITE_CLOUDINARY_SANTI_CLOUD_NAME,
+    apiKey: import.meta.env.VITE_CLOUDINARY_SANTI_API_KEY,
+    apiSecret: import.meta.env.VITE_CLOUDINARY_SANTI_API_SECRET,
     secure: true,
   }
 };
