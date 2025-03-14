@@ -7,6 +7,10 @@ import {
   signOut 
 } from 'firebase/auth';
 import { 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
   doc, 
   setDoc,
   getDoc 
@@ -140,7 +144,7 @@ export const emailSignIn = async (email, password) => {
       };
     }
 
-    const userData = querySnapshot.docs[0].data();
+    const userData = userDoc.data();
     if (userData['Registro/Inicio de Sesión'] === 'Google Authentication') {
       return {
         error: true,
