@@ -28,7 +28,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
   const [currentYear, setCurrentYear] = useState(2025);
   const [selectedDate, setSelectedDate] = useState(null); 
   const [focusedCell, setFocusedCell] = useState(null);
-  
+  const [showPopup, setShowPopup] = useState(false);
+  const [activitiesForPopup, setActivitiesForPopup] = useState([]);
   const dayRefs = useRef([]);
 
   const months = [
@@ -264,6 +265,17 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
     dayRefs.current = {};
   }, [daysInMonth]);
 
+  //Para abrir y cerrar el pop up de eliminar actividad
+  const handleRemoveClick = () => {
+    const dailyEvents = getEventsForDay(selectedDate);
+    setActivitiesForPopup(dailyEvents);
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -370,6 +382,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
                   Agregar +
                 </button>
                 <button
+                  //Abre el pop up para eliminar una actividad
+                  onClick={handleRemoveClick}
                   className="bg-gray-400 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Remover -
@@ -416,6 +430,39 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
           )}
         </div>
       </div>
+      {/* Popup para eliminar actividades */}
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-[#3A4C2E] text-white rounded-lg p-4 w-1/2 max-w-lg relative">
+            {/* Ícono de cierre (X) */}
+            <button
+              className="absolute top-2 right-4 text-white text-3xl hover:text-red-500 transition-colors duration-300"
+              onClick={handleClosePopup}
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
+            <h3 className="text-2xl font-bold mb-4">Seleccione la actividad a eliminar</h3>
+            {activitiesForPopup.length > 0 ? (
+              activitiesForPopup.map((event, index) => (
+                <div
+                  key={index}
+                  className="cursor-pointer hover:bg-[#607B50] text-lg rounded p-2"
+                  onClick={() => {
+                    // Hacer aquí la lógica para eliminar actividades 
+                    console.log("Actividad eliminada:", event.title);
+                    handleClosePopup(); // Cierra el pop-up
+                  }}
+                >
+                  {event.title}
+                </div>
+              ))
+            ) : (
+              <p>No hay actividades asignadas para este día</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
