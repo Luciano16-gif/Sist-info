@@ -30,6 +30,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
   const [focusedCell, setFocusedCell] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [activitiesForPopup, setActivitiesForPopup] = useState([]);
+  const [activityToDelete, setActivityToDelete] = useState(null);
   const dayRefs = useRef([]);
 
   const months = [
@@ -276,6 +277,15 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
     setShowPopup(false);
   };
 
+  // Manejar la eliminación de una actividad
+  const handleConfirmDelete = () => {
+    if (activityToDelete) {
+      console.log("Actividad eliminada:", activityToDelete.title);
+      // Lógica para eliminar la actividad
+      handleClosePopup();
+    }
+  };
+
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-8">
       <div className="flex flex-col md:flex-row gap-8">
@@ -442,23 +452,49 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
             >
               ×
             </button>
-            <h3 className="text-2xl font-bold mb-4">Seleccione la actividad a eliminar</h3>
-            {activitiesForPopup.length > 0 ? (
-              activitiesForPopup.map((event, index) => (
-                <div
-                  key={index}
-                  className="cursor-pointer hover:bg-[#607B50] text-lg rounded p-2"
-                  onClick={() => {
-                    // Hacer aquí la lógica para eliminar actividades 
-                    console.log("Actividad eliminada:", event.title);
-                    handleClosePopup(); // Cierra el pop-up
-                  }}
-                >
-                  {event.title}
+
+            {/* Contenido del pop-up */}
+            {activityToDelete ? (
+              // Mensaje de confirmación para eliminacion
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold">
+                  ¿Seguro que quieres eliminar la actividad{" "}
+                  <span className="text-red-500">{activityToDelete.title}</span>?
+                </h3>
+                <p className="text-sm text-gray-300">Esta acción no es revertible</p>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    className="bg-gray-500 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
+                    onClick={handleConfirmDelete}
+                  >
+                    Sí
+                  </button>
+                  <button
+                    className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
+                    onClick={() => setActivityToDelete(null)}
+                  >
+                    No
+                  </button>
                 </div>
-              ))
+              </div>
             ) : (
-              <p>No hay actividades asignadas para este día</p>
+              // Lista de actividades a seleccionar para eliminar
+              <>
+                <h3 className="text-2xl font-bold mb-4">Seleccione la actividad a eliminar</h3>
+                {activitiesForPopup.length > 0 ? (
+                  activitiesForPopup.map((event, index) => (
+                    <div
+                      key={index}
+                      className="cursor-pointer hover:bg-[#607B50] text-lg rounded p-2"
+                      onClick={() => setActivityToDelete(event)} // Ir a mensaje de confirmación
+                    >
+                      {event.title}
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay actividades asignadas para este día</p>
+                )}
+              </>
             )}
           </div>
         </div>
