@@ -274,7 +274,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
   };
 
   const handleClosePopup = () => {
-    setShowPopup(false);
+    setShowPopup(false); 
+    setActivityToDelete(null); // Para arreglrar el error y que se abra en el estado inicial del pop up
   };
 
   // Manejar la eliminación de una actividad
@@ -471,7 +472,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => {
                   </button>
                   <button
                     className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
-                    onClick={() => setActivityToDelete(null)}
+                    onClick={() => setActivityToDelete(null)} // Vuelve al estado inicial del pop up
                   >
                     No
                   </button>
