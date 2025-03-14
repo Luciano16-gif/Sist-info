@@ -7,6 +7,10 @@ import {
   signOut 
 } from 'firebase/auth';
 import { 
+  collection, 
+  getDocs, 
+  query, 
+  where, 
   doc, 
   setDoc,
   getDoc 

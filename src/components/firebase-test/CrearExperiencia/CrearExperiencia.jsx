@@ -1,6 +1,7 @@
-// CrearExperiencia.jsx (ACTUALIZADO - Obtener Guías de Firestore)
+// CrearExperiencia.jsx (ACTUALIZADO - Bloquear creación, código completo)
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import './CrearExperiencia.css';
 import { db, /* storage  <-- ELIMINAR */ } from '../../../firebase-config'; // Eliminamos storage
 import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
@@ -8,6 +9,8 @@ import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDo
 import storageService from '../../../cloudinary-services/storage-service'; // IMPORTAR storageService
 
 function CrearExperiencia() {
+    const navigate = useNavigate(); // Inicializa useNavigate
+    const [hasPermission, setHasPermission] = useState(false); // New state to track permission
     const [nombre, setNombre] = useState('');
     const [precio, setPrecio] = useState('');
     const [fechas, setFechas] = useState([]);
@@ -37,6 +40,23 @@ function CrearExperiencia() {
     const [guiasSeleccionados, setGuiasSeleccionados] = useState([]);
     const [guiasDisponibles, setGuiasDisponibles] = useState([]);
 
+    useEffect(() => {
+        // Simulate permission check (replace with actual logic)
+        // This is just an example, you would typically check user roles or permissions
+        // using authentication context or data from Firestore.
+        const checkPermission = () => {
+            // Example: Always deny for this example
+            setHasPermission(false);
+        };
+
+        checkPermission();
+
+        if (!hasPermission) {
+            alert("No puedes crear experiencias.  Comunícate con el administrador.");
+            navigate("/"); // Redirige al usuario a la página principal.  Ajusta la ruta según sea necesario.
+        }
+
+    }, [navigate, hasPermission]);
 
     // --- Firestore Interaction for Activity Types ---
     useEffect(() => {
@@ -179,6 +199,10 @@ function CrearExperiencia() {
 
 
     const handleAgregar = async () => {
+      if (!hasPermission) {
+          alert("No tienes permisos para crear experiencias.");
+          return;
+      }
         // 1. Data Validation
         if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
@@ -480,6 +504,15 @@ function CrearExperiencia() {
           setGuiasSeleccionados([...guiasSeleccionados, guia]);
         }
       };
+
+    if (!hasPermission) {
+        return (
+            <div className="crear-experiencia-container-crear-experiencia">
+                <h1 className="titulo-crear-experiencia">Acceso Denegado</h1>
+                <p className="subtitulo-crear-experiencia">No tienes permisos para crear experiencias.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="crear-experiencia-container-crear-experiencia">

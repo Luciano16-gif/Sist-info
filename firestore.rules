@@ -1,3 +1,5 @@
+// firestore.rules
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -21,15 +23,16 @@ service cloud.firestore {
            request.auth.token.email == email)
         );
       
-      // Allow updates and deletes only by the document owner
-      allow update, delete: if request.auth != null && 
+      // Allow read/update if the user is authenticated and owns the document
+      allow read, update: if request.auth != null && 
                             request.auth.token.email == email;
+                            
+      // For admins, you might want to add additional rules later
     }
     
-    // All other collections require authentication
-    match /{collection}/{document=**} {
-      allow read: if request.auth != null && collection != "lista-de-usuarios";
-      allow write: if request.auth != null && collection != "lista-de-usuarios";
+    // Default deny all other operations
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
