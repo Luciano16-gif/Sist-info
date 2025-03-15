@@ -1,13 +1,6 @@
 import React, { useRef } from 'react';
 import './ExperiencesPage.css';
-<<<<<<< HEAD
-import { db } from '../../firebase-config';
-import { collection, getDocs } from 'firebase/firestore'; // Import query and where
 import { useNavigate } from 'react-router-dom';
-import storageService from '../../cloudinary-services/storage-service'; // Importa el nuevo servicio;
-=======
-import { useNavigate } from 'react-router-dom';
->>>>>>> revised-backend
 
 // Custom hook for fetching experiences
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
