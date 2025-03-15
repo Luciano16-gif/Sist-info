@@ -8,7 +8,11 @@
     padding-right: 1rem;
     padding-top: 2rem;
     padding-bottom: 2rem;
+    background-color: #1a2a1f; /* Dark green background for the container */
+    min-height: 100vh; /* Ensure it fills at least the screen height */
 }
+
+/* ... (rest of your CSS) ... */
 
 .mx-auto-statistics {
     margin-left: auto;
@@ -45,14 +49,14 @@
     margin-bottom: 2rem;
 }
 
-.text-gray-800-statistics {
+.text-light-green-statistics {
     font-size: 50px;
-    color: rgb(140, 240, 188);
+    color: #a7f3d0; /* Light green color */
 }
 
 /* Individual chart containers */
-.bg-white-statistics {
-    background-color: #38533d;
+.bg-light-green-statistics {
+    background-color: #416043; /* Light green color */
 }
 
 .p-6-statistics {
@@ -80,9 +84,11 @@
 }
 
 .mb-4-statistics {
-    margin-bottom: 1rem;
+     margin-bottom: 0; /* Remove the bottom margin to prevent extra spacing */
 }
-
+.p-4-statistics{
+    padding: 1rem;
+}
 .text-gray-700-statistics {
     color: rgb(164, 247, 119);
 }
@@ -115,6 +121,9 @@
 .h-16-statistics {
     height: 4rem;
 }
+.h-full-statistics{
+    height: 100%;
+}
 
 .w-16-statistics {
     width: 4rem;
@@ -144,7 +153,7 @@
 
 /* Error message (using Tailwind classes) */
 .bg-red-100-statistics {
-    background-color: #fee2e2;
+     background-color: #ffffff; /* I changed this to white, as it contrasted better with the dark background*/
 }
 
 .border-statistics {
@@ -183,10 +192,9 @@
 
 /* New styles for chart elements */
 .chart-axis-text-statistics {
-    fill: rgb(164, 247, 119);
-    /* Light green for axis labels */
+    fill: #a7f3d0; /* Light green for axis labels AND numbers */
     font-size: 0.8rem;
-    /* Optional: Adjust font size */
+
 }
 
 .chart-grid-lines-statistics {
@@ -206,4 +214,19 @@
 .chart-legend-text-statistics {
     color: rgb(164, 247, 119);
     /* Change legend text color */
+}
+
+/* Flexbox styles for rows */
+.flex-wrap-statistics {
+    flex-wrap: wrap;
+}
+
+.w-full-statistics {
+    width: 100%;
+}
+
+@media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
+    .md\:w-1\/2-statistics {
+        width: 50%;
+    }
 }

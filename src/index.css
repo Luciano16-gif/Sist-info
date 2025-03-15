@@ -6,23 +6,5 @@
 
 html, body {
   @apply font-ysabeau;
-  height: 100%;  /* O elimina si causa problemas.  A veces es mejor sin esto. */
-  overflow: auto;
-  margin: 0;
-
 }
 
-.app-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .buttons-container {
-    display: flex;
-    flex-direction: column;
-    gap: 90px; /* Espacio entre los botones */
-    width: 100%; /* Asegura que ocupe todo el ancho disponible */
-    max-width: 400px; /* Ancho máximo para evitar que sea demasiado grande */
-  }

@@ -1,11 +1,10 @@
-
-
 .galeria-page-gallery {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    background-color: #223A26; /* Color de fondo */
     padding: 40px;
     box-sizing: border-box;
     overflow: hidden;

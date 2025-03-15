@@ -1,6 +1,6 @@
 import { db } from '../../firebase-config';
 import { doc, getDoc, updateDoc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
-import storageService from '../../cloudinary-services/cloudinary-service';
+import cloudinaryService from '../../cloudinary-services/cloudinary-service';
 
 /**
  * Service for handling form-related operations for experiences
@@ -44,7 +44,7 @@ const experienceFormService = {
       }
       
       // Fetch available guides
-      const guiasQuery = query(collection(db, "lista-de-usuarios"), where("userType", "==", "Guia"));
+      const guiasQuery = query(collection(db, "lista-de-usuarios"), where("userType", "==", "guia"));
       const guiasSnapshot = await getDocs(guiasQuery);
       const guiasData = [];
       guiasSnapshot.forEach((doc) => {
@@ -175,14 +175,25 @@ const experienceFormService = {
       let publicId = null;
       
       if (formData.imageFile) {
-        const uploadResult = await storageService.uploadFile(`experiences`, formData.imageFile);
-        
-        if (uploadResult.error) {
-          throw new Error(uploadResult.message || "Error al subir la imagen");
+        try {
+          console.log("Iniciando subida de imagen a Cloudinary...");
+          // Usar directamente cloudinaryService en lugar de storageService
+          const uploadResult = await cloudinaryService.uploadFile(formData.imageFile, `experiences`);
+          
+          console.log("Resultado de subida:", uploadResult);
+          
+          if (!uploadResult || !uploadResult.url) {
+            throw new Error("Error al subir la imagen: no se recibió una URL");
+          }
+          
+          imageUrl = uploadResult.url;
+          publicId = uploadResult.publicId;
+        } catch (uploadError) {
+          console.error("Error durante la subida de imagen:", uploadError);
+          throw new Error(`Error al subir la imagen: ${uploadError.message}`);
         }
-        
-        imageUrl = uploadResult.downloadURL;
-        publicId = uploadResult.publicId;
+      } else {
+        throw new Error("Por favor, seleccione una imagen para la experiencia");
       }
       
       // Prepare data object

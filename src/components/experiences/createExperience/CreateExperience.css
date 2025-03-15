@@ -1,5 +1,3 @@
-/* CrearExperiencia.css (Updated with error handling styles) */
-
 .crear-experiencia-container-crear-experiencia {
     background-color: #1a2a1a;
     color: #fff;
@@ -8,12 +6,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 60px;
-    /* Added to allow the whole component to scroll */
-    overflow-y: auto;
-    height: calc(97vh - 40px); /* Adjust as needed based on header height */
-    margin-bottom: 30px;
-    margin-top: 1px;
+    min-height: calc(100vh - 64px); /* Adjusted to match the menu height */
 }
 
 .titulo-crear-experiencia {

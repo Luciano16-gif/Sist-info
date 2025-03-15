@@ -69,7 +69,7 @@ const TopMenu = () => {
         top-0
         left-0
         right-0
-        ${scrolled ? 'bg-opacity-95' : 'bg-opacity-85'}
+        ${scrolled ? 'bg-opacity-95' : 'bg-opacity-95'}
         transition-all
         duration-300
         min-h-16
@@ -86,7 +86,6 @@ const TopMenu = () => {
               alt="Avilaventuras"
             />
           </Link>
-
           {currentUser ? (
             <div className="ml-4 flex items-center">
               <span className="uppercase font-ysabeau text-white text-xs md:text-xs lg:text-sm">
