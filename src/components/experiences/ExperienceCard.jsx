@@ -2,6 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import LazyImage from '../common/LazyImage/LazyImage';
 
+// Import all images as constants
+import caminoIcon from '../../assets/images/ExperiencesPage/camino.png';
+import calendarioIcon from '../../assets/images/ExperiencesPage/calendario.png';
+import participantesIcon from '../../assets/images/ExperiencesPage/participantes.png';
+import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
+
 /**
  * RatingDisplay component for showing star/dot ratings
  */
@@ -77,15 +83,15 @@ export const ExperienceStats = ({ distance, time, registeredUsers, maxPeople }) 
   return (
     <div className="data-container-experiences">
       <p className="data-text-experiences">
-        <img src="../../src/assets/images/ExperiencesPage/camino.png" alt="Camino" className="camino-icon-experiences" />
+        <img src={caminoIcon} alt="Camino" className="camino-icon-experiences" />
         {distance}
       </p>
       <p className="data-text-experiences">
-        <img src="../../src/assets/images/ExperiencesPage/calendario.png" alt="Calendario" className="calendar-icon-experiences" />
+        <img src={calendarioIcon} alt="Calendario" className="calendar-icon-experiences" />
         <i className="far fa-clock"></i> {time}
       </p>
       <p className="data-text-experiences">
-        <img src="../../src/assets/images/ExperiencesPage/participantes.png" alt="Participantes" className="participantes-icon-experiences" />
+        <img src={participantesIcon} alt="Participantes" className="participantes-icon-experiences" />
         {registeredUsers} / {maxPeople} Cupos
       </p>
     </div>
@@ -110,7 +116,7 @@ export const ExperienceImage = ({ imageUrl, price, alt }) => {
         src={imageUrl} 
         alt={alt || 'Experience image'} 
         className="image-experiences"
-        fallbackSrc='../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png'
+        fallbackSrc={profileFallbackImage}
         placeholderColor='#2a3a2a'
         threshold={0.2}
       />

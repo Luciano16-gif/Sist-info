@@ -1,4 +1,5 @@
 import { ACTION_TYPES } from './actions';
+import subirImagen from '../../../../assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png'
 
 /**
  * Initial state for the form reducer
@@ -21,7 +22,7 @@ export const initialState = {
     incluidosExperiencia: [],
     tipoActividad: '',
     imageFile: null,
-    imagePreview: '../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png',
+    imagePreview: subirImagen,
     dificultad: 0,
     guiasSeleccionados: [],
   },
