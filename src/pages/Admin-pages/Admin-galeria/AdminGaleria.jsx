@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection"
+import GaleriaGrid from "../../../components/Admin-components/admin-galeria/GaleriaGrid";
+import GaleriaSolicitudes from "../../../components/Admin-components/admin-galeria/SolicitudesGaleria";
+
 
 const AdminGaleria = () => {
   const FotosActuales = 284;
