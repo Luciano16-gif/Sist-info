@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // CrearExperiencia.jsx (ACTUALIZADO - Bloquear creación, código completo)
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -730,3 +731,5 @@ function CrearExperiencia() {
 }
 
 export default CrearExperiencia;
+=======
+>>>>>>> 269e17eb4eab5b127936afff8cb7718c7aecba1d

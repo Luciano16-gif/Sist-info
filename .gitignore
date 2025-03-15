@@ -22,7 +22,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Firebase config file
-firebase-config.js 
+# Enviroment variables
 .env.local
-.cloudinary-config.js
+.env
