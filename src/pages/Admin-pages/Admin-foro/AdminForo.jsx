@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import ForumSection from '../../../components/Admin-components/admin-foro/Forum';
-
+import NewForo from "../../../components/Admin-components/admin-foro/StartNewForum";
 const AdminForo = () => {
 
   //Variables de información relevante:
@@ -31,6 +31,8 @@ const AdminForo = () => {
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
       <ForumSection />
+      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <NewForo/>
     </div>
   );
 };
