@@ -20,6 +20,8 @@
     object-fit: cover;
     display: block;
     border-radius: 8px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .price-overlay-experiences {
