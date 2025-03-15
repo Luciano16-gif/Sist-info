@@ -1,14 +1,22 @@
+/* ExperiencesPage.css */
+
 .container-experiences {
-    background-color: none;
+    /* Existing styles */
+    background-color: #172819;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: auto;
-    min-height: 100vh;
-    padding-top: 100px;
-    max-height: calc(100vh - 100px);
-    background-color: #223A26; /* Color de fondo */
+    overflow: auto;  /*  Important:  Enable scrolling if content overflows */
+    margin-top: 0px; /* Keep your existing margin-top */
+
+    /* NEW STYLES FOR HEIGHT CONSTRAINT */
+    /* Calculate the available height: 100vh (viewport height) - height of top menu */
+    /* Assuming TopMenu height is approximately 60px.  ADJUST THIS IF NEEDED! */
+    max-height: calc(100vh - 60px);  /*  KEY CHANGE:  Set a maximum height */
+    /* 100vh is the total height, 60 px the navbar and 40px is the h1 margin top */
+    max-height: calc(100vh - 60px);  /* Corrected height */
+
 }
 
 .title-experiences {
@@ -20,21 +28,23 @@
     line-height: normal;
 }
 
+/* ... (rest of your existing CSS) ... */
+
 .experience-card-experiences {
     display: flex;
     margin-bottom: 20px;
     margin-top: 20px;
     justify-content: center;
-    align-items: center;
+    /* align-items: center; Remove align-items center */
     gap: 20px;
     width: 100%;
     max-width: 1000px;
-    flex-wrap: wrap; /*  Important: Allows wrapping on smaller screens */
+    /*flex-wrap: wrap;  Remove this line to make a column */
 }
 
 .image-experiences {
-    width: 300px;
-    height: 400px;
+    /*width: 300px; Removed width and height, handled in ExperienceCard.css */
+    /*height: 400px;*/
     flex-shrink: 0;
     border-radius: 20px;
     object-fit: cover;
@@ -45,8 +55,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    max-width: 50%;  /*  Limits width on larger screens */
-    width: 100%; /* Take full width when wrapped */
+    /*max-width: 50%;  Remove this */
 }
 
 .rating-box-experiences {
@@ -59,22 +68,25 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    background-color: rgba(119, 119, 119, 0.5);
+    /* Añadido para el rectángulo */
+    background-color: rgba(119, 119, 119, 0.5); /* Fondo semitransparente */
     padding: 5px 10px;
     border-radius: 5px;
     margin-top: 20px;
+
 }
+
 
 .subtitle-experiences {
     display: flex;
-    width: 100%; /* Important: Use full width of parent */
+    width: auto;
     height: auto;
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     color: #FFF;
     font-family: "Ysabeau SC";
-    font-size: clamp(1.5rem, 5vw, 2rem); /* Responsive font size: min 24px, pref 5vw, max 32px */
+    font-size: 32px;
     font-weight: 600;
     line-height: normal;
     margin-bottom: 5px;
@@ -83,27 +95,17 @@
 
 .description-experiences {
     display: flex;
-    width: 100%;  /* Crucial: Use the full width of the parent */
-    max-width: 100%; /* Also important */
+    width: auto;
     height: auto;
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     color: #FFF;
     font-family: "Ysabeau SC";
-    font-size: clamp(0.875rem, 2vw, 0.9rem); /* Responsive font size: min 14px, pref 3vw, max 24px */
+    font-size: 14px;
     font-weight: 400;
     line-height: 1.2;
     margin-bottom: 10px;
-    overflow-wrap: break-word; /*  ESSENTIAL: Break long words */
-
-    /*  Highly Recommended:  Truncate with ellipsis */
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3; 
-    -webkit-box-orient: vertical;
-    box-orient: vertical; 
-    overflow: hidden;
 }
 
 .data-container-experiences {
@@ -112,12 +114,11 @@
     align-items: flex-start;
     margin-bottom: 10px;
     gap: 2px;
-    width: 100%; /* Take full width */
 }
 
 .data-text-experiences {
     display: flex;
-    width: 100%;  /*  Important: Use full width available */
+    width: auto;
     height: auto;
     flex-direction: row;
     justify-content: flex-start;
@@ -129,12 +130,12 @@
     font-weight: 400;
     line-height: normal;
     gap: 5px;
-    margin-bottom: 30px; /* Keep existing margin */
 }
 
 .data-text-experiences i {
     margin-right: 5px;
 }
+
 
 .button-experiences {
     width: 170px;
@@ -169,7 +170,7 @@
 .dot-experiences {
     height: 8px;
     width: 8px;
-    background-color: #d5ffcf;
+    background-color: #ffffff;
     border-radius: 50%;
     display: inline-block;
     margin-left: 2px;
@@ -178,7 +179,7 @@
 .dot-gray-experiences {
     height: 8px;
     width: 8px;
-    background-color: #8e8e8e;
+    background-color: #686868;
     border-radius: 50%;
     display: inline-block;
     margin-left: 2px;
@@ -193,15 +194,23 @@
 .camino-icon-experiences,
 .participantes-icon-experiences {
     margin-right: 5px;
-    width: 50px;
-    height: 50px;
+    /*width: 50px;  Reduced size */
+    /*height: 50px;*/
     vertical-align: middle;
+}
+
+.data-text-experiences {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+
 }
 
 .image-container-experiences {
     position: relative;
-    width: 300px;
-    height: 400px;
+    /*width: 300px;  Removed fixed width and height */
+    /*height: 400px;*/
+
 }
 
 .price-overlay-experiences {
@@ -215,66 +224,4 @@
     font-family: "Ysabeau SC";
     font-size: 20px;
     z-index: 10;
-}
-
-/* New styles for loading, error, and empty states */
-
-.loading-container,
-.error-container,
-.empty-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 40px;
-    margin: 20px 0;
-    border-radius: 10px;
-    color: #FFF;
-    font-family: "Ysabeau SC";
-}
-
-.loading-container {
-    background-color: rgba(119, 119, 119, 0.2);
-}
-
-.error-container {
-    background-color: rgba(255, 99, 71, 0.2);
-}
-
-.empty-container {
-    background-color: rgba(119, 119, 119, 0.2);
-    text-align: center;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-top: 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.retry-button {
-    margin-top: 20px;
-    padding: 8px 16px;
-    background-color: #D9D9D9;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.retry-button:hover {
-    background-color: #ffce66;
 }

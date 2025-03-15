@@ -1,6 +1,8 @@
+// ExperienceCard.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 import LazyImage from '../common/LazyImage/LazyImage';
+import './ExperienceCard.css';
 
 // Import all images as constants
 import caminoIcon from '../../assets/images/ExperiencesPage/camino.png';
@@ -9,21 +11,21 @@ import participantesIcon from '../../assets/images/ExperiencesPage/participantes
 import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
 
 /**
- * RatingDisplay component for showing star/dot ratings
+ * RatingDisplay component
  */
 export const RatingDisplay = ({ rating, maxRating = 5 }) => {
   const renderRatingDots = () => {
     const fullDots = Math.floor(rating);
     const dots = [];
-    
+
     for (let i = 0; i < fullDots; i++) {
       dots.push(<span key={`full-${i}`} className='dot-experiences'></span>);
     }
-    
+
     for (let i = fullDots; i < maxRating; i++) {
       dots.push(<span key={`gray-${i}`} className='dot-gray-experiences'></span>);
     }
-    
+
     return dots;
   };
 
@@ -41,25 +43,25 @@ RatingDisplay.propTypes = {
 };
 
 /**
- * DifficultyDisplay component for showing difficulty level
+ * DifficultyDisplay component
  */
 export const DifficultyDisplay = ({ difficulty, maxDifficulty = 5 }) => {
   const renderDifficultyDots = () => {
     const difficultyLevel = parseInt(difficulty, 10);
     const dots = [];
-    
+
     if (isNaN(difficultyLevel)) {
       return <span>Invalid difficulty</span>;
     }
-    
+
     for (let i = 0; i < difficultyLevel; i++) {
       dots.push(<span key={`diff-full-${i}`} className='dot-experiences'></span>);
     }
-    
+
     for (let i = difficultyLevel; i < maxDifficulty; i++) {
       dots.push(<span key={`diff-gray-${i}`} className='dot-gray-experiences'></span>);
     }
-    
+
     return dots;
   };
 
@@ -77,7 +79,7 @@ DifficultyDisplay.propTypes = {
 };
 
 /**
- * ExperienceStats component for showing distance, time, and slots
+ * ExperienceStats component
  */
 export const ExperienceStats = ({ distance, time, registeredUsers, maxPeople }) => {
   return (
@@ -106,15 +108,14 @@ ExperienceStats.propTypes = {
 };
 
 /**
- * ExperienceImage component for showing the experience image with price overlay
- * Now using LazyImage for optimized loading
+ * ExperienceImage component
  */
 export const ExperienceImage = ({ imageUrl, price, alt }) => {
   return (
     <div className="image-container-experiences">
-      <LazyImage 
-        src={imageUrl} 
-        alt={alt || 'Experience image'} 
+      <LazyImage
+        src={imageUrl}
+        alt={alt || 'Experience image'}
         className="image-experiences"
         fallbackSrc={profileFallbackImage}
         placeholderColor='#2a3a2a'
@@ -132,34 +133,85 @@ ExperienceImage.propTypes = {
 };
 
 /**
- * Main ExperienceCard component that combines all elements
+ * Formats the review date consistently.  Handles Timestamps, Dates, and strings.
+ * @param {object | string | Date} date The date from Firestore.
+ * @returns {string} A formatted date string.
  */
-const ExperienceCard = ({ experience, onViewMore, forwardedRef }) => {
+const formatReviewDate = (date) => {
+    if (!date) {
+        return 'Fecha no disponible';
+    }
+
+    try {
+        let jsDate;
+        if (typeof date === 'string') {
+          jsDate = new Date(date);
+        } else if (date.toDate) {
+            // It's a Firestore Timestamp
+            jsDate = date.toDate();
+        } else if (date instanceof Date) {
+            jsDate = date;
+        } else
+        {
+          return 'Formato de fecha incorrecto';
+        }
+
+        // Check if jsDate is valid
+        if (isNaN(jsDate.getTime())) {
+            return 'Fecha inválida'; // or some other error message
+        }
+
+        return jsDate.toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    } catch (error) {
+        console.error("Error formatting date:", error);
+        return 'Error al formatear fecha';
+    }
+};
+
+/**
+ * Main ExperienceCard component
+ */
+const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = false, isExpanded = false }) => {
+  const textStyle = isExpanded ? "review-text-no-fade" : "review-text"; //Keep this
+
   return (
-    <div className="experience-card-experiences" ref={forwardedRef}>
-      <ExperienceImage 
-        imageUrl={experience.imageUrl} 
-        price={experience.price} 
-        alt={experience.name} 
+    <div className={`experience-card-experiences ${isReviewsPage ? 'review-card' : ''}`} ref={forwardedRef}>
+      <ExperienceImage
+        imageUrl={experience.imageUrl}
+        price={experience.price}
+        alt={experience.name}
       />
-      
+
       <div className="experience-info-experiences">
         <RatingDisplay rating={experience.rating} />
         <DifficultyDisplay difficulty={experience.difficulty} />
-        
         <h2 className="subtitle-experiences">{experience.name}</h2>
-        <p className="description-experiences">{experience.description}</p>
-        
-        <ExperienceStats 
-          distance={experience.distance}
-          time={experience.time}
-          registeredUsers={experience.registeredUsers}
-          maxPeople={experience.maxPeople}
+        <ExperienceStats
+            distance={experience.distance}
+            time={experience.time}
+            registeredUsers={experience.registeredUsers}
+            maxPeople={experience.maxPeople}
         />
-        
-        <button className="button-experiences" onClick={() => onViewMore(experience)}>
-          Ver más
-        </button>
+         <p className="description-experiences">{experience.description}</p> {/* Keep the description always visible */}
+
+        {/* Button (ONLY show when NOT isReviewsPage) */}
+        {!isReviewsPage && (
+          <button className="button-experiences" onClick={() => onViewMore(experience)}>
+             "Ver más"
+          </button>
+        )}
+         {/* Button for Reviews Page(ONLY show when isReviewsPage) */}
+        {isReviewsPage && !isExpanded && (
+          <button className="button-experiences" onClick={() => onViewMore(experience)}>
+            "Ver Reseñas"
+          </button>
+        )}
       </div>
     </div>
   );
@@ -178,9 +230,18 @@ ExperienceCard.propTypes = {
     maxPeople: PropTypes.number.isRequired,
     imageUrl: PropTypes.string.isRequired,
     rating: PropTypes.number.isRequired,
+    reviews: PropTypes.arrayOf(PropTypes.shape({
+      user: PropTypes.string.isRequired,
+      text: PropTypes.string.isRequired,
+      date: PropTypes.oneOfType([PropTypes.string, PropTypes.object]), // Allow object for Timestamp
+      userEmail: PropTypes.string,
+        profileImage: PropTypes.string
+    })),
   }).isRequired,
   onViewMore: PropTypes.func.isRequired,
-  forwardedRef: PropTypes.object
+  forwardedRef: PropTypes.object,
+  isReviewsPage: PropTypes.bool,
+  isExpanded: PropTypes.bool, // Keep isExpanded
 };
 
 export default ExperienceCard;

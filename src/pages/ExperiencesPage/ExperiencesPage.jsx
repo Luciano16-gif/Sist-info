@@ -78,15 +78,15 @@ function ExperiencesPage() {
     if (loading) {
       return <LoadingState />;
     }
-    
+
     if (error) {
       return <ErrorState message={error} />;
     }
-    
+
     if (experiences.length === 0) {
       return <EmptyState />;
     }
-    
+
     return experiences.map((experience, index) => (
       <ExperienceCard
         key={experience.id}
@@ -98,11 +98,11 @@ function ExperiencesPage() {
   };
 
   return (
-    <div className="container-experiences">
+    <div className="container-experiences" style={{ backgroundColor: '#172819' }}>
       <h1 className="title-experiences">
         ¡Todas nuestras experiencias disponibles para ti!
       </h1>
-      
+
       {renderContent()}
     </div>
   );

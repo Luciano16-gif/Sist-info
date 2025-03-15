@@ -1,0 +1,363 @@
+/* ReviewsPage.css */
+
+.selected-yellow-reviews {
+    background-color: rgb(98, 226, 38) !important; /* Added !important */
+}
+.difficulty-circle-reviews{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #999999;
+    /* Removed cursor: pointer; */
+    transition: background-color 0.2s ease;
+}
+
+.difficulty-container-reviews {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+/* ... (Existing styles) ... */
+
+.container-reviews {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #172819;
+    font-family: 'Ysabeau SC', sans-serif;
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.title-reviews {
+    color: #fff;
+    font-size: 85px;
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 20px;
+}
+
+.reviews-wrapper-reviews {
+    display: flex;
+    gap: 1px;
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+    &::-webkit-scrollbar {
+        width: 10px;
+         height: 12px;
+    }
+    &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 5px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+}
+
+.scroll-buttons-container-reviews {
+    position: absolute;
+    top: 130px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    z-index: 10;
+    pointer-events: none;
+}
+.scroll-button-reviews{
+     pointer-events: all;
+}
+
+.scroll-button-reviews {
+    background-color: #0056b3;
+    border: 2px solid #0056b3;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+     width: 34px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.scroll-button-reviews:hover {
+    background-color: #003d82;
+    border-color: #003d82;
+}
+
+.scroll-button-reviews.left-reviews {
+    margin-left: -5px;
+
+}
+
+.scroll-button-reviews.right-reviews {
+   margin-right: -5px;
+}
+
+.reviews-wrapper-reviews .experience-card-experiences {
+  min-width: 600px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.selected-review-container {
+  width: 95%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #1c351f;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.back-button-reviews {
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 16px;
+    align-self: flex-start;
+}
+
+
+.back-button-reviews:hover {
+    background-color: #003d82;
+}
+
+.review-actions {
+    margin-top: 20px;
+    align-self: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.report-button {
+   background-color: #7a1b1b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 220px;
+     display: block;
+}
+
+.report-button:hover {
+    background-color: #531010;
+}
+.errorReport{
+    color: red;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.make-review-button {
+    background-color: #5a8146;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+     width: 220px;
+}
+
+.make-review-button:hover {
+    background-color: #4a6b38;
+}
+
+
+.comment-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.comment-popup {
+    background-color: #d9d9d9;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+     width: 80%;
+    max-width: 600px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.replying-to-popup {
+     color: #3f3f3f;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-family: "Ysabeau SC";
+    text-align: center;
+}
+
+.comment-input {
+      width: 95%;
+    height: 150px;
+    margin-bottom: 28px;
+    padding: 25px;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    resize: none;
+    font-size: 20px;
+     font-family: "Ysabeau SC";
+}
+
+.comment-input::placeholder {
+    color: #8f8f3f;
+}
+
+.publish-button {
+    width: 220px;
+    height: 45px;
+    background-color: #5a8146;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+     font-family: "Ysabeau SC";
+    align-self: center;
+    padding: 6px 12px;
+}
+
+.publish-button:hover {
+    background-color: #4a6b38;
+}
+
+.publish-button:active {
+    background-color: #d9f7c8;
+}
+
+.close-button {
+   position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+/* Rating Circles (from CreateExperience.css - good to reuse!) */
+.difficulty-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.difficulty-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #999999;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+
+  /* Review Item Styling */
+
+.reviews-list {
+    width: 100%;
+}
+
+.review-item-container {
+    background-color: #4c8151;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-profile-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+   align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+.user-info > div{
+    width: fit-content;
+}
+
+.review-user-name {
+    font-weight: bold;
+    color: #000;
+    margin: 0;
+    font-size: 1.1em;
+}
+
+.review-date {
+    color: #333;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.review-text-content {
+    color: #000;
+    margin: 0;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
