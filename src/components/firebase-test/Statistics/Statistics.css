@@ -1,0 +1,209 @@
+/* Statistics.css */
+
+/* General container for the page */
+.container-statistics {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.mx-auto-statistics {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.px-4-statistics {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.py-8-statistics {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Main heading */
+.text-3xl-statistics {
+    font-size: 1.875rem;
+    /* 30px */
+    line-height: 2.25rem;
+    /* 36px */
+}
+
+.font-bold-statistics {
+    font-weight: 700;
+}
+
+.text-center-statistics {
+    text-align: center;
+}
+
+.mb-8-statistics {
+    margin-bottom: 2rem;
+}
+
+.text-gray-800-statistics {
+    font-size: 50px;
+    color: rgb(140, 240, 188);
+}
+
+/* Individual chart containers */
+.bg-white-statistics {
+    background-color: #38533d;
+}
+
+.p-6-statistics {
+    padding: 1.5rem;
+}
+
+.rounded-lg-statistics {
+    border-radius: 0.5rem;
+}
+
+.shadow-lg-statistics {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Chart headings */
+.text-xl-statistics {
+    font-size: 1.25rem;
+    /* 20px */
+    line-height: 1.75rem;
+    /* 28px */
+}
+
+.font-semibold-statistics {
+    font-weight: 600;
+}
+
+.mb-4-statistics {
+    margin-bottom: 1rem;
+}
+
+.text-gray-700-statistics {
+    color: rgb(164, 247, 119);
+}
+
+/* Loading spinner (using Tailwind classes) */
+.flex-statistics {
+    display: flex;
+}
+
+.justify-center-statistics {
+    justify-content: center;
+}
+
+.items-center-statistics {
+    align-items: center;
+}
+
+.h-screen-statistics {
+    height: 100vh;
+}
+
+.animate-spin-statistics {
+    animation: spin 2s linear infinite;
+}
+
+.rounded-full-statistics {
+    border-radius: 9999px;
+}
+
+.h-16-statistics {
+    height: 4rem;
+}
+
+.w-16-statistics {
+    width: 4rem;
+}
+
+.border-t-2-statistics {
+    border-top-width: 2px;
+}
+
+.border-b-2-statistics {
+    border-bottom-width: 2px;
+}
+
+.border-blue-500-statistics {
+    border-color: #3b82f6;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error message (using Tailwind classes) */
+.bg-red-100-statistics {
+    background-color: #fee2e2;
+}
+
+.border-statistics {
+    border-width: 1px;
+}
+
+.border-red-400-statistics {
+    border-color: #f87171;
+}
+
+.text-red-700-statistics {
+    color: #b91c1c;
+}
+
+
+.py-3-statistics {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.rounded-statistics {
+    border-radius: 0.25rem;
+}
+
+.relative-statistics {
+    position: relative;
+}
+
+.block-statistics {
+    display: block;
+}
+
+.sm\:inline-statistics {
+    display: inline;
+}
+
+/* New styles for chart elements */
+.chart-axis-text-statistics {
+    fill: rgb(164, 247, 119);
+    /* Light green for axis labels */
+    font-size: 0.8rem;
+    /* Optional: Adjust font size */
+}
+
+.chart-grid-lines-statistics {
+    stroke: rgba(164, 247, 119, 0.3);
+    /* Light green, semi-transparent grid lines */
+}
+
+.chart-tooltip-statistics {
+    background-color: #38533d;
+    /* Darker background for tooltip */
+    border: 1px solid rgb(164, 247, 119);
+    padding: 0.5rem;
+    color: rgb(164, 247, 119);
+    /* Light green text in tooltip */
+}
+
+.chart-legend-text-statistics {
+    color: rgb(164, 247, 119);
+    /* Change legend text color */
+}
