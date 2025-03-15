@@ -5,22 +5,18 @@ import blank from "../../../assets/images/AdminLandingPage/profile_blank.webp";
 const MensajesGrid = () => {
 
     const Messages = [
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
-        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
+        { name: "Carlos Fernández", who: 'whoever', asunto: "Do whatever you want", context: 'aaaaaaaaaaaa' },
     ];
 
     return (
