@@ -1,6 +1,7 @@
-import star from "../../../assets/images/AdminLandingPage/profile_blank.webp";
 
 const GuiaCard = ({img, name, stars, number, status, solicitudes}) => {
+    const starString = "⭐".repeat(stars);
+
     return (
         <div className="bg-[#6b9e5a] text-black p-4 w-[27rem] h-full rounded-full flex-shrink-0 flex flex-row space-x-5">
             <img src={img} className="w-20 h-20 rounded-full"></img>
@@ -8,11 +9,7 @@ const GuiaCard = ({img, name, stars, number, status, solicitudes}) => {
                 <div className="flex flex-row space-x-5 w-auto">
                     <p className="font-bold whitespace-nowrap">{name}</p>
                     <div className="flex flex-row space-x-1">
-                        <img src={star} className="w-5 h-5 rounded-full"></img>
-                        <img src={star} className="w-5 h-5 rounded-full"></img>
-                        <img src={star} className="w-5 h-5 rounded-full"></img>
-                        <img src={star} className="w-5 h-5 rounded-full"></img>
-                        <img src={star} className="w-5 h-5 rounded-full"></img>
+                        <p>{starString}</p>
                     </div>
                 </div>
                 <p className="text-xs">Guía #{number}</p>
