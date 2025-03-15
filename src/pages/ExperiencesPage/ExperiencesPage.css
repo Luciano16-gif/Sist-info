@@ -20,7 +20,6 @@
     line-height: normal;
 }
 
-
 .experience-card-experiences {
     display: flex;
     margin-bottom: 20px;
@@ -64,9 +63,7 @@
     padding: 5px 10px;
     border-radius: 5px;
     margin-top: 20px;
-
 }
-
 
 .subtitle-experiences {
     display: flex;
@@ -139,7 +136,6 @@
     margin-right: 5px;
 }
 
-
 .button-experiences {
     width: 170px;
     height: 42px;
@@ -202,12 +198,10 @@
     vertical-align: middle;
 }
 
-
 .image-container-experiences {
     position: relative;
     width: 300px;
     height: 400px;
-
 }
 
 .price-overlay-experiences {
@@ -221,4 +215,66 @@
     font-family: "Ysabeau SC";
     font-size: 20px;
     z-index: 10;
+}
+
+/* New styles for loading, error, and empty states */
+
+.loading-container,
+.error-container,
+.empty-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 40px;
+    margin: 20px 0;
+    border-radius: 10px;
+    color: #FFF;
+    font-family: "Ysabeau SC";
+}
+
+.loading-container {
+    background-color: rgba(119, 119, 119, 0.2);
+}
+
+.error-container {
+    background-color: rgba(255, 99, 71, 0.2);
+}
+
+.empty-container {
+    background-color: rgba(119, 119, 119, 0.2);
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.retry-button {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background-color: #D9D9D9;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+    background-color: #ffce66;
 }

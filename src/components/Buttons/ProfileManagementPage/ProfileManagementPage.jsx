@@ -5,7 +5,7 @@ import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore
 import { useNavigate } from 'react-router-dom';
 import './ProfileManagementPage.css';
 import { signOut } from 'firebase/auth';
-import storageService from '../../../../src/cloudinary-services/storage-service'; // Importa el nuevo servicio
+import storageService from '../../../cloudinary-services/storage-service'; // Importa el nuevo servicio
 
 
 function ProfileManagementPage() {
