@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Reviews() {
+const Reviews = () => {
   const userImage = "https://via.placeholder.com/50"; // Placeholder image
 
   return (
@@ -10,9 +10,9 @@ function Reviews() {
 
       <div className="w-[1447px] h-auto rounded-[20px] bg-[#16260C] shadow-[5px_5px_15px_5px_rgba(0,0,0,0.40)] p-5">
         <div className="overflow-x-auto overflow-y-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"> {/* Removed whitespace-nowrap */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {/* Review Card 1 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -25,7 +25,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 2 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -38,7 +38,7 @@ function Reviews() {
             </div>
 
             {/* Review card 3*/}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -51,7 +51,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 4 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -64,7 +64,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 5 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -77,7 +77,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 6 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -90,7 +90,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 7 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -103,7 +103,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 8 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -116,7 +116,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 9 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -129,7 +129,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 10 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -142,7 +142,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 11 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -155,7 +155,7 @@ function Reviews() {
             </div>
 
             {/* Review Card 12 */}
-            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black"> {/* Removed inline-block and overflow-hidden */}
+            <div className="w-[450px] p-4 rounded-[100px] bg-[#C3D8B4] text-black">
               <div className="flex items-start">
                 <img src={userImage} alt="User Avatar" className="w-12 h-12 rounded-full mr-8" />
                 <div className="text-left">
@@ -171,6 +171,6 @@ function Reviews() {
       </div>
     </>
   );
-}
+};
 
 export default Reviews;
