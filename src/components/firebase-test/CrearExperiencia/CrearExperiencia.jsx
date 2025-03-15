@@ -1,16 +1,17 @@
-// CrearExperiencia.jsx (ACTUALIZADO - Bloquear creación, código completo)
+// CrearExperiencia.jsx (ACTUALIZADO - Aprobación de Guía y Admin)
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useNavigate } from 'react-router-dom';
 import './CrearExperiencia.css';
-import { db, /* storage  <-- ELIMINAR */ } from '../../../firebase-config'; // Eliminamos storage
+import { db } from '../../../firebase-config';
 import { collection, addDoc, doc, setDoc, getDoc, updateDoc, query, where, getDocs } from 'firebase/firestore';
-// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';  <-- ELIMINAR ESTAS IMPORTACIONES
-import storageService from '../../../cloudinary-services/storage-service'; // IMPORTAR storageService
+import storageService from '../../../cloudinary-services/storage-service';
+import { useAuth } from '../../../components/contexts/AuthContext'; // Importa el contexto de autenticación
 
 function CrearExperiencia() {
-    const navigate = useNavigate(); // Inicializa useNavigate
-    const [hasPermission, setHasPermission] = useState(false); // New state to track permission
+    const navigate = useNavigate();
+    const { currentUser } = useAuth(); // Obtiene el usuario actual desde el contexto de autenticación
+    const [hasPermission, setHasPermission] = useState(false);
     const [nombre, setNombre] = useState('');
     const [precio, setPrecio] = useState('');
     const [fechas, setFechas] = useState([]);
@@ -20,10 +21,10 @@ function CrearExperiencia() {
     const [puntoSalida, setPuntoSalida] = useState('');
     const [longitudRecorrido, setLongitudRecorrido] = useState('');
     const [duracionRecorrido, setDuracionRecorrido] = useState('');
-    const [guiasRequeridos, setGuiasRequeridos] = useState('');  // <-- Mantener, para número *total*
+    const [guiasRequeridos, setGuiasRequeridos] = useState('');
     const [minimoUsuarios, setMinimoUsuarios] = useState('');
     const [maximoUsuarios, setMaximoUsuarios] = useState('');
-    const [incluidosExperiencia, setIncluidosExperiencia] = useState([]);  // Now an array
+    const [incluidosExperiencia, setIncluidosExperiencia] = useState([]);
     const [tipoActividad, setTipoActividad] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
@@ -35,28 +36,34 @@ function CrearExperiencia() {
     const [nuevoIncluido, setNuevoIncluido] = useState("");
     const [puntosSalida, setPuntosSalida] = useState([]);
     const [nuevoPuntoSalida, setNuevoPuntoSalida] = useState("");
-
-    // NUEVO: Estado para guías
     const [guiasSeleccionados, setGuiasSeleccionados] = useState([]);
     const [guiasDisponibles, setGuiasDisponibles] = useState([]);
 
     useEffect(() => {
-        // Simulate permission check (replace with actual logic)
-        // This is just an example, you would typically check user roles or permissions
-        // using authentication context or data from Firestore.
-        const checkPermission = () => {
-            // Example: Always deny for this example
-            setHasPermission(false);
+        const checkPermission = async () => {
+            if (currentUser) {
+                try {
+                    const userDocRef = doc(db, "lista-de-usuarios", currentUser.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        // Verifica si el usuario es "Admin" o "Guia"
+                        setHasPermission(userData.userType === 'Admin' || userData.userType === 'Guia');
+                    } else {
+                        setHasPermission(false);
+                    }
+                } catch (error) {
+                    console.error("Error checking user permissions:", error);
+                    setHasPermission(false);
+                }
+            } else {
+                setHasPermission(false);
+            }
         };
 
         checkPermission();
-
-        if (!hasPermission) {
-            alert("No puedes crear experiencias.  Comunícate con el administrador.");
-            navigate("/"); // Redirige al usuario a la página principal.  Ajusta la ruta según sea necesario.
-        }
-
-    }, [navigate, hasPermission]);
+    }, [currentUser]);
 
     // --- Firestore Interaction for Activity Types ---
     useEffect(() => {
@@ -196,13 +203,12 @@ function CrearExperiencia() {
         }
     };
 
-
-
     const handleAgregar = async () => {
-      if (!hasPermission) {
-          alert("No tienes permisos para crear experiencias.");
-          return;
-      }
+        if (!hasPermission) {
+            alert("No tienes permisos para crear experiencias.");
+            return;
+        }
+
         // 1. Data Validation
         if (!nombre || !precio || fechas.length === 0 || !descripcion || !horarioInicio || !horarioFin || !puntoSalida ||
             !longitudRecorrido || !duracionRecorrido || !guiasRequeridos ||
@@ -283,20 +289,13 @@ function CrearExperiencia() {
             return;
         }
 
-      //Validar que se hayan escogido guías o que el número de guías escogidos sea igual al número de guías requerido
+        //Validar que se hayan escogido guías o que el número de guías escogidos sea igual al número de guías requerido
         if (guiasSeleccionados.length !== parseInt(guiasRequeridos)) {
             alert('La cantidad de guías seleccionados debe ser igual a la cantidad de guías requeridos.');
             return;
         }
 
-
         try {
-            // Check for duplicate experience based on name (but allow if updating)
-            const experienciasRef = collection(db, "Experiencias");
-            const q = query(experienciasRef, where("nombre", "==", nombre));
-            const querySnapshot = await getDocs(q);
-
-
             // 2. Subir la imagen a Cloudinary usando storageService
             let imageUrl = null;
             let publicId = null; //  Guardaremos también el publicId
@@ -326,19 +325,25 @@ function CrearExperiencia() {
                 imageUrl, // URL de Cloudinary
                 publicId,  //  Guarda el publicId en Firestore
                 dificultad,
+                status: 'pending', // Estado inicial para las experiencias creadas por guías
+                createdBy: currentUser.uid, // ID del usuario que crea la experiencia
             };
 
-            // 4. Add to Firestore (Use setDoc with nombre as doc ID, but ONLY if it doesn't exist)
-            if (querySnapshot.empty) { // Only create if truly new
-                const docRef = doc(db, "Experiencias", nombre); // Use nombre as doc ID
-                await setDoc(docRef, experienciaData);  // Use setDoc
-                 console.log("Document written with ID: ", nombre); //Log the name
-             }
-            else{
-                 alert("El nombre de la experiencia ya existe, intente con otro");
-                 return;
-             }
-           
+            // Determinar si el usuario es Admin o Guía
+            const userDocRef = doc(db, "lista-de-usuarios", currentUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            const userData = userDocSnap.data();
+
+            if (userData.userType === 'Admin') {
+                // Si es Admin, crear la experiencia directamente
+                const docRef = doc(db, "Experiencias", nombre); // Usar nombre como ID
+                await setDoc(docRef, experienciaData);
+                alert('Experiencia creada con éxito');
+            } else if (userData.userType === 'Guia') {
+                // Si es Guía, guardar en una colección "Propuestas de Experiencias" para aprobación
+                await addDoc(collection(db, "Propuestas de Experiencias"), experienciaData);
+                alert('La solicitud ha sido enviada');
+            }
 
             // 5. Clear the form
             setNombre('');
@@ -359,9 +364,6 @@ function CrearExperiencia() {
             setImagePreview('../../src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png');
             setDificultad(0);
             setGuiasSeleccionados([]); // Limpiar guías seleccionados
-
-            // 6. Success message
-            alert('Experiencia creada exitosamente!');
 
         } catch (error) {
             console.error("Error adding document: ", error);
@@ -466,13 +468,13 @@ function CrearExperiencia() {
 
     // --- Incluidos Handling (Multiple Selection) ---
 
-      const handleIncluidosChange = (option) => {
+    const handleIncluidosChange = (option) => {
         if (incluidosExperiencia.includes(option)) {
-          setIncluidosExperiencia(incluidosExperiencia.filter((item) => item !== option));
+            setIncluidosExperiencia(incluidosExperiencia.filter((item) => item !== option));
         } else {
-          setIncluidosExperiencia([...incluidosExperiencia, option]);
+            setIncluidosExperiencia([...incluidosExperiencia, option]);
         }
-      };
+    };
 
 
     // --- NUEVO: Obtener y manejar guías ---
@@ -499,11 +501,11 @@ function CrearExperiencia() {
 
     const handleSeleccionarGuia = (guia) => {
         if (guiasSeleccionados.some((g) => g.id === guia.id)) {
-          setGuiasSeleccionados(guiasSeleccionados.filter((g) => g.id !== guia.id));
+            setGuiasSeleccionados(guiasSeleccionados.filter((g) => g.id !== guia.id));
         } else {
-          setGuiasSeleccionados([...guiasSeleccionados, guia]);
+            setGuiasSeleccionados([...guiasSeleccionados, guia]);
         }
-      };
+    };
 
     if (!hasPermission) {
         return (
@@ -621,23 +623,23 @@ function CrearExperiencia() {
                     </div>
                     {/* Sección de Selección de Guías */}
                     <div className="campo-crear-experiencia">
-                            <label>Seleccionar Guías:</label>
-                            <div className="guias-seleccion-container">
-                                {guiasDisponibles.map((guia) => (
-                                    <div key={guia.id} className="guia-item">
-                                        <input
-                                            type="checkbox"
-                                            id={`guia-${guia.id}`}
-                                            checked={guiasSeleccionados.some((g) => g.id === guia.id)}
-                                            onChange={() => handleSeleccionarGuia(guia)}
-                                        />
-                                         <label htmlFor={`guia-${guia.id}`}>
-                                            {/* Aquí, muestra el nombre del guía si lo tienes, o el ID */}
-                                             {guia.name || guia.email || guia.id} 
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
+                        <label>Seleccionar Guías:</label>
+                        <div className="guias-seleccion-container">
+                            {guiasDisponibles.map((guia) => (
+                                <div key={guia.id} className="guia-item">
+                                    <input
+                                        type="checkbox"
+                                        id={`guia-${guia.id}`}
+                                        checked={guiasSeleccionados.some((g) => g.id === guia.id)}
+                                        onChange={() => handleSeleccionarGuia(guia)}
+                                    />
+                                    <label htmlFor={`guia-${guia.id}`}>
+                                        {/* Aquí, muestra el nombre del guía si lo tienes, o el ID */}
+                                        {guia.name || guia.email || guia.id}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div className='campo-row-crear-experiencia'>
@@ -648,9 +650,9 @@ function CrearExperiencia() {
 
                         <div className="campo-crear-experiencia campo-incluidos-experiencia">
                             <label>Incluidos en la Experiencia</label>
-                                <div className="incluidos-options-container">
-                                    {opcionesIncluidos.map((incluido) => (
-                                        <div key={incluido} className="incluido-option">
+                            <div className="incluidos-options-container">
+                                {opcionesIncluidos.map((incluido) => (
+                                    <div key={incluido} className="incluido-option">
                                         <input
                                             type="checkbox"
                                             id={`incluido-${incluido}`}
@@ -659,9 +661,9 @@ function CrearExperiencia() {
                                             onChange={() => handleIncluidosChange(incluido)}
                                         />
                                         <label htmlFor={`incluido-${incluido}`}>{incluido}</label>
-                                        </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
+                            </div>
 
                             <div className="add-activity-container">
                                 <input
