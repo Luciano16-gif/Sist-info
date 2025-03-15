@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase-config';
+import LoadingScreen from '../loading/LoadingScreen';
 
 // Create the AuthContext
 const AuthContext = createContext(null);
@@ -174,7 +175,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : <div>Loading...</div>}
+      {!loading ? children : <LoadingScreen appName="ÁvilaVenturas" />}
     </AuthContext.Provider>
   );
 };
