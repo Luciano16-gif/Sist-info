@@ -7,7 +7,7 @@ import './ExperienceCard.css';
 // Import all images as constants
 import caminoIcon from '../../assets/images/ExperiencesPage/camino.png';
 import calendarioIcon from '../../assets/images/ExperiencesPage/calendario.png';
-import participantesIcon from '../../assets/images/ExperiencesPage/participantes.png';
+import participantesIcon from '../../assets/images/ExperiencesPage/participantes.png'; // You might want a different icon
 import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
 
 /**
@@ -79,9 +79,9 @@ DifficultyDisplay.propTypes = {
 };
 
 /**
- * ExperienceStats component
+ * ExperienceStats component (MODIFIED)
  */
-export const ExperienceStats = ({ distance, time, registeredUsers, maxPeople }) => {
+export const ExperienceStats = ({ distance, time, minPeople, maxPeople }) => { // Changed props
   return (
     <div className="data-container-experiences">
       <p className="data-text-experiences">
@@ -94,7 +94,7 @@ export const ExperienceStats = ({ distance, time, registeredUsers, maxPeople }) 
       </p>
       <p className="data-text-experiences">
         <img src={participantesIcon} alt="Participantes" className="participantes-icon-experiences" />
-        {registeredUsers} / {maxPeople} Cupos
+        {minPeople} - {maxPeople} Cupos {/* Changed text */}
       </p>
     </div>
   );
@@ -103,7 +103,7 @@ export const ExperienceStats = ({ distance, time, registeredUsers, maxPeople }) 
 ExperienceStats.propTypes = {
   distance: PropTypes.string.isRequired,
   time: PropTypes.string.isRequired,
-  registeredUsers: PropTypes.number.isRequired,
+  minPeople: PropTypes.number.isRequired,  // Changed prop type
   maxPeople: PropTypes.number.isRequired
 };
 
@@ -175,10 +175,37 @@ const formatReviewDate = (date) => {
 };
 
 /**
- * Main ExperienceCard component
+ * Calculates the average rating for an experience.
+ *
+ * @param {Array<object>} reviews An array of review objects.
+ * @returns {number} The average rating, rounded to the nearest whole number.
+ */
+export const calculateAverageRating = (reviews) => {
+    if (!reviews || reviews.length === 0) {
+        return 0;
+    }
+
+    let totalRating = 0;
+    for (const review of reviews) {
+        if (review && typeof review.rating === 'number') {
+            totalRating += review.rating;
+        } else {
+            console.warn("Invalid review format:", review);
+        }
+    }
+
+    return Math.round(totalRating / reviews.length);
+};
+
+
+/**
+ * Main ExperienceCard component (MODIFIED)
  */
 const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = false, isExpanded = false }) => {
   const textStyle = isExpanded ? "review-text-no-fade" : "review-text"; //Keep this
+
+    // Calculate average rating ONLY IF reviews exist.
+    const averageRating = experience.reviews ? calculateAverageRating(experience.reviews) : 0;
 
   return (
     <div className={`experience-card-experiences ${isReviewsPage ? 'review-card' : ''}`} ref={forwardedRef}>
@@ -189,27 +216,28 @@ const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = 
       />
 
       <div className="experience-info-experiences">
-        <RatingDisplay rating={experience.rating} />
+        {/* Use the calculated averageRating */}
+        <RatingDisplay rating={averageRating} />
         <DifficultyDisplay difficulty={experience.difficulty} />
         <h2 className="subtitle-experiences">{experience.name}</h2>
         <ExperienceStats
             distance={experience.distance}
             time={experience.time}
-            registeredUsers={experience.registeredUsers}
-            maxPeople={experience.maxPeople}
+            minPeople={experience.minPeople}  // Pass minPeople
+            maxPeople={experience.maxPeople}  // Pass maxPeople
         />
          <p className="description-experiences">{experience.description}</p> {/* Keep the description always visible */}
 
         {/* Button (ONLY show when NOT isReviewsPage) */}
         {!isReviewsPage && (
           <button className="button-experiences" onClick={() => onViewMore(experience)}>
-             "Ver más"
+             Ver más
           </button>
         )}
          {/* Button for Reviews Page(ONLY show when isReviewsPage) */}
         {isReviewsPage && !isExpanded && (
           <button className="button-experiences" onClick={() => onViewMore(experience)}>
-            "Ver Reseñas"
+            Ver Reseñas
           </button>
         )}
       </div>
@@ -226,8 +254,8 @@ ExperienceCard.propTypes = {
     price: PropTypes.number.isRequired,
     distance: PropTypes.string.isRequired,
     time: PropTypes.string.isRequired,
-    registeredUsers: PropTypes.number.isRequired,
-    maxPeople: PropTypes.number.isRequired,
+    minimoUsuarios: PropTypes.number.isRequired, // Changed prop
+    maximoUsuarios: PropTypes.number.isRequired, // Changed prop
     imageUrl: PropTypes.string.isRequired,
     rating: PropTypes.number.isRequired,
     reviews: PropTypes.arrayOf(PropTypes.shape({
@@ -235,7 +263,8 @@ ExperienceCard.propTypes = {
       text: PropTypes.string.isRequired,
       date: PropTypes.oneOfType([PropTypes.string, PropTypes.object]), // Allow object for Timestamp
       userEmail: PropTypes.string,
-        profileImage: PropTypes.string
+        profileImage: PropTypes.string,
+        rating: PropTypes.number, // Add rating to review shape
     })),
   }).isRequired,
   onViewMore: PropTypes.func.isRequired,

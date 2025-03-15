@@ -2,8 +2,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
-import ExperienceCard from '../../components/experiences/ExperienceCard';
-import { doc, updateDoc, getDoc, collection, addDoc, serverTimestamp, getDocs, setDoc } from "firebase/firestore";
+import ExperienceCard, { calculateAverageRating } from '../../components/experiences/ExperienceCard'; // Import calculateAverageRating
+import { doc, updateDoc, getDoc, collection, serverTimestamp, getDocs, setDoc } from "firebase/firestore";
 import { db } from './../../firebase-config';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
@@ -78,16 +78,19 @@ function ReviewsPage() {
     const experienceRefs = useRef([]);
     const reviewsContainerRef = useRef(null);
     const [selectedReview, setSelectedReview] = useState(null);
-    const [reportedReviews, setReportedReviews] = useState([]);
-    const [errorReport, setError] = useState(null);
+    const [reportedReviews, setReportedReviews] = useState([]); // Store reported review IDs
+    const [errorReport, setError] = useState(null);  //Error general de la pagina  // Changed to errorReport
     const [showReviewPopup, setShowReviewPopup] = useState(false);
     const [newReviewText, setNewReviewText] = useState("");
     const [rating, setRating] = useState(0);
     const [localExperiences, setLocalExperiences] = useState([]);
     const [allReviews, setAllReviews] = useState({});
+    const [reviewError, setReviewError] = useState(""); // Error especifico al publicar
+    const [reviewReportErrors, setReviewReportErrors] = useState({}); //NEW, specific errors
 
 
-    useEffect(() => {
+
+   useEffect(() => {
         const loadReportedData = async () => {
             const user = await getCurrentUser();
             if (user) {
@@ -95,7 +98,7 @@ function ReviewsPage() {
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
-                    setReportedReviews(userData.reportedReviews || []);
+                    setReportedReviews(userData.reportedReviews || []); // Load reported reviews
                 }
             }
         };
@@ -108,27 +111,31 @@ function ReviewsPage() {
         }
     }, [experiences]);
 
-      useEffect(() => {
-        const fetchAllReviews = async () => {
-            if (selectedReview) {
-                const experienceRef = doc(db, 'Experiencias', selectedReview.id);
-                const reviewsCollectionRef = collection(experienceRef, 'reviews');
-                const querySnapshot = await getDocs(reviewsCollectionRef);
+    // --- MODIFIED useEffect ---
+    useEffect(() => {
+        const fetchAllReviewsData = async () => {
+            if (localExperiences.length > 0) {
+                let reviewsData = {};
+                for (const experience of localExperiences) {
+                    const experienceRef = doc(db, 'Experiencias', experience.id);
+                    const reviewsCollectionRef = collection(experienceRef, 'reviews');
+                    const querySnapshot = await getDocs(reviewsCollectionRef);
 
-                const reviewsData = [];
-                querySnapshot.forEach((doc) => {
-                    reviewsData.push({ id: doc.id, ...doc.data() });
-                });
+                    const reviews = [];
+                    querySnapshot.forEach((doc) => {
+                        reviews.push({ id: doc.id, ...doc.data() });
+                    });
 
-                setAllReviews(prevReviews => ({
-                    ...prevReviews,
-                    [selectedReview.id]: reviewsData
-                }));
+                    const averageRating = calculateAverageRating(reviews);
+                    reviewsData[experience.id] = reviews;
+                    reviewsData[`${experience.id}-averageRating`] = averageRating;
+                }
+                setAllReviews(reviewsData);
             }
         };
 
-        fetchAllReviews();
-    }, [selectedReview]);
+        fetchAllReviewsData();
+    }, [localExperiences]); // Run when localExperiences changes
 
 
     const scrollLeft = () => {
@@ -151,59 +158,71 @@ function ReviewsPage() {
         setSelectedReview(null);
     };
 
-    const handleReportReview = async (reviewId) => {
-      const user = await getCurrentUser();
-      if (!user) {
-          setError("Debes iniciar sesión para reportar una reseña.");
-          setTimeout(() => setError(null), 5000);
-          return;
-      }
-      const reviewsForSelected = allReviews[selectedReview.id] || [];
-      const reviewToReport = reviewsForSelected.find(review => review.id === reviewId);
+  const handleReportReview = async (experienceId, reviewId) => {
+    const user = await getCurrentUser();
+    if (!user) {
+        setReviewReportErrors(prevErrors => ({
+            ...prevErrors,
+            [reviewId]: "Debes iniciar sesión para reportar una reseña."
+        }));
+        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+        return;
+    }
+
+    const reviewsForExperience = allReviews[experienceId] || [];
+    const reviewToReport = reviewsForExperience.find(review => review.id === reviewId);
+
+    if (!reviewToReport) {
+        setReviewReportErrors(prevErrors => ({
+            ...prevErrors,
+            [reviewId]: "La reseña no existe."
+        }));
+        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+        return;
+    }
+
+    if (reviewToReport.userEmail === user.email) {
+        setReviewReportErrors(prevErrors => ({
+            ...prevErrors,
+            [reviewId]: "No puedes reportar tu propia reseña."
+        }));
+        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+        return;
+    }
+
+    if (reportedReviews.includes(reviewId)) {
+        setReviewReportErrors(prevErrors => ({
+            ...prevErrors,
+            [reviewId]: "Ya has reportado esta reseña."
+        }));
+        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+        return;
+    }
+
+    try {
+        const userDocRef = doc(db, "lista-de-usuarios", user.email);
+        await updateDoc(userDocRef, {
+            reportedReviews: [...reportedReviews, reviewId]
+        });
+        setReportedReviews([...reportedReviews, reviewId]);
+
+    } catch (error) {
+        console.error("Error al reportar la reseña:", error);
+        setReviewReportErrors(prevErrors => ({
+            ...prevErrors,
+            [reviewId]: "Error al reportar la reseña."
+        }));
+        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+    }
+};
 
 
-      if (reviewToReport && reviewToReport.userEmail === user.email) {
-          setError("No puedes reportar tu propia reseña.");
-          setTimeout(() => setError(null), 5000);
-          return;
-      }
-      if (reviewToReport && reportedReviews.includes(reviewToReport.id)) {
-            setError("Ya has reportado esta reseña.");
-            setTimeout(() => setError(null), 5000);
-            return;
-        }
-
-      try {
-          const userDocRef = doc(db, "lista-de-usuarios", user.email);
-          await updateDoc(userDocRef, {
-              reportedReviews: [...reportedReviews, reviewId]
-          });
-
-          setReportedReviews([...reportedReviews, reviewId]);
-
-          setAllReviews(prevAllReviews => {
-              const updatedReviews = (prevAllReviews[selectedReview.id] || []).filter(review => review.id !== reviewId);
-              return {
-                  ...prevAllReviews,
-                  [selectedReview.id]: updatedReviews
-              };
-          });
-          setSelectedReview(prevSelectedReview => ({
-                ...prevSelectedReview,
-                reviews: (prevSelectedReview.reviews || []).filter(review => review.id !== reviewId)
-          }));
-
-      } catch (error) {
-          console.error("Error al reportar la reseña:", error);
-          setError("Error al reportar la reseña: " + error.message);
-          setTimeout(() => setError(null), 5000);
-      }
-  };
 
     const handleOpenReviewPopup = () => {
         if (selectedReview) {
             setShowReviewPopup(true);
             setRating(0);
+            setReviewError(""); // Resetear el error al abrir el popup
         }
     };
 
@@ -211,14 +230,21 @@ function ReviewsPage() {
         setShowReviewPopup(false);
         setNewReviewText("");
         setRating(0);
+        setReviewError(""); // Resetear el error al cerrar
     };
 
     const handleReviewTextChange = (event) => {
         setNewReviewText(event.target.value);
+        if (reviewError) {  //Limpia el error si el usuario empieza a escribir
+             setReviewError("");
+        }
     };
 
     const handleRatingClick = (newRating) => {
         setRating(newRating);
+        if(reviewError){ //Limpia el error si el usuario cambia el rating
+            setReviewError("");
+        }
     };
 
  const handlePublishReview = async () => {
@@ -230,9 +256,8 @@ function ReviewsPage() {
             return;
         }
         if (!newReviewText.trim()) {
-            setError("La reseña no puede estar vacía.");
-            setTimeout(() => setError(null), 5000);
-            return;
+            setReviewError("La reseña no puede estar vacía.");
+            return; // Importante: salir de la función si hay un error
         }
         if (!selectedReview) {
             setError("Error: No se ha seleccionado una experiencia.");
@@ -240,9 +265,8 @@ function ReviewsPage() {
             return;
         }
         if (rating === 0) {
-            setError("Por favor, selecciona una puntuación.");
-            setTimeout(() => setError(null), 5000);
-            return;
+            setReviewError("Por favor, selecciona una puntuación.");
+            return; // Importante: salir de la función si hay un error
         }
 
         try {
@@ -272,16 +296,19 @@ function ReviewsPage() {
             } else {
                 existingReviews.push({ ...newReview, id: user.email });
             }
+              const averageRating = calculateAverageRating(existingReviews);
 
             return {
                 ...prevReviews,
-                [selectedReview.id]: existingReviews
+                [selectedReview.id]: existingReviews,
+                [`${selectedReview.id}-averageRating`]: averageRating
             };
         });
 
             setShowReviewPopup(false);
             setNewReviewText("");
             setRating(0);
+            setReviewError(""); //Resetear
 
         } catch (error) {
             console.error("Error al publicar la reseña:", error);
@@ -306,10 +333,13 @@ function ReviewsPage() {
         if (filteredExperiences.length === 0 && !selectedReview) {
             return <EmptyState />;
         }
-        return filteredExperiences.map((experience, index) => (
+          return filteredExperiences.map((experience, index) => (
             <ExperienceCard
                 key={experience.id}
-                experience={experience}
+                experience={{
+                    ...experience,
+                    reviews: allReviews[experience.id] || [], // Pass reviews
+                }}
                 onViewMore={handleViewMore}
                 forwardedRef={experienceRefs.current[index]}
                 isReviewsPage={true}
@@ -330,6 +360,19 @@ function ReviewsPage() {
         return <div className="difficulty-container-reviews">{circles}</div>;
     };
 
+      // Función para formatear la fecha
+    const formatDate = (timestamp) => {
+      if (!timestamp) return 'Fecha no disponible';
+      if(typeof timestamp === 'string') return timestamp;
+      if (!timestamp.toDate) return 'Fecha no disponible';
+
+      const date = timestamp.toDate();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript van de 0 a 11
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+  };
+
 
     return (
         <div className="container-reviews">
@@ -342,14 +385,19 @@ function ReviewsPage() {
                     </button>
                     <ExperienceCard
                         key={selectedReview.id}
-                        experience={selectedReview}
+                        experience={{
+                            ...selectedReview,
+                            reviews: allReviews[selectedReview.id] || [], // Pass reviews even for selected review
+                        }}
                         isExpanded={true}
                         isReviewsPage={true}
                     />
 
                    <div className="reviews-list">
                     {allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
-                        allReviews[selectedReview.id].map((review) => (
+                           allReviews[selectedReview.id]
+                            .filter(review => !reportedReviews.includes(review.id)) // Filter out reported reviews
+                            .map((review) => (
                             <div key={review.id} className="review-item-container">
                                  <div className="review-header">
                                     <img src={review.profileImage || profileFallbackImage} alt="User" className="review-profile-image" />
@@ -357,19 +405,24 @@ function ReviewsPage() {
                                         <div style={{width: 'fit-content'}}>
                                             <p className="review-user-name">{review.user}</p>
                                             <p className="review-date">
-                                                {review.date
-                                                  ? (typeof review.date === 'string'
-                                                    ? review.date
-                                                    : (review.date.toDate
-                                                      ? `Hace ${Math.floor((new Date() - review.date.toDate()) / (1000 * 60 * 60 * 24))} días`
-                                                      : 'Fecha no disponible'))
-                                                  : 'Fecha no disponible'}
+                                               {formatDate(review.date)}
                                             </p>
                                         </div>
                                         {renderRatingCircles(review.rating)}
                                     </div>
                                 </div>
                                 <p className="review-text-content">{review.text}</p>
+                                {/* Report Button */}
+                                <button
+                                    className="report-button"
+                                    onClick={() => handleReportReview(selectedReview.id, review.id)}
+                                >
+                                    Reportar Reseña
+                                </button>
+                                 {/* Display review-specific error */}
+                                {reviewReportErrors[review.id] && (
+                                    <div className="review-error">{reviewReportErrors[review.id]}</div>
+                                )}
                             </div>
                         ))
                     ) : (
@@ -380,9 +433,6 @@ function ReviewsPage() {
                     <div className="review-actions">
                         <button className="make-review-button" onClick={handleOpenReviewPopup}>
                             Hacer Reseña
-                        </button>
-                        <button className="report-button" onClick={() => handleReportReview(selectedReview.id)}>
-                            Reportar Reseña
                         </button>
                     </div>
                     {showReviewPopup && (
@@ -399,6 +449,7 @@ function ReviewsPage() {
                                         ></div>
                                     ))}
                                 </div>
+                                 {reviewError && <div className="review-error">{reviewError}</div>}
                                 <textarea
                                     className="comment-input"
                                     placeholder="Introduce un texto"
