@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import ForumSection from '../../../components/Admin-components/admin-foro/Forum';
 
 const AdminForo = () => {
 
@@ -29,6 +30,7 @@ const AdminForo = () => {
         <RelevantInfoS number = {Usuarios} description ="Usuarios participantes" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <ForumSection />
     </div>
   );
 };
