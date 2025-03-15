@@ -13,7 +13,7 @@ const HamburgerMenu = () => {
     { href: "/experiencias", label: "Experiencias" },
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
-    { href: "/resenas", label: "Reseñas" },
+    { href: "/reviews", label: "Reseñas" },
   ];
 
   const sesionItems = [
