@@ -33,6 +33,7 @@ import ReviewsPage from './pages/ReviewsPage/ReviewsPage';
 
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
+import AdminExperienceRequests from './pages/Admin-experience-requests/AdminExperienceRequests';
 
 //test
 // import PayPalTest from './pages/BookingProcessPage/PalPayTest';
@@ -73,6 +74,7 @@ root.render(
           <Route element={<LayoutAdmin />}>
             {/* Admin Routes */}
             <Route path="/admin-landing" element={<AdminLanding />} />
+            <Route path="/admin-experiencias-pendientes" element={<AdminExperienceRequests />} />
             {/* <Route path="/paypal-test" element={<PayPalTest />} /> */}
           </Route>
 

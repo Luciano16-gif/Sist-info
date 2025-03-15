@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './ExperiencesPage.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,6 +47,22 @@ function ExperiencesPage() {
   const { experiences, loading, error } = useExperiences();
   const experienceRefs = useRef([]);
   const navigate = useNavigate();
+  const [acceptedExperiences, setAcceptedExperiences] = useState([]);
+
+  // Filter for only accepted experiences
+  useEffect(() => {
+    if (!loading && !error && experiences.length > 0) {
+      const filtered = experiences.filter(exp => {
+        // Check if rawData exists and has status
+        if (exp.rawData) {
+          // Include experiences with 'accepted' status or no status (for backward compatibility)
+          return exp.rawData.status === 'accepted' || exp.rawData.status === undefined;
+        }
+        return true; // Include experiences without rawData (shouldn't happen, but just in case)
+      });
+      setAcceptedExperiences(filtered);
+    }
+  }, [experiences, loading, error]);
 
   // Scroll to a specific experience by index
   const scrollToExperience = (index) => {
@@ -69,8 +85,8 @@ function ExperiencesPage() {
   };
 
   // Initialize refs when experiences are loaded
-  if (!loading && !error && experiences.length > 0) {
-    experienceRefs.current = experiences.map((_, i) => experienceRefs.current[i] || React.createRef());
+  if (!loading && !error && acceptedExperiences.length > 0) {
+    experienceRefs.current = acceptedExperiences.map((_, i) => experienceRefs.current[i] || React.createRef());
   }
 
   // Render content based on state
@@ -83,11 +99,11 @@ function ExperiencesPage() {
       return <ErrorState message={error} />;
     }
 
-    if (experiences.length === 0) {
+    if (acceptedExperiences.length === 0) {
       return <EmptyState />;
     }
 
-    return experiences.map((experience, index) => (
+    return acceptedExperiences.map((experience, index) => (
       <ExperienceCard
         key={experience.id}
         experience={experience}

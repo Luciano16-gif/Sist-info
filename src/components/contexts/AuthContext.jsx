@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../../firebase-config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase-config';
 
 // Create the AuthContext
 const AuthContext = createContext(null);
@@ -18,13 +20,40 @@ export const useAuth = () => {
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState(null); // Add user role state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   
+  // Effect to handle auth state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
+      
+      if (user) {
+        try {
+          // Fetch user role from Firestore
+          const userDocRef = doc(db, "lista-de-usuarios", user.email);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            // Set the user role from Firestore (default to 'usuario' if not present)
+            setUserRole(userData.userType || 'usuario');
+          } else {
+            // Default role if document doesn't exist
+            setUserRole('usuario');
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          // Default role if there's an error
+          setUserRole('usuario');
+        }
+      } else {
+        // Clear role when user is not authenticated
+        setUserRole(null);
+      }
+      
       setLoading(false);
     });
 
@@ -132,6 +161,7 @@ export const AuthProvider = ({ children }) => {
   // Context value object
   const value = {
     currentUser,
+    userRole, // Make the user role available in the context
     error,
     login,
     signup,

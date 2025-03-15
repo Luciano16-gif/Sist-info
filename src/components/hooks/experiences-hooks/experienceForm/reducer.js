@@ -1,3 +1,4 @@
+// src/components/hooks/experiences-hooks/experienceForm/reducer.js
 import { ACTION_TYPES } from './actions';
 import subirImagen from '../../../../assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png'
 
@@ -25,6 +26,7 @@ export const initialState = {
     imagePreview: subirImagen,
     dificultad: 0,
     guiasSeleccionados: [],
+    status: 'pending', // Default to pending, will be changed to 'accepted' for admins
   },
   
   // Configuration states
