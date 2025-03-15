@@ -98,8 +98,8 @@ function ExperiencesPage() {
   };
 
   return (
-    <div className="container-experiences" style={{ marginTop: "60px" }}>
-      <h1 className="title-experiences" style={{ marginTop: "40px" }}>
+    <div className="container-experiences">
+      <h1 className="title-experiences">
         ¡Todas nuestras experiencias disponibles para ti!
       </h1>
       

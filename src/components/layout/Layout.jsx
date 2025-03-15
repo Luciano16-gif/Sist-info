@@ -4,10 +4,12 @@ import TopMenu from "../menus/TopMenu";
 
 const Layout = () => {
   return (
-    <div className="sm:pt-15 lg:pt-16">
+    <div className="min-h-screen">
       <TopMenu />
       <HamburgerMenu />
-      <Outlet />
+      <div className="pt-16 md:pt-16 lg:pt-16">
+        <Outlet />
+      </div>
     </div>
   );
 };
