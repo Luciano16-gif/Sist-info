@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
+import Reviews from '../../../components/Admin-components/admin-resenas/ReviewAdmin';
 
 const AdminResenas = () => {
 
@@ -33,6 +34,7 @@ const AdminResenas = () => {
         <RelevantInfoS number = {Resenas1e} description ="Resenas con 1 estrella" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <Reviews/>
     </div>
   );
 };
