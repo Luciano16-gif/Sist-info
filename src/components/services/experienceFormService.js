@@ -196,6 +196,9 @@ const experienceFormService = {
         throw new Error("Por favor, seleccione una imagen para la experiencia");
       }
       
+      // Set default status if not provided
+      const status = formData.status || 'pending';
+      
       // Prepare data object
       const experienciaData = {
         nombre: formData.nombre,
@@ -216,6 +219,8 @@ const experienceFormService = {
         imageUrl,
         publicId,
         dificultad: formData.dificultad,
+        status: status, // Set status (pending for guides, accepted for admins)
+        createdBy: formData.createdBy || null, // Store who created the experience
         // Add creation timestamp and initial values
         fechaCreacion: new Date().toISOString(),
         puntuacion: 0,
@@ -231,6 +236,61 @@ const experienceFormService = {
     } catch (error) {
       console.error("Error creating experience:", error);
       throw error;
+    }
+  },
+
+  /**
+   * Fetch all pending experience requests
+   * @returns {Promise<Array>} Array of pending experiences
+   */
+  async fetchPendingExperiences() {
+    try {
+      const experienciasRef = collection(db, "Experiencias");
+      const q = query(experienciasRef, where("status", "==", "pending"));
+      const querySnapshot = await getDocs(q);
+      
+      const pendingExperiences = [];
+      querySnapshot.forEach((doc) => {
+        pendingExperiences.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      return pendingExperiences;
+    } catch (error) {
+      console.error("Error fetching pending experiences:", error);
+      throw new Error("Error al obtener las solicitudes pendientes.");
+    }
+  },
+
+  /**
+   * Update experience status (approve or reject)
+   * @param {string} experienceId - ID of the experience to update
+   * @param {string} status - New status ('accepted' or 'rejected')
+   * @param {string} feedback - Optional feedback for rejection
+   * @returns {Promise<void>}
+   */
+  async updateExperienceStatus(experienceId, status, feedback = null) {
+    try {
+      const experienceRef = doc(db, "Experiencias", experienceId);
+      const experienceDoc = await getDoc(experienceRef);
+      
+      if (!experienceDoc.exists()) {
+        throw new Error("La experiencia no existe");
+      }
+      
+      const updateData = { status };
+      
+      // Add feedback for rejections
+      if (status === 'rejected' && feedback) {
+        updateData.feedback = feedback;
+      }
+      
+      await updateDoc(experienceRef, updateData);
+    } catch (error) {
+      console.error(`Error updating experience status to ${status}:`, error);
+      throw new Error(`Error al ${status === 'accepted' ? 'aprobar' : 'rechazar'} la experiencia.`);
     }
   }
 };

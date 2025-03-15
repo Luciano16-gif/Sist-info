@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateExperience.css';
+
+// Auth context - for currentUser and userRole information
+import { useAuth } from '../../contexts/AuthContext';
 
 // Custom hooks
 import { useExperienceForm } from '../../hooks/experiences-hooks/useExperienceForm';
+
+// Import actions directly 
+import { updateField } from '../../hooks/experiences-hooks/experienceForm/actions';
 
 // UI Components
 import {
@@ -20,8 +27,17 @@ import {
 
 /**
  * CreateExperience component - Allows creating new experiences
+ * Only accessible to guides and admins
  */
 function CreateExperience() {
+  // Get current user info, role, and navigate function
+  const { currentUser, userRole } = useAuth();
+  const navigate = useNavigate();
+
+  // Loading state while checking permissions
+  const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
+  
   // Setup for new item inputs
   const [nuevoTipoActividad, setNuevoTipoActividad] = useState("");
   const [nuevoIncluido, setNuevoIncluido] = useState("");
@@ -39,25 +55,133 @@ function CreateExperience() {
   
   // Success message state
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Check user role and set status accordingly
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        if (!currentUser) {
+          setUnauthorized(true);
+          setLoading(false);
+          return;
+        }
+
+        // Check role directly from context (no need to fetch from Firestore again)
+        if (userRole === 'admin' || userRole === 'guia') {
+          // Set status based on role - accepted for admin, pending for guide
+          if (userRole === 'admin') {
+            // Use the enhanced setStatus method (defined below)
+            handlers.setStatus('accepted');
+          } else {
+            handlers.setStatus('pending');
+          }
+        } else {
+          // Not authorized
+          setUnauthorized(true);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error checking access:", error);
+        setUnauthorized(true);
+        setLoading(false);
+      }
+    };
+    
+    if (userRole !== null) {
+      checkAccess();
+    }
+  }, [currentUser, userRole]);
+
+  // Enhanced handlers that don't use require()
+  // We use the updateField action that we imported at the top of the file
+  handlers.setStatus = (status) => {
+    // Access dispatch from the useExperienceForm hook
+    const dispatch = formOperations.dispatch;
+    if (dispatch) {
+      dispatch(updateField('status', status));
+    } else {
+      console.error("Dispatch function not available");
+    }
+  };
+
+  // Add setter for createdBy field
+  handlers.setCreatedBy = (email) => {
+    const dispatch = formOperations.dispatch;
+    if (dispatch) {
+      dispatch(updateField('createdBy', email));
+    } else {
+      console.error("Dispatch function not available");
+    }
+  };
   
   // Handle form submission
   const handleSubmit = async () => {
+    // Set who created this experience
+    if (currentUser && currentUser.email) {
+      handlers.setCreatedBy(currentUser.email);
+    }
+    
     const success = await formOperations.handleSubmit();
     if (success) {
+      // Different success messages based on role
+      if (userRole === 'admin') {
+        setSuccessMessage('¡Experiencia creada exitosamente!');
+      } else {
+        setSuccessMessage('¡Solicitud de experiencia enviada! Un administrador la revisará pronto.');
+      }
+      
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 5000); // Hide after 5 seconds
     }
   };
 
+  // Redirect unauthorized users
+  if (unauthorized) {
+    return (
+      <div className="crear-experiencia-container-crear-experiencia">
+        <h1 className="titulo-crear-experiencia">Acceso No Autorizado</h1>
+        <p className="subtitulo-crear-experiencia">
+          Solo los guías y administradores pueden acceder a esta página.
+        </p>
+        <button 
+          className="boton-agregar-crear-experiencia" 
+          onClick={() => navigate('/')}
+          style={{ marginTop: '20px' }}
+        >
+          Volver al Inicio
+        </button>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="crear-experiencia-container-crear-experiencia">
+        <h1 className="titulo-crear-experiencia">Cargando...</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="crear-experiencia-container-crear-experiencia">
-      <h1 className="titulo-crear-experiencia">Agregar una nueva Experiencia</h1>
-      <p className="subtitulo-crear-experiencia">Expande nuestra lista de servicios y experiencias únicas...</p>
+      <h1 className="titulo-crear-experiencia">
+        {userRole === 'admin' 
+          ? 'Agregar una nueva Experiencia' 
+          : 'Solicitar una nueva Experiencia'}
+      </h1>
+      <p className="subtitulo-crear-experiencia">
+        {userRole === 'admin'
+          ? 'Expande nuestra lista de servicios y experiencias únicas...'
+          : 'Propón una nueva experiencia para que los administradores la aprueben...'}
+      </p>
 
       {/* Success Message */}
       {showSuccess && (
         <div className="success-message">
-          ¡Experiencia creada exitosamente!
+          {successMessage}
         </div>
       )}
       
@@ -254,10 +378,11 @@ function CreateExperience() {
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit Button with different text based on role */}
       <SubmitButton 
         onClick={handleSubmit}
         isSubmitting={formHandling.isSubmitting}
+        text={userRole === 'admin' ? "Agregar" : "Enviar Solicitud"}
       />
     </div>
   );

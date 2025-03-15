@@ -4,32 +4,73 @@ import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/landing-page/EventCalendar';
 import { db } from '../../firebase-config';
-import { collection, query, where, getDocs } from 'firebase/firestore'; // Corrected imports
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 function BookingPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const experience = location.state?.experience;
+    const experienceData = location.state?.experience;
+    const isAdmin = location.state?.isAdmin;
+    const [experience, setExperience] = useState(null);
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [availableTimes, setAvailableTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState('');
-    const [totalPaidUsers, setTotalPaidUsers] = useState(0); // Now correctly used
+    const [totalPaidUsers, setTotalPaidUsers] = useState(0);
     const [reservationsForSelectedTime, setReservationsForSelectedTime] = useState(0);
     const [reservationsForSelectedDate, setReservationsForSelectedDate] = useState(0);
 
+    // Normalize experience data based on the source (admin view vs regular view)
     useEffect(() => {
-        if (!experience) {
+        if (!experienceData) {
             navigate('/');
             return;
         }
 
-        // Generate time slots (no changes, but included for completeness)
-        if (experience) {
-            const generateTimeSlots = (startTime, endTime, durationMinutes) => {
+        // Normalize the experience data structure
+        const normalizedExperience = isAdmin ? {
+            id: experienceData.id || experienceData.nombre,
+            name: experienceData.nombre,
+            description: experienceData.descripcion,
+            // Handle time field format - convert Firestore format to the expected format
+            time: experienceData.horarioInicio && experienceData.horarioFin 
+                ? `${experienceData.horarioInicio} - ${experienceData.horarioFin}`
+                : "No disponible",
+            days: Array.isArray(experienceData.fechas) ? experienceData.fechas.join(', ') : "",
+            puntoDeSalida: experienceData.puntoSalida,
+            price: experienceData.precio,
+            duracion: experienceData.duracionRecorrido,
+            maxPeople: experienceData.maximoUsuarios,
+            distance: `${experienceData.longitudRecorrido} km`,
+            incluidos: experienceData.incluidosExperiencia,
+            imageUrl: experienceData.imageUrl,
+            // Include all raw data for reference
+            rawData: experienceData
+        } : experienceData;
+
+        setExperience(normalizedExperience);
+    }, [experienceData, navigate, isAdmin]);
+
+    useEffect(() => {
+        if (!experience) return;
+
+        // Generate time slots based on the experience time range
+        const generateTimeSlots = (startTime, endTime, durationMinutes) => {
+            if (!startTime || !endTime || !durationMinutes) {
+                console.log("Missing time data:", { startTime, endTime, durationMinutes });
+                return [];
+            }
+
+            try {
                 const slots = [];
                 const [startHour, startMinute] = startTime.split(':').map(Number);
                 const [endHour, endMinute] = endTime.split(':').map(Number);
+                
+                if (isNaN(startHour) || isNaN(startMinute) || isNaN(endHour) || isNaN(endMinute)) {
+                    console.log("Invalid time format:", { startTime, endTime });
+                    return [];
+                }
+                
                 let currentHour = startHour;
                 let currentMinute = startMinute;
 
@@ -41,41 +82,64 @@ function BookingPage() {
                     currentHour += Math.floor(currentMinute / 60);
                     currentMinute %= 60;
                 }
+                
                 if (slots.length > 0) {
                     const lastSlot = slots[slots.length - 1];
                     if (lastSlot === endTime) {
                         slots.pop();
                     }
                 }
+                
                 return slots;
-            };
-            const [startTime, endTime] = experience.time.split(' - ');
-            const timeSlots = generateTimeSlots(startTime, endTime, parseInt(experience.duracion));
-            setAvailableTimes(timeSlots);
-        }
-
-        // Fetch Total Paid Users (now correctly placed and used)
-         const fetchTotalPaidUsers = async () => {
-          try {
-              const paymentsCollection = collection(db, "payments");
-              const q = query(paymentsCollection, where("experienceId", "==", experience.id), where("status", "==", "COMPLETED"));
-              const paymentsSnapshot = await getDocs(q);
-              let totalPeople = 0;
-              paymentsSnapshot.forEach((doc) => {
-                  totalPeople += Number(doc.data().selectedPeople) || 0;
-              });
-              setTotalPaidUsers(totalPeople);
-          } catch (error) {
-              console.error("Error fetching total payment data:", error);
-          }
+            } catch (error) {
+                console.error("Error generating time slots:", error);
+                return [];
+            }
         };
-        if(experience.id){
+
+        // Parse time from the experience data
+        let startTime = "";
+        let endTime = "";
+        
+        if (experience.time && experience.time.includes('-')) {
+            [startTime, endTime] = experience.time.split('-').map(t => t.trim());
+        } else if (experience.rawData && experience.rawData.horarioInicio && experience.rawData.horarioFin) {
+            startTime = experience.rawData.horarioInicio;
+            endTime = experience.rawData.horarioFin;
+        }
+        
+        // Get the duration - handle possible number or string
+        const duration = typeof experience.duracion === 'number' 
+            ? experience.duracion 
+            : parseInt(experience.duracion || "60");
+        
+        const timeSlots = generateTimeSlots(startTime, endTime, duration);
+        setAvailableTimes(timeSlots);
+
+        // Fetch Total Paid Users
+        const fetchTotalPaidUsers = async () => {
+            try {
+                const paymentsCollection = collection(db, "payments");
+                const q = query(
+                    paymentsCollection, 
+                    where("experienceId", "==", experience.id), 
+                    where("status", "==", "COMPLETED")
+                );
+                const paymentsSnapshot = await getDocs(q);
+                let totalPeople = 0;
+                paymentsSnapshot.forEach((doc) => {
+                    totalPeople += Number(doc.data().selectedPeople) || 0;
+                });
+                setTotalPaidUsers(totalPeople);
+            } catch (error) {
+                console.error("Error fetching total payment data:", error);
+            }
+        };
+        
+        if (experience.id) {
             fetchTotalPaidUsers();
         }
-
-
-    }, [experience, navigate]);
-
+    }, [experience]);
 
     useEffect(() => {
         const fetchReservations = async () => {
@@ -111,7 +175,7 @@ function BookingPage() {
                 });
                 setReservationsForSelectedTime(peopleInSlot);
 
-              const q2 = query(
+                const q2 = query(
                     paymentsRef,
                     where("experienceId", "==", experience.id),
                     where("selectedDate", "==", formattedDate),
@@ -127,8 +191,6 @@ function BookingPage() {
                 });
 
                 setReservationsForSelectedDate(peopleInDate);
-
-
             } catch (error) {
                 console.error("Error fetching reservations:", error);
                 setReservationsForSelectedTime(0);
@@ -139,9 +201,8 @@ function BookingPage() {
         fetchReservations();
     }, [selectedDate, selectedTime, experience]); // Depend on selectedDate, selectedTime, and experience
 
-
     if (!experience) {
-        return null;
+        return <div className="loading-container">Cargando...</div>;
     }
 
     const renderIncluidos = () => {
@@ -158,12 +219,18 @@ function BookingPage() {
     };
 
     const handleBookingClick = () => {
-        navigate('/booking-process', { state: { experience, selectedDate, selectedTime } });
+        if (isAdmin) {
+            // For admin users, just go back to the admin page
+            navigate('/admin-experiencias-pendientes');
+        } else {
+            navigate('/booking-process', { state: { experience, selectedDate, selectedTime } });
+        }
     };
 
     const handleShowCalendar = () => {
         setShowCalendar(true);
     }
+    
     const handleCloseCalendar = () => {
         setShowCalendar(false);
     }
@@ -180,11 +247,11 @@ function BookingPage() {
 
     return (
         <div className="container-booking">
-            <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
+            <img src="/src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
             <div className="content-booking">
                 <div className='left-side-booking'>
                     <div className="title-description-box">
-                        <h1 className="title-booking">{experience.id}</h1>
+                        <h1 className="title-booking">{experience.name || experience.id}</h1>
                         <p className="description-booking">
                             {experience.description}
                         </p>
@@ -199,9 +266,9 @@ function BookingPage() {
                     <div className='details-grid-booking'>
                         <div className='details-column-booking'>
                             <BookingDetail title="Punto de Salida" value={experience.puntoDeSalida} />
-                            <BookingDetail title="Fecha y Hora" value={experience.time + ", " + experience.days} />
-                            <BookingDetail title="Duración Aprox." value={experience.duracion + " minutos"} />
-                           <BookingDetail
+                            <BookingDetail title="Fecha y Hora" value={`${experience.time}, ${experience.days}`} />
+                            <BookingDetail title="Duración Aprox." value={`${experience.duracion} minutos`} />
+                            <BookingDetail
                                 title="Personas Inscritas"
                                 value={
                                   selectedTime
@@ -211,7 +278,7 @@ function BookingPage() {
                             />
                         </div>
                         <div className='details-column-booking'>
-                            <BookingDetail title="Precio P/P" value={experience.price + "$"} />
+                            <BookingDetail title="Precio P/P" value={`${experience.price}$`} />
                             {renderIncluidos()}
                             <BookingDetail title="Distancia a Recorrer" value={experience.distance} />
                         </div>
@@ -234,7 +301,9 @@ function BookingPage() {
                     </div>
                     {/* End Time Selection UI */}
 
-                    <button className="reserve-button-booking" onClick={handleBookingClick}>Reserva tu Cupo</button>
+                    <button className="reserve-button-booking" onClick={handleBookingClick}>
+                        {isAdmin ? "Volver" : "Reserva tu Cupo"}
+                    </button>
                 </div>
             </div>
             {showCalendar && (

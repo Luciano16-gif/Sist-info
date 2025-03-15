@@ -45,6 +45,9 @@ export const useExperienceForm = () => {
   const configHandlers = createConfigHandlers(dispatch, configData);
   const formOperations = createFormOperations(dispatch, formFields);
   
+  // Expose dispatch function for direct access
+  formOperations.dispatch = dispatch;
+  
   // Returning the public API with the same structure as the original hook (i did it like this maintain compatibility)
   return {
     // Form state
@@ -71,5 +74,3 @@ export const useExperienceForm = () => {
     formOperations,
   };
 };
-
-//Modulating this is probaby the hardest thing ive ever done in coding lol, but it works (i hope)
