@@ -127,7 +127,7 @@ function CreateExperience() {
               id="horarioInicio"
               label="Horario Inicio"
               value={formState.horarioInicio}
-              onChange={handlers.handleTimeChange(formOperations.setHorarioInicio)}
+              onChange={handlers.handleTimeChange('horarioInicio')}
               error={formHandling.errors.horarioInicio}
             />
 
@@ -135,7 +135,7 @@ function CreateExperience() {
               id="horarioFin"
               label="Horario Fin"
               value={formState.horarioFin}
-              onChange={handlers.handleTimeChange(formOperations.setHorarioFin)}
+              onChange={handlers.handleTimeChange('horarioFin')}
               error={formHandling.errors.horarioFin}
             />
           </div>

@@ -26,21 +26,28 @@ export const createFieldHandlers = (dispatch) => {
     dispatch(actions.updateField('descripcion', e.target.value));
   };
   
-  // Time field change handler with formatting
-  const handleTimeChange = (setter) => (e) => {
+  const handleTimeChange = (fieldName) => (e) => {
     let value = e.target.value;
+    
+    // Remove any non-digit and non-colon characters
     value = value.replace(/[^0-9:]/g, '');
-    value = value.slice(0, 5);
-    if (value.length >= 2 && value.indexOf(':') === -1) {
-      value = value.slice(0, 2) + ':' + value.slice(2);
+    
+    // Track if user is typing forward (not backspacing)
+    // We check the inputType property from the native event
+    // This is because when adding the ':' if we dont do this the user cant backspace
+    const isTypingForward = e.nativeEvent.inputType !== 'deleteContentBackward';
+    
+    // Only add colon when typing forward AND exactly at 2 digits without a colon
+    if (isTypingForward && value.length === 2 && !value.includes(':')) {
+      value = value + ':';
     }
     
-    // Determine which field to update based on the setter function
-    const field = setter === setHorarioInicio ? 'horarioInicio' : 'horarioFin';
+    // Limit to 5 characters (HH:MM format)
+    value = value.slice(0, 5);
     
-    dispatch(actions.updateField(field, value));
+    dispatch(actions.updateField(fieldName, value));
   };
-  
+
   // Location field change handler
   const handlePuntoSalidaChange = (e) => {
     dispatch(actions.updateField('puntoSalida', e.target.value));
