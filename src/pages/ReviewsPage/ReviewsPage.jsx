@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
 import ExperienceCard, { calculateAverageRating } from '../../components/experiences/ExperienceCard'; // Import calculateAverageRating
+import '../ExperiencesPage/ExperiencesPage.css';
 import { doc, updateDoc, getDoc, collection, serverTimestamp, getDocs, setDoc } from "firebase/firestore";
 import { db } from './../../firebase-config';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -90,7 +91,7 @@ function ReviewsPage() {
 
 
 
-   useEffect(() => {
+    useEffect(() => {
         const loadReportedData = async () => {
             const user = await getCurrentUser();
             if (user) {
@@ -158,63 +159,63 @@ function ReviewsPage() {
         setSelectedReview(null);
     };
 
-  const handleReportReview = async (experienceId, reviewId) => {
-    const user = await getCurrentUser();
-    if (!user) {
-        setReviewReportErrors(prevErrors => ({
-            ...prevErrors,
-            [reviewId]: "Debes iniciar sesión para reportar una reseña."
-        }));
-        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
-        return;
-    }
+    const handleReportReview = async (experienceId, reviewId) => {
+        const user = await getCurrentUser();
+        if (!user) {
+            setReviewReportErrors(prevErrors => ({
+                ...prevErrors,
+                [reviewId]: "Debes iniciar sesión para reportar una reseña."
+            }));
+            setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+            return;
+        }
 
-    const reviewsForExperience = allReviews[experienceId] || [];
-    const reviewToReport = reviewsForExperience.find(review => review.id === reviewId);
+        const reviewsForExperience = allReviews[experienceId] || [];
+        const reviewToReport = reviewsForExperience.find(review => review.id === reviewId);
 
-    if (!reviewToReport) {
-        setReviewReportErrors(prevErrors => ({
-            ...prevErrors,
-            [reviewId]: "La reseña no existe."
-        }));
-        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
-        return;
-    }
+        if (!reviewToReport) {
+            setReviewReportErrors(prevErrors => ({
+                ...prevErrors,
+                [reviewId]: "La reseña no existe."
+            }));
+            setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+            return;
+        }
 
-    if (reviewToReport.userEmail === user.email) {
-        setReviewReportErrors(prevErrors => ({
-            ...prevErrors,
-            [reviewId]: "No puedes reportar tu propia reseña."
-        }));
-        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
-        return;
-    }
+        if (reviewToReport.userEmail === user.email) {
+            setReviewReportErrors(prevErrors => ({
+                ...prevErrors,
+                [reviewId]: "No puedes reportar tu propia reseña."
+            }));
+            setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+            return;
+        }
 
-    if (reportedReviews.includes(reviewId)) {
-        setReviewReportErrors(prevErrors => ({
-            ...prevErrors,
-            [reviewId]: "Ya has reportado esta reseña."
-        }));
-        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
-        return;
-    }
+        if (reportedReviews.includes(reviewId)) {
+            setReviewReportErrors(prevErrors => ({
+                ...prevErrors,
+                [reviewId]: "Ya has reportado esta reseña."
+            }));
+            setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+            return;
+        }
 
-    try {
-        const userDocRef = doc(db, "lista-de-usuarios", user.email);
-        await updateDoc(userDocRef, {
-            reportedReviews: [...reportedReviews, reviewId]
-        });
-        setReportedReviews([...reportedReviews, reviewId]);
+        try {
+            const userDocRef = doc(db, "lista-de-usuarios", user.email);
+            await updateDoc(userDocRef, {
+                reportedReviews: [...reportedReviews, reviewId]
+            });
+            setReportedReviews([...reportedReviews, reviewId]);
 
-    } catch (error) {
-        console.error("Error al reportar la reseña:", error);
-        setReviewReportErrors(prevErrors => ({
-            ...prevErrors,
-            [reviewId]: "Error al reportar la reseña."
-        }));
-        setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
-    }
-};
+        } catch (error) {
+            console.error("Error al reportar la reseña:", error);
+            setReviewReportErrors(prevErrors => ({
+                ...prevErrors,
+                [reviewId]: "Error al reportar la reseña."
+            }));
+            setTimeout(() => setReviewReportErrors(prevErrors => ({ ...prevErrors, [reviewId]: null })), 5000);
+        }
+    };
 
 
 
@@ -236,18 +237,18 @@ function ReviewsPage() {
     const handleReviewTextChange = (event) => {
         setNewReviewText(event.target.value);
         if (reviewError) {  //Limpia el error si el usuario empieza a escribir
-             setReviewError("");
+            setReviewError("");
         }
     };
 
     const handleRatingClick = (newRating) => {
         setRating(newRating);
-        if(reviewError){ //Limpia el error si el usuario cambia el rating
+        if (reviewError) { //Limpia el error si el usuario cambia el rating
             setReviewError("");
         }
     };
 
- const handlePublishReview = async () => {
+    const handlePublishReview = async () => {
         const user = await getCurrentUser();
 
         if (!user) {
@@ -276,34 +277,42 @@ function ReviewsPage() {
 
             const userReviewRef = doc(reviewsCollectionRef, user.email);
 
+            // Use a Date object for immediate display
+            const now = new Date();
             const newReview = {
                 user: user.userName,
                 text: newReviewText,
-                date: serverTimestamp(),
+                date: now, // Store the immediate Date object.
                 userEmail: user.email,
                 profileImage: user.profileImage,
                 rating: rating,
             };
+            
+            // First update the local state, then the DB
+            setAllReviews(prevReviews => {
+                const existingReviews = prevReviews[selectedReview.id] || [];
+                const reviewIndex = existingReviews.findIndex(review => review.userEmail === user.email);
 
-            await setDoc(userReviewRef, newReview);
+                if (reviewIndex > -1) {
+                    existingReviews[reviewIndex] = { ...newReview, id: user.email };
+                } else {
+                    existingReviews.push({ ...newReview, id: user.email });
+                }
+                const averageRating = calculateAverageRating(existingReviews);
 
-          setAllReviews(prevReviews => {
-            const existingReviews = prevReviews[selectedReview.id] || [];
-            const reviewIndex = existingReviews.findIndex(review => review.userEmail === user.email);
+                return {
+                    ...prevReviews,
+                    [selectedReview.id]: existingReviews,
+                    [`${selectedReview.id}-averageRating`]: averageRating
+                };
+            });
+                
+            // Now update the database.  Firebase will handle the server timestamp.
+            await setDoc(userReviewRef, {
+                ...newReview,
+                date: serverTimestamp() // Let Firebase set the *server* timestamp.
+            });
 
-            if (reviewIndex > -1) {
-                existingReviews[reviewIndex] = { ...newReview, id: user.email };
-            } else {
-                existingReviews.push({ ...newReview, id: user.email });
-            }
-              const averageRating = calculateAverageRating(existingReviews);
-
-            return {
-                ...prevReviews,
-                [selectedReview.id]: existingReviews,
-                [`${selectedReview.id}-averageRating`]: averageRating
-            };
-        });
 
             setShowReviewPopup(false);
             setNewReviewText("");
@@ -333,7 +342,7 @@ function ReviewsPage() {
         if (filteredExperiences.length === 0 && !selectedReview) {
             return <EmptyState />;
         }
-          return filteredExperiences.map((experience, index) => (
+        return filteredExperiences.map((experience, index) => (
             <ExperienceCard
                 key={experience.id}
                 experience={{
@@ -346,7 +355,6 @@ function ReviewsPage() {
             />
         ));
     };
-
     const renderRatingCircles = (rating) => {
         const circles = [];
         for (let i = 1; i <= 5; i++) {
@@ -360,18 +368,39 @@ function ReviewsPage() {
         return <div className="difficulty-container-reviews">{circles}</div>;
     };
 
-      // Función para formatear la fecha
+    //  IMPROVED formatDate FUNCTION
     const formatDate = (timestamp) => {
-      if (!timestamp) return 'Fecha no disponible';
-      if(typeof timestamp === 'string') return timestamp;
-      if (!timestamp.toDate) return 'Fecha no disponible';
+        if (!timestamp) {
+            return 'Fecha no disponible'; // Handle null/undefined case.
+        }
 
-      const date = timestamp.toDate();
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript van de 0 a 11
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-  };
+        // If it's already a string, assume it's formatted and return it.
+        if (typeof timestamp === 'string') {
+            return timestamp;
+        }
+
+
+        // Handle Date objects (for newly created reviews)
+        if (timestamp instanceof Date) {
+            const date = timestamp;
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-11
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // If it's a Firestore Timestamp, convert it.
+        if (timestamp.toDate) {
+            const date = timestamp.toDate();
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-11
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        //  Fallback if the timestamp is neither a string nor a Firestore Timestamp
+        return 'Fecha no disponible';
+    };
 
 
     return (
@@ -393,42 +422,42 @@ function ReviewsPage() {
                         isReviewsPage={true}
                     />
 
-                   <div className="reviews-list">
-                    {allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
-                           allReviews[selectedReview.id]
-                            .filter(review => !reportedReviews.includes(review.id)) // Filter out reported reviews
-                            .map((review) => (
-                            <div key={review.id} className="review-item-container">
-                                 <div className="review-header">
-                                    <img src={review.profileImage || profileFallbackImage} alt="User" className="review-profile-image" />
-                                    <div className="user-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                                        <div style={{width: 'fit-content'}}>
-                                            <p className="review-user-name">{review.user}</p>
-                                            <p className="review-date">
-                                               {formatDate(review.date)}
-                                            </p>
+                    <div className="reviews-list">
+                        {allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
+                            allReviews[selectedReview.id]
+                                .filter(review => !reportedReviews.includes(review.id)) // Filter out reported reviews
+                                .map((review) => (
+                                    <div key={review.id} className="review-item-container">
+                                        <div className="review-header">
+                                            <img src={review.profileImage || profileFallbackImage} alt="User" className="review-profile-image" />
+                                            <div className="user-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                                                <div style={{ width: 'fit-content' }}>
+                                                    <p className="review-user-name">{review.user}</p>
+                                                    <p className="review-date">
+                                                        {formatDate(review.date)}
+                                                    </p>
+                                                </div>
+                                                {renderRatingCircles(review.rating)}
+                                            </div>
                                         </div>
-                                        {renderRatingCircles(review.rating)}
+                                        <p className="review-text-content">{review.text}</p>
+                                        {/* Report Button */}
+                                        <button
+                                            className="report-button"
+                                            onClick={() => handleReportReview(selectedReview.id, review.id)}
+                                        >
+                                            Reportar Reseña
+                                        </button>
+                                        {/* Display review-specific error */}
+                                        {reviewReportErrors[review.id] && (
+                                            <div className="review-error">{reviewReportErrors[review.id]}</div>
+                                        )}
                                     </div>
-                                </div>
-                                <p className="review-text-content">{review.text}</p>
-                                {/* Report Button */}
-                                <button
-                                    className="report-button"
-                                    onClick={() => handleReportReview(selectedReview.id, review.id)}
-                                >
-                                    Reportar Reseña
-                                </button>
-                                 {/* Display review-specific error */}
-                                {reviewReportErrors[review.id] && (
-                                    <div className="review-error">{reviewReportErrors[review.id]}</div>
-                                )}
-                            </div>
-                        ))
-                    ) : (
-                        <p>No hay reseñas para esta experiencia.</p>
-                    )}
-                </div>
+                                ))
+                        ) : (
+                            <p>No hay reseñas para esta experiencia.</p>
+                        )}
+                    </div>
 
                     <div className="review-actions">
                         <button className="make-review-button" onClick={handleOpenReviewPopup}>
@@ -438,7 +467,7 @@ function ReviewsPage() {
                     {showReviewPopup && (
                         <div className="comment-popup-overlay">
                             <div className="comment-popup">
-                                <span className="close-button" onClick={handleCloseReviewPopup}>×</span>
+                                <span className="close-button-review" onClick={handleCloseReviewPopup}>×</span>
                                 <p className="replying-to-popup">Escribe una reseña</p>
                                 <div className="difficulty-container">
                                     {[1, 2, 3, 4, 5].map((value) => (
@@ -449,7 +478,7 @@ function ReviewsPage() {
                                         ></div>
                                     ))}
                                 </div>
-                                 {reviewError && <div className="review-error">{reviewError}</div>}
+                                {reviewError && <div className="review-error">{reviewError}</div>}
                                 <textarea
                                     className="comment-input"
                                     placeholder="Introduce un texto"
@@ -466,14 +495,14 @@ function ReviewsPage() {
                     <div className="scroll-buttons-container-reviews">
                         <button className="scroll-button-reviews left-reviews" onClick={scrollLeft}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                                 strokeLinecap="round" strokeLinejoin="round">
+                                strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="15 18 9 12 15 6"></polyline>
                             </svg>
                         </button>
                         <button className="scroll-button-reviews right-reviews" onClick={scrollRight}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                                 strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
+                                strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                         </button>
                     </div>

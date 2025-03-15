@@ -271,19 +271,19 @@
     background-color: #d9f7c8;
 }
 
-.close-button {
+.close-button-review {
    position: absolute;
     top: 10px;
     right: 10px;
     font-size: 40px;
     font-weight: bold;
     cursor: pointer;
-    color: #666;
+    color: #b86666;
     line-height: 1;
 }
 
-.close-button:hover {
-    color: #000;
+.close-button-review:hover {
+    color: #b00808;
 }
 
 /* Rating Circles (from CreateExperience.css - good to reuse!) */
