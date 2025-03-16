@@ -12,11 +12,11 @@ const HamburgerMenu = () => {
   // Define base menu items
   const baseMenuItems = [
     { href: "/experiencias", label: "Experiencias" },
+    { href: "/user-requests", label: "Mis Solicitudes" }, 
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
   ];
-
   // Create final menu items array with conditional item for admin/guide
   const menuItems = [...baseMenuItems];
   
@@ -27,7 +27,10 @@ const HamburgerMenu = () => {
 
   // Add admin-specific menu items
   if (currentUser && userRole === 'admin') {
-    menuItems.push({ href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" });
+    menuItems.push(
+      { href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" },
+      { href: "/admin-guias-pendientes", label: "Guías Pendientes" }
+    );
   }
 
   const sesionItems = [

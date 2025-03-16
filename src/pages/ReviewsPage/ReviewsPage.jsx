@@ -108,7 +108,16 @@ function ReviewsPage() {
 
     useEffect(() => {
         if (experiences) {
-            setLocalExperiences(experiences);
+            // Filter for only accepted experiences, just like in ExperiencesPage
+            const filtered = experiences.filter(exp => {
+                // Check if rawData exists and has status
+                if (exp.rawData) {
+                    // Include experiences with 'accepted' status or no status (for backward compatibility)
+                    return exp.rawData.status === 'accepted' || exp.rawData.status === undefined;
+                }
+                return true; // Include experiences without rawData (shouldn't happen, but just in case)
+            });
+            setLocalExperiences(filtered);
         }
     }, [experiences]);
 
