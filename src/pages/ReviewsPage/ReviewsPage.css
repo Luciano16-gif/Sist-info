@@ -1,5 +1,3 @@
-/* ReviewsPage.css - Fixed button positioning and card spacing */
-
 .selected-yellow-reviews {
     background-color: rgb(98, 226, 38) !important;
 }
@@ -130,6 +128,33 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+/* Ensure experience images display correctly */
+.selected-review-container .experience-card .experience-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Ensure image containers in review page are properly sized */
+.selected-review-container .image-container-experiences {
+    width: 100%;
+    min-height: 250px;
+}
+
+/* Override the default image styling for reviews */
+.review-card .image-experiences {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure image containers in selected reviews are visible */
+.selected-review-container .experience-card .image-container-experiences {
+    display: block !important;
+    visibility: visible !important;
 }
 
 .back-button-reviews {
@@ -379,6 +404,12 @@
     .reviews-wrapper-reviews .experience-card-experiences {
         min-width: 500px;
     }
+    
+    /* Ensure image is displayed at proper size on tablets */
+    .selected-review-container .image-container-experiences {
+        min-height: 300px;
+        height: 300px;
+    }
 }
 
 @media screen and (max-width: 768px) {
@@ -411,6 +442,34 @@
     .selected-review-container {
         width: 100%;
         padding: 15px;
+    }
+    
+    /* Added styles for mobile experience view */
+    .selected-review-container .experience-card-experiences {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .selected-review-container .image-container-experiences {
+        height: 250px !important;
+        min-height: 250px !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    
+    /* Force image to be visible */
+    .selected-review-container .image-experiences {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .selected-review-container .experience-details {
+        padding: 10px 0;
     }
     
     .comment-popup {
@@ -519,6 +578,21 @@
         height: 35px;
         font-size: 14px;
         border-radius: 12px;
+    }
+    
+    /* Fix for review ratings display on mobile */
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .user-info {
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    .difficulty-container-reviews {
+        margin-top: 5px;
     }
     
     .review-user-name {

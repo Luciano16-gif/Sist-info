@@ -106,6 +106,7 @@ function ReviewsPage() {
         fetchUserData();
     }, [currentUser]);
 
+    // Modified to filter experiences by status - FIXED HERE
     useEffect(() => {
         if (experiences) {
             // Filter for only accepted experiences, just like in ExperiencesPage
@@ -441,6 +442,7 @@ function ReviewsPage() {
                         }}
                         isExpanded={true}
                         isReviewsPage={true}
+                        onViewMore={handleViewMore} // Pass the required onViewMore prop
                     />
 
                     <div className="reviews-list">
