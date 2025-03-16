@@ -31,6 +31,7 @@ import OurTeam from './components/nuestro-equipo/OurTeam';
 import Statistics from './components/firebase-test/Statistics/Statistics';
 import ReviewsPage from './pages/ReviewsPage/ReviewsPage';
 import SupportPage from './pages/SupportPage/SupportPage';
+import GuideRequest from './pages/GuideRequest/GuideRequest';
 
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
@@ -70,6 +71,7 @@ root.render(
             <Route path="/estadisticas" element={<Statistics />} />
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/support" element={<SupportPage />} />
+            <Route path="/guide-request" element={<GuideRequest />} />
           </Route>
 
           {/* Routes with LayoutAdmin */}
