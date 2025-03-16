@@ -2,6 +2,11 @@ import React from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import TipCard from "../../../components/Admin-components/admin-buttons/TipCard";
 import backpack from "../../../assets/images/landing-page-admin/backpack.webp";
+import hiker from "../../../assets/images/landing-page-admin/hiker.webp";
+import sunscreen from "../../../assets/images/landing-page-admin/skincare.webp";
+import smartphone from "../../../assets/images/landing-page-admin/smartphone.webp";
+import tree from "../../../assets/images/landing-page-admin/tree.webp";
+import water from "../../../assets/images/landing-page-admin/water.webp";
 
 const AdminTips = () => {
     // Variables de información relevante
@@ -17,7 +22,32 @@ const AdminTips = () => {
             imageSrc: backpack,
             title: "Lleva el equipo adecuado",
             description: "Viste capas de ropa que puedas ajustar según el clima y lleva calzado adecuado. No olvides una mochila con elementos esenciales como agua, comida y un botiquín."
-        }
+        },
+        {
+          imageSrc: water,
+          title: "Hidrátate",
+          description: "Bebe agua regularmente, incluso si no tienes sed. La altitud y el esfuerzo físico pueden deshidratarte más rápido de lo esperado."
+        },
+        {
+          imageSrc: tree,
+          title: "Respeta la naturaleza",
+          description: "Permanece en los senderos marcados, no disturbes la fauna y lleva tu basura de vuelta. Mantener el entorno limpio es fundamental."
+        },
+        {
+          imageSrc: hiker,
+          title: "Escucha a tu cuerpo",
+          description: "Presta atención a cómo te sientes y no dudes en detenerte si te sientes fatigado o si las condiciones climáticas empeoran."
+        },
+        {
+          imageSrc: smartphone,
+          title: "Lleva un teléfono o dispositivo GPS",
+          description: "Aunque no siempre haya recepción, un dispositivo GPS puede ser útil en caso de emergencia. Asegúrate de llevar una batería de repuesto."
+        },
+        {
+          imageSrc: sunscreen,
+          title: "Usa protector solar",
+          description: "Incluso en días nublados, los rayos UV pueden afectar tu piel. Usa un protector solar de amplio espectro y reaplícalo cada par de horas."
+        },
     ];
 
     return (
