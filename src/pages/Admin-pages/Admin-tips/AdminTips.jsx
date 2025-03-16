@@ -73,7 +73,7 @@ const AdminTips = () => {
             <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
 
             {/* Sección para la baraja de tips actual */}
-            <div className="flex flex-row gap-8">
+            <div className="flex flex-row gap-8 w-full">
                 {/* Parte izquierda: texto */}
                 <div className="flex flex-col justify-center items-start w-64">
                     <h1 className="text-white text-[43px] font-bold pt-6 pb-6">Baraja de Tips Actual</h1>
@@ -91,15 +91,17 @@ const AdminTips = () => {
                 </div>
 
                 {/* Parte derecha: Cartas de tips */}
-                <div className="flex flex-wrap justify-center gap-8">
-                    {tipsCards.map((tip, index) => (
-                        <TipCard
-                            key={index}
-                            imageSrc={tip.imageSrc}
-                            title={tip.title}
-                            description={tip.description}
-                        />
-                    ))}
+                <div className="flex-1 overflow-x-auto"> {/* Contenedor deslizable */}
+                    <div className="flex gap-8 flex-nowrap" style={{ minWidth: `${tipsCards.length * 320}px` }}> {/* Para que las cartas no pongan para abajo */}
+                        {tipsCards.map((tip, index) => (
+                            <TipCard
+                                key={index}
+                                imageSrc={tip.imageSrc}
+                                title={tip.title}
+                                description={tip.description}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
