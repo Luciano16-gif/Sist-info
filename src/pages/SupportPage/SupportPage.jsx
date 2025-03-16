@@ -246,7 +246,7 @@ function SupportPage() {
                             displayedUsers.map((user) => (
                                 <option key={user.id} value={user.id}>
                                     {currentUserData && currentUserData.userType === 'admin'
-                                        ? `${user.name} (${user.email}) - ${user.userType}`
+                                        ? `${user.name} - ${user.userType}`
                                         : user.name}
                                 </option>
                             ))}
