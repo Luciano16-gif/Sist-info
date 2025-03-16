@@ -33,7 +33,10 @@ function GalleryPage() {
             } else {
                 setUserImages([]);
             }
-            loadAllImages();
+            if (!showDeleteImages) { // Only load all if NOT in delete mode.
+              loadAllImages();
+            }
+
         });
 
         // Load available hashtags (from cache or Firestore)
@@ -53,7 +56,7 @@ function GalleryPage() {
             unsubscribeAuth();
             unsubscribeHashtags(); // Clean up the listener
         };
-    }, []);
+    }, [showDeleteImages]); // Important:  Add showDeleteImages to the dependency array!
 
 
 
@@ -316,9 +319,17 @@ function GalleryPage() {
 
             if (userGalleryDocSnap.exists()) {
                 const galleryData = userGalleryDocSnap.data();
-                setUserImages(galleryData.images && Array.isArray(galleryData.images) ? galleryData.images : []);
+                const loadedUserImages = galleryData.images && Array.isArray(galleryData.images) ? galleryData.images : [];
+                setUserImages(loadedUserImages);
+                 if (showDeleteImages) {
+                   setImages(loadedUserImages); // Set images to userImages when in delete mode
+                 }
+
             } else {
                 setUserImages([]);
+                if(showDeleteImages){ //If in delete mode and no user images, clear display
+                  setImages([]);
+                }
             }
         } catch (error) {
             console.error("Error loading user images:", error);
@@ -327,13 +338,16 @@ function GalleryPage() {
     };
 
     const toggleDeleteMode = () => {
-        setSelectedImage(null);
         setShowDeleteImages(!showDeleteImages);
-        setImages(showDeleteImages ? userImages : images); // Corrected toggle
-        if (!showDeleteImages) {
-            loadAllImages(); // Ensure all images are loaded when exiting delete mode
-        }
+        setSelectedImage(null);
 
+        if (!showDeleteImages) { // Entering delete mode, load user images
+          if (auth.currentUser) {
+             loadUserImages(auth.currentUser.email)
+          }
+        } else { // Exiting delete mode, load all images
+          loadAllImages();
+        }
     };
 
     const loadAllImages = async () => {
@@ -418,12 +432,12 @@ function GalleryPage() {
                     });
                 }
             }
-
+            //Update the state to reflect the deletion
             setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setSelectedImage(null);
             alert("Image deleted successfully.");
-            await loadUserImages(auth.currentUser.email);
+           // No need to reload user images here, state update handles it.
 
         } catch (error) {
             console.error("Error deleting image:", error);
