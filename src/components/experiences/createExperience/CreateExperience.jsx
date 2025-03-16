@@ -146,7 +146,7 @@ function CreateExperience() {
           Solo los guías y administradores pueden acceder a esta página.
         </p>
         <button 
-          className="boton-agregar-crear-experiencia" 
+          className={`boton-agregar-crear-experiencia ${unauthorized && 'self-center'}`} 
           onClick={() => navigate('/')}
           style={{ marginTop: '20px' }}
         >

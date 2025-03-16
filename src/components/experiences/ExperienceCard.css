@@ -141,3 +141,81 @@
 .button-experiences:hover {
     background-color: #4a6b38;
 }
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+    .experience-card-experiences {
+        flex-direction: column;
+        width: 90%;
+        margin: 15px auto;
+    }
+
+    .image-container-experiences {
+        width: 100%;
+        height: 200px;
+    }
+
+    .image-experiences {
+        border-radius: 8px 8px 0 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        height: 100%;
+    }
+
+    .experience-info-experiences {
+        padding: 15px;
+    }
+
+    .subtitle-experiences {
+        font-size: 1.1rem;
+        line-height: 1.2;
+    }
+
+    .description-experiences {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .data-text-experiences {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+
+    .rating-box-experiences {
+        font-size: 0.9rem;
+    }
+
+    .price-overlay-experiences {
+        font-size: 0.9rem;
+        padding: 3px 6px;
+    }
+
+    .button-experiences {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .experience-card-experiences {
+        width: 95%;
+    }
+
+    .image-container-experiences {
+        height: 180px;
+    }
+
+    .subtitle-experiences {
+        font-size: 1rem;
+    }
+
+    .description-experiences {
+        font-size: 0.8rem;
+    }
+
+    .dot-experiences, .dot-gray-experiences {
+        width: 8px;
+        height: 8px;
+    }
+}
