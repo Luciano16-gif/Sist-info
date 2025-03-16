@@ -1,14 +1,13 @@
 // GalleryPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { db, auth } from '../../../firebase-config'; // Remove 'storage' import
-import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove } from 'firebase/firestore';
+import { db, auth } from '../../../firebase-config';
+import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove, runTransaction, onSnapshot } from 'firebase/firestore'; // Added runTransaction and onSnapshot
 import './GalleryPage.css';
-import storageService from '../../../cloudinary-services/storage-service'; // Import the new storage service
-
+import storageService from '../../../cloudinary-services/storage-service';
 
 function GalleryPage() {
-    const [images, setImages] = useState([]); // All images for display
-    const [userImages, setUserImages] = useState([]); // Current user's images (for deletion)
+    const [images, setImages] = useState([]);
+    const [userImages, setUserImages] = useState([]);
     const imageContainerRef = useRef(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
@@ -17,42 +16,92 @@ function GalleryPage() {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [uploading, setUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0); // Keep for visual feedback
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [showDeleteImages, setShowDeleteImages] = useState(false);
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [hashtags, setHashtags] = useState([]);
+    const [availableHashtags, setAvailableHashtags] = useState([]);
+    const [newHashtag, setNewHashtag] = useState("");
+    const [hashtagError, setHashtagError] = useState("");
+
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
             if (user) {
                 await loadUserImages(user.email);
             } else {
                 setUserImages([]);
             }
-            // Load all images whenever the user changes (login/logout)
-            loadAllImages();
-        });
-        return () => unsubscribe();
-    }, []);
+            if (!showDeleteImages) { // Only load all if NOT in delete mode.
+              loadAllImages();
+            }
 
-    // Load ALL images (Firestore + Mock), filtering out reported images
-    useEffect(() => {
-      loadAllImages();
-    }, []);
+        });
+
+        // Load available hashtags (from cache or Firestore)
+        loadAvailableHashtags();
+
+        // Set up real-time listener for Hashtags collection (Optional, but recommended)
+        const unsubscribeHashtags = onSnapshot(collection(db, 'Hashtags'), (snapshot) => {
+             const updatedHashtags = snapshot.docs.map(doc => doc.id);
+             setAvailableHashtags(updatedHashtags);
+             // Update cache as well
+             localStorage.setItem('availableHashtags', JSON.stringify(updatedHashtags));
+             localStorage.setItem('hashtagsTimestamp', Date.now().toString());
+        });
+
+
+        return () => {
+            unsubscribeAuth();
+            unsubscribeHashtags(); // Clean up the listener
+        };
+    }, [showDeleteImages]); // Important:  Add showDeleteImages to the dependency array!
+
+
+
+   const loadAvailableHashtags = async () => {
+        try {
+            // Try to load from cache first
+            const cachedHashtags = localStorage.getItem('availableHashtags');
+            const cacheTimestamp = localStorage.getItem('hashtagsTimestamp');
+
+            if (cachedHashtags && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 3600000) { // 1 hour
+                setAvailableHashtags(JSON.parse(cachedHashtags));
+                return; // Exit early if loaded from cache
+            }
+
+            // If not in cache, or cache is expired, fetch from Firestore
+            const hashtagsCollection = collection(db, 'Hashtags');
+            const querySnapshot = await getDocs(hashtagsCollection);
+            const fetchedHashtags = [];
+            querySnapshot.forEach((doc) => {
+                fetchedHashtags.push(doc.id); // The ID is the hashtag
+            });
+
+            setAvailableHashtags(fetchedHashtags);
+
+            // Update cache
+            localStorage.setItem('availableHashtags', JSON.stringify(fetchedHashtags));
+            localStorage.setItem('hashtagsTimestamp', Date.now().toString());
+
+        } catch (error) {
+            console.error("Error loading available hashtags:", error);
+            // Handle error appropriately (e.g., show a message to the user)
+        }
+    };
+
+
 
     const scrollLeft = () => {
         if (imageContainerRef.current) {
-            imageContainerRef.current.scrollBy({
-                left: -440,
-                behavior: 'smooth'
-            });
+            imageContainerRef.current.scrollBy({ left: -440, behavior: 'smooth' });
         }
     };
 
     const scrollRight = () => {
         if (imageContainerRef.current) {
-            imageContainerRef.current.scrollBy({
-                left: 440,
-                behavior: 'smooth'
-            });
+            imageContainerRef.current.scrollBy({ left: 440, behavior: 'smooth' });
         }
     };
 
@@ -62,37 +111,27 @@ function GalleryPage() {
             setZoomLevel(1);
             setDragOffset({ x: 0, y: 0 });
         } else {
-            setSelectedImage(image);
+            setSelectedImage(image); // Allow selection in delete mode
         }
     };
 
-    const closeImage = (event) => {
-        event.stopPropagation();
+    const closeImage = () => {
         setSelectedImage(null);
         setZoomLevel(1);
         setDragOffset({ x: 0, y: 0 });
     };
 
-    const handleZoomIn = () => {
-        setZoomLevel(prevZoom => Math.min(prevZoom + 0.2, 3));
-    };
-
-    const handleZoomOut = () => {
-        setZoomLevel(prevZoom => Math.max(prevZoom - 0.2, 0.4));
-    };
+    const handleZoomIn = () => setZoomLevel(prevZoom => Math.min(prevZoom + 0.2, 3));
+    const handleZoomOut = () => setZoomLevel(prevZoom => Math.max(prevZoom - 0.2, 0.4));
 
     const handleWheel = (event) => {
         if (selectedImage && !showDeleteImages) {
             event.preventDefault();
-            if (event.deltaY < 0) {
-                handleZoomIn();
-            } else {
-                handleZoomOut();
-            }
+            event.deltaY < 0 ? handleZoomIn() : handleZoomOut();
         }
     };
 
-    const handleMouseDown = (event) => {
+     const handleMouseDown = (event) => {
         if (selectedImage && !showDeleteImages) {
             event.preventDefault();
             setIsDragging(true);
@@ -107,13 +146,8 @@ function GalleryPage() {
         setDragOffset({ x, y });
     };
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
-    const handleMouseLeave = () => {
-        setIsDragging(false);
-    };
+    const handleMouseUp = () => setIsDragging(false);
+    const handleMouseLeave = () => setIsDragging(false);
 
     const handleTouchStart = (event) => {
         if (selectedImage && !showDeleteImages) {
@@ -127,16 +161,15 @@ function GalleryPage() {
 
     const handleTouchMove = (event) => {
         if (!isDragging) return;
-        const x = event.touches[0].clientX - dragStart.x;
-        const y = event.touches[0].clientY - dragStart.y;  // Removed type annotation
+         const x = event.touches[0].clientX - dragStart.x;
+        const y = event.touches[0].clientY - dragStart.y;
         setDragOffset({ x, y });
     };
 
-    const handleTouchEnd = () => {
-        setIsDragging(false);
-    };
+    const handleTouchEnd = () => setIsDragging(false);
 
-    const handleFileUpload = async (event) => {
+
+    const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -146,100 +179,157 @@ function GalleryPage() {
             return;
         }
 
+        setSelectedFile(file);
+        setShowUploadModal(true);
+        setHashtags([]);
+        setHashtagError("");
+    };
+
+    const handleConfirmUpload = async () => {
+        if (!selectedFile) return;
+
+        if (hashtags.length === 0) {
+            setHashtagError("Please add at least one hashtag.");
+            return;
+        }
+        setHashtagError("");
+
         setUploading(true);
-        setUploadProgress(0); // Reset progress
+        setUploadProgress(0);
 
         try {
-            // Use the new storageService to upload
-            const uploadResult = await storageService.uploadFile('gallery', file);
-            setUploadProgress(100); // Instantly set to 100, since we don't have granular progress
+            const uploadResult = await storageService.uploadFile('gallery', selectedFile);
+            setUploadProgress(100); // Immediate feedback
             alert('File uploaded successfully!');
 
-
-            if (auth.currentUser) {
-                try {
-                    const user = auth.currentUser;
-                    const usersCollection = collection(db, 'lista-de-usuarios');
-                    const userQuery = query(usersCollection, where("email", "==", user.email));
-                    const userQuerySnapshot = await getDocs(userQuery);
-
-                    if (userQuerySnapshot.empty) {
-                        console.error('User not found in Firestore.');
-                        return;
-                    }
-
-                    const userDoc = userQuerySnapshot.docs[0];
-                    const userData = userDoc.data();
-                    const userName = `${userData.name} ${userData.lastName}`;
-
-                    const now = new Date();
-                    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}/${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-                    const galleryCollection = collection(db, 'Galeria de Imágenes');
-                    // *** CHANGE HERE: Use user.email as document ID ***
-                    const userGalleryDocRef = doc(galleryCollection, user.email);
-                    const userGalleryDocSnap = await getDoc(userGalleryDocRef);
-
-                    const imageData = {
-                        url: uploadResult.downloadURL, // Use the URL from Cloudinary
-                        uploadedBy: userName,  // Keep userName for display
-                        uploadDate: formattedDate
-                    };
-
-                    if (userGalleryDocSnap.exists()) {
-                        await updateDoc(userGalleryDocRef, {
-                            images: arrayUnion(imageData) //Removed the email field.
-                        });
-                        console.log("Image URL added to existing gallery document.");
-                    } else {
-                        await setDoc(userGalleryDocRef, {
-                            images: [imageData] //Removed the email field.
-                        });
-                        console.log("New gallery document created.");
-                    }
-
-                    const newImageData = {
-                        url: uploadResult.downloadURL,
-                        uploadedBy: userName,
-                        uploadDate: formattedDate
-                    };
-                    setImages(prevImages => [...prevImages, newImageData]);
-                    await loadUserImages(user.email); // Reload *user* images
-
-                } catch (firestoreError) {
-                    console.error("Error updating Firestore:", firestoreError);
-                    alert("Error saving image to user's gallery: " + firestoreError.message);
-                }
-            } else {
+            if (!auth.currentUser) {
                 console.error("No user logged in.");
                 alert("Please log in to upload images.");
+                return; // Early return if no user
             }
+
+            const user = auth.currentUser;
+            const usersCollection = collection(db, 'lista-de-usuarios');
+            const userQuery = query(usersCollection, where("email", "==", user.email));
+            const userQuerySnapshot = await getDocs(userQuery);
+
+            if (userQuerySnapshot.empty) {
+                console.error('User not found in Firestore.');
+                return; // Early return if user not found
+            }
+
+            const userDoc = userQuerySnapshot.docs[0];
+            const userData = userDoc.data();
+            const userName = `${userData.name} ${userData.lastName}`;
+
+            const now = new Date();
+            const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}/${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const galleryCollection = collection(db, 'Galeria de Imágenes');
+            const userGalleryDocRef = doc(galleryCollection, user.email);
+            const userGalleryDocSnap = await getDoc(userGalleryDocRef);
+
+            const imageData = {
+                url: uploadResult.downloadURL,
+                uploadedBy: userName,
+                uploadDate: formattedDate,
+                hashtags: hashtags,
+            };
+
+            if (userGalleryDocSnap.exists()) {
+                await updateDoc(userGalleryDocRef, { images: arrayUnion(imageData) });
+                console.log("Image URL added to existing gallery document.");
+            } else {
+                await setDoc(userGalleryDocRef, { images: [imageData] });
+                console.log("New gallery document created.");
+            }
+
+            // Update Hashtags collection (Crucial for efficiency)
+            for (const hashtag of hashtags) {
+                const hashtagRef = doc(db, 'Hashtags', hashtag);
+                const hashtagDoc = await getDoc(hashtagRef);
+
+                if (hashtagDoc.exists()) {
+                    // Increment count using a transaction (for concurrency safety)
+                    await runTransaction(db, async (transaction) => {
+                        const currentDoc = await transaction.get(hashtagRef); // Re-fetch in transaction
+                        const currentCount = currentDoc.exists() ? currentDoc.data().count : 0;
+                        transaction.update(hashtagRef, { count: currentCount + 1 });
+                    });
+                } else {
+                    // Create the hashtag document
+                    await setDoc(hashtagRef, { count: 1 });
+                }
+            }
+
+            // Update local state
+            setImages(prevImages => [...prevImages, imageData]);
+            await loadUserImages(user.email);
+
         } catch (uploadError) {
             console.error("Upload failed:", uploadError);
             alert("Error uploading file: " + uploadError.message);
         } finally {
-            setUploading(false); // Ensure this is always reset
+            setUploading(false);
             setUploadProgress(0);
+            setShowUploadModal(false);
+            setSelectedFile(null);
+            setHashtags([]);
         }
     };
 
+
+    const handleCancelUpload = () => {
+        setShowUploadModal(false);
+        setSelectedFile(null);
+        setHashtags([]);
+        setHashtagError("");
+    };
+
+    const handleAddHashtag = () => {
+        if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
+             const hashtagRegex = /^[a-zA-Z0-9_]+$/;
+            if (!hashtagRegex.test(newHashtag.trim())) {
+                setHashtagError("Hashtags can only contain letters, numbers, and underscores.");
+                return;
+            }
+            setHashtags([...hashtags, newHashtag.trim()]);
+            setNewHashtag("");
+            setHashtagError("");
+        }
+    };
+
+    const handleHashtagClick = (tag) => {
+        if (!hashtags.includes(tag)) {
+            setHashtags([...hashtags, tag]);
+        }
+    };
+
+    const handleRemoveHashtag = (tagToRemove) => {
+        setHashtags(hashtags.filter(tag => tag !== tagToRemove));
+    };
+
+
+
     const loadUserImages = async (userEmail) => {
         try {
-            // No need to query 'Lista de Usuarios' here, we have the email directly
             const galleryCollection = collection(db, 'Galeria de Imágenes');
-             // *** CHANGE HERE: Use userEmail as document ID ***
             const userGalleryDocRef = doc(galleryCollection, userEmail);
             const userGalleryDocSnap = await getDoc(userGalleryDocRef);
 
             if (userGalleryDocSnap.exists()) {
                 const galleryData = userGalleryDocSnap.data();
-                if (galleryData.images && Array.isArray(galleryData.images)) {
-                    setUserImages(galleryData.images);  // Update *userImages*
-                } else {
-                    setUserImages([]);
-                }
+                const loadedUserImages = galleryData.images && Array.isArray(galleryData.images) ? galleryData.images : [];
+                setUserImages(loadedUserImages);
+                 if (showDeleteImages) {
+                   setImages(loadedUserImages); // Set images to userImages when in delete mode
+                 }
+
             } else {
                 setUserImages([]);
+                if(showDeleteImages){ //If in delete mode and no user images, clear display
+                  setImages([]);
+                }
             }
         } catch (error) {
             console.error("Error loading user images:", error);
@@ -248,180 +338,151 @@ function GalleryPage() {
     };
 
     const toggleDeleteMode = () => {
-        setSelectedImage(null);
         setShowDeleteImages(!showDeleteImages);
+        setSelectedImage(null);
 
-        if (!showDeleteImages) {
-            // Switch to user images for deletion
-            setImages(userImages);
-        } else {
-            // Switch back to all images
-            loadAllImages();
+        if (!showDeleteImages) { // Entering delete mode, load user images
+          if (auth.currentUser) {
+             loadUserImages(auth.currentUser.email)
+          }
+        } else { // Exiting delete mode, load all images
+          loadAllImages();
         }
     };
-const loadAllImages = async () => {
-    try {
-        const galleryCollection = collection(db, 'Galeria de Imágenes');
-        const querySnapshot = await getDocs(galleryCollection);
-        let firestoreImages = [];
 
-        querySnapshot.forEach((doc) => {
-            const galleryData = doc.data();
-            if (galleryData.images && Array.isArray(galleryData.images)) {
-                galleryData.images.forEach(image => {
-                    // **FIX:** Check if image.url exists before using .split()
-                    if (image.url) {
-                        firestoreImages.push(image);
-                    } else {
-                        console.warn("Skipping image with missing URL:", image);
+    const loadAllImages = async () => {
+        try {
+            const galleryCollection = collection(db, 'Galeria de Imágenes');
+            const querySnapshot = await getDocs(galleryCollection);
+            let firestoreImages = [];
+
+            querySnapshot.forEach((doc) => {
+                const galleryData = doc.data();
+                if (galleryData.images && Array.isArray(galleryData.images)) {
+                    galleryData.images.forEach(image => {
+                        if (image.url) firestoreImages.push(image);
+                        else console.warn("Skipping image with missing URL:", image);
+                    });
+                }
+            });
+
+            // Report filtering (remains the same)
+            let reportedImageRefs = [];
+            if (auth.currentUser) {
+                const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
+                const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
+                const reporterDocSnap = await getDoc(reporterDocRef);
+
+                if (reporterDocSnap.exists()) {
+                    const reportedData = reporterDocSnap.data();
+                    if (reportedData.images && Array.isArray(reportedData.images)) {
+                        reportedImageRefs = reportedData.images.map(image => image.imageRef);
                     }
-                });
-            }
-        });
-
-        // Get reported images for the current user
-        let reportedImageRefs = [];
-        if (auth.currentUser) {
-            const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
-            const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
-            const reporterDocSnap = await getDoc(reporterDocRef);
-
-            if (reporterDocSnap.exists()) {
-                const reportedData = reporterDocSnap.data();
-                // **FIX:** Ensure reportedData.images exists and is an array
-                if (reportedData.images && Array.isArray(reportedData.images)) {
-                  reportedImageRefs = reportedData.images.map(image => image.imageRef);
                 }
             }
+            firestoreImages = firestoreImages.filter(image => !reportedImageRefs.includes(image.publicId || image.url));
+
+            setImages(firestoreImages); // Set directly, no mock images
+        } catch (error) {
+            console.error("Error loading all images:", error);
+            alert("Error loading images: " + error.message);
         }
-
-        // Filter out reported images
-        firestoreImages = firestoreImages.filter(image => {
-            // Use the publicId for comparison if available, otherwise fallback to URL
-            const imageIdentifier = image.publicId || image.url;
-            return !reportedImageRefs.includes(imageIdentifier);
-
-        });
-
-
-        // Combine Firestore images with mock images, avoiding duplicates  (NO MOCK IMAGES NOW)
-        //const allImages = [...mockImages];
-        let allImages = []; // Start with an empty array
-        firestoreImages.forEach(firestoreImage => {
-            if (!allImages.some(img => img.url === firestoreImage.url)) {
-                allImages.push(firestoreImage);
-            }
-        });
-
-        setImages(allImages); // Set the combined and filtered array
-    } catch (error) {
-        console.error("Error loading all images:", error);
-        alert("Error loading images: " + error.message);
-    }
-};
-
+    };
 
 
     const handleDeleteImage = async () => {
         if (!selectedImage) {
-            alert("Por favor, selecciona una imagen para borrar.");
+            alert("Please select an image to delete.");
             return;
         }
-
         if (!auth.currentUser) {
-            alert("Por favor, inicia sesión para borrar imágenes.");
+            alert("Please log in to delete images.");
             return;
         }
-        const publicId = selectedImage.publicId || storageService.ref(selectedImage.url).fullPath
 
+        const publicId = selectedImage.publicId || storageService.ref(selectedImage.url).fullPath;
         if (!publicId) {
-           console.error("Could not determine publicId for deletion.");
-           alert("Error: Could not determine image ID for deletion.");
-           return;
-         }
+            console.error("Could not determine publicId for deletion.");
+            alert("Error: Could not determine image ID for deletion.");
+            return;
+        }
 
         try {
-            // 1. Delete from Cloudinary
             await storageService.deleteFile(publicId);
 
-            // 2. Delete from Firestore
             const user = auth.currentUser;
-             // *** CHANGE HERE: Use user.email as document ID ***
             const galleryCollection = collection(db, 'Galeria de Imágenes');
-            const userGalleryDocRef = doc(galleryCollection, user.email); // Use email
+            const userGalleryDocRef = doc(galleryCollection, user.email);
+            await updateDoc(userGalleryDocRef, { images: arrayRemove(selectedImage) });
 
-            await updateDoc(userGalleryDocRef, {
-                images: arrayRemove(selectedImage)  // Remove the image object
-            });
-
-            // 3. Update Local State
-            setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url)); // Remove from userImages.
-
-            //Since now we are working with all images and user images, we have to filter in both states
+            // Remove hashtags from Hashtags collection (decrement count)
+             if (selectedImage.hashtags && Array.isArray(selectedImage.hashtags)) {
+                for (const hashtag of selectedImage.hashtags) {
+                    const hashtagRef = doc(db, 'Hashtags', hashtag);
+                    await runTransaction(db, async (transaction) => {
+                        const currentDoc = await transaction.get(hashtagRef);
+                        if (currentDoc.exists()) { // Check if still exists
+                            const currentCount = currentDoc.data().count;
+                            if (currentCount > 1) {
+                                transaction.update(hashtagRef, { count: currentCount - 1 });
+                            } else {
+                                transaction.delete(hashtagRef); // Delete if count is 1
+                            }
+                        }
+                    });
+                }
+            }
+            //Update the state to reflect the deletion
+            setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
-            setSelectedImage(null);  // Clear selected image (close modal)
-            alert("Imagen borrada exitosamente.");
-            await loadUserImages(auth.currentUser.email); //  Reload images after adding
+            setSelectedImage(null);
+            alert("Image deleted successfully.");
+           // No need to reload user images here, state update handles it.
 
         } catch (error) {
             console.error("Error deleting image:", error);
-            alert("Error al borrar la imagen: " + error.message);
+            alert("Error deleting image: " + error.message);
         }
     };
 
-const reportImage = async (image) => {
-    if (!auth.currentUser) {
-        alert("Por favor, inicia sesión para reportar imágenes.");
-        return;
-    }
-
-    const reporterEmail = auth.currentUser.email;
-    const uploaderEmail = image.uploadedBy;
-    // *** CHANGE:  We now have the uploader's email directly ***
-    // No need to query the 'Lista de Usuarios' collection
-
-    // Prevent self-reporting:
-    if (reporterEmail === image.uploadedBy) { //uploadedBy now it's the email
-        alert("No puedes reportar tus propias imágenes.");
-        return;
-    }
-
-     const imageIdentifier = image.publicId || image.url;
-    const imageRef = imageIdentifier;
-
-    try {
-        const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
-        const reporterDocRef = doc(reportedImagesCollection, reporterEmail);
-        const reporterDocSnap = await getDoc(reporterDocRef);
-
-        const reportData = {
-            imageRef: imageRef,
-            uploaderEmail: image.uploadedBy // Store the uploader's email directly
-        };
-
-        if (reporterDocSnap.exists()) {
-            await updateDoc(reporterDocRef, {
-                images: arrayUnion(reportData)
-            });
-            console.log("Image report added to existing document.");
-        } else {
-            await setDoc(reporterDocRef, {
-                images: [reportData]
-            });
-            console.log("New report document created.");
+    const reportImage = async (image) => {
+        if (!auth.currentUser) {
+            alert("Please log in to report images.");
+            return;
         }
 
-        // Remove the image from the *current user's* view
-        setImages(prevImages => prevImages.filter(img => img.url !== image.url));
-        alert("Imagen reportada exitosamente.");
+        const reporterEmail = auth.currentUser.email;
+        if (reporterEmail === image.uploadedBy) {
+            alert("You cannot report your own images.");
+            return;
+        }
 
-    } catch (error) {
-        console.error("Error reporting image:", error);
-        alert("Error al reportar la imagen: " + error.message);
-    }
-};
+        const imageIdentifier = image.publicId || image.url;
+        const imageRef = imageIdentifier;
 
+        try {
+            const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
+            const reporterDocRef = doc(reportedImagesCollection, reporterEmail);
+            const reporterDocSnap = await getDoc(reporterDocRef);
 
+            const reportData = { imageRef, uploaderEmail: image.uploadedBy };
+
+            if (reporterDocSnap.exists()) {
+                await updateDoc(reporterDocRef, { images: arrayUnion(reportData) });
+                console.log("Image report added to existing document.");
+            } else {
+                await setDoc(reporterDocRef, { images: [reportData] });
+                console.log("New report document created.");
+            }
+
+            setImages(prevImages => prevImages.filter(img => img.url !== image.url));
+            alert("Image reported successfully.");
+
+        } catch (error) {
+            console.error("Error reporting image:", error);
+            alert("Error reporting image: " + error.message);
+        }
+    };
 
     return (
         <div className="galeria-page-gallery">
@@ -473,12 +534,70 @@ const reportImage = async (image) => {
                 </div>
             )}
 
+            {/* Upload Modal */}
+            {showUploadModal && (
+                <div className="modal-overlay-gallery">
+                    <div className="modal-content-container-gallery" style={{ maxWidth: '500px' }}>
+                        <button className="close-button-gallery" onClick={handleCancelUpload}>X</button>
+                        <h2>Upload Image</h2>
+                        {selectedFile && (
+                            <img src={URL.createObjectURL(selectedFile)} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                        )}
+
+                        {/* Hashtag Input */}
+                        <div style={{ marginTop: '20px', marginBottom: '10px', width: "100%" }}>
+                            <label htmlFor="hashtag-input" style={{ color: 'white', display: 'block', marginBottom: "5px" }}>Hashtags:</label>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', width: '100%' }}>
+                                <input
+                                    type="text"
+                                    id="hashtag-input"
+                                    value={newHashtag}
+                                    onChange={(e) => setNewHashtag(e.target.value)}
+                                    placeholder="Añade un hashtag"
+                                    style={{ flexGrow: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddHashtag(); }}
+
+                                />
+                                <button onClick={handleAddHashtag} style={{ padding: '8px 12px', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', border: 'none' }}>Añadir</button>
+                            </div>
+                            {hashtagError && <p style={{ color: 'red', marginTop: '5px' }}>{hashtagError}</p>}
+
+                            {/* Display added hashtags */}
+                            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                {hashtags.map((tag) => (
+                                    <span key={tag} style={{ backgroundColor: '#ddd', padding: '5px', borderRadius: '4px', display: 'flex', alignItems: "center", gap: '2px' }}>
+                                        {tag}
+                                        <button onClick={() => handleRemoveHashtag(tag)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>x</button>
+                                    </span>
+                                ))}
+                            </div>
+
+                            {/* Display available hashtags */}
+                            <div style={{ marginTop: '10px' }}>
+                                <p style={{ color: 'white', marginBottom: '5px' }}>Hashtags Disponibles:</p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                    {availableHashtags.map((tag) => (
+                                        <span key={tag} style={{ backgroundColor: '#eee', padding: '5px', borderRadius: '4px', cursor: 'pointer' }} onClick={() => handleHashtagClick(tag)}>
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button disabled={uploading} onClick={handleConfirmUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', border: 'none', marginTop: "20px" }}>
+                        {uploading ? 'Subiendo...' : 'Publicar imagen'}
+                        </button>
+                        <button onClick={handleCancelUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#ccc', color: 'black', border: 'none', marginTop: '10px', marginLeft: '3px' }}>Cancelar</button>
+                    </div>
+                </div>
+            )}
+
             {selectedImage && !showDeleteImages && (
                 <div className="modal-overlay-gallery" onWheel={handleWheel}>
-                    {/* Close button (ensured it's always visible) */}
-
                     <div className="modal-content-container-gallery"
-                        onMouseDown={handleMouseDown}
+                         onMouseDown={handleMouseDown}
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseLeave}
@@ -514,6 +633,10 @@ const reportImage = async (image) => {
                         <div className="image-info-gallery">
                             <p>Publicado por: {selectedImage.uploadedBy}</p>
                             <p>Fecha: {selectedImage.uploadDate}</p>
+                            {/* Display Hashtags */}
+                            {selectedImage.hashtags && selectedImage.hashtags.length > 0 && (
+                                <p>Hashtags: {selectedImage.hashtags.join(', ')}</p>
+                            )}
                         </div>
 
                         <div className="zoom-controls-gallery">

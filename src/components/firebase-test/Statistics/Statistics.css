@@ -8,7 +8,7 @@
     padding-right: 1rem;
     padding-top: 2rem;
     padding-bottom: 2rem;
-    background-color: #1a2a1f; /* Dark green background for the container */
+    background-color: #1b3021; /* Dark green background for the container */
     min-height: 100vh; /* Ensure it fills at least the screen height */
 }
 
@@ -56,7 +56,7 @@
 
 /* Individual chart containers */
 .bg-light-green-statistics {
-    background-color: #416043; /* Light green color */
+    background-color: #0d300f; /* Light green color */
 }
 
 .p-6-statistics {
@@ -91,6 +91,9 @@
 }
 .text-gray-700-statistics {
     color: rgb(164, 247, 119);
+    margin-bottom: 18px;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 /* Loading spinner (using Tailwind classes) */
@@ -138,7 +141,7 @@
 }
 
 .border-blue-500-statistics {
-    border-color: #3b82f6;
+    border-color: #67a1ff;
 }
 
 @keyframes spin {
