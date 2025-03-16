@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TipCard = ({ imageSrc, title, description }) => {
+const TipCard = ({ imageSrc, title, description, type }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false); // Estado para mostrar el pop-up de edición
     const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Estado para mostrar el pop-up de éxito
@@ -72,30 +72,46 @@ const TipCard = ({ imageSrc, title, description }) => {
                     <div className="flex flex-col p-12 items-center justify-center">
                         <img src={imageSrc} className="w-[133.432px] h-auto" />
                     </div>
-
                     {/* Divisor */}
                     <hr className="border-t border-white-600 w-full" />
-
                     {/* Parte inferior de la carta */}
                     <h2 className="text-[26px] font-bold text-center mt-2 leading-7">{title}</h2>
                     <p className="text-center text-[15px] p-4 leading-5">{description}</p>
                 </div>
-
                 {/* Botones de Editar y Eliminar */}
                 {isHovered && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70">
-                        <button 
-                            className="bg-gray-500 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full mb-4"
-                            onClick={handleEditClick}
-                        >
-                            Editar
-                        </button>
-                        <button 
-                            className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
-                            onClick={handleDeleteClick}
-                        >
-                            Eliminar
-                        </button>
+                        {type === 'solicitud' ? (
+                            <>
+                                <button 
+                                    className="bg-gray-500 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-full mb-4"
+                                    onClick={handleAcceptClick}
+                                >
+                                    Aceptar
+                                </button>
+                                <button 
+                                    className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleDeleteClick}
+                                >
+                                    Eliminar
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button 
+                                    className="bg-gray-500 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full mb-4"
+                                    onClick={handleEditClick}
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleDeleteClick}
+                                >
+                                    Eliminar
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
