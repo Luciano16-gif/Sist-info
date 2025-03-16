@@ -1,22 +1,51 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useScrollDetection from "./useScrollDetection";
 import { useAuth } from "../contexts/AuthContext";
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
-
 const TopMenu = () => {
   const scrolled = useScrollDetection();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, userRole } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isIpadPro, setIsIpadPro] = useState(false);
+  
+  // Check if the device is iPad Pro based on screen width
+  // See explanation of why in Layout.jsx
+  useEffect(() => {
+    const checkIpadPro = () => {
+      // iPad Pro typically has 1024px width
+      const isIpadProSize = window.innerWidth >= 1020 && window.innerWidth <= 1030;
+      setIsIpadPro(isIpadProSize);
+    };
+    
+    checkIpadPro();
+    window.addEventListener('resize', checkIpadPro);
+    
+    return () => window.removeEventListener('resize', checkIpadPro);
+  }, []);
 
-  const menuItems = [
+  // Define base menu items
+  const baseMenuItems = [
     { href: "/experiencias", label: "Experiencias" },
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
     { href: "/foro", label: "Foro" },
   ];
+
+  // Create final menu items array with conditional item for admin/guide
+  const menuItems = [...baseMenuItems];
+  
+  // Add "Crear Experiencia" for admin and guide users after "Experiencias"
+  if (currentUser && (userRole === 'admin' || userRole === 'guia')) {
+    menuItems.splice(1, 0, { href: "/crear-experiencia", label: "Crear Experiencia" });
+  }
+
+  // Add admin-specific menu items
+  if (currentUser && userRole === 'admin') {
+    menuItems.push({ href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" });
+  }
 
   const sesionItems = [
     { href: "/signUpPage", label: "Registrarse"},
@@ -31,7 +60,6 @@ const TopMenu = () => {
     try {
       await logout();
       setShowDropdown(false);
-      // AuthContext will handle the redirect
     } catch (error) {
       console.error("Failed to log out", error);
     }
@@ -41,7 +69,6 @@ const TopMenu = () => {
   const getUserInitials = () => {
     if (!currentUser) return "V";
     
-    // Try to get name from Firebase user
     const displayName = currentUser.displayName || "";
     if (displayName) {
       return displayName
@@ -52,7 +79,6 @@ const TopMenu = () => {
         .substring(0, 2);
     }
     
-    // Fallback to email
     return currentUser.email.charAt(0).toUpperCase();
   };
 
@@ -73,12 +99,14 @@ const TopMenu = () => {
         ${scrolled ? 'bg-opacity-95' : 'bg-opacity-95'}
         transition-all
         duration-300
-        min-h-16
+        ${isIpadPro ? 'min-h-32' : 'min-h-16'}
         z-50
       `}
       style={{ zIndex: 9999 }}
     >
-      <div className="w-full flex flex-wrap items-center justify-between px-4">
+      {/* Use a 3-column grid layout for better centering */}
+      <div className="w-full grid grid-cols-3 items-center px-4">
+        {/* Left section - Logo and user info */}
         <div className="flex items-center">
           <Link to={"/"}>
             <img 
@@ -98,15 +126,19 @@ const TopMenu = () => {
           )}
         </div>
         
-        <ul className="flex flex-row uppercase font-ysabeau underline text-xs lg:text-sm space-x-3 md:space-x-4 lg:space-x-8">
-          {menuItems.map((item) => (
-            <li key={item.href} className="hover:scale-110 transform transition-all duration-300">
-              <Link to={item.href} className="text-center whitespace-nowrap">{item.label}</Link>
-            </li>
-          ))}
-        </ul>
+        {/* Center section - Main navigation */}
+        <div className="flex justify-center">
+          <ul className="flex flex-wrap justify-center uppercase font-ysabeau underline text-xs lg:text-sm gap-3 md:gap-4 lg:gap-6">
+            {menuItems.map((item) => (
+              <li key={item.href} className="hover:scale-110 transform transition-all duration-300 whitespace-nowrap">
+                <Link to={item.href} className="text-center">{item.label}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
         
-        <div className="flex">
+        {/* Right section - User profile/login */}
+        <div className="flex justify-end">
           {currentUser ? (
             // User is logged in - show profile dropdown
             <div className="relative">
@@ -139,6 +171,26 @@ const TopMenu = () => {
                   >
                     Mi Perfil
                   </Link>
+                  {/* Conditionally add Crear Experiencia to dropdown too for visibility */}
+                  {(userRole === 'admin' || userRole === 'guia') && (
+                    <Link 
+                      to="/crear-experiencia" 
+                      className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      Crear Experiencia
+                    </Link>
+                  )}
+                  {/* Admin-specific dropdown item */}
+                  {userRole === 'admin' && (
+                    <Link 
+                      to="/admin-experiencias-pendientes" 
+                      className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
+                      onClick={() => setShowDropdown(false)}
+                    >
+                      Experiencias Pendientes
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
