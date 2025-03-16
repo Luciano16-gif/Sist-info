@@ -1,19 +1,19 @@
-// TipCard.jsx
 import React, { useState } from 'react';
 
 const TipCard = ({ imageSrc, title, description }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const [isEditing, setIsEditing] = useState(false); // Estado para mostrar el pop-up
+    const [isEditing, setIsEditing] = useState(false); // Estado para mostrar el pop-up de edición
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false); // Estado para mostrar el pop-up de éxito
     const [editedTitle, setEditedTitle] = useState(title); // Estado para el título editado
     const [editedDescription, setEditedDescription] = useState(description); // Estado para la descripción editada
     const [editedImage, setEditedImage] = useState(imageSrc); // Estado para la imagen editada
 
-    // Función para abrir el pop-up
+    // Función para abrir el pop-up de edición
     const handleEditClick = () => {
         setIsEditing(true);
     };
 
-    // Función para cerrar el pop-up
+    // Función para cerrar el pop-up de edición
     const handleClosePopup = () => {
         setIsEditing(false);
     };
@@ -28,6 +28,18 @@ const TipCard = ({ imageSrc, title, description }) => {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    // Función para manejar el botón "Aceptar"
+    const handleAcceptClick = () => {
+        console.log('Cambios guardados:', editedTitle, editedDescription, editedImage);
+        setIsEditing(false); // Cerrar el pop-up de edición
+        setShowSuccessPopup(true); // Mostrar el pop-up de guardado exitodo
+    };
+
+    // Función para cerrar el pop-up de guaradado éxito
+    const handleCloseSuccessPopup = () => {
+        setShowSuccessPopup(false); // Cerrar el pop-up 
     };
 
     return (
@@ -122,13 +134,30 @@ const TipCard = ({ imageSrc, title, description }) => {
                             {/* Botón Aceptar */}
                             <button 
                                 className="bg-green-500 text-white font-bold py-2 px-4 rounded-full self-end"
-                                onClick={() => {
-                                    console.log('Cambios guardados:', editedTitle, editedDescription, editedImage);
-                                    handleClosePopup();
-                                }}
+                                onClick={handleAcceptClick}
                             >
                                 Aceptar
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Pop-up de éxito */}
+            {showSuccessPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-[#556052] w-[400px] h-[200px] rounded-xl p-8 relative">
+                        {/* Botón de cerrar */}
+                        <button 
+                            className="absolute top-4 right-4 text-white text-2xl font-bold"
+                            onClick={handleCloseSuccessPopup}
+                        >
+                            &times;
+                        </button>
+
+                        {/* Pop-up de guardado con éxito */}
+                        <div className="flex flex-col items-center justify-center space-y-6 h-full">
+                            <p className="text-white text-[25px] font-bold">Cambios guardados con éxito</p>
                         </div>
                     </div>
                 </div>
