@@ -59,7 +59,7 @@ const AdminTips = () => {
     const solicitudCards = [
         {
             imageSrc: nublado,
-            title: "Conoce las condiciones meteorológicas",
+            title: "Conoce condiciones meteorológicas",
             description: "Antes de salir, revisa el pronóstico del tiempo. Las condiciones pueden cambiar rápidamente en la montaña, así que prepárate para escenarios inesperados."
         },
         {

@@ -9,6 +9,10 @@ const TipCard = ({ imageSrc, title, description, type }) => {
     const [editedImage, setEditedImage] = useState(imageSrc); // Estado para la imagen editada
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // Estado para mostrar el pop-up de confirmación de eliminación
 
+    // Nuevos estados para los pop-ups de las solicitudes
+    const [showAcceptPopup, setShowAcceptPopup] = useState(false); // Estado para mostrar el pop-up de aceptación
+    const [showDeleteSolicitudPopup, setShowDeleteSolicitudPopup] = useState(false); // Estado para mostrar el pop-up de eliminación de solicitud
+
     // Función para abrir el pop-up de edición
     const handleEditClick = () => {
         setIsEditing(true);
@@ -31,11 +35,15 @@ const TipCard = ({ imageSrc, title, description, type }) => {
         }
     };
 
-    // Función para manejar el botón "Aceptar"
+    // Función para manejar el botón "Aceptar" en las solicitudes
     const handleAcceptClick = () => {
-        console.log('Cambios guardados:', editedTitle, editedDescription, editedImage);
-        setIsEditing(false); // Cerrar el pop-up de edición
-        setShowSuccessPopup(true); // Mostrar el pop-up de guardado exitoso
+        if (type === 'solicitud') {
+            setShowAcceptPopup(true);
+        } else {
+            console.log('Cambios guardados:', editedTitle, editedDescription, editedImage);
+            setIsEditing(false); // Cerrar el pop-up de edición
+            setShowSuccessPopup(true); // Mostrar el pop-up de guardado exitoso
+        }
     };
 
     // Función para cerrar el pop-up de guardado exitoso
@@ -57,6 +65,27 @@ const TipCard = ({ imageSrc, title, description, type }) => {
     // Función para cancelar la eliminación
     const handleCancelDelete = () => {
         setShowDeleteConfirmation(false);
+    };
+
+    // Función para cerrar el pop-up de aceptación de solicitud
+    const handleCloseAcceptPopup = () => {
+        setShowAcceptPopup(false);
+    };
+
+    // Función para manejar el botón "Eliminar" en las solicitudes
+    const handleDeleteSolicitudClick = () => {
+        setShowDeleteSolicitudPopup(true);
+    };
+
+    // Función para confirmar la eliminación de la solicitud
+    const handleConfirmDeleteSolicitud = () => {
+        console.log('Solicitud eliminada');
+        setShowDeleteSolicitudPopup(false);
+    };
+
+    // Función para cancelar la eliminación de la solicitud
+    const handleCancelDeleteSolicitud = () => {
+        setShowDeleteSolicitudPopup(false);
     };
 
     return (
@@ -91,7 +120,7 @@ const TipCard = ({ imageSrc, title, description, type }) => {
                                 </button>
                                 <button 
                                     className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
-                                    onClick={handleDeleteClick}
+                                    onClick={handleDeleteSolicitudClick}
                                 >
                                     Eliminar
                                 </button>
@@ -221,6 +250,56 @@ const TipCard = ({ imageSrc, title, description, type }) => {
                                 <button 
                                     className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
                                     onClick={handleCancelDelete}
+                                >
+                                    No
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Pop-up de aceptación de solicitud */}
+            {showAcceptPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-[#556052] w-[600px] h-[200px] rounded-xl p-8 relative">
+                        {/* Botón de cerrar */}
+                        <button 
+                            className="absolute top-4 right-4 text-white text-2xl font-bold"
+                            onClick={handleCloseAcceptPopup}
+                        >
+                            &times;
+                        </button>
+                        <div className="flex flex-col items-center justify-center space-y-6 h-full">
+                            <p className="text-white text-[30px] font-bold">¡Solicitud agregada a nuestra lista pública de tips!</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Pop-up de confirmación de eliminación de solicitud */}
+            {showDeleteSolicitudPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-[#556052] w-[600px] h-[250px] rounded-xl p-8 relative">
+                        {/* Botón de cerrar */}
+                        <button 
+                            className="absolute top-4 right-4 text-white text-2xl font-bold"
+                            onClick={handleCancelDeleteSolicitud}
+                        >
+                            &times;
+                        </button>
+                        <div className="flex flex-col items-center justify-center space-y-6 h-full">
+                            <p className="text-white text-[30px] font-bold">¿Seguro que quieres eliminar esta solicitud de tip?</p>
+                            <p className="text-white text-[20px]">No se publicará y desaparecerá de las solicitudes</p>
+                            <div className="flex space-x-4">
+                                <button 
+                                    className="bg-gray-500 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleConfirmDeleteSolicitud}
+                                >
+                                    Sí
+                                </button>
+                                <button 
+                                    className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleCancelDeleteSolicitud}
                                 >
                                     No
                                 </button>
