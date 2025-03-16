@@ -11,7 +11,6 @@ const TopMenu = () => {
   const [isIpadPro, setIsIpadPro] = useState(false);
   
   // Check if the device is iPad Pro based on screen width
-  // See explanation of why in Layout.jsx
   useEffect(() => {
     const checkIpadPro = () => {
       if (userRole === 'usuario') return;
@@ -26,7 +25,7 @@ const TopMenu = () => {
     return () => window.removeEventListener('resize', checkIpadPro);
   }, []);
 
-  // Define base menu items
+  // Define base menu items - SIMPLIFIED for top navigation
   const baseMenuItems = [
     { href: "/experiencias", label: "Experiencias" },
     { href: "/equipo", label: "Nuestro Equipo" },
@@ -35,18 +34,8 @@ const TopMenu = () => {
     { href: "/foro", label: "Foro" },
   ];
 
-  // Create final menu items array with conditional item for admin/guide
+  // Create final menu items array 
   const menuItems = [...baseMenuItems];
-  
-  // Add "Crear Experiencia" for admin and guide users after "Experiencias"
-  if (currentUser && (userRole === 'admin' || userRole === 'guia')) {
-    menuItems.splice(1, 0, { href: "/crear-experiencia", label: "Crear Experiencia" });
-  }
-
-  // Add admin-specific menu items
-  if (currentUser && userRole === 'admin') {
-    menuItems.push({ href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" });
-  }
 
   const sesionItems = [
     { href: "/signUpPage", label: "Registrarse"},
@@ -162,9 +151,9 @@ const TopMenu = () => {
                 )}
               </button>
               
-              {/* Dropdown menu */}
+              {/* Complete dropdown menu with ALL navigation options */}
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-700">
+                <div className="absolute right-0 mt-2 w-48 bg-gray-800 shadow-lg py-1 z-50 border border-gray-700">
                   <Link 
                     to="/profile-management-page" 
                     className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
@@ -172,7 +161,17 @@ const TopMenu = () => {
                   >
                     Mi Perfil
                   </Link>
-                  {/* Conditionally add Crear Experiencia to dropdown too for visibility */}
+                  
+                  {/* All navigation items moved to dropdown */}
+                  <Link 
+                    to="/user-requests" 
+                    className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    Mis Solicitudes
+                  </Link>
+                  
+                  {/* Conditionally add Crear Experiencia to dropdown */}
                   {(userRole === 'admin' || userRole === 'guia') && (
                     <Link 
                       to="/crear-experiencia" 
@@ -182,16 +181,27 @@ const TopMenu = () => {
                       Crear Experiencia
                     </Link>
                   )}
-                  {/* Admin-specific dropdown item */}
+                  
+                  {/* Admin-specific dropdown items */}
                   {userRole === 'admin' && (
-                    <Link 
-                      to="/admin-experiencias-pendientes" 
-                      className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Experiencias Pendientes
-                    </Link>
+                    <>
+                      <Link 
+                        to="/admin-experiencias-pendientes" 
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        Experiencias Pendientes
+                      </Link>
+                      <Link 
+                        to="/admin-guias-pendientes" 
+                        className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        Guías Pendientes
+                      </Link>
+                    </>
                   )}
+                  
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"

@@ -1,4 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const HeroText = () => {
   const { currentUser } = useAuth();
@@ -28,9 +29,12 @@ const HeroText = () => {
                     <p className="text-sm md:text-base max-w-2xl">
                       Tu aventura comienza aquí. Reserva tu excursión hoy mismo y vive una experiencia inolvidable en Caracas.
                     </p>
-                    <button className="bg-[#AAACA8] text-white px-6 py-3 rounded-full mt-4 hover:bg-opacity-90 transition-all">
-                      Únete a la aventura
-                    </button>
+                    <Link to={"/SignUpPage"}>
+                        <button className="bg-[#AAACA8] text-white px-6 py-3 rounded-full mt-4 hover:bg-opacity-90 transition-all">
+                        Únete a la aventura
+                        </button>
+                    </Link>
+
                 </div>
             )}
         </div>

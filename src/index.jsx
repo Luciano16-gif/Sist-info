@@ -33,10 +33,11 @@ import ReviewsPage from './pages/ReviewsPage/ReviewsPage';
 import SupportPage from './pages/SupportPage/SupportPage';
 import GuideRequest from './pages/GuideRequest/GuideRequest';
 import SearchTest from './components/SearchTest/SearchTest';
-
+import UserRequestsPage from './pages/User-requests-page/UserRequestsPage';
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
 import AdminExperienceRequests from './pages/Admin-experience-requests/AdminExperienceRequests';
+import AdminGuideRequests from './pages/Admin-guide-requests/AdminGuideRequests';
 
 //test
 // import PayPalTest from './pages/BookingProcessPage/PalPayTest';
@@ -75,6 +76,7 @@ root.render(
             <Route path="/support" element={<SupportPage />} />
             <Route path="/guide-request" element={<GuideRequest />} />
             <Route path="/search-test" element={<SearchTest />} />
+            <Route path="/user-requests" element={<UserRequestsPage />} />
           </Route>
 
           {/* Routes with LayoutAdmin */}
@@ -82,6 +84,7 @@ root.render(
             {/* Admin Routes */}
             <Route path="/admin-landing" element={<AdminLanding />} />
             <Route path="/admin-experiencias-pendientes" element={<AdminExperienceRequests />} />
+            <Route path="/admin-guias-pendientes" element={<AdminGuideRequests />} />
             {/* <Route path="/paypal-test" element={<PayPalTest />} /> */}
           </Route>
 

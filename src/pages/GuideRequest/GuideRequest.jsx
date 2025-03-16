@@ -68,10 +68,12 @@ function GuideRequest() {
                         address: completeUserData.address || '',
                     }));
                     
-                    // Check if user is already a guide
-                    if (userRole === 'guia') {
+                    // Check if user is already a guide or an admin
+                    if (userRole === 'guia' || userRole === 'admin') {
                         setIsFormDisabled(true);
-                        setSubmitError("Ya eres un guía. No puedes enviar otra solicitud.");
+                        setSubmitError(userRole === 'guia' 
+                            ? "Ya eres un guía. No puedes enviar otra solicitud." 
+                            : "Los administradores no pueden enviar solicitudes de guía.");
                     }
                 } else {
                     console.warn("Usuario no encontrado en Firestore:", currentUser.email);
@@ -162,20 +164,47 @@ function GuideRequest() {
             if (!dateRegex.test(formData.birthDate)) {
                  tempErrors.birthDate = "Formato de fecha inválido. Use DD/MM/AAAA.";
                  isValid = false;
+            } else {
+                // Parse the date components
+                const [day, month, year] = formData.birthDate.split('/').map(Number);
+                
+                // JavaScript months are 0-indexed (0 = January, 11 = December)
+                const dateObj = new Date(year, month - 1, day);
+                
+                // Check if the date is valid (if date is invalid, the components won't match what we set)
+                const isValidDate = dateObj.getDate() === day && 
+                                   dateObj.getMonth() === month - 1 && 
+                                   dateObj.getFullYear() === year;
+                
+                if (!isValidDate) {
+                    tempErrors.birthDate = "Fecha inválida. Por favor ingrese una fecha que exista en el calendario.";
+                    isValid = false;
+                } else {
+                    // Date is valid, now validate the year range
+                    const currentYear = new Date().getFullYear();
+                    
+                    // Assuming minimum age is 18 and maximum age is 100
+                    if (year > currentYear - 18 || year < currentYear - 100) {
+                        tempErrors.birthDate = `El año de nacimiento debe estar entre ${currentYear - 100} y ${currentYear - 18}.`;
+                        isValid = false;
+                    }
+                }
             }
         }
         if (!formData.weeklyHours) {
             tempErrors.weeklyHours = "Horas semanales son requeridas.";
             isValid = false;
-        } else if (isNaN(parseInt(formData.weeklyHours)) || parseInt(formData.weeklyHours) <= 0 ) {
+        } else if (isNaN(parseInt(formData.weeklyHours)) || parseInt(formData.weeklyHours) <= 0) {
             tempErrors.weeklyHours = "Ingrese un número de horas válido (mayor que cero).";
             isValid = false;
-
+        } else if (parseInt(formData.weeklyHours) > 40) {
+            tempErrors.weeklyHours = "El máximo de horas semanales permitido es 40.";
+            isValid = false;
         }
         if (!formData.weeklyDays) {
             tempErrors.weeklyDays = "Días semanales son requeridos.";
             isValid = false;
-        }else if (isNaN(parseInt(formData.weeklyDays)) || parseInt(formData.weeklyDays) <= 0 || parseInt(formData.weeklyDays) > 7) {
+        } else if (isNaN(parseInt(formData.weeklyDays)) || parseInt(formData.weeklyDays) <= 0 || parseInt(formData.weeklyDays) > 7) {
             tempErrors.weeklyDays = "Ingrese un número de días válido (entre 1 y 7).";
             isValid = false;
         }
@@ -406,6 +435,7 @@ function GuideRequest() {
                                 value={formData.weeklyHours}
                                 onChange={handleChange}
                                 placeholder='0'
+                                max="40"
                                 disabled={isFormDisabled}
                             />
                              {errors.weeklyHours && <div className="form-error-guide-request">{errors.weeklyHours}</div>}
@@ -420,6 +450,8 @@ function GuideRequest() {
                                 value={formData.weeklyDays}
                                 onChange={handleChange}
                                 placeholder='0'
+                                min="1"
+                                max="7"
                                 disabled={isFormDisabled}
                             />
                              {errors.weeklyDays && <div className="form-error-guide-request">{errors.weeklyDays}</div>}
