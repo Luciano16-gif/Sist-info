@@ -14,6 +14,7 @@ const TopMenu = () => {
   // See explanation of why in Layout.jsx
   useEffect(() => {
     const checkIpadPro = () => {
+      if (userRole === 'usuario') return;
       // iPad Pro typically has 1024px width
       const isIpadProSize = window.innerWidth >= 1020 && window.innerWidth <= 1030;
       setIsIpadPro(isIpadProSize);

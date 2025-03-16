@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * LazyImage component that loads images only when they are in or near the viewport
- * Also handles image loading errors with a fallback (cuz why not you know?)
+ * Enhanced to prevent fallback image from affecting layout
  */
 const LazyImage = ({
   src,
@@ -20,16 +20,19 @@ const LazyImage = ({
   const [isError, setIsError] = useState(false);
   const imgRef = useRef(null);
   const observerRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Handle successful image load
   const handleLoad = () => {
     setIsLoaded(true);
+    if (props.onLoad) props.onLoad();
   };
 
   // Handle image loading error
   const handleError = () => {
     setIsError(true);
     setImageSrc(fallbackSrc);
+    if (props.onError) props.onError();
   };
 
   // Setup Intersection Observer for lazy loading
@@ -39,16 +42,16 @@ const LazyImage = ({
         if (entries[0].isIntersecting) {
           setImageSrc(src);
           // Stop observing once the image is in view
-          if (observerRef.current && imgRef.current) {
-            observerRef.current.unobserve(imgRef.current);
+          if (observerRef.current && containerRef.current) {
+            observerRef.current.unobserve(containerRef.current);
           }
         }
       },
       { threshold }
     );
 
-    if (imgRef.current) {
-      observerRef.current.observe(imgRef.current);
+    if (containerRef.current) {
+      observerRef.current.observe(containerRef.current);
     }
 
     return () => {
@@ -58,25 +61,44 @@ const LazyImage = ({
     };
   }, [src, threshold]);
 
-  // Create combined style with placeholder background
-  const combinedStyle = {
-    ...style,
-    backgroundColor: !isLoaded ? placeholderColor : undefined,
+  // Maintain the placeholder color until the actual image is loaded
+  const containerStyle = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: placeholderColor,
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: 'inherit',
+  };
+  
+  // Enhanced style for better image display 
+  const imageStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
     transition: 'opacity 0.3s ease',
     opacity: isLoaded ? 1 : 0,
+    ...style, // Allow style prop to override defaults
   };
 
   return (
-    <img
-      ref={imgRef}
-      src={imageSrc || fallbackSrc}
-      alt={alt}
-      className={`lazy-image ${className} ${isError ? 'image-error' : ''}`}
-      style={combinedStyle}
-      onLoad={handleLoad}
-      onError={handleError}
-      {...props}
-    />
+    <div ref={containerRef} style={containerStyle} className={className || ''}>
+      {(imageSrc || isError) && (
+        <img
+          ref={imgRef}
+          src={imageSrc || fallbackSrc}
+          alt={alt}
+          className={isError ? 'image-error' : ''}
+          style={imageStyle}
+          onLoad={handleLoad}
+          onError={handleError}
+          {...props}
+        />
+      )}
+    </div>
   );
 };
 
@@ -88,6 +110,8 @@ LazyImage.propTypes = {
   fallbackSrc: PropTypes.string,
   threshold: PropTypes.number,
   placeholderColor: PropTypes.string,
+  onLoad: PropTypes.func,
+  onError: PropTypes.func
 };
 
 export default LazyImage;

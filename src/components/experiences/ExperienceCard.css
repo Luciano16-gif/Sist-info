@@ -1,5 +1,3 @@
-/* ExperienceCard.css */
-
 .experience-card-experiences {
     display: flex;
     background-color: #2a3a2a;
@@ -7,21 +5,30 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 0px;
     width: 100%;
+    overflow: hidden; /* Prevent image overflow */
+    height: auto;
 }
+
+/* Update these CSS rules in ExperienceCard.css */
 
 .image-container-experiences {
     position: relative;
     flex: 1 0 40%;
+    overflow: hidden; /* Ensure image stays within bounds */
+    display: flex; /* Use flexbox for better image control */
+    align-items: center; /* Center vertically instead of stretch */
+    justify-content: center; /* Center horizontally */
+    min-height: 100%; /* Fill full height */
+    background-color: #2a3a2a; /* Match background color */
 }
 
 .image-experiences {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100%; 
+    height: 100%; /* Make images fill full height on desktop */
+    object-fit: cover; /* Change to cover to fill the space */
     display: block;
-    border-radius: 8px;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-radius: 8px 0 0 8px; /* Only round left corners */
+    min-height: 100%;
 }
 
 .price-overlay-experiences {
@@ -33,6 +40,7 @@
     padding: 2px 5px;
     border-radius: 4px;
     font-size: 20px;
+    z-index: 2; /* Ensure overlay is above image */
 }
 
 .experience-info-experiences {
@@ -81,6 +89,12 @@
     font-size: 0.9rem;
     margin-bottom: 8px;
     color: #ccc;
+    /* Limit description lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .data-container-experiences {
@@ -88,30 +102,27 @@
     flex-grow: 1;
 }
 
-
 .data-text-experiences {
     font-size: 20px;
     color: #fff;
-    margin-bottom: 2px; /* Reduce overall margin-bottom */
+    margin-bottom: 2px;
     display: flex;
     align-items: center;
 }
 
-
-/* Option 1: Target the <i> tag directly (most specific) */
-.data-text-experiences .fa-clock { /*  Or whatever class your clock icon has */
-  margin-right: 4px; /*  Consistent spacing with other icons */
-  margin-bottom: 0; /* Remove any bottom margin on the icon itself */
-  vertical-align: middle; /* Ensure vertical alignment */
+/* Target the clock icon */
+.data-text-experiences .fa-clock {
+  margin-right: 4px;
+  margin-bottom: 0;
+  vertical-align: middle;
 }
 
-/* Option 2: Adjust the <p> tag's margin (less specific, but might be sufficient) */
 .data-text-experiences {
     font-size: 20px;
     color: #fff;
     display: flex;
     align-items: center;
-    margin-bottom: 5px; /* A smaller margin, consistent spacing */
+    margin-bottom: 5px;
 }
 
 .data-text-experiences img{
@@ -143,46 +154,81 @@
 }
 
 /* Mobile responsiveness */
+@media screen and (max-width: 1024px) {
+    .experience-card-experiences {
+        min-height: 220px; /* Ensure minimum height on tablets */
+    }
+    
+    .image-container-experiences {
+        height: 100%; /* Fill available height */
+        min-height: 240px; /* Increased height for tablets */
+        max-height: none; /* Remove max height restriction */
+    }
+    
+    .image-experiences {
+        height: 100%;
+        object-fit: cover; /* Use cover to fill space */
+    }
+    
+    .data-text-experiences {
+        font-size: 18px;
+    }
+}
+
 @media screen and (max-width: 768px) {
     .experience-card-experiences {
         flex-direction: column;
         width: 90%;
-        margin: 15px auto;
+        margin: 10px auto;
+        height: auto;
+        min-height: auto;
     }
 
     .image-container-experiences {
         width: 100%;
-        height: 200px;
+        height: 220px; /* Fixed height instead of auto */
+        min-height: 220px; /* Increased minimum height for mobile */
+        max-height: none; /* Remove max height restriction */
     }
 
     .image-experiences {
+        height: 100%;
+        width: 100%;
         border-radius: 8px 8px 0 0;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-        height: 100%;
+        object-fit: cover; /* Use cover to fill space */
     }
-
+    
     .experience-info-experiences {
-        padding: 15px;
+        padding: 12px;
     }
 
     .subtitle-experiences {
         font-size: 1.1rem;
         line-height: 1.2;
+        margin-bottom: 3px;
     }
 
     .description-experiences {
         font-size: 0.85rem;
         line-height: 1.3;
+        -webkit-line-clamp: 2; /* Limit to 2 lines on mobile */
+        margin-bottom: 5px;
+    }
+
+    .data-container-experiences {
+        margin-bottom: 4px;
     }
 
     .data-text-experiences {
         font-size: 0.9rem;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
     }
 
     .rating-box-experiences {
         font-size: 0.9rem;
+        margin-bottom: 3px;
     }
 
     .price-overlay-experiences {
@@ -191,8 +237,9 @@
     }
 
     .button-experiences {
-        width: 100%;
-        margin-top: 10px;
+        width: auto;
+        margin-top: 5px;
+        padding: 5px 8px;
     }
 }
 
@@ -203,7 +250,11 @@
     }
 
     .image-container-experiences {
-        height: 180px;
+        min-height: 180px; /* Slightly smaller minimum height for small mobiles */
+    }
+
+    .experience-info-experiences {
+        padding: 10px;
     }
 
     .subtitle-experiences {
@@ -212,6 +263,16 @@
 
     .description-experiences {
         font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .data-container-experiences {
+        margin-bottom: 2px;
+    }
+
+    .data-text-experiences {
+        font-size: 0.8rem;
+        margin-bottom: 1px;
     }
 
     .dot-experiences, .dot-gray-experiences {

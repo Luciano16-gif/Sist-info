@@ -1,17 +1,15 @@
-// --- START OF FILE GuideRequestjsx.txt ---
-
 import React, { useState, useEffect } from 'react';
 import './GuideRequest.css';
-import { db } from './../../firebase-config'; // Import db and firebaseStorage
+import { db } from './../../firebase-config'; // Import db
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import storageService from '../../cloudinary-services/storage-service'; // Import Cloudinary service
-
+import { useAuth } from '../../components/contexts/AuthContext'; // Import useAuth hook
 
 /**
  * GuideRequest component -  A form for potential guides to apply.
  */
 function GuideRequest() {
+    const { currentUser, userRole } = useAuth(); // Use the AuthContext
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -33,91 +31,63 @@ function GuideRequest() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
-    const [currentUserData, setCurrentUserData] = useState(null);
+    const [userData, setUserData] = useState(null);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
-
-    const getCurrentUser = () => {
-        return new Promise((resolve, reject) => {
-            const auth = getAuth();
-            const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    try {
-                        const userDocRef = doc(db, "lista-de-usuarios", user.email);
-                        const userDocSnap = await getDoc(userDocRef);
-
-                        if (!userDocSnap.exists()) {
-                            console.warn("Usuario no encontrado en Firestore:", user.email);
-                            const userData = {
-                                email: 'default@example.com',
-                                name: 'Unknown User',
-                                userType: 'Unknown',
-                            };
-                            setCurrentUserData(userData);
-                            resolve(userData);
-                            unsubscribe();
-                            return;
-                        }
-                        const userData = userDocSnap.data();
-                        const email = userData.email || 'default@example.com';
-                        const name = `${userData.name || ''} ${userData.lastName || ''}`;
-                        const userType = userData.userType || 'Unknown';
-                        const cedula = userData.cedula || '';
-                        const address = userData.address || '';
-
-                         const completeUserData = {
-                            email: email,
-                            name: name,
-                            userType: userType,
-                            cedula: cedula,
-                            address: address,
-                        };
-                        setCurrentUserData(completeUserData);
-                        resolve(completeUserData);
-                        unsubscribe();
-                    } catch (error) {
-                        console.error("Error fetching user data:", error);
-                        reject(error);
-                        unsubscribe();
-                    }
-                } else {
-                    setCurrentUserData(null);
-                    resolve(null);
-                    unsubscribe();
-                }
-            });
-        });
-    };
+    // Fetch additional user data not provided by AuthContext if needed
     useEffect(() => {
+        const fetchUserData = async () => {
+            if (!currentUser) {
+                setIsLoadingUser(false);
+                return;
+            }
 
-        const fetchCurrentUser = async () => {
             try {
-                const user = await getCurrentUser();
-                if (user) {
+                const userDocRef = doc(db, "lista-de-usuarios", currentUser.email);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const data = userDocSnap.data();
+                    const name = `${data.name || ''} ${data.lastName || ''}`;
+                    const completeUserData = {
+                        email: data.email || currentUser.email,
+                        name: name.trim(),
+                        cedula: data.cedula || '',
+                        address: data.address || '',
+                    };
+                    
+                    setUserData(completeUserData);
+                    
+                    // Pre-fill form with user data
                     setFormData(prev => ({
                         ...prev,
-                        fullName: user.name || '',
-                        email: user.email || '',
-                        cedula: user.cedula || '',
-                        address: user.address || '',
+                        fullName: completeUserData.name || '',
+                        email: completeUserData.email || '',
+                        cedula: completeUserData.cedula || '',
+                        address: completeUserData.address || '',
                     }));
-                    if (user.userType === 'guia') {
+                    
+                    // Check if user is already a guide
+                    if (userRole === 'guia') {
                         setIsFormDisabled(true);
                         setSubmitError("Ya eres un guía. No puedes enviar otra solicitud.");
                     }
+                } else {
+                    console.warn("Usuario no encontrado en Firestore:", currentUser.email);
                 }
             } catch (error) {
-                console.error("Error fetching current user:", error);
+                console.error("Error fetching user data:", error);
                 setSubmitError("Failed to load user information. Please refresh.");
             } finally {
                 setIsLoadingUser(false);
             }
         };
-        fetchCurrentUser();
-    }, []);
 
+        fetchUserData();
+    }, [currentUser, userRole]);
 
+    // The rest of the component remains mostly the same...
     const handleChange = (e) => {
         const { name, value } = e.target;
         let formattedValue = value;
@@ -140,9 +110,6 @@ function GuideRequest() {
         }
     };
 
-
-
-
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -159,6 +126,7 @@ function GuideRequest() {
             setErrors(prev => ({ ...prev, image: '' }));
         }
     };
+    
     const validateForm = () => {
         let tempErrors = {};
         let isValid = true;
@@ -240,15 +208,14 @@ function GuideRequest() {
             return;
         }
 
+        if (!currentUser) {
+            setSubmitError("Debes iniciar sesión para enviar una solicitud.");
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
-            if (!currentUserData || !currentUserData.email) {
-                setSubmitError("No se pudo obtener el correo electrónico del usuario.");
-                setIsSubmitting(false);
-                return;
-            }
-
             // Use Cloudinary for image upload
             let imageUrl = '';
             if (formData.image) {
@@ -256,8 +223,7 @@ function GuideRequest() {
                 imageUrl = uploadResult.downloadURL;
             }
 
-
-            const docRef = doc(db, "solicitudes-guias", currentUserData.email);
+            const docRef = doc(db, "solicitudes-guias", currentUser.email);
             const dataToStore = {
                 fullName: formData.fullName,
                 cedula: formData.cedula,

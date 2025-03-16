@@ -3,78 +3,57 @@ import emailjs from 'emailjs-com';
 import { db } from './../../firebase-config';
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import './SupportPage.css';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuth } from '../../components/contexts/AuthContext'; // Import useAuth hook
 
 function SupportPage() {
+    const { currentUser, userRole } = useAuth(); // Use the AuthContext
+    
     const [selectedUser, setSelectedUser] = useState('');
     const [message, setMessage] = useState('');
-    const [guides, setGuides] = useState([]);  // All fetched guides
+    const [guides, setGuides] = useState([]);  // All fetched users
     const [displayedUsers, setDisplayedUsers] = useState([]); // Filtered users based on userType
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
-    const [currentUserData, setCurrentUserData] = useState(null);
+    const [userData, setUserData] = useState(null);
     const [isLoadingUser, setIsLoadingUser] = useState(true);
-    const [debugName, setDebugName] = useState("Loading..."); // Debug state
-    const [debugEmail, setDebugEmail] = useState("Loading..."); // Debug state
-    const [debugUserType, setDebugUserType] = useState("Loading..."); // Debug state
 
-    const getCurrentUser = () => {
-        return new Promise((resolve, reject) => {
-            const auth = getAuth();
-            const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    // User is signed in.
-                    try {
-                        const userDocRef = doc(db, "lista-de-usuarios", user.email);
-                        const userDocSnap = await getDoc(userDocRef);
-
-                        if (!userDocSnap.exists()) {
-                            console.warn("Usuario no encontrado en Firestore:", user.email);
-                            const userData = {
-                                email: 'default@example.com',
-                                name: 'Unknown User',
-                                userType: 'Unknown'
-                            };
-                            setCurrentUserData(userData);
-                            resolve(userData);
-                            unsubscribe();
-                            return;
-                        }
-
-                        const userData = userDocSnap.data();
-                        const email = userData.email || 'default@example.com';
-                        const name = `${userData.name || ''} ${userData.lastName || ''}`;
-                        const userType = userData.userType || 'Unknown';
-                        const completeUserData = {
-                            email: email,
-                            name: name,
-                            userType: userType
-                        };
-
-                        // *** DEBUGGING: Update debug state *before* setting currentUserData ***
-                        setDebugName(name);
-                        setDebugEmail(email);
-                        setDebugUserType(userType);
-
-                        setCurrentUserData(completeUserData);
-                        resolve(completeUserData);
-                        unsubscribe();
-                    } catch (error) {
-                        console.error("Error fetching user data:", error);
-                        // Reject and unsubscribe on error
-                        reject(error);
-                        unsubscribe();
-                    }
+    // Fetch additional user data not provided by AuthContext
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (!currentUser) {
+                setIsLoadingUser(false);
+                return;
+            }
+            
+            try {
+                const userDocRef = doc(db, "lista-de-usuarios", currentUser.email);
+                const userDocSnap = await getDoc(userDocRef);
+                
+                if (userDocSnap.exists()) {
+                    const data = userDocSnap.data();
+                    const name = `${data.name || ''} ${data.lastName || ''}`.trim();
+                    
+                    setUserData({
+                        email: currentUser.email,
+                        name: name || currentUser.displayName || "Usuario Anónimo"
+                    });
                 } else {
-                    // No user.
-                    setCurrentUserData(null);
-                    resolve(null);
-                    unsubscribe();
+                    setUserData({
+                        email: currentUser.email,
+                        name: currentUser.displayName || "Usuario Anónimo"
+                    });
                 }
-            });
-        });
-    };
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                setSubmitError("Failed to load user information. Please refresh.");
+            } finally {
+                setIsLoadingUser(false);
+            }
+        };
+        
+        fetchUserData();
+    }, [currentUser]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -91,7 +70,7 @@ function SupportPage() {
 
                     fetchedUsers.push({
                         id: userDoc.id,  // Use email as ID for consistency
-                        name: `${data.name || ''} ${lastName}`,
+                        name: `${data.name || ''} ${lastName}`.trim(),
                         email: email,
                         userType: userType,
                     });
@@ -105,32 +84,20 @@ function SupportPage() {
         };
 
         fetchUsers();
-
-        const fetchCurrentUser = async () => {
-            try {
-                await getCurrentUser();
-            } catch (error) {
-                console.error("Error fetching current user:", error);
-                setSubmitError("Failed to load user information. Please refresh.");
-            } finally {
-                setIsLoadingUser(false);
-            }
-        };
-        fetchCurrentUser();
     }, []);
 
     useEffect(() => {
-        if (guides.length > 0 && currentUserData) {
+        if (guides.length > 0 && currentUser) {
             let filteredUsers = [];
             const adminOption = { id: 'admin', name: 'Administrador', email: 'avila.venturas.grupo.5@gmail.com', userType: 'admin' };
 
-            if (currentUserData.userType === 'admin') {
+            if (userRole === 'admin') {
                 filteredUsers = [...guides, adminOption];  // Admins see all
-            } else if (currentUserData.userType === 'guia' || currentUserData.userType === 'usuario') {
+            } else if (userRole === 'guia' || userRole === 'usuario') {
                 // Filter for guides and the admin
                 filteredUsers = guides.filter(user => user.userType === 'guia').concat(adminOption);
             } else {
-                // Handle unknown user types (optional)
+                // Handle unknown user types
                 filteredUsers = [adminOption];
             }
             setDisplayedUsers(filteredUsers);
@@ -140,11 +107,9 @@ function SupportPage() {
                  //Prioritize selecting admin, if available
                 const adminUser = filteredUsers.find(user => user.id === 'admin');
                 setSelectedUser(adminUser ? adminUser.id : filteredUsers[0].id);
-
             }
-
         }
-    }, [guides, currentUserData, selectedUser]); // Include selectedUser for correct default selection
+    }, [guides, currentUser, userRole, selectedUser]); // Include selectedUser for correct default selection
 
     const handleUserChange = (event) => {
         setSelectedUser(event.target.value);
@@ -166,7 +131,7 @@ function SupportPage() {
             return;
         }
 
-        if (!currentUserData) {
+        if (!currentUser) {
             setSubmitError('You must be logged in to send a message.');
             setIsSubmitting(false);
             return;
@@ -199,9 +164,9 @@ function SupportPage() {
                 name: selectedUserName,
                 time: currentTime,
                 message: message,
-                from_email: currentUserData.email,
-                from_name: currentUserData.name,
-                from_userType: currentUserData.userType
+                from_email: userData.email,
+                from_name: userData.name,
+                from_userType: userRole
             };
 
             await emailjs.send(
@@ -245,7 +210,7 @@ function SupportPage() {
                         {displayedUsers.length > 0 &&
                             displayedUsers.map((user) => (
                                 <option key={user.id} value={user.id}>
-                                    {currentUserData && currentUserData.userType === 'admin'
+                                    {userRole === 'admin'
                                         ? `${user.name} - ${user.userType}`
                                         : user.name}
                                 </option>

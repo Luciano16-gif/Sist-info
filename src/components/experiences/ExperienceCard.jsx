@@ -1,4 +1,3 @@
-// Updated ExperienceCard.jsx with better mobile responsiveness
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import LazyImage from '../common/LazyImage/LazyImage';
@@ -79,7 +78,7 @@ DifficultyDisplay.propTypes = {
 };
 
 /**
- * ExperienceStats component (MODIFIED)
+ * ExperienceStats component
  */
 export const ExperienceStats = ({ distance, time, minPeople, maxPeople }) => {
   return (
@@ -108,11 +107,37 @@ ExperienceStats.propTypes = {
 };
 
 /**
- * ExperienceImage component
+ * ExperienceImage component with improved image handling
  */
+// Update the ExperienceImage component in ExperienceCard.jsx
+
 export const ExperienceImage = ({ imageUrl, price, alt }) => {
-  // Add a state to track if image failed to load
   const [imageFailed, setImageFailed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  
+  // Detect device type for optimal image positioning
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
+    };
+    
+    checkDeviceType();
+    window.addEventListener('resize', checkDeviceType);
+    
+    return () => {
+      window.removeEventListener('resize', checkDeviceType);
+    };
+  }, []);
+
+  // Changed to cover to fill the space completely
+  const imageStyle = {
+    objectFit: 'cover',
+    height: '100%',
+    width: '100%'
+  };
 
   return (
     <div className="image-container-experiences">
@@ -123,12 +148,14 @@ export const ExperienceImage = ({ imageUrl, price, alt }) => {
         fallbackSrc={profileFallbackImage}
         placeholderColor='#2a3a2a'
         threshold={0.2}
+        style={imageStyle}
         onError={() => setImageFailed(true)}
       />
       <div className="price-overlay-experiences">{price} $</div>
     </div>
   );
 };
+
 
 ExperienceImage.propTypes = {
   imageUrl: PropTypes.string.isRequired,
@@ -153,8 +180,7 @@ const formatReviewDate = (date) => {
             jsDate = date.toDate();
         } else if (date instanceof Date) {
             jsDate = date;
-        } else
-        {
+        } else {
           return 'Formato de fecha incorrecto';
         }
 
@@ -197,7 +223,7 @@ export const calculateAverageRating = (reviews) => {
 };
 
 /**
- * Main ExperienceCard component (MODIFIED)
+ * Main ExperienceCard component
  */
 const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = false, isExpanded = false }) => {
   const textStyle = isExpanded ? "review-text-no-fade" : "review-text";
@@ -241,7 +267,7 @@ const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = 
         
         {/* Conditionally render shorter description on mobile */}
         <p className="description-experiences">
-          {isMobile && experience.description.length > 100 
+          {isMobile && !isExpanded && experience.description.length > 100 
             ? `${experience.description.substring(0, 100)}...` 
             : experience.description}
         </p>
@@ -273,8 +299,8 @@ ExperienceCard.propTypes = {
     price: PropTypes.number.isRequired,
     distance: PropTypes.string.isRequired,
     time: PropTypes.string.isRequired,
-    minPeople: PropTypes.number.isRequired, // Updated from minimoUsuarios
-    maxPeople: PropTypes.number.isRequired, // Updated from maximoUsuarios
+    minPeople: PropTypes.number.isRequired,
+    maxPeople: PropTypes.number.isRequired,
     imageUrl: PropTypes.string.isRequired,
     rating: PropTypes.number.isRequired,
     reviews: PropTypes.arrayOf(PropTypes.shape({
