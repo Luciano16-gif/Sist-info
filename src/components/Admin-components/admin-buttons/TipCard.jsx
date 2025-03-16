@@ -7,6 +7,7 @@ const TipCard = ({ imageSrc, title, description }) => {
     const [editedTitle, setEditedTitle] = useState(title); // Estado para el título editado
     const [editedDescription, setEditedDescription] = useState(description); // Estado para la descripción editada
     const [editedImage, setEditedImage] = useState(imageSrc); // Estado para la imagen editada
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // Estado para mostrar el pop-up de confirmación de eliminación
 
     // Función para abrir el pop-up de edición
     const handleEditClick = () => {
@@ -34,12 +35,28 @@ const TipCard = ({ imageSrc, title, description }) => {
     const handleAcceptClick = () => {
         console.log('Cambios guardados:', editedTitle, editedDescription, editedImage);
         setIsEditing(false); // Cerrar el pop-up de edición
-        setShowSuccessPopup(true); // Mostrar el pop-up de guardado exitodo
+        setShowSuccessPopup(true); // Mostrar el pop-up de guardado exitoso
     };
 
-    // Función para cerrar el pop-up de guaradado éxito
+    // Función para cerrar el pop-up de guardado exitoso
     const handleCloseSuccessPopup = () => {
         setShowSuccessPopup(false); // Cerrar el pop-up 
+    };
+
+    // Función para manejar el botón "Eliminar"
+    const handleDeleteClick = () => {
+        setShowDeleteConfirmation(true);
+    };
+
+    // Función para confirmar la eliminación
+    const handleConfirmDelete = () => {
+        console.log('Tip eliminado');
+        setShowDeleteConfirmation(false);
+    };
+
+    // Función para cancelar la eliminación
+    const handleCancelDelete = () => {
+        setShowDeleteConfirmation(false);
     };
 
     return (
@@ -75,7 +92,7 @@ const TipCard = ({ imageSrc, title, description }) => {
                         </button>
                         <button 
                             className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
-                            onClick={() => console.log('Delete')}
+                            onClick={handleDeleteClick}
                         >
                             Eliminar
                         </button>
@@ -158,6 +175,40 @@ const TipCard = ({ imageSrc, title, description }) => {
                         {/* Pop-up de guardado con éxito */}
                         <div className="flex flex-col items-center justify-center space-y-6 h-full">
                             <p className="text-white text-[25px] font-bold">Cambios guardados con éxito</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Pop-up de confirmación de eliminación */}
+            {showDeleteConfirmation && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-[#556052] w-[600px] h-[200px] rounded-xl p-8 relative">
+                        {/* Botón de cerrar */}
+                        <button 
+                            className="absolute top-4 right-4 text-white text-2xl font-bold"
+                            onClick={handleCancelDelete}
+                        >
+                            &times;
+                        </button>
+
+                        <div className="flex flex-col items-center justify-center space-y-6 h-full">
+                            <p className="text-white text-[30px] font-bold">¿Seguro que quieres eliminar este tip?</p>
+                            <p className="text-white text-[20px]">Los usuarios ya no podrían leerlo</p>
+                            <div className="flex space-x-4">
+                                <button 
+                                    className="bg-gray-500 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleConfirmDelete}
+                                >
+                                    Sí
+                                </button>
+                                <button 
+                                    className="bg-gray-500 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full"
+                                    onClick={handleCancelDelete}
+                                >
+                                    No
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
