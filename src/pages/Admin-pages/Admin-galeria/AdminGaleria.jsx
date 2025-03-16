@@ -21,7 +21,7 @@ const AdminGaleria = () => {
       <h1 className=" text-white text-xl md:text-3xl font-bold">
         Información relevante
       </h1>
-      <div className="flex justify-start space-x-10 overflow-x-auto">
+      <div className="flex justify-start space-x-10">
         <RelevantInfoS number = {FotosActuales} description ="Fotos en la galería actual" />
         <RelevantInfoS number = {Solicitudes} description ="Solicitudes de nuevas fotos" />
       </div>
@@ -32,6 +32,7 @@ const AdminGaleria = () => {
           </h2>
       </div>
       <GaleriaGrid />
+      <GaleriaSolicitudes/>
     </div>
   );
 };
