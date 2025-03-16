@@ -4,7 +4,7 @@ import PhotoCard from './PhotoCard';
 const PhotoRequests = () => {
   const photoData = [
     {
-      imageUrl: 'https://via.placeholder.com/300x200', // Reemplaza con URLs reales
+      imageUrl: 'https://via.placeholder.com/300x200',
       name: 'Gabriela Colmenares',
       type: 'Usuario',
       date: '05-12-2024',
@@ -35,12 +35,11 @@ const PhotoRequests = () => {
 
   return (
     <div className="container mx-left px-4">
-      <h1 className="text-4xl font-bold text-white mb-2 tracking-widest">SOLICITUDES DE FOTOS</h1>
+      <h1 className="text-4xl font-bold text-white mb-2 tracking-widest">Solicitudes de Fotos</h1>
       <p className="text-sm text-white mb-4 tracking-widest">
-        AQUÍ APARECERÁN LAS FOTOS QUE ENVÍEN NUESTROS USUARIOS O NUESTROS GUÍAS QUE HAYAN TOMADO DURANTE NUESTRO SERVICIO PARA
-        AGREGARLA A NUESTRA GALERÍA DE FOTOS Y QUE TODOS PUEDAN VER LO QUE VIVIDO CON NOSOTROS!
+      Aqui apareceran las fotos que envien nuestros usuarios o nuestros guias que hayan tomado durante nuestro servicio para  agregarlo a nuestra galeria de fotos y que todos puedan ver lo que vivido con nosotros!
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
         {photoData.map((data, index) => (
           <PhotoCard key={index} {...data} />
         ))}
