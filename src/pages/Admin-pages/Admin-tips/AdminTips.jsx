@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import TipCard from "../../../components/Admin-components/admin-buttons/TipCard";
 import backpack from "../../../assets/images/landing-page-admin/backpack.webp";
@@ -20,6 +20,9 @@ const AdminTips = () => {
     const TipsEditados = 21;
     const SolicitudesTips = 14;
     const TipsCreados = 3;
+    const [newTipImage, setNewTipImage] = useState(null);
+    const [newTipTitle, setNewTipTitle] = useState('');
+    const [newTipDescription, setNewTipDescription] = useState('');
 
     // Datos de las cartas de tips actuales
     const tipsCards = [
@@ -83,6 +86,23 @@ const AdminTips = () => {
             description: "Disfruta del silencio y los sonidos del entorno. Deja a un lado la música o el ruido de los dispositivos electrónicos para conectarte mejor con el ambiente."
         },
     ];
+
+    // Función para manejar la selección de una imagen en un nuevo tip
+    const handleNewTipImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNewTipImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleAddTipClick = () => {
+        console.log('Nuevo tip agregado:', newTipTitle, newTipDescription, newTipImage);
+        // Aquí hay que agregar cómo almacenaremos el nuevo tip
+    };
 
     return (
         <div className="absolute inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
@@ -156,10 +176,75 @@ const AdminTips = () => {
                                     title={solicitud.title}
                                     description={solicitud.description}
                                 />
-                                <p className="text-white text-center mt-2">Enviado por: Juan Mendoza</p> {/* Usuario que envio la solicitud */}
+                                <p className="text-white text-center mt-2">Enviado por: Juan Mendoza</p> {/* Usuario que envió la solicitud */}
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+
+            <hr className="border-1 border-white-600 sm:w-10 md:w-96 py-4" />
+
+            {/* Sección de creación de tip */}
+            <div className="flex flex-row gap-8 w-full">
+                {/* Parte izquierda: texto */}
+                <div className="flex flex-col justify-center items-start w-64">
+                    <h1 className="text-white text-[43px] font-bold pt-6 pb-6">Crear nuevo tip</h1>
+                    <div className="flex items-center">
+                        <hr className="border-t border-white w-[138.293px] mx-8 p-4" />
+                    </div>
+                    <p className="text-white text-[16px]">
+                        Expande nuestra lista de información útil y de calidad para mejorar la experiencia de nuestros usuarios
+                    </p>
+                </div>
+
+                {/* Divisor vertical */}
+                <div className="flex items-center">
+                    <hr className="border-l border-white h-[361.341px] mx-8" />
+                </div>
+
+                {/* Parte derecha: Formulario para crear nuevo tip */}
+                <div className="flex flex-col items-center justify-center w-[441px] h-[681px] bg-[#556052] rounded-xl p-8">
+                  <div className="bg-[#556052] w-[360px] h-[610px] mx-auto rounded-xl border-2 border-white flex flex-col items-center justify-center space-y-6 p-6 overflow-y-auto">
+                      {/* Input para la imagen */}
+                      <label className="w-[200px] h-[200px] bg-gray-700 rounded-lg flex items-center justify-center cursor-pointer mb-4">
+                          <input 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={handleNewTipImageChange} 
+                          />
+                          {newTipImage ? (
+                              <img src={newTipImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                          ) : (
+                              <span className="text-white">Seleccionar imagen</span>
+                          )}
+                      </label>
+                      <hr className="border-t border-white-600 w-[300px]" />
+                      {/* Input para el título */}
+                      <input 
+                          type="text" 
+                          value={newTipTitle} 
+                          onChange={(e) => setNewTipTitle(e.target.value)} 
+                          className="w-full p-2 text-white bg-gray-700 rounded-md mb-4"
+                          placeholder="Título"
+                      />
+                      {/* Input para la descripción */}
+                      <textarea 
+                          value={newTipDescription} 
+                          onChange={(e) => setNewTipDescription(e.target.value)} 
+                          className="w-full p-2 text-white bg-gray-700 rounded-md resize-none mb-4"
+                          placeholder="Descripción"
+                          rows="7"
+                      />
+                      {/* Botón de Agregar Tip */}
+                      <button 
+                          className="bg-gray-500 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-full"
+                          onClick={handleAddTipClick}
+                      >
+                          + Agregar Tip
+                      </button>
+                  </div>
                 </div>
             </div>
         </div>
