@@ -8,7 +8,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 function SupportPage() {
     const [selectedUser, setSelectedUser] = useState('');
     const [message, setMessage] = useState('');
-    const [guides, setGuides] = useState([]);
+    const [guides, setGuides] = useState([]);  // All fetched guides
+    const [displayedUsers, setDisplayedUsers] = useState([]); // Filtered users based on userType
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -74,42 +75,40 @@ function SupportPage() {
             });
         });
     };
-    useEffect(() => {
-        const fetchGuides = async () => {
-             try {
-                const usersCollectionRef = collection(db, "lista-de-usuarios");
-                const q = query(usersCollectionRef, where("userType", "==", "guia"));
-                const querySnapshot = await getDocs(q);
 
-                const fetchedGuides = [];
-                for (const guideDoc of querySnapshot.docs) {
-                    const data = guideDoc.data();
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const usersCollectionRef = collection(db, "lista-de-usuarios");
+                const querySnapshot = await getDocs(usersCollectionRef);  // Fetch ALL users
+
+                const fetchedUsers = [];
+                for (const userDoc of querySnapshot.docs) {
+                    const data = userDoc.data();
                     const email = data.email || 'unknown@example.com';
                     const lastName = data.lastName || '';
+                    const userType = data.userType || 'Unknown';
 
-                    fetchedGuides.push({
-                        id: guideDoc.id,
+                    fetchedUsers.push({
+                        id: userDoc.id,  // Use email as ID for consistency
                         name: `${data.name || ''} ${lastName}`,
                         email: email,
+                        userType: userType,
                     });
                 }
 
-                setGuides(fetchedGuides);
-                if (fetchedGuides.length > 0) {
-                    setSelectedUser(fetchedGuides[0].id);
-                }
+                setGuides(fetchedUsers);  // Store ALL users here
             } catch (error) {
-                console.error("Error fetching guides:", error);
-                setSubmitError('Failed to load guides. Please refresh the page.');
+                console.error("Error fetching users:", error);
+                setSubmitError('Failed to load users. Please refresh the page.');
             }
         };
 
-        fetchGuides();
+        fetchUsers();
 
         const fetchCurrentUser = async () => {
             try {
-                await getCurrentUser(); // Now simply await the promise
-                // REMOVED setCurrentUserData(user) from here
+                await getCurrentUser();
             } catch (error) {
                 console.error("Error fetching current user:", error);
                 setSubmitError("Failed to load user information. Please refresh.");
@@ -120,6 +119,33 @@ function SupportPage() {
         fetchCurrentUser();
     }, []);
 
+    useEffect(() => {
+        if (guides.length > 0 && currentUserData) {
+            let filteredUsers = [];
+            const adminOption = { id: 'admin', name: 'Administrador', email: 'avila.venturas.grupo.5@gmail.com', userType: 'admin' };
+
+            if (currentUserData.userType === 'admin') {
+                filteredUsers = [...guides, adminOption];  // Admins see all
+            } else if (currentUserData.userType === 'guia' || currentUserData.userType === 'usuario') {
+                // Filter for guides and the admin
+                filteredUsers = guides.filter(user => user.userType === 'guia').concat(adminOption);
+            } else {
+                // Handle unknown user types (optional)
+                filteredUsers = [adminOption];
+            }
+            setDisplayedUsers(filteredUsers);
+
+            // Set default selection
+            if (!selectedUser && filteredUsers.length > 0) {
+                 //Prioritize selecting admin, if available
+                const adminUser = filteredUsers.find(user => user.id === 'admin');
+                setSelectedUser(adminUser ? adminUser.id : filteredUsers[0].id);
+
+            }
+
+        }
+    }, [guides, currentUserData, selectedUser]); // Include selectedUser for correct default selection
+
     const handleUserChange = (event) => {
         setSelectedUser(event.target.value);
     };
@@ -127,6 +153,7 @@ function SupportPage() {
     const handleMessageChange = (event) => {
         setMessage(event.target.value);
     };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setSubmitError('');
@@ -146,7 +173,7 @@ function SupportPage() {
         }
 
         if (!selectedUser) {
-            setSubmitError('Please select a guide.');
+            setSubmitError('Please select a recipient.');
             setIsSubmitting(false);
             return;
         }
@@ -156,14 +183,14 @@ function SupportPage() {
             return;
         }
 
-        const selectedGuide = guides.find(guide => guide.id === selectedUser);
-        if (!selectedGuide) {
-            setSubmitError('Selected guide not found.');
+        const selectedRecipient = displayedUsers.find(user => user.id === selectedUser); // Use displayedUsers
+        if (!selectedRecipient) {
+            setSubmitError('Selected recipient not found.');
             setIsSubmitting(false);
             return;
         }
-        const selectedUserName = selectedGuide.name;
-        const selectedUserEmail = selectedGuide.email;
+        const selectedUserName = selectedRecipient.name;
+        const selectedUserEmail = selectedRecipient.email;
         const currentTime = new Date().toLocaleTimeString();
 
         try {
@@ -195,11 +222,11 @@ function SupportPage() {
             setIsSubmitting(false);
         }
     };
+
     return (
         <div className="soporte-container-support">
             <h1 className="soporte-titulo-support">Soporte Técnico</h1>
             <p className="soporte-subtitulo-support">Contacta con guías o administradores para resolver problemas o recibir feedback.</p>
-
 
             {isLoadingUser && <div className="loading-message-support">Loading user data...</div>}
 
@@ -208,17 +235,19 @@ function SupportPage() {
 
             <form className="soporte-form-support" onSubmit={handleSubmit}>
                 <div className="soporte-campo-support">
-                    <label htmlFor="user-select">Seleccionar Guía:</label>
+                    <label htmlFor="user-select">Seleccionar Usuario:</label>
                     <select
                         id="user-select"
                         value={selectedUser}
                         onChange={handleUserChange}
                         className={`soporte-select-support ${submitError && !selectedUser ? "input-error-support" : ""}`}
                     >
-                        {guides.length > 0 &&
-                            guides.map((guide) => (
-                                <option key={guide.id} value={guide.id}>
-                                    {`${guide.name} (${guide.email})`}
+                        {displayedUsers.length > 0 &&
+                            displayedUsers.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {currentUserData && currentUserData.userType === 'admin'
+                                        ? `${user.name} (${user.email}) - ${user.userType}`
+                                        : user.name}
                                 </option>
                             ))}
                     </select>
