@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * LazyImage component that loads images only when they are in or near the viewport
- * Also handles image loading errors with a fallback (cuz why not you know?)
+ * Enhanced for better image display while maintaining compatibility
  */
 const LazyImage = ({
   src,
@@ -24,12 +24,14 @@ const LazyImage = ({
   // Handle successful image load
   const handleLoad = () => {
     setIsLoaded(true);
+    if (props.onLoad) props.onLoad();
   };
 
   // Handle image loading error
   const handleError = () => {
     setIsError(true);
     setImageSrc(fallbackSrc);
+    if (props.onError) props.onError();
   };
 
   // Setup Intersection Observer for lazy loading
@@ -58,20 +60,22 @@ const LazyImage = ({
     };
   }, [src, threshold]);
 
-  // Create combined style with placeholder background
+  // Enhanced style for better image display 
   const combinedStyle = {
-    ...style,
     backgroundColor: !isLoaded ? placeholderColor : undefined,
     transition: 'opacity 0.3s ease',
     opacity: isLoaded ? 1 : 0,
+    objectFit: 'cover',
+    width: '100%',
+    height: '100%',
+    ...style, // Allow style prop to override defaults
   };
-
   return (
     <img
       ref={imgRef}
       src={imageSrc || fallbackSrc}
       alt={alt}
-      className={`lazy-image ${className} ${isError ? 'image-error' : ''}`}
+      className={`lazy-image ${className || ''} ${isError ? 'image-error' : ''}`}
       style={combinedStyle}
       onLoad={handleLoad}
       onError={handleError}
@@ -88,6 +92,8 @@ LazyImage.propTypes = {
   fallbackSrc: PropTypes.string,
   threshold: PropTypes.number,
   placeholderColor: PropTypes.string,
+  onLoad: PropTypes.func,
+  onError: PropTypes.func
 };
 
 export default LazyImage;

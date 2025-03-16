@@ -1,14 +1,13 @@
-/* ReviewsPage.css */
+/* ReviewsPage.css - Fixed button positioning and card spacing */
 
 .selected-yellow-reviews {
-    background-color: rgb(98, 226, 38) !important; /* Added !important */
+    background-color: rgb(98, 226, 38) !important;
 }
 .difficulty-circle-reviews{
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background-color: #999999;
-    /* Removed cursor: pointer; */
     transition: background-color 0.2s ease;
 }
 
@@ -18,7 +17,6 @@
     margin-bottom: 10px;
     justify-content: center;
 }
-/* ... (Existing styles) ... */
 
 .container-reviews {
     display: flex;
@@ -43,46 +41,46 @@
 
 .reviews-wrapper-reviews {
     display: flex;
-    gap: 1px;
+    gap: 20px; /* Increased gap between cards */
     width: 95%;
     max-width: 1200px;
     margin: 0 auto;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 30px; /* Increased top padding to prevent button overlap */
+    padding-bottom: 30px; /* Increased bottom padding */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: thin;
+    scroll-behavior: smooth;
     scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
     &::-webkit-scrollbar {
         width: 10px;
-         height: 12px;
+        height: 12px;
     }
     &::-webkit-scrollbar-track {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 5px;
-
     }
     &::-webkit-scrollbar-thumb {
         background-color: rgba(255, 255, 255, 0.5);
         border-radius: 5px;
         border: 2px solid rgba(255, 255, 255, 0.1);
     }
-
 }
 
 .scroll-buttons-container-reviews {
     position: absolute;
-    top: 130px;
+    top: 160px; /* Moved buttons down to avoid overlapping with cards */
     left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 10px;
-    z-index: 10;
+    padding: 0 20px; /* Increased padding for better positioning */
+    z-index: 20; /* Increased z-index to ensure buttons are always on top */
     pointer-events: none;
 }
+
 .scroll-button-reviews{
-     pointer-events: all;
+    pointer-events: all;
 }
 
 .scroll-button-reviews {
@@ -92,12 +90,13 @@
     color: white;
     cursor: pointer;
     padding: 0;
-     width: 34px;
-    height: 36px;
+    width: 40px; /* Slightly larger buttons */
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Added shadow for better visibility */
 }
 
 .scroll-button-reviews:hover {
@@ -106,31 +105,31 @@
 }
 
 .scroll-button-reviews.left-reviews {
-    margin-left: -5px;
-
+    margin-left: 5px;
 }
 
 .scroll-button-reviews.right-reviews {
-   margin-right: -5px;
+    margin-right: 5px;
 }
 
 .reviews-wrapper-reviews .experience-card-experiences {
-  min-width: 600px;
-  flex-shrink: 0;
-  scroll-snap-align: start;
+    min-width: 600px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    margin: 0;
 }
 
 .selected-review-container {
-  width: 95%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #1c351f;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1c351f;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .back-button-reviews {
@@ -145,7 +144,6 @@
     align-self: flex-start;
 }
 
-
 .back-button-reviews:hover {
     background-color: #003d82;
 }
@@ -159,7 +157,7 @@
     gap: 10px;
 }
 .report-button {
-   background-color: #7a1b1b;
+    background-color: #7a1b1b;
     color: white;
     border: none;
     border-radius: 8px;
@@ -190,13 +188,12 @@
     padding: 10px 15px;
     cursor: pointer;
     font-size: 16px;
-     width: 220px;
+    width: 220px;
 }
 
 .make-review-button:hover {
     background-color: #4a6b38;
 }
-
 
 .comment-popup-overlay {
     position: fixed;
@@ -216,7 +213,7 @@
     padding: 40px;
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-     width: 80%;
+    width: 80%;
     max-width: 600px;
     position: relative;
     display: flex;
@@ -224,7 +221,7 @@
 }
 
 .replying-to-popup {
-     color: #3f3f3f;
+    color: #3f3f3f;
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -233,7 +230,7 @@
 }
 
 .comment-input {
-      width: 95%;
+    width: 95%;
     height: 150px;
     margin-bottom: 28px;
     padding: 25px;
@@ -241,7 +238,7 @@
     border-radius: 16px;
     resize: none;
     font-size: 20px;
-     font-family: "Ysabeau SC";
+    font-family: "Ysabeau SC";
 }
 
 .comment-input::placeholder {
@@ -258,7 +255,7 @@
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-     font-family: "Ysabeau SC";
+    font-family: "Ysabeau SC";
     align-self: center;
     padding: 6px 12px;
 }
@@ -272,7 +269,7 @@
 }
 
 .close-button-review {
-   position: absolute;
+    position: absolute;
     top: 10px;
     right: 10px;
     font-size: 40px;
@@ -286,7 +283,7 @@
     color: #b00808;
 }
 
-/* Rating Circles (from CreateExperience.css - good to reuse!) */
+/* Rating Circles */
 .difficulty-container {
     display: flex;
     gap: 5px;
@@ -303,9 +300,7 @@
     transition: background-color 0.2s ease;
 }
 
-
-  /* Review Item Styling */
-
+/* Review Item Styling */
 .reviews-list {
     width: 100%;
 }
@@ -335,7 +330,7 @@
 
 .user-info {
     display: flex;
-   align-items: flex-start;
+    align-items: flex-start;
     gap: 10px;
     width: 100%;
 }
@@ -368,4 +363,179 @@
     margin-top: 5px;
     margin-bottom: 10px;
     text-align: center;
+}
+
+/* RESPONSIVE STYLES */
+@media screen and (max-width: 1024px) {
+    .title-reviews {
+        font-size: 65px;
+        margin-bottom: 20px;
+    }
+    
+    .scroll-buttons-container-reviews {
+        top: 140px;
+    }
+    
+    .reviews-wrapper-reviews .experience-card-experiences {
+        min-width: 500px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .container-reviews {
+        padding: 15px 10px;
+    }
+    
+    .title-reviews {
+        font-size: 48px;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .scroll-buttons-container-reviews {
+        top: 100px; /* Adjusted for mobile */
+    }
+    
+    .reviews-wrapper-reviews {
+        padding-top: 40px; /* Increased top padding on mobile for button clearance */
+        gap: 15px;
+    }
+    
+    .reviews-wrapper-reviews .experience-card-experiences {
+        min-width: 85%;
+        width: 85%;
+        height: auto;
+        margin: 0;
+    }
+    
+    .selected-review-container {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .comment-popup {
+        padding: 20px;
+        width: 90%;
+    }
+    
+    .replying-to-popup {
+        font-size: 18px;
+    }
+    
+    .comment-input {
+        height: 120px;
+        padding: 15px;
+        font-size: 16px;
+    }
+    
+    .publish-button {
+        width: 180px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .review-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .make-review-button, .report-button {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .review-item-container {
+        padding: 12px;
+    }
+    
+    .review-profile-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .difficulty-container-reviews {
+        margin-bottom: 5px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .title-reviews {
+        font-size: 36px;
+    }
+    
+    .scroll-buttons-container-reviews {
+        top: 90px;
+        padding: 0 10px;
+    }
+    
+    .scroll-button-reviews {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .reviews-wrapper-reviews {
+        padding-top: 35px;
+        gap: 10px;
+    }
+    
+    .reviews-wrapper-reviews .experience-card-experiences {
+        min-width: 90%;
+        width: 90%;
+    }
+    
+    .back-button-reviews {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .comment-popup {
+        padding: 15px;
+    }
+    
+    .close-button-review {
+        font-size: 32px;
+        top: 5px;
+        right: 5px;
+    }
+    
+    .replying-to-popup {
+        font-size: 16px;
+    }
+    
+    .comment-input {
+        height: 100px;
+        padding: 12px;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+    
+    .publish-button {
+        width: 150px;
+        height: 35px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
+    
+    .review-user-name {
+        font-size: 0.9em;
+    }
+    
+    .review-date {
+        font-size: 0.8em;
+    }
+    
+    .review-text-content {
+        font-size: 0.9em;
+        line-height: 1.3;
+    }
+    
+    .difficulty-circle-reviews {
+        width: 16px;
+        height: 16px;
+    }
 }
