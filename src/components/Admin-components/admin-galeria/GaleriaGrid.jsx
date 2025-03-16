@@ -1,10 +1,10 @@
-import Fotos from "../admin-buttons/GaleriaFoto";
+
 import ImgDefault from "../../../assets/images/AdminLandingPage/CrearExperiencias/Subirimagen.png";
 
 const GaleriaGrid = () => {
   const Pictures = [
-    { img: ImgDefault, alte: "abc" },
-    { img: ImgDefault, alte: "abc" },
+    { img: ImgDefault, alt: "abc" },
+    { img: ImgDefault, alt: "abc" },
     { img: ImgDefault, alt: "abc" },
     { img: ImgDefault, alt: "abc" },
     { img: ImgDefault, alt: "abc" },
@@ -13,17 +13,22 @@ const GaleriaGrid = () => {
     { img: ImgDefault, alt: "abc" }, 
     { img: ImgDefault, alt: "abc" },
     { img: ImgDefault, alt: "abc" },
+    { img: ImgDefault, alt: "abc" },
+    { img: ImgDefault, alt: "abc" },
+    { img: ImgDefault, alt: "abc" },
 
   ];
   return (
-    <section className="bg-[#121F0A] text-gray-300 p-6 w-[1558px] h-[726px]">
-      <div className="grid grid-cols-3 gap-y-16 gap-x-12 rounded-lg">
-        {Pictures.map((picture, index) => (
-          <Fotos key={index} img={picture.img} alt={picture.alt} />
-        ))}
-      </div>
+    <section className="bg-[#121F0A] text-gray-300 p-6 h-[726px] w-auto rounded-lg">
+        <div className="flex flex-nowrap gap-y-16 gap-x-12 overflow-x-auto h-[336px]">
+            {Pictures.map((picture, index) => (
+                <div key={index} className="w-44 h-24 bg-gray-600 rounded-lg">
+                    <img className="object-cover object-center" src={picture.img} alt={picture.alt} />
+                </div>
+            ))}
+        </div>
     </section>
-  );
+);
 };
 
 export default GaleriaGrid;
