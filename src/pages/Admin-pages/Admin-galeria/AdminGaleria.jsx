@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection"
 import GaleriaGrid from "../../../components/Admin-components/admin-galeria/GaleriaGrid";
-import GaleriaSolicitudes from "../../../components/Admin-components/admin-galeria/SolicitudesGaleria";
-
+import PhotoRequests from '../../../components/Admin-components/admin-galeria/PhotoRequets';
 
 const AdminGaleria = () => {
   const FotosActuales = 284;
@@ -32,7 +31,8 @@ const AdminGaleria = () => {
           </h2>
       </div>
       <GaleriaGrid />
-      <GaleriaSolicitudes/>
+      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <PhotoRequests />
     </div>
   );
 };
