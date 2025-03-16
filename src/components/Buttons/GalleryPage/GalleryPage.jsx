@@ -1,9 +1,10 @@
 // GalleryPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../../../firebase-config';
-import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove, runTransaction, onSnapshot } from 'firebase/firestore'; // Added runTransaction and onSnapshot
+import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove, runTransaction, onSnapshot } from 'firebase/firestore';
 import './GalleryPage.css';
 import storageService from '../../../cloudinary-services/storage-service';
+import { useLocation } from 'react-router-dom';
 
 function GalleryPage() {
     const [images, setImages] = useState([]);
@@ -25,6 +26,8 @@ function GalleryPage() {
     const [newHashtag, setNewHashtag] = useState("");
     const [hashtagError, setHashtagError] = useState("");
 
+    const location = useLocation();
+    const imagesLoadedRef = useRef(false); // Ref to track if images have been loaded
 
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
@@ -33,65 +36,36 @@ function GalleryPage() {
             } else {
                 setUserImages([]);
             }
-            if (!showDeleteImages) { // Only load all if NOT in delete mode.
-              loadAllImages();
-            }
-
+            loadAllImages();
         });
 
-        // Load available hashtags (from cache or Firestore)
         loadAvailableHashtags();
 
-        // Set up real-time listener for Hashtags collection (Optional, but recommended)
         const unsubscribeHashtags = onSnapshot(collection(db, 'Hashtags'), (snapshot) => {
-             const updatedHashtags = snapshot.docs.map(doc => doc.id);
-             setAvailableHashtags(updatedHashtags);
-             // Update cache as well
-             localStorage.setItem('availableHashtags', JSON.stringify(updatedHashtags));
-             localStorage.setItem('hashtagsTimestamp', Date.now().toString());
+            const updatedHashtags = snapshot.docs.map(doc => doc.id);
+            setAvailableHashtags(updatedHashtags);
+            localStorage.setItem('availableHashtags', JSON.stringify(updatedHashtags));
+            localStorage.setItem('hashtagsTimestamp', Date.now().toString());
         });
-
 
         return () => {
             unsubscribeAuth();
-            unsubscribeHashtags(); // Clean up the listener
+            unsubscribeHashtags();
         };
-    }, [showDeleteImages]); // Important:  Add showDeleteImages to the dependency array!
+    }, []); // Empty dependency array: runs only on mount
 
-
-
-   const loadAvailableHashtags = async () => {
-        try {
-            // Try to load from cache first
-            const cachedHashtags = localStorage.getItem('availableHashtags');
-            const cacheTimestamp = localStorage.getItem('hashtagsTimestamp');
-
-            if (cachedHashtags && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 3600000) { // 1 hour
-                setAvailableHashtags(JSON.parse(cachedHashtags));
-                return; // Exit early if loaded from cache
-            }
-
-            // If not in cache, or cache is expired, fetch from Firestore
-            const hashtagsCollection = collection(db, 'Hashtags');
-            const querySnapshot = await getDocs(hashtagsCollection);
-            const fetchedHashtags = [];
-            querySnapshot.forEach((doc) => {
-                fetchedHashtags.push(doc.id); // The ID is the hashtag
-            });
-
-            setAvailableHashtags(fetchedHashtags);
-
-            // Update cache
-            localStorage.setItem('availableHashtags', JSON.stringify(fetchedHashtags));
-            localStorage.setItem('hashtagsTimestamp', Date.now().toString());
-
-        } catch (error) {
-            console.error("Error loading available hashtags:", error);
-            // Handle error appropriately (e.g., show a message to the user)
+    useEffect(() => {
+      if (imagesLoadedRef.current && location.state && location.state.imageData) {
+        const imageUrlToFind = location.state.imageData.url;
+        // Find the image in the `images` array
+        const foundImage = images.find(img => img.url === imageUrlToFind);
+        if (foundImage) {
+            openImage(foundImage);
+        } else {
+            console.warn("Image not found in loaded images:", imageUrlToFind);
         }
-    };
-
-
+    }
+}, [images, location.state]); // Depend on `images` and `location.state`
 
     const scrollLeft = () => {
         if (imageContainerRef.current) {
@@ -124,7 +98,10 @@ function GalleryPage() {
     const handleZoomIn = () => setZoomLevel(prevZoom => Math.min(prevZoom + 0.2, 3));
     const handleZoomOut = () => setZoomLevel(prevZoom => Math.max(prevZoom - 0.2, 0.4));
 
-    const handleWheel = (event) => {
+    // ... (rest of the component, including handleWheel, handleMouseDown, etc.) ...
+    //ALL OF THE OTHER FUNCTIONS ARE THE SAME AS BEFORE
+
+  const handleWheel = (event) => {
         if (selectedImage && !showDeleteImages) {
             event.preventDefault();
             event.deltaY < 0 ? handleZoomIn() : handleZoomOut();
@@ -319,17 +296,9 @@ function GalleryPage() {
 
             if (userGalleryDocSnap.exists()) {
                 const galleryData = userGalleryDocSnap.data();
-                const loadedUserImages = galleryData.images && Array.isArray(galleryData.images) ? galleryData.images : [];
-                setUserImages(loadedUserImages);
-                 if (showDeleteImages) {
-                   setImages(loadedUserImages); // Set images to userImages when in delete mode
-                 }
-
+                setUserImages(galleryData.images && Array.isArray(galleryData.images) ? galleryData.images : []);
             } else {
                 setUserImages([]);
-                if(showDeleteImages){ //If in delete mode and no user images, clear display
-                  setImages([]);
-                }
             }
         } catch (error) {
             console.error("Error loading user images:", error);
@@ -338,19 +307,16 @@ function GalleryPage() {
     };
 
     const toggleDeleteMode = () => {
-        setShowDeleteImages(!showDeleteImages);
         setSelectedImage(null);
-
-        if (!showDeleteImages) { // Entering delete mode, load user images
-          if (auth.currentUser) {
-             loadUserImages(auth.currentUser.email)
-          }
-        } else { // Exiting delete mode, load all images
-          loadAllImages();
+        setShowDeleteImages(!showDeleteImages);
+        setImages(showDeleteImages ? userImages : images); // Corrected toggle
+        if (!showDeleteImages) {
+            loadAllImages(); // Ensure all images are loaded when exiting delete mode
         }
+
     };
 
-    const loadAllImages = async () => {
+     const loadAllImages = async () => {
         try {
             const galleryCollection = collection(db, 'Galeria de Imágenes');
             const querySnapshot = await getDocs(galleryCollection);
@@ -360,13 +326,13 @@ function GalleryPage() {
                 const galleryData = doc.data();
                 if (galleryData.images && Array.isArray(galleryData.images)) {
                     galleryData.images.forEach(image => {
-                        if (image.url) firestoreImages.push(image);
-                        else console.warn("Skipping image with missing URL:", image);
+                        if (image.url) { firestoreImages.push(image);}
+                        else {console.warn("Skipping image with missing URL:", image);}
                     });
                 }
             });
 
-            // Report filtering (remains the same)
+            //Report filtering.
             let reportedImageRefs = [];
             if (auth.currentUser) {
                 const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
@@ -380,12 +346,13 @@ function GalleryPage() {
                     }
                 }
             }
-            firestoreImages = firestoreImages.filter(image => !reportedImageRefs.includes(image.publicId || image.url));
+           firestoreImages = firestoreImages.filter(image => !reportedImageRefs.includes(image.publicId || image.url));
 
-            setImages(firestoreImages); // Set directly, no mock images
+            setImages(firestoreImages);
+            imagesLoadedRef.current = true; // Set the ref to true after images are loaded
+
         } catch (error) {
-            console.error("Error loading all images:", error);
-            alert("Error loading images: " + error.message);
+            console.error("Error loading images from Firestore:", error);
         }
     };
 
@@ -432,12 +399,12 @@ function GalleryPage() {
                     });
                 }
             }
-            //Update the state to reflect the deletion
+
             setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setSelectedImage(null);
             alert("Image deleted successfully.");
-           // No need to reload user images here, state update handles it.
+            await loadUserImages(auth.currentUser.email);
 
         } catch (error) {
             console.error("Error deleting image:", error);
@@ -481,6 +448,37 @@ function GalleryPage() {
         } catch (error) {
             console.error("Error reporting image:", error);
             alert("Error reporting image: " + error.message);
+        }
+    };
+
+       const loadAvailableHashtags = async () => {
+        try {
+            // Try to load from cache first
+            const cachedHashtags = localStorage.getItem('availableHashtags');
+            const cacheTimestamp = localStorage.getItem('hashtagsTimestamp');
+
+            if (cachedHashtags && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 3600000) { // 1 hour
+                setAvailableHashtags(JSON.parse(cachedHashtags));
+                return; // Exit early if loaded from cache
+            }
+
+            // If not in cache, or cache is expired, fetch from Firestore
+            const hashtagsCollection = collection(db, 'Hashtags');
+            const querySnapshot = await getDocs(hashtagsCollection);
+            const fetchedHashtags = [];
+            querySnapshot.forEach((doc) => {
+                fetchedHashtags.push(doc.id); // The ID is the hashtag
+            });
+
+            setAvailableHashtags(fetchedHashtags);
+
+            // Update cache
+            localStorage.setItem('availableHashtags', JSON.stringify(fetchedHashtags));
+            localStorage.setItem('hashtagsTimestamp', Date.now().toString());
+
+        } catch (error) {
+            console.error("Error loading available hashtags:", error);
+            // Handle error appropriately (e.g., show a message to the user)
         }
     };
 

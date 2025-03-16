@@ -1,0 +1,163 @@
+/* SearchTest.css */
+
+body {
+    background-color: #172a1a;
+}
+
+.container-search-test {
+    max-width: 800px; /* Increased max-width for better layout */
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #172a1a;
+    color: #fff; /* Changed text color to white for dark background */
+  }
+
+.titulo-search-test {
+    color: #fff; /* White title */
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.subtitulo-search-test {
+    color: #ccc; /* Lighter gray for subtitle */
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-search-test {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.campo-search-test {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo-search-test label {
+    margin-bottom: 0.3rem;
+    color: #fff; /* White label text */
+}
+.input-container {
+    position: relative; /* Make this a positioning context */
+    display: flex; /* Use flex to center the searching text*/
+    align-items: center; /* Center vertically */
+}
+
+.input-search-test {
+    padding: 10px;
+    padding-right: 35px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #283f2c; /* Darker input background */
+    color: #fff;          /* White text in input */
+}
+.input-search-test::placeholder { /* Style the placeholder text */
+    color: #aaa;
+}
+
+.input-error-search-test {
+    border-color: red;
+}
+
+.error-message-search-test {
+    color: red;
+    margin-top: 0.5rem;
+}
+
+/* New styles for icon positioning */
+
+.search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.searching-text {
+    margin-left: 10px; /* Add some spacing */
+    color: #aaa; /*  Lighter text for "Searching..." */
+}
+.input-search-test:disabled {
+    background-color: #344938; /*  Slightly lighter gray when disabled */
+    color: #999;
+    cursor: not-allowed;
+    border-color: #555;
+}
+
+.input-search-test:disabled + .search-icon {
+  opacity: 0.5;
+}
+
+/* --- Results Styling --- */
+.results-container-search-test {
+    margin-top: 20px; /* Increased margin for better spacing */
+}
+
+.results-container-search-test h2 {
+    color: #fff; /* White heading for results */
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.results-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+}
+
+.result-item {
+    background-color: #283f2c; /* Darker background for result items */
+    border: 1px solid #555; /* Slightly darker border */
+    padding: 15px;
+    border-radius: 8px;
+    width: calc(50% - 10px);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-details p {
+    margin: 5px 0;
+    color: #ccc; /* Lighter text for details */
+}
+.result-details strong{
+    color: #fff;
+}
+
+.result-link {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.result-link:hover {
+    background-color: #367c39;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .result-item {
+        width: 100%; /* One item per row on smaller screens */
+    }
+    .container-search-test {
+        max-width: 95%;  /* More responsive width */
+    }
+}

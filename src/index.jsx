@@ -32,6 +32,7 @@ import Statistics from './components/firebase-test/Statistics/Statistics';
 import ReviewsPage from './pages/ReviewsPage/ReviewsPage';
 import SupportPage from './pages/SupportPage/SupportPage';
 import GuideRequest from './pages/GuideRequest/GuideRequest';
+import SearchTest from './components/SearchTest/SearchTest';
 
 // Admin Pages
 import AdminLanding from './pages/Admin-landing/AdminLanding';
@@ -61,6 +62,7 @@ root.render(
             {/* Main Routes */}
             <Route path="/" element={<AvilaLanding />} />
             <Route path="/foro" element={<ForumPage />} />
+            <Route path="/foro/:forumId" element={<ForumPage />} /> {/* Dynamic route for individual forums */}
             <Route path="/equipo" element={<OurTeam />} />
             <Route path="/experiencias" element={<ExperiencesPage />} />
             <Route path="/crear-experiencia" element={<CreateExperience />} />
@@ -72,6 +74,7 @@ root.render(
             <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/guide-request" element={<GuideRequest />} />
+            <Route path="/search-test" element={<SearchTest />} />
           </Route>
 
           {/* Routes with LayoutAdmin */}
