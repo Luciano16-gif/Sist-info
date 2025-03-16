@@ -25,7 +25,13 @@ const AdminGaleria = () => {
         <RelevantInfoS number = {FotosActuales} description ="Fotos en la galería actual" />
         <RelevantInfoS number = {Solicitudes} description ="Solicitudes de nuevas fotos" />
       </div>
-      <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+      <div className="flex flex-col">
+          <h2 className="text-4xl font-bold text-white mr-4">Nuestra Galería</h2>
+          <h2 className="text-sm text-white mr-4">Selecciona una imagen para obtener
+            los detalles de la misma o eliminarla de nuestra galería
+          </h2>
+      </div>
+      <GaleriaGrid />
     </div>
   );
 };
