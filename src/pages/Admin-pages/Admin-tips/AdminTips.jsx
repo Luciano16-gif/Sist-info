@@ -23,6 +23,7 @@ const AdminTips = () => {
     const [newTipImage, setNewTipImage] = useState(null);
     const [newTipTitle, setNewTipTitle] = useState('');
     const [newTipDescription, setNewTipDescription] = useState('');
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     // Datos de las cartas de tips actuales
     const tipsCards = [
@@ -101,7 +102,13 @@ const AdminTips = () => {
 
     const handleAddTipClick = () => {
         console.log('Nuevo tip agregado:', newTipTitle, newTipDescription, newTipImage);
+        setShowSuccessPopup(true); // Mostrar el pop-up de éxito
         // Aquí hay que agregar cómo almacenaremos el nuevo tip
+    };
+    
+    // Función para cerrar el pop-up de éxito
+    const handleCloseSuccessPopup = () => {
+        setShowSuccessPopup(false); // Cerrar el pop-up 
     };
 
     return (
@@ -247,6 +254,24 @@ const AdminTips = () => {
                   </div>
                 </div>
             </div>
+
+            {/* Pop-up de tip creado */}
+            {showSuccessPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-[#556052] w-[400px] h-[200px] rounded-xl p-8 relative">
+                        <button 
+                            className="absolute top-4 right-4 text-white text-2xl font-bold"
+                            onClick={handleCloseSuccessPopup}
+                        >
+                            &times;
+                        </button>
+                        {/* Pop-up de guardado con éxito */}
+                        <div className="flex flex-col items-center justify-center space-y-6 h-full">
+                            <p className="text-white text-[25px] font-bold">¡Tip creado agregado a nuestra lista pública de tips!</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
