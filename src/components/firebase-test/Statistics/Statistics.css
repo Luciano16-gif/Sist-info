@@ -92,6 +92,8 @@
 .text-gray-700-statistics {
     color: rgb(164, 247, 119);
     margin-bottom: 18px;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 /* Loading spinner (using Tailwind classes) */
@@ -139,7 +141,7 @@
 }
 
 .border-blue-500-statistics {
-    border-color: #3b82f6;
+    border-color: #67a1ff;
 }
 
 @keyframes spin {

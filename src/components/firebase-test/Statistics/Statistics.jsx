@@ -18,6 +18,7 @@ const Statistics = () => {
     const [incluidosUsage, setIncluidosUsage] = useState([]);
     const [activityTypeUsage, setActivityTypeUsage] = useState([]);
     const [forumAndCommentData, setForumAndCommentData] = useState([]);
+    const [hashtagUsage, setHashtagUsage] = useState([]); // New state
 
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -181,10 +182,48 @@ const Statistics = () => {
             }
         };
 
+        const fetchHashtagData = async () => {
+            try {
+                const galleryCollection = collection(db, 'Galeria de Imágenes');
+                const querySnapshot = await getDocs(galleryCollection);
+                const hashtagCounts = {};
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.images && Array.isArray(data.images)) {
+                        data.images.forEach(image => {
+                            if (image.hashtags && Array.isArray(image.hashtags)) {
+                                image.hashtags.forEach(hashtag => {
+                                    // Normalize the hashtag (e.g., lowercase) to avoid duplicates
+                                    const normalizedHashtag = hashtag.toLowerCase();
+                                    hashtagCounts[normalizedHashtag] = (hashtagCounts[normalizedHashtag] || 0) + 1;
+                                });
+                            }
+                        });
+                    }
+                });
+
+                const hashtagData = Object.entries(hashtagCounts)
+                    .map(([hashtag, count]) => ({ hashtag, count }))
+                    .sort((a, b) => b.count - a.count); // Sort by count (descending)
+
+                setHashtagUsage(hashtagData);  // Update state with the processed data
+
+            } catch (err) {
+                console.error("Error fetching hashtag data:", err);
+                setError("Failed to load hashtag statistics.");
+            } finally {
+                // You might want to have a separate loading state for hashtags,
+                // but for simplicity, I'm re-using the existing loading state.
+                // setLoading(false);  // Only if you have separate loading.
+            }
+        };
+
         fetchUserTypeData();
         fetchImageUploadData();
         fetchExperienceData();
         fetchForumAndCommentData();
+        fetchHashtagData(); // Add the call here
     }, []);
 
     if (loading) {
@@ -241,7 +280,7 @@ const Statistics = () => {
 
                 <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
                     <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Images Uploaded per Day</h2>
+                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Imágenes subidas por día</h2>
                          <ResponsiveContainer width="95%" height={300}>
                             <BarChart data={imagesPerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
@@ -261,7 +300,7 @@ const Statistics = () => {
             <div className="flex-statistics flex-wrap-statistics">
                 <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
                     <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Experiences Created per Day</h2>
+                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Experiencias creadas </h2>
                         <ResponsiveContainer width="95%" height={300}>
                             <LineChart data={experiencesPerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
@@ -278,7 +317,7 @@ const Statistics = () => {
 
                 <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
                     <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">"Incluidos" Usage</h2>
+                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Tipos de "Incluidos en la Experiencia"</h2>
                         <ResponsiveContainer width="95%" height={300}>
                             <BarChart data={incluidosUsage} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
@@ -298,7 +337,7 @@ const Statistics = () => {
             <div className="flex-statistics flex-wrap-statistics">
                 <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
                     <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Activity Type Usage</h2>
+                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Tipos de actividad usadas</h2>
                         <ResponsiveContainer width="95%" height={300}>
                             <BarChart data={activityTypeUsage} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
@@ -314,7 +353,7 @@ const Statistics = () => {
                 </div>
                 <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
                     <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Forums and Comments per Day</h2>
+                        <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Foros y Comentarios por día</h2>
                         <ResponsiveContainer width="95%" height={300}>
                             <LineChart data={forumAndCommentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
@@ -328,6 +367,29 @@ const Statistics = () => {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
+                </div>
+            </div>
+            {/* Row 4: Hashtag Bar Chart */}
+            <div className="w-full p-4">
+                <div className="bg-light-green-statistics p-6 rounded-lg shadow-lg h-full">
+                    <h2 className="text-gray-700-statistics">Hashtags más usados</h2>
+                    {hashtagUsage.length > 0 ? (
+                        <ResponsiveContainer width="95%" height={300}>
+                            <BarChart
+                                data={hashtagUsage}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
+                                <XAxis dataKey="hashtag" className="chart-axis-text-statistics" angle={-45} textAnchor="end" height={100} interval={0}/>
+                                <YAxis className="chart-axis-text-statistics" />
+                                <Tooltip className="chart-tooltip-statistics" />
+                                <Legend className="chart-legend-text-statistics" />
+                                <Bar dataKey="count" fill="#8884d8" name="Times Used" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <p className="text-center text-gray-500">No hashtags found.</p>
+                    )}
                 </div>
             </div>
 
