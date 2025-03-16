@@ -25,6 +25,10 @@ const OurTeam = () => {
     navigate('/support'); // Navigate to the /support route
   };
 
+  const handleJoinTeam = () => {
+    navigate('/guide-request'); // Navigate to the /guide-request route
+  };
+
   return (
     <div className="relative min-h-screen text-white font-sans overflow-x-hidden">
       {/* Background circles */}
@@ -146,7 +150,7 @@ const OurTeam = () => {
           </div>
 
           <div className="flex justify-center mb-12">
-            <Button text="Unirse al Equipo" onClick={() => {}} />
+            <Button text="Unirse al Equipo" onClick={handleJoinTeam} /> {/* Use handleJoinTeam */}
           </div>
 
           <h2 className="text-4xl font-bold text-center mb-8">
