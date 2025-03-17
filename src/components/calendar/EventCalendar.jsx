@@ -292,7 +292,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
   }, [daysInMonth]);
 
   return (
-    <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-6 sm:py-12">
+    <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
       {/* Loading Overlay for initial loading and month changes */}
       <LoadingOverlay 
         isLoading={loading || isChangingMonth} 
@@ -317,9 +317,9 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
       )}
       
       {/* Layout: stacked on mobile, side-by-side on larger screens */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
         {/* Calendar Container */}
-        <div className="w-full lg:w-7/12 bg-[rgba(25,39,15,0.8)] rounded-xl sm:rounded-2xl p-3 sm:p-6">
+        <div className="w-full xl:w-7/12 bg-[rgba(25,39,15,0.8)] rounded-xl sm:rounded-2xl p-2 sm:p-4 md:p-6">
           {/* Month navigation header */}
           <div className="flex justify-between items-center mb-4">
             <button
@@ -397,16 +397,16 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                             {day}
                           </div>
                           {validDay && !pastDay && (
-                            <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-[1px] sm:space-x-1 pb-[2px] sm:pb-1">
-                              {/* Show fewer dots on mobile */}
-                              {dayEvents.slice(0, window.innerWidth < 640 ? 3 : 4).map((event, index) => (
+                            <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-[1px] pb-[2px] sm:pb-1">
+                              {/* Show 4 dots on mobile, 5 on tablet/desktop */}
+                              {dayEvents.slice(0, window.innerWidth < 640 ? 4 : 5).map((event, index) => (
                                 <div
                                   key={index}
                                   className={`w-[5px] h-[5px] sm:w-2 sm:h-2 rounded-full ${event.color}`}
                                   aria-hidden="true"
                                 />
                               ))}
-                              {dayEvents.length > (window.innerWidth < 640 ? 3 : 4) && (
+                              {dayEvents.length > (window.innerWidth < 640 ? 4 : 5) && (
                                 <div className="w-[5px] h-[5px] sm:w-2 sm:h-2 rounded-full bg-white" aria-hidden="true" />
                               )}
                             </div>
@@ -422,8 +422,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
         </div>
 
         {/* Event Details and Button Container */}
-        <div className="w-full lg:w-5/12 flex flex-col">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+        <div className="w-full xl:w-5/12 flex flex-col">
+          <h2 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-white mb-3 sm:mb-4">
             Calendario de actividades
           </h2>
 
@@ -434,7 +434,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
               </h3>
               
               {/* Scrollable container for events */}
-              <div className="overflow-y-auto max-h-[300px] sm:max-h-[380px] pr-2 space-y-3">
+              <div className="overflow-y-auto max-h-[250px] sm:max-h-[300px] md:max-h-[350px] pr-2 space-y-3">
                 {getEventsForSpecificDay(selectedDate).map((event, index) => (
                   <div
                     key={`${event.id}-${index}`}
@@ -470,7 +470,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
               </div>
             </>
           ) : (
-            <div className="h-[200px] sm:h-[300px] flex items-center justify-center">
+            <div className="h-[200px] sm:h-[250px] md:h-[300px] flex items-center justify-center">
               <p className="text-gray-300 text-center px-4">
                 Selecciona una fecha para ver las experiencias disponibles
               </p>

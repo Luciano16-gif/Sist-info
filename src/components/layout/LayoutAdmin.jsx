@@ -81,7 +81,7 @@ const LayoutAdmin = () => {
       {/* Main content area with appropriate padding for all device sizes */}
       <div className={`
         pt-16 transition-all duration-500 ease-in-out
-        ${isTablet ? (isMobileSidebarOpen ? 'pl-64' : 'pl-16') : 'md:pl-16 lg:pl-20'}
+        ${isTablet ? 'pl-0' : 'md:pl-16 lg:pl-20'}
       `}>
         <div className="p-4 md:p-6 lg:p-8 mt-12">
           <Outlet />
