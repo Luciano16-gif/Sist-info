@@ -6,6 +6,7 @@ import { db, auth } from '../../firebase-config';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
 import storage from '../../cloudinary-services/storage-service';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 
 function BookingProcessPage() {
     // ... (All other state variables remain the same)
@@ -387,7 +388,7 @@ function BookingProcessPage() {
             )}
             <div className="container-booking-process">
                 <button className="back-button-booking-process" onClick={handleGoBack}> VOLVER AL MENÚ DE RUTAS </button>
-                <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking-process" />
+                <img src={backgroundImage} alt="Background" className="background-image-booking-process" />
                 <div className="content-booking-process">
                     <div className="left-side-booking-process">
                         <div className='pasarela-de-pago-title-container-booking-process'>

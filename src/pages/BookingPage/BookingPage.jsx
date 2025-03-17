@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/calendar/EventCalendar';
 import { db } from '../../firebase-config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -308,7 +309,7 @@ function BookingPage() {
 
     return (
         <div className="container-booking">
-            <img src="/src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking" />
+            <img src={backgroundImage} alt="Background" className="background-image-booking" />
             <div className="content-booking">
                 <div className='left-side-booking'>
                     <div className="title-description-box">
