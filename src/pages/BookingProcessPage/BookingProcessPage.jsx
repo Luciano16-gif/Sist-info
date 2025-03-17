@@ -8,6 +8,9 @@ import storage from '../../cloudinary-services/storage-service';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 import ExperienceBookingService from '../../components/services/ExperienceBookingService';
+import html2canvas from 'html2canvas'; // Importa html2canvas
+import ReactDOMServer from 'react-dom/server';
+
 
 function BookingProcessPage() {
     const location = useLocation();
@@ -25,13 +28,11 @@ function BookingProcessPage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
-    const [experienceCode, setExperienceCode] = useState(''); // Added experience code state
+    const [experienceCode, setExperienceCode] = useState('');
+    const [paymentDetails, setPaymentDetails] = useState(null);
 
-
-    // --- Generate Experience Code ---
     useEffect(() => {
         const generateExperienceCode = () => {
-            // Generates a 6-character alphanumeric code (uppercase letters and numbers)
             let code = '';
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             for (let i = 0; i < 6; i++) {
@@ -40,8 +41,7 @@ function BookingProcessPage() {
             return code;
         };
         setExperienceCode(generateExperienceCode());
-    }, []); // Run only once when the component mounts
-
+    }, []);
 
     const savePaymentDetails = async (details) => {
         try {
@@ -50,7 +50,6 @@ function BookingProcessPage() {
                 throw new Error("User email not found.  User might not be logged in.");
             }
 
-            // Prepare guide information to store in payment data
             const guidesData = experienceGuides.map(guide => ({
                 id: guide.id,
                 name: guide.name,
@@ -73,10 +72,10 @@ function BookingProcessPage() {
                 guides: guidesData,
                 selectedDate: selectedDate?.toISOString(),
                 selectedDay,
-                experienceCode, // Store the experience code
+                experienceCode,
             };
+            setPaymentDetails(paymentData);
 
-            // Save payment details to Firestore
             const userDocRef = doc(db, "payments", userEmail);
             const userDocSnap = await getDoc(userDocRef);
 
@@ -92,41 +91,38 @@ function BookingProcessPage() {
 
             console.log("Payment details saved to Firestore with email as ID");
 
-            // Update experience bookings
             await updateExperienceBookings({
                 ...paymentData,
-                guides: guidesData // Ensure guides are passed to updateExperienceBookings
+                guides: guidesData
             });
 
-            // Update available slots in the experience
             const slotsUpdated = await ExperienceBookingService.updateAvailableSlots(
                 experience.id,
                 selectedPeople
             );
 
             if (!slotsUpdated) {
-                console.warn("Failed to update available slots. The payment was processed successfully, but spot count may be inaccurate.");
+                console.warn("Failed to update available slots.");
             }
 
             setIsPaymentSuccessful(true);
         } catch (error) {
-            console.error("Error saving payment details to Firestore:", error);
+            console.error("Error saving payment details:", error);
             alert("Hubo un error al guardar los detalles del pago.");
         }
     };
 
-    const updateExperienceBookings = async (paymentData) => {
+     const updateExperienceBookings = async (paymentData) => {
         if (!experience || !experience.id) {
             console.error("Experience ID is missing. Cannot update bookings.");
             return;
         }
 
         const experienceRef = doc(db, "Experiencias", experience.id);
-        const formattedDate = selectedDay; // Use the already formatted date.
+        const formattedDate = selectedDay;
         const timeSlot = selectedTime;
 
         try {
-            // Include guide information and experience code in the booking data
             const bookingData = {
                 people: parseInt(selectedPeople, 10),
                 user: {
@@ -138,10 +134,9 @@ function BookingProcessPage() {
                 guides: paymentData.guides || [],
                 timestamp: new Date(),
                 transactionId: paymentData.transactionId,
-                experienceCode: paymentData.experienceCode, // Include experience code here
+                experienceCode: paymentData.experienceCode,
             };
 
-            // Get the current experience data.
             const expDocSnap = await getDoc(experienceRef);
 
             if (!expDocSnap.exists()) {
@@ -150,21 +145,17 @@ function BookingProcessPage() {
             }
 
             const expData = expDocSnap.data();
-            // Initialize 'reservas' if it doesn't exist.
             const reservas = expData.reservas || {};
 
-            // Initialize the date's array if it doesn't exist
             if (!reservas[formattedDate]) {
                 reservas[formattedDate] = {};
             }
 
-            // Initialize time slot if doesn't exist
             if (!reservas[formattedDate][timeSlot]) {
                 reservas[formattedDate][timeSlot] = [];
             }
 
             reservas[formattedDate][timeSlot].push(bookingData);
-            // Update experience data in Firestore
             await updateDoc(experienceRef, { reservas });
             console.log("Experience bookings updated successfully with guide information and experience code.");
 
@@ -172,6 +163,7 @@ function BookingProcessPage() {
             console.error("Error updating experience bookings:", error);
         }
     };
+
 
     const handlePaymentSuccess = (details) => {
         console.log("Pago completado:", details);
@@ -185,8 +177,107 @@ function BookingProcessPage() {
         setIsPaymentSuccessful(false);
     };
 
-    // ... (rest of your useEffect hooks and other functions remain unchanged)
-      useEffect(() => {
+    // --- Componente Factura (puedes ponerlo en un archivo separado si quieres) ---
+    function Factura({ paymentDetails, currentUser, experience }) {
+        if (!paymentDetails || !currentUser || !experience) {
+            return <div>No hay datos para la factura.</div>;
+        }
+
+        return (
+            <div id="factura" style={{ fontFamily: 'Arial', fontSize: '14px', padding: '20px', backgroundColor: 'white' }}>
+                <h1 style={{ color: 'blue', textAlign: 'center' }}>Detalles de la Reserva</h1>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Código:</strong> {paymentDetails.experienceCode}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Usuario:</strong> {currentUser.name} {currentUser.lastName}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Email:</strong> {currentUser.id}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Fecha:</strong> {paymentDetails.selectedDay}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Hora:</strong> {paymentDetails.selectedTime}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Cantidad de Personas:</strong> {paymentDetails.selectedPeople}
+                </div>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#eee' }}>
+                            <th style={{ border: '1px solid #ddd', padding: '8px' }}>Campo</th>
+                            <th style={{ border: '1px solid #ddd', padding: '8px' }}>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Ruta</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{experience.name}</td>
+                        </tr>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Guías</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{paymentDetails.guides.map(g => `${g.name} ${g.lastName}`).join(', ')}</td>
+                        </tr>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Precio Total</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>${paymentDetails.amount} {paymentDetails.currency}</td>
+                        </tr>
+                        <tr>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>ID de Transacción</td>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>{paymentDetails.transactionId}</td>
+                        </tr>
+                        <tr>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>Estado del Pago</td>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>{paymentDetails.status}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    // --- Función para descargar la imagen ---
+    const downloadBookingDetails = async () => {
+        if (!paymentDetails || !currentUser || !experience) {
+            console.error("Faltan datos para generar la imagen.");
+            return;
+        }
+
+        const facturaContainer = document.createElement('div');
+        facturaContainer.style.position = 'absolute';
+        facturaContainer.style.left = '-9999px';
+        document.body.appendChild(facturaContainer);
+
+        const facturaElement = (
+            <Factura
+                paymentDetails={paymentDetails}
+                currentUser={currentUser}
+                experience={experience}
+            />
+        );
+
+        const facturaHTML = ReactDOMServer.renderToString(facturaElement);
+        facturaContainer.innerHTML = facturaHTML;
+
+
+        const canvas = await html2canvas(facturaContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = `reserva_${paymentDetails.experienceCode}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        document.body.removeChild(facturaContainer);
+    };
+
+
+    useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             setError(null);
@@ -233,10 +324,10 @@ function BookingProcessPage() {
                                 imageUrl = await storage.getDownloadURL(data.imageUrl);
                             } catch (imageError) {
                                 console.error("Error fetching experience image URL:", imageError);
-                                imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                imageUrl = '/public/profile_managemente/profile_picture_1.png';
                             }
                         } else {
-                            imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                            imageUrl = '/public/profile_managemente/profile_picture_1.png';
                         }
 
                         const experienceData = {
@@ -260,7 +351,6 @@ function BookingProcessPage() {
                         };
                         setExperience(experienceData);
 
-                        // Pre-fill selectedDate, selectedTime, and selectedDay from location.state
                         if (location.state?.selectedDate) {
                             const date = new Date(location.state.selectedDate);
                             setSelectedDate(date);
@@ -270,7 +360,6 @@ function BookingProcessPage() {
                             setSelectedTime(location.state.selectedTime);
                         }
 
-                        // Fetch guides from the experience
                         if (data.guias && Array.isArray(data.guias)) {
                             const fetchedGuides = [];
                             for (const guideRef of data.guias) {
@@ -287,10 +376,10 @@ function BookingProcessPage() {
                                                 guideImageUrl = await storage.getDownloadURL(guideData["Foto de Perfil"]);
                                             } catch (guideImageError) {
                                                 console.error("Error fetching guide image URL:", guideImageError);
-                                                guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                                guideImageUrl = '/public/profile_managemente/profile_picture_1.png';
                                             }
                                         } else {
-                                            guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                            guideImageUrl = '/public/profile_managemente/profile_picture_1.png';
                                         }
                                         fetchedGuides.push({
                                             id: guideDoc.id,
@@ -318,7 +407,7 @@ function BookingProcessPage() {
             return () => unsubscribe && unsubscribe();
         };
         fetchData();
-    }, [location.state, navigate]);
+    }, [location.state?.experience?.id, location.state?.selectedDate, location.state?.selectedTime, navigate]);
 
     useEffect(() => {
         if (experience) {
@@ -337,7 +426,7 @@ function BookingProcessPage() {
                     currentHour += Math.floor(currentMinute / 60);
                     currentMinute %= 60;
                 }
-                 if (slots.length > 0) {
+                if (slots.length > 0) {
                     const lastSlot = slots[slots.length - 1];
                     if (lastSlot === endTime) {
                         slots.pop();
@@ -360,14 +449,15 @@ function BookingProcessPage() {
     }, [experience, selectedPeople]);
 
     useEffect(() => {
-        console.log("selectedTime:", selectedTime);
-        console.log("selectedPeople:", selectedPeople);
-        console.log("selectedDate:", selectedDate);
-        console.log("selectedDay", selectedDay);
-        console.log("totalPrice", totalPrice);
-        console.log("experienceGuides:", experienceGuides);
-        console.log("Experience Code:", experienceCode); // Log the experience code
+    console.log("selectedTime:", selectedTime);
+    console.log("selectedPeople:", selectedPeople);
+    console.log("selectedDate:", selectedDate);
+    console.log("selectedDay", selectedDay);
+    console.log("totalPrice", totalPrice);
+    console.log("experienceGuides:", experienceGuides);
+    console.log("Experience Code:", experienceCode);
     }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides, experienceCode]);
+
     const handleGoBack = () => {
         navigate(-1);
     };
@@ -484,7 +574,7 @@ function BookingProcessPage() {
                             <h2 className="details-title-booking-process">DETALLES</h2>
                         </div>
                         <p className='details-booking-process-p'>CÓDIGO DE PARTICIPACIÓN</p>
-                        <h2 className='codigo-participacion-booking-process'>{experienceCode}</h2> {/* Display experience code */}
+                        <h2 className='codigo-participacion-booking-process'>{experienceCode}</h2>
                         <div className='user-details-container-booking-process'>
                             <p className='details-booking-process-p'>USUARIO: {currentUser?.name} {currentUser?.lastName}</p>
                             <p className='details-booking-process-p'>CANTIDAD DE PERSONAS : {selectedPeople}</p>
@@ -500,7 +590,12 @@ function BookingProcessPage() {
                         </div>
                         <div className='realizar-pago-button-container-booking-process'>
                             {isPaymentSuccessful ? (
-                                <p>Pago exitoso!</p>
+                                <>
+                                    <p>Pago exitoso!</p>
+                                    <button onClick={downloadBookingDetails} className="payment-button-booking-process">
+                                        Descargar Detalles de la Reserva
+                                    </button>
+                                </>
                             ) : (
                                 <PayPalButtons
                                     style={{ layout: "horizontal" }}
