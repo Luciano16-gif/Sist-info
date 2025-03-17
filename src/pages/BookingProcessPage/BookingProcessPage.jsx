@@ -103,51 +103,53 @@ function BookingProcessPage() {
             console.error("Experience ID is missing. Cannot update bookings.");
             return;
         }
-
+    
         const experienceRef = doc(db, "Experiencias", experience.id);
         const formattedDate = selectedDay; // Use the already formatted date.
         const timeSlot = selectedTime;
-
+    
         try {
+            // Include guide information in the booking data
             const bookingData = {
                 people: parseInt(selectedPeople, 10), // Ensure this is a number
                 user: {
                     id: currentUser.id,
                     name: currentUser.name,
                     lastName: currentUser.lastName,
-                    email: auth.currentUser.email // Store user email.
+                    email: auth.currentUser.email // Store user email
                 },
+                guides: paymentData.guides || [], // Store all guides information
                 timestamp: new Date(),  // Capture current timestamp
                 transactionId: paymentData.transactionId, // Referencing the payment
             };
-
+    
             // Get the current experience data.
             const expDocSnap = await getDoc(experienceRef);
-
+    
             if (!expDocSnap.exists()) {
                 console.log("No such document!");
                 return;
             }
-
+    
             const expData = expDocSnap.data();
             // Initialize 'reservas' if it doesn't exist.
             const reservas = expData.reservas || {};
-
+    
             // Initialize the date's array if it doesn't exist
             if (!reservas[formattedDate]) {
                 reservas[formattedDate] = {};
             }
-
-            //Initialize time slot if doesn't exist
+    
+            // Initialize time slot if doesn't exist
             if(!reservas[formattedDate][timeSlot]){
                 reservas[formattedDate][timeSlot] = [];
             }
-
+    
             reservas[formattedDate][timeSlot].push(bookingData);
-            //Update experience data in firestore
+            // Update experience data in Firestore
             await updateDoc(experienceRef, {reservas});
-            console.log("Experience bookings updated successfully.");
-
+            console.log("Experience bookings updated successfully with guide information.");
+    
         } catch (error) {
             console.error("Error updating experience bookings:", error);
         }
