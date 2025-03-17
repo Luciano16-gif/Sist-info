@@ -297,7 +297,7 @@
     border-radius: 20px; /* Rounded corners like buttons */
     border: 1px solid #ccc;
     font-size: 16px;
-    background-color: #f8f8f8;
+    background-color: #294129;
     color: #333;
     width: 250px; /* Specify a width */
     box-sizing: border-box; /* Include padding and border in width */
@@ -305,7 +305,7 @@
 
 .search-filters-gallery input[type="text"]::placeholder,
 .search-filters-gallery input[type="date"]::placeholder {
-     color: #999; /* Lighter placeholder text */
+     color: #999999; /* Lighter placeholder text */
 }
 
 .search-filters-gallery input[type="text"]:focus,

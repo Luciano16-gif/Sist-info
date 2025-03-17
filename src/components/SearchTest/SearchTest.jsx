@@ -1,19 +1,18 @@
 /* eslint-disable no-loop-func */
-// SearchTest.jsx (Modified to filter GalleryPage based on hashtag search)
-import React, { useState, useEffect } from 'react';
+// SearchTest.jsx
+import React, { useState } from 'react';
 import './SearchTest.css';
 import searchIcon from '../../../src/assets/images/lupa-search.png';
 import { db } from './../../firebase-config';
 import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { Link } from 'react-router-dom';
 
 function SearchTest() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchError, setSearchError] = useState('');
-    const navigate = useNavigate(); // Use useNavigate hook
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -23,47 +22,13 @@ function SearchTest() {
         event.preventDefault();
         setSearchError('');
         setIsSearching(true);
-
-        const trimmedSearchTerm = searchTerm.trim();
-
-        if (!trimmedSearchTerm) {
-            setSearchError("Please enter a search term.");
-            setIsSearching(false);
-            return;
-        }
-
-        const isNumericSearch = /^\d+$/.test(trimmedSearchTerm);
-
-        if (!isNumericSearch && trimmedSearchTerm.length < 3) {
-            setSearchError("Please enter at least 3 characters for text searches.");
-            setIsSearching(false);
-            return;
-        }
-
-        performSearch(trimmedSearchTerm);
+        performSearch(searchTerm);
     };
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
             handleSearchSubmit(event);
         }
-    };
-
-    const excludeFields = (data) => {
-        const excludedKeys = ['email', 'phone', 'fullName', "Foto de Perfil", "address", "birthDate", "cedula", "image", "languages", "qualifications", "weeklyDays", "weeklyHours", "userType", "reportedReviews", "schedule"];
-
-        if (Array.isArray(data)) {
-            return data.map(item => excludeFields(item));
-        } else if (typeof data === 'object' && data !== null) {
-            const filteredData = {};
-            for (const key in data) {
-                if (!excludedKeys.includes(key)) {
-                    filteredData[key] = excludeFields(data[key]);
-                }
-            }
-            return filteredData;
-        }
-        return data;
     };
 
     const getCurrentUser = () => {
@@ -76,337 +41,140 @@ function SearchTest() {
         });
     };
 
-    const isNameField = (collectionName, fieldName) => {
-        const nameFields = {
-            'Galeria de Imágenes': ['uploadedBy'],
-            'Foros': ['userName'],
-            'Experiencias': [],
-            'solicitudes-guias': ['user'],
-            'payments': []
-        };
-        return nameFields[collectionName] && nameFields[collectionName].includes(fieldName);
-    };
 
     const collectionToPageMap = {
         'Experiencias': '/experiencias',
-        'Hashtags': '/galeria',
-        'payments': '/booking-process',
-        'solicitudes-guias': '/guide-request',
-        'Configuraciones de Experiencias': '/admin-experiencias-pendientes',
         'Foros': '/foro',
         'Galeria de Imágenes': '/galeria',
-        'Imágenes Reportadas': '/admin-landing',
     };
 
-    const pageToDisplayNameMap = {
-        '/experiencias': 'Experiencias',
-        '/galeria': 'Galería',
-        '/booking-process': 'Pagos',
-        '/guide-request': 'Solicitudes de Guías',
-        '/admin-experiencias-pendientes': 'Admin: Experiencias Pendientes',
-        '/foro': 'Foros',
-        '/admin-landing': 'Admin: Imágenes Reportadas',
-    };
 
-    const normalizeString = (str) => {
-        return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    };
-
-    // No longer needed for this approach.
-    // const findImageWithHashtag = (docData, hashtag) => { ... };
-
-      const performSearch = async (term) => {
+    const performSearch = async (term) => {
         try {
-            const collectionsToSearch = Object.keys(collectionToPageMap);
+            const lowerCaseTerm = term.toLowerCase().trim();
+            if (!lowerCaseTerm) {
+                setSearchError("Please enter a search term.");
+                setIsSearching(false);
+                return;
+            }
+
             let allResults = [];
             const currentUser = await getCurrentUser();
-            const lowerCaseTerm = term.toLowerCase();
-            const numericTerm = parseInt(term);
-            const normalizedTerm = normalizeString(term);
-            const isRatingKeyword = ['puntuacion', 'calificacion'].some(keyword => normalizeString(keyword).startsWith(normalizedTerm));
 
-            // Flag to check if the search term is a hashtag.
-            let isHashtagSearch = false;
-
-            for (const collectionName of collectionsToSearch) {
-                let collectionRef = collection(db, collectionName);
-                let q = null;
-
-                if (collectionName === 'payments' && currentUser) {
-                    q = query(collectionRef, where('userEmail', '==', currentUser.email));
+            // --- Foros ---
+            const forosRef = collection(db, 'Foros');
+            const forosSnapshot = await getDocs(forosRef);
+            for (const docSnap of forosSnapshot.docs) {
+                const docData = docSnap.data();
+                const docId = docSnap.id;
+                if (docData.Title && docData.Title.toLowerCase().startsWith(lowerCaseTerm)) {
+                    allResults.push({
+                        coleccion: 'Foros',
+                        id: docId,
+                        title: docData.Title,
+                        descripcion: docData.descripcion,
+                        userName: docData.userName,
+                        page: `/foro/${docId}`
+                    });
                 }
-                if (collectionName === 'solicitudes-guias' && currentUser) {
-                    q = query(collectionRef, where('userEmail', '==', currentUser.email));
+                if (docData.descripcion && docData.descripcion.toLowerCase().startsWith(lowerCaseTerm)) {
+                    allResults.push({
+                        coleccion: 'Foros',
+                        id: docId,
+                        title: docData.Title,
+                        descripcion: docData.descripcion,
+                        userName: docData.userName,
+                        page: `/foro/${docId}`
+                    });
                 }
+            }
 
-                const querySnapshot = await getDocs(q || collectionRef);
+            // --- Galeria de Imágenes ---
+             const galeriaRef = collection(db, 'Galeria de Imágenes');
+            const galeriaSnapshot = await getDocs(galeriaRef);
+            let reportedImageRefs = [];
 
-                for (const docSnap of querySnapshot.docs) {
-                    const docData = docSnap.data();
-                    const filteredData = excludeFields(docData);
-                    const docId = docSnap.id;
-                    const page = collectionToPageMap[collectionName] || '/';
-                    const displayName = pageToDisplayNameMap[page] || 'Unknown Page';
+            if (currentUser) {
+                const reportedImagesRef = collection(db, 'Imágenes Reportadas');
+                const reportedImagesSnapshot = await getDocs(reportedImagesRef);
 
-                    if (docId.toLowerCase().includes('@') && docId.toLowerCase().includes('.')) {
-                        continue;
-                    }
 
-                    if (docId.toLowerCase().startsWith(lowerCaseTerm) && docId.length >= 3) {
-                         allResults.push({ //Added
-                            id: docId,
-                            page: page,
-                            displayName: displayName,
-                            value: docId,
-                        });
-                    }
+                for (const reportedDoc of reportedImagesSnapshot.docs) {
 
-                    const searchRecursive = (obj, currentCollection, currentDocId) => {
-                        if (typeof obj === 'object' && obj !== null) {
-                            for (let key in obj) {
-                                if (obj.hasOwnProperty(key)) {
+                    if(reportedDoc.id === currentUser.uid){
+                        const reportedData = reportedDoc.data();
 
-                                    // --- Configuraciones de Experiencias Subcollections ---
-                                    if (currentCollection === 'Configuraciones de Experiencias') {
-                                        if (typeof obj[key] === 'string') {
-                                            const lowerCaseValue = obj[key].toLowerCase();
-                                              if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
-                                                allResults.push({
-                                                    id: currentDocId,
-                                                    page: '/galeria',
-                                                    displayName: pageToDisplayNameMap['/galeria'], //Use galeria here
-                                                    value: obj[key],
-                                                });
-                                            }
-                                        }
-                                        else if (Array.isArray(obj[key])) {
-                                            for (const item of obj[key]) {
-                                                if (typeof item === 'string' && item.toLowerCase().startsWith(lowerCaseTerm)) { //Added
-                                                    allResults.push({
-                                                        id: currentDocId,
-                                                        page: '/galeria',
-                                                        displayName: pageToDisplayNameMap['/galeria'], // Use galeria here
-                                                        value: item,
-                                                    });
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                    // Specific check for 'Title' or 'description' field in 'Foros'
-                                    else if (currentCollection === 'Foros' && (key === 'Title' || key === 'description')) {
-                                        const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
-                                            allResults.push({
-                                                id: currentDocId,
-                                                page: `/foro/${currentDocId}`, // DYNAMIC URL
-                                                displayName: displayName,
-                                                value: obj[key],
-                                                forumData: {
-                                                    forumId: currentDocId,
-                                                    showComments: true,
-                                                    openCommentPopup: true,
-                                                }
-                                            });
-                                        }
-                                    }
-                                    // Specific check for 'descripcion' in 'Experiencias'
-                                    else if (currentCollection === 'Experiencias' && key === 'descripcion') {
-                                       const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
-                                            allResults.push({
-                                                id: currentDocId,
-                                                page: page,
-                                                displayName: displayName,
-                                                value: obj[key],
-                                            });
-                                        }
-                                    }
-                                    // Check for other name fields
-                                    else if (typeof obj[key] === 'string' && isNameField(currentCollection, key)) {
-                                        const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm) && lowerCaseValue.length >= 3) { //Added
-                                            allResults.push({
-                                                id: currentDocId,
-                                                page: page,
-                                                displayName: displayName,
-                                                value: obj[key],
-                                            });
-                                        }
-                                    }
-
-                                    // --- Check for hashtags in Galeria de Imágenes ---
-                                    else if (currentCollection === 'Galeria de Imágenes' && key === 'hashtags') {
-                                        if (Array.isArray(obj[key])) {
-                                            for (const hashtag of obj[key]) {
-                                                if (normalizeString(hashtag).startsWith(normalizedTerm)) {
-                                                    // Set the flag to indicate a hashtag search.
-                                                    isHashtagSearch = true;
-                                                    break; // Exit inner loop, we found a match.
-                                                }
-                                            }
-                                            if (isHashtagSearch) break; // Exit outer loop if a hashtag match is found
-                                        }
-                                    }
-                                    // --- Numeric Field Checks (Experiencias) ---
-                                    else if (currentCollection === 'Experiencias' && !isNaN(numericTerm)) {
-                                        if (key === 'longitudRecorrido' || key === 'maximoUsuarios' || key === 'minimoUsuarios' || key === 'precio') {
-                                            if (obj[key] === numericTerm) {
-                                               allResults.push({ //Added
-                                                    id: currentDocId,
-                                                    page: page,
-                                                    displayName: displayName,
-                                                    value: obj[key],
-                                                });
-                                            }
-                                        }
-                                    }
-                                    // --- Check for string values that contain email patterns ---
-                                    else if (typeof obj[key] === 'string' && obj[key].toLowerCase().includes('@') && obj[key].toLowerCase().includes('.')) {
-                                        continue; // Skip this field
-                                    }
-                                    else if (typeof obj[key] === 'object') {
-                                        searchRecursive(obj[key], currentCollection, currentDocId);
-                                    }
+                        if(reportedData.images && Array.isArray(reportedData.images)){
+                            reportedData.images.forEach(image => {
+                                if (image && image.imageRef) {
+                                  reportedImageRefs.push(image.imageRef);
                                 }
-                            }
-                        }
-                    };
-
-                    if (collectionName === 'Experiencias') {
-                        const reviewsRef = collection(db, 'Experiencias', docId, 'reviews');
-                        const reviewsSnapshot = await getDocs(reviewsRef);
-
-                        let totalRating = 0;
-                        let reviewCount = 0;
-
-                        for (const reviewDoc of reviewsSnapshot.docs) {
-                            const reviewData = reviewDoc.data();
-
-                            if (reviewDoc.id.toLowerCase().includes('@') && reviewDoc.id.toLowerCase().includes('.')) {
-                                continue;
-                            }
-
-                            if (reviewData.text && reviewData.text.toLowerCase().includes('@') && reviewData.text.toLowerCase().includes('.')) {
-                                continue;
-                            }
-
-                              if (reviewData.text && reviewData.text.toLowerCase().startsWith(lowerCaseTerm)) { //Added
-                                allResults.push({
-                                    id: reviewDoc.id,
-                                    page: page,
-                                    displayName: displayName,
-                                    value: reviewData.text,
-                                });
-                            }
-
-                            if (!isNaN(numericTerm) && reviewData.rating === numericTerm) {
-                                 allResults.push({ //Added
-                                    id: reviewDoc.id,
-                                    page: page,
-                                    displayName: displayName,
-                                    value: reviewData.rating,
-                                });
-                            } else if (isRatingKeyword) {
-                                allResults.push({ //Added
-                                    id: reviewDoc.id,
-                                    page: page,
-                                    displayName: displayName,
-                                    value: reviewData.rating,
-                                });
-                            }
-
-                            if (typeof reviewData.rating === 'number') {
-                                totalRating += reviewData.rating;
-                                reviewCount++;
-                            }
-                        }
-
-                        if (reviewCount > 0) {
-                            const averageRating = totalRating / reviewCount;
-                            if (!isNaN(numericTerm) && averageRating === numericTerm) {
-                                allResults.push({ //Added
-                                    id: docId,
-                                    page: page,
-                                    displayName: displayName,
-                                    value: averageRating,
-                                });
-                            } else if (isRatingKeyword) {
-                                allResults.push({ //Added
-                                    id: docId,
-                                    page: page,
-                                    displayName: displayName,
-                                    value: averageRating,
-                                });
-                            }
-                        }
-                    }
-
-
-                   // --- Search within Forum Comments ---
-                    if (collectionName === 'Foros') {
-                         // Get forum data
-                        const forumData = docSnap.data();
-
-                         if (forumData.description && forumData.description.toLowerCase().startsWith(lowerCaseTerm)) { //Added
-                            allResults.push({
-                                id: docId,
-                                page: `/foro/${docId}`,
-                                displayName: displayName,
-                                value: forumData.description,
-                                forumUserName: forumData.userName, // Add userName for the forum
-                                forumData: {
-                                        forumId: docId,
-                                        showComments: true,
-                                    }
                             });
-                        }
 
-
-                        const commentsRef = collection(db, 'Foros', docId, 'comments');
-                        const commentsSnapshot = await getDocs(commentsRef);
-
-                        for (const commentDoc of commentsSnapshot.docs) {
-                            const commentData = commentDoc.data();
-                            const commentId = commentDoc.id;
-
-                            // Skip comment if ID or description contains email-like patterns
-                            if (commentId.toLowerCase().includes('@') && commentId.toLowerCase().includes('.')) {
-                                continue;
-                            }
-                            if (commentData.description && commentData.description.toLowerCase().includes('@') && commentData.description.toLowerCase().includes('.')) {
-                                continue;
-                            }
-
-                            if (commentData.description && commentData.description.toLowerCase().startsWith(lowerCaseTerm)) { //Added
-                                allResults.push({
-                                    id: commentId,
-                                    page: `/foro/${docId}`, //  Go to the forum page
-                                    displayName: `Comment in ${displayName}`, // Show it is inside a forum
-                                    value: commentData.description,
-                                    commentUserName: commentData.userName, // Add userName for the comment
-                                    forumData: {          // Send forum data, so, the comments are visible
-                                        forumId: docId,
-                                        showComments: true,
-                                    }
-                                });
-                            }
                         }
                     }
-
-                    searchRecursive(filteredData, collectionName, docId);
-                    if(isHashtagSearch) break;
                 }
-                if(isHashtagSearch) break; //And here
             }
 
 
-             if (isHashtagSearch) {
-                // Navigate to /galeria with the hashtag as a query parameter.
-                navigate(`/galeria?hashtag=${encodeURIComponent(normalizedTerm)}`);
-            } else {
-                setSearchResults(allResults); //  Show other results if not a hashtag search
-           }
+            for (const docSnap of galeriaSnapshot.docs) {
+                const docData = docSnap.data();
+                if (docData.images && Array.isArray(docData.images)) {
+                    for (const image of docData.images) {
+                        if (image.hashtags && Array.isArray(image.hashtags)) {
+                            for (const hashtag of image.hashtags) {
+                                if (hashtag.toLowerCase().startsWith(lowerCaseTerm)) {
+                                     if (!reportedImageRefs.includes(image.url)) {  // Check against reported images
+                                        const encodedImageUrl = encodeURIComponent(image.url);
+                                        allResults.push({
+                                            coleccion: 'Galeria de Imágenes',
+                                            // url: image.url, // Remove URL from display
+                                            page: '/galeria/' + encodedImageUrl
+                                        });
+                                    }
+                                    break; //  Stop inner loop if found
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            // --- Experiencias ---
+            const experienciasRef = collection(db, 'Experiencias');
+            const experienciasSnapshot = await getDocs(experienciasRef);
+            for (const docSnap of experienciasSnapshot.docs) {
+                const docData = docSnap.data();
+                const docId = docSnap.id;
+
+                const fieldsToCheck = ['nombre', 'puntoSalida', 'longitudRecorrido', 'horarioInicio', 'horarioFin', 'maximoUsuarios', 'minimoUsuarios', 'dificultad', 'puntuacion'];
+                for (const field of fieldsToCheck) {
+                    if (docData[field] !== undefined) {
+                        if (typeof docData[field] === 'string' && docData[field].toLowerCase().startsWith(lowerCaseTerm)) {
+                            allResults.push({
+                                coleccion: 'Experiencias',
+                                id: docId,
+                                nombre: docData.nombre,
+                                page: '/experiencias'
+                            });
+                            break; // Stop checking other fields if one matches.
+                        } else if (typeof docData[field] === 'number' && docData[field].toString().startsWith(lowerCaseTerm)) {
+                              allResults.push({
+                                coleccion: 'Experiencias',
+                                id: docId,
+                                nombre: docData.nombre,
+                                page: '/experiencias'
+                            });
+                            break; // Stop checking other fields
+                        }
+                    }
+                }
+            }
+
+
+
+            setSearchResults(allResults);
         } catch (error) {
             console.error('Error searching Firestore:', error);
             setSearchError('Error searching. Please try again.');
@@ -419,7 +187,7 @@ function SearchTest() {
 
     return (
         <div className="container-search-test">
-            <h1 className="titulo-search-test">Search Test</h1>
+            <h1 className="Title-search-test">Search Test</h1>
             <p className="subtitulo-search-test">Enter a term to search.</p>
 
             <form className="form-search-test" onSubmit={handleSearchSubmit}>
@@ -443,43 +211,49 @@ function SearchTest() {
             </form>
             {searchError && <div className="error-message-search-test">{searchError}</div>}
 
-            {/*Conditionally render results based on isHashtagSearch*/}
-            {!searchTerm.trim() || (searchResults.length > 0) ? (
+            {searchResults.length > 0 && (
                 <div className='results-container-search-test'>
                     <h2>Results:</h2>
                     <div className="results-wrapper">
                         {searchResults.map((item, index) => (
                             <div key={index} className="result-item">
                                 <div className="result-details">
-                                    <p><strong>Page:</strong> {item.displayName}</p>
-                                    <p><strong>Value:</strong> {item.value}</p>
-                                    {/* Display userName for forums and comments */}
-                                     {item.forumUserName && (
-                                        <p><strong>Forum Creator:</strong> {item.forumUserName}</p>
+                                    <p><strong>Collection:</strong> {item.coleccion}</p>
+                                     {/*Foros*/}
+                                    {item.coleccion === 'Foros' && (
+                                        <>
+                                            <p><strong>ID:</strong> {item.id}</p>
+                                            {item.Title && <p><strong>Title:</strong> {item.Title}</p>}
+                                            {item.descripcion && <p><strong>Description:</strong> {item.descripcion}</p>}
+                                             {item.userName && <p><strong>User:</strong> {item.userName}</p>}
+                                        </>
                                     )}
-                                    {item.commentUserName && (
-                                        <p><strong>Comment Creator:</strong> {item.commentUserName}</p>
-                                     )}
+                                    {/*Galeria de Imagenes - No URL display */}
+                                     {item.coleccion === 'Galeria de Imágenes' && (
+                                        <>
+                                            {/* No URL displayed here */}
+                                        </>
+                                    )}
+
+                                    {/*Experiencias*/}
+                                      {item.coleccion === 'Experiencias' && (
+                                         <>
+                                            <p><strong>ID:</strong> {item.id}</p>
+                                            {item.nombre && <p><strong>Name:</strong> {item.nombre}</p>}
+                                        </>
+                                    )}
+
                                 </div>
-                                <Link
-                                    to={{
-                                        pathname: item.page,
-                                        state: item.forumData
-                                            ? { forumData: item.forumData }
-                                            : item.imageData  // Keep imageData handling
-                                                ? { imageData: item.imageData }
-                                                : {}
-                                    }}
-                                    className="result-link"
-                                >
-                                    Go to Page
+
+                                 <Link to={item.page} className="result-link">
+                                        Go to Page
                                 </Link>
+
                             </div>
                         ))}
                     </div>
                 </div>
-            ) : null}
-
+            )}
         </div>
     );
 }
