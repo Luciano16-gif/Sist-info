@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useScrollDetection from "./useScrollDetection";
 import { useAuth } from "../contexts/AuthContext";
+import UserDropdown from "./UserDropdownMenu";
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
 const TopMenu = () => {
   const scrolled = useScrollDetection();
-  // Use currentUser.photoURL from enhanced user object
   const { currentUser, logout, userRole } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isIpadPro, setIsIpadPro] = useState(false);
@@ -24,7 +24,7 @@ const TopMenu = () => {
     window.addEventListener('resize', checkIpadPro);
     
     return () => window.removeEventListener('resize', checkIpadPro);
-  }, []);
+  }, [userRole]);
 
   // Define base menu items - SIMPLIFIED for top navigation
   const baseMenuItems = [
@@ -43,19 +43,6 @@ const TopMenu = () => {
     { href: "/login-page", label: "Iniciar Sesión"},
   ];
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setShowDropdown(false);
-    } catch (error) {
-      console.error("Failed to log out", error);
-    }
-  };
-
   // Get user initials for avatar fallback
   const getUserInitials = () => {
     if (!currentUser) return "V";
@@ -72,6 +59,21 @@ const TopMenu = () => {
     
     return currentUser.email.charAt(0).toUpperCase();
   };
+
+  // Prepare custom button content for TopMenu
+  const topMenuButtonContent = (
+    currentUser?.photoURL ? (
+      <img 
+        src={currentUser.photoURL} 
+        alt="User Profile" 
+        className="w-8 h-8 rounded-full object-cover border-2 border-white cursor-pointer"
+      />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-medium border-2 border-white cursor-pointer">
+        {getUserInitials()}
+      </div>
+    )
+  );
 
   return (
     <nav 
@@ -132,87 +134,16 @@ const TopMenu = () => {
         <div className="flex justify-end">
           {currentUser ? (
             // User is logged in - show profile dropdown
-            <div className="relative">
-              <button 
-                onClick={toggleDropdown}
-                className="flex items-center focus:outline-none"
-                aria-expanded={showDropdown}
-                aria-label="User menu"
-              >
-                {/* Use currentUser.photoURL instead of separate profilePhotoUrl */}
-                {currentUser.photoURL ? (
-                  <img 
-                    src={currentUser.photoURL} 
-                    alt="User Profile" 
-                    className="w-8 h-8 rounded-full object-cover border-2 border-white cursor-pointer"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-medium border-2 border-white cursor-pointer">
-                    {getUserInitials()}
-                  </div>
-                )}
-              </button>
-              
-              {/* Complete dropdown menu with ALL navigation options */}
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-800 shadow-lg py-1 z-50 border border-gray-700">
-                  <Link 
-                    to="/profile-management-page" 
-                    className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Mi Perfil
-                  </Link>
-                  
-                  {/* All navigation items moved to dropdown */}
-                  <Link 
-                    to="/user-requests" 
-                    className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Mis Solicitudes
-                  </Link>
-                  
-                  {/* Conditionally add Crear Experiencia to dropdown */}
-                  {(userRole === 'admin' || userRole === 'guia') && (
-                    <Link 
-                      to="/crear-experiencia" 
-                      className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      Crear Experiencia
-                    </Link>
-                  )}
-                  
-                  {/* Admin-specific dropdown items */}
-                  {userRole === 'admin' && (
-                    <>
-                      <Link 
-                        to="/admin-experiencias-pendientes" 
-                        className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                        onClick={() => setShowDropdown(false)}
-                      >
-                        Experiencias Pendientes
-                      </Link>
-                      <Link 
-                        to="/admin-guias-pendientes" 
-                        className="block px-4 py-2 text-sm text-white hover:bg-gray-700"
-                        onClick={() => setShowDropdown(false)}
-                      >
-                        Guías Pendientes
-                      </Link>
-                    </>
-                  )}
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
-              )}
-            </div>
+            <UserDropdown 
+              currentUser={currentUser}
+              userRole={userRole}
+              onLogout={logout}
+              showDropdown={showDropdown}
+              setShowDropdown={setShowDropdown}
+              dropdownAlign="right"
+              bgColor="bg-gray-800"
+              buttonContent={topMenuButtonContent}
+            />
           ) : (
             // User is not logged in - show login/signup buttons
             <ul className="flex flex-row uppercase font-ysabeau text-xs lg:text-sm space-x-1 md:space-x-2">
