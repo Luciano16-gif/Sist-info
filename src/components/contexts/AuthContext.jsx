@@ -25,6 +25,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  // New state for profile photo URL from Firestore
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   
   // Effect to handle auth state changes
   useEffect(() => {
@@ -41,6 +43,8 @@ export const AuthProvider = ({ children }) => {
             const userData = userDoc.data();
             // Set the user role from Firestore (default to 'usuario' if not present)
             setUserRole(userData.userType || 'usuario');
+            // Set the profile photo URL from Firestore
+            setProfilePhotoUrl(userData['Foto de Perfil'] || '');
           } else {
             // Default role if document doesn't exist
             setUserRole('usuario');
@@ -53,6 +57,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         // Clear role when user is not authenticated
         setUserRole(null);
+        setProfilePhotoUrl('');
       }
       
       setLoading(false);
@@ -159,10 +164,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // New function to update profile photo URL
+  const updateProfilePhoto = (photoUrl) => {
+    setProfilePhotoUrl(photoUrl);
+  };
+
   // Context value object
   const value = {
     currentUser,
-    userRole, // Make the user role available in the context
+    userRole,
+    profilePhotoUrl, // Add profile photo URL to context
+    updateProfilePhoto, // Add function to update profile photo
     error,
     login,
     signup,

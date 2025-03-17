@@ -6,7 +6,8 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 
 const TopMenu = () => {
   const scrolled = useScrollDetection();
-  const { currentUser, logout, userRole } = useAuth();
+  // Get profilePhotoUrl from AuthContext
+  const { currentUser, logout, userRole, profilePhotoUrl } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isIpadPro, setIsIpadPro] = useState(false);
   
@@ -138,9 +139,10 @@ const TopMenu = () => {
                 aria-expanded={showDropdown}
                 aria-label="User menu"
               >
-                {currentUser.photoURL ? (
+                {/* Use profilePhotoUrl from context instead of Firebase Auth */}
+                {profilePhotoUrl ? (
                   <img 
-                    src={currentUser.photoURL} 
+                    src={profilePhotoUrl} 
                     alt="User Profile" 
                     className="w-8 h-8 rounded-full object-cover border-2 border-white cursor-pointer"
                   />

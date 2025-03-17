@@ -7,7 +7,8 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
-  const { currentUser, logout, userRole } = useAuth();
+  // Get profilePhotoUrl from AuthContext
+  const { currentUser, logout, userRole, profilePhotoUrl } = useAuth();
 
   // Define base menu items
   const baseMenuItems = [
@@ -146,11 +147,11 @@ const HamburgerMenu = () => {
           </Link>
           {currentUser ? (
             <div className="flex items-center ml-4">
-              {/* User Avatar */}
+              {/* User Avatar - Use profilePhotoUrl from context */}
               <div className="flex items-center">
-                {currentUser.photoURL ? (
+                {profilePhotoUrl ? (
                   <img 
-                    src={currentUser.photoURL} 
+                    src={profilePhotoUrl} 
                     alt="User Profile" 
                     className="w-8 h-8 rounded-full object-cover"
                   />
