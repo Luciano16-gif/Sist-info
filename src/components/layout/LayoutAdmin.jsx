@@ -17,13 +17,11 @@ const LayoutAdmin = () => {
       // Set tablet state (between 768px and 1024px inclusive)
       setIsTablet(width >= 768 && width <= 1024);
       
-      // Track exactly 1024px width
+      // Track exactly 1024px width I hate the Ipad-pro so mcuh :)
       setIsExactly1024(width === 1024);
       
       // Determine hamburger button visibility - show on all widths below 1025px
       setShowHamburgerButton(width <= 1024);
-      
-      // No auto-opening at 1024px to keep behavior consistent
       
       // Close sidebar on larger screens
       if (width >= 1025) {

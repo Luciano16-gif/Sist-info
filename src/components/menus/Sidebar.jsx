@@ -162,16 +162,20 @@ const Sidebar = ({ isMobileSidebarOpen, setIsMobileSidebarOpen, isTablet, isExac
                         `}
                       />
                     </div>
+                    
+                    {/* Improved text transition */}
                     <span 
                       className={`
-                        ml-3 whitespace-nowrap
-                        transition-all duration-500 ease-in-out
+                        ml-3 whitespace-nowrap overflow-hidden
+                        transition-all duration-500
                         ${isTextVisible()
-                          ? 'opacity-100 translate-x-0 block' 
-                          : 'opacity-0 -translate-x-4 md:absolute'}
+                          ? 'opacity-100 max-w-32 translate-x-0' 
+                          : 'opacity-0 max-w-0 translate-x-2'}
                       `}
                       style={{ 
-                        transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' 
+                        transitionTimingFunction: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                        transitionDelay: isTextVisible() ? '100ms' : '0ms',
+                        pointerEvents: isTextVisible() ? 'auto' : 'none'
                       }}
                     >
                       {item.label}
