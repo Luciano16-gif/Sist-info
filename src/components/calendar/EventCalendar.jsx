@@ -1,4 +1,3 @@
-// components/landing-page/EventCalendar.jsx
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDateSelect and showSelectButton
@@ -14,7 +13,6 @@ const EventCalendar = ({ onDateSelect, showSelectButton }) => { // Receive onDat
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // ... (events array remains the same)
     const events = [
     // Enero
     { date: '2025-01-15', title: 'Ruta nocturna al Ávila', description: 'Excursión guiada nocturna con observación de estrellas', color: 'bg-green-400' },

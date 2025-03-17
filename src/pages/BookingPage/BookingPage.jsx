@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import EventCalendar from '../../components/landing-page/EventCalendar';
+import EventCalendar from '../../components/calendar/EventCalendar';
 import { db } from '../../firebase-config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 

@@ -7,7 +7,7 @@ import TestimonySection from '../../components/landing-page/Testimonials';
 import RoutesSection from '../../components/landing-page/RoutesSection/index'; 
 import FunFactSection from '../../components/landing-page/FunFactSection';
 import ForumSection from '../../components/landing-page/forum_section';
-import EventCalendar from '../../components/landing-page/EventCalendar';
+import EventCalendar from '../../components/calendar/EventCalendar';
 
 import { useAuth } from '../../components/contexts/AuthContext';
 
