@@ -114,7 +114,7 @@ const AdminCalendario = () => {
       {/* Calendar container with admin panel */}
       <div className="w-full mt-6 flex flex-col xl:flex-row gap-6">
         {/* EventCalendar component - full width on small/medium screens, 7/12 on xl screens */}
-        <div className="w-full xl:w-7/12">
+        <div className="w-full xl:w-9/12">
           <EventCalendar 
             onDateSelect={handleDateSelect} 
             showSelectButton={true} 
@@ -123,8 +123,8 @@ const AdminCalendario = () => {
         </div>
         
         {/* Admin Panel - full width on small/medium screens, 5/12 on xl screens */}
-        <div className="w-full xl:w-5/12 bg-[rgba(25,39,15,0.8)] rounded-xl p-3 sm:p-4 mt-4 xl:mt-0">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">Panel de Administración</h2>
+        <div className="w-full xl:w-3/12 bg-[rgba(25,39,15,0.8)] rounded-xl p-3 sm:p-4 mt-4 xl:mt-0">
+          <h2 className="text-xl font-bold text-white mb-3">Panel de Administración</h2>
           
           {selectedDate ? (
             <>
