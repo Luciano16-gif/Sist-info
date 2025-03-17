@@ -12,7 +12,7 @@ import ExperienceCard from '../../components/experiences/ExperienceCard';
  * LoadingState component for displaying during data loading
  */
 const LoadingState = () => (
-  <div className="loading-container">
+  <div className="loading-container min-h-screen">
     <p>Cargando experiencias...</p>
     <div className="loading-spinner"></div>
   </div>

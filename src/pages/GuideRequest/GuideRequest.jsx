@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './GuideRequest.css';
-import { db } from './../../firebase-config'; // Import db
+import { db } from './../../firebase-config'; 
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import storageService from '../../cloudinary-services/storage-service'; // Import Cloudinary service
-import { useAuth } from '../../components/contexts/AuthContext'; // Import useAuth hook
+import storageService from '../../cloudinary-services/storage-service';
+import { useAuth } from '../../components/contexts/AuthContext'; 
 
 /**
  * GuideRequest component -  A form for potential guides to apply.
