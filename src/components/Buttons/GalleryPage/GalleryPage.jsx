@@ -1,6 +1,3 @@
-// --- START OF FILE GalleryPagejsx.txt ---
-
-// GalleryPage.jsx (Modified)
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../../../firebase-config';
 import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove, runTransaction, onSnapshot } from 'firebase/firestore';
@@ -29,6 +26,7 @@ function GalleryPage() {
     const [searchHashtag, setSearchHashtag] = useState("");
     const [searchDate, setSearchDate] = useState(""); //  "YYYY-MM-DD" format
     const [filteredImages, setFilteredImages] = useState([]);
+    const [selectedImages, setSelectedImages] = useState([]); // New state for selected images
 
 
     const location = useLocation();
@@ -334,7 +332,7 @@ function GalleryPage() {
         } else { // Exiting delete mode.  Show all images
             loadAllImages();
         }
-
+        setSelectedImages([]); // Reset selected images when toggling mode
         navigate('/galeria');
     };
 
@@ -377,67 +375,80 @@ function GalleryPage() {
         }
     };
 
+    const toggleImageSelection = (image) => {
+        if (!showDeleteImages) return; // Only allow selection in delete mode
+
+        const imageUrl = image.url;
+        if (selectedImages.includes(imageUrl)) {
+            setSelectedImages(selectedImages.filter(url => url !== imageUrl));
+        } else {
+            setSelectedImages([...selectedImages, imageUrl]);
+        }
+      };
 
     const handleDeleteImage = async () => {
-
         if (!auth.currentUser) {
             alert("Please log in to delete images.");
             return;
         }
 
-        const { imageId } = useParams();
-        if (!imageId) return;
-
-        const decodedImageUrl = decodeURIComponent(imageId);
-
-        //  Important: Use *userImages* when in delete mode, otherwise use *images*.
-        const selectedImage = showDeleteImages
-            ? userImages.find((img) => img.url === decodedImageUrl)
-            : images.find((img) => img.url === decodedImageUrl);
-
-
-        if (!selectedImage) {
-            console.error("Image to delete not found");
-            return;
-        }
-
-        const publicId = selectedImage.publicId || storageService.ref(selectedImage.url).fullPath;
-        if (!publicId) {
-            console.error("Could not determine publicId for deletion.");
-            alert("Error: Could not determine image ID for deletion.");
+        if (selectedImages.length === 0) {
+            alert("Please select images to delete.");
             return;
         }
 
         try {
-            await storageService.deleteFile(publicId);
+             for (const imageUrl of selectedImages) {
 
-            const user = auth.currentUser;
-            const galleryCollection = collection(db, 'Galeria de Imágenes');
-            const userGalleryDocRef = doc(galleryCollection, user.email);
-            await updateDoc(userGalleryDocRef, { images: arrayRemove(selectedImage) });
+                const selectedImage = userImages.find(img => img.url === imageUrl);
 
-            if (selectedImage.hashtags && Array.isArray(selectedImage.hashtags)) {
-                for (const hashtag of selectedImage.hashtags) {
-                    const hashtagRef = doc(db, 'Hashtags', hashtag);
-                    await runTransaction(db, async (transaction) => {
-                        const currentDoc = await transaction.get(hashtagRef);
-                        if (currentDoc.exists()) {
-                            const currentCount = currentDoc.data().count;
-                            if (currentCount > 1) {
-                                transaction.update(hashtagRef, { count: currentCount - 1 });
-                            } else {
-                                transaction.delete(hashtagRef);
-                            }
-                        }
-                    });
+                if (!selectedImage) {
+                    console.error("Image to delete not found:", imageUrl);
+                    continue; // Skip to the next image
                 }
-            }
 
-            setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
-            setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
-            alert("Image deleted successfully.");
-            await loadUserImages(auth.currentUser.email);
-            navigate('/galeria');
+                const publicId = selectedImage.publicId || storageService.ref(selectedImage.url).fullPath;
+
+                if (!publicId) {
+                    console.error("Could not determine publicId for deletion:", imageUrl);
+                    continue;
+                }
+                await storageService.deleteFile(publicId);
+
+
+                const user = auth.currentUser;
+                const galleryCollection = collection(db, 'Galeria de Imágenes');
+                const userGalleryDocRef = doc(galleryCollection, user.email);
+
+                await updateDoc(userGalleryDocRef, { images: arrayRemove(selectedImage) });
+
+                if (selectedImage.hashtags && Array.isArray(selectedImage.hashtags)) {
+                    for (const hashtag of selectedImage.hashtags) {
+                      const hashtagRef = doc(db, 'Hashtags', hashtag);
+                        await runTransaction(db, async (transaction) => {
+                            const currentDoc = await transaction.get(hashtagRef);
+                            if (currentDoc.exists()) {
+                                const currentCount = currentDoc.data().count;
+                                if (currentCount > 1) {
+                                    transaction.update(hashtagRef, { count: currentCount - 1 });
+                                } else {
+                                    transaction.delete(hashtagRef);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                //  Update local state *after* successful Firestore and storage deletion:
+                setUserImages(prevImages => prevImages.filter(img => img.url !== imageUrl));
+                setImages(prevImages => prevImages.filter(img => img.url !== imageUrl));
+             }
+
+            alert("Images deleted successfully.");
+            setSelectedImages([]); // Clear selection after deleting
+            await loadUserImages(auth.currentUser.email);  // Reload after deleting.
+            navigate('/galeria'); // Navigate after successful deletion.
+
 
         } catch (error) {
             console.error("Error deleting image:", error);
@@ -450,9 +461,26 @@ function GalleryPage() {
             alert("Please log in to report images.");
             return;
         }
-
         const reporterEmail = auth.currentUser.email;
-        if (reporterEmail === image.uploadedBy) {
+
+        //Obtenemos el email del que subio la imagen, a partir de la URL
+        const galleryCollection = collection(db, 'Galeria de Imágenes');
+        const querySnapshot = await getDocs(galleryCollection);
+        let uploaderEmail = null;
+
+        querySnapshot.forEach((doc) => {
+            const galleryData = doc.data();
+            if (galleryData.images && Array.isArray(galleryData.images)) {
+                galleryData.images.forEach(img => {
+                    if (img.url === image.url) {
+                        uploaderEmail = doc.id; // El ID del documento es el email del uploader
+                    }
+                });
+            }
+        });
+
+
+        if (reporterEmail === uploaderEmail) {
             alert("You cannot report your own images.");
             return;
         }
@@ -465,7 +493,7 @@ function GalleryPage() {
             const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
             const reporterDocSnap = await getDoc(reporterDocRef);
 
-            const reportData = { imageRef, uploaderEmail: image.uploadedBy };
+            const reportData = { imageRef, uploaderEmail: uploaderEmail };
 
             if (reporterDocSnap.exists()) {
                 await updateDoc(reporterDocRef, { images: arrayUnion(reportData) });
@@ -625,15 +653,19 @@ function GalleryPage() {
                     </svg>
                 </button>
                 <div className="image-container-gallery" ref={imageContainerRef}>
-                    {/*  Display *filteredImages*, which are based on 'images'  */}
                     {filteredImages.map((image, index) => (
                         <img
                             key={index}
                             src={image.url}
                             alt={`Imagen ${index}`}
-                            className={`gallery-image-gallery ${location.pathname.includes(encodeURIComponent(image.url)) && showDeleteImages ? 'selected-gallery' : ''
-                                }`}
-                            onClick={() => openImage(image)}
+                            className={`gallery-image-gallery ${selectedImages.includes(image.url) ? 'selected-gallery' : ''}`}
+                            onClick={() => {
+                                if (showDeleteImages) {
+                                    toggleImageSelection(image);
+                                } else {
+                                    openImage(image);
+                                }
+                            }}
                         />
                     ))}
                 </div>
