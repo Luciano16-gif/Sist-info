@@ -11,7 +11,7 @@
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@paypal/react-paypal-js": "^8.8.2",
     "autoprefixer": "^10.4.20",
-    "cloudify": "^1.1.2",
+    "cloudify": "^1.4.0",
     "cra-template": "1.2.0",
     "crypto-js": "^4.2.0",
     "emailjs-com": "^3.2.0",

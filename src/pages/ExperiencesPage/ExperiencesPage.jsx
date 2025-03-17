@@ -75,14 +75,19 @@ function ExperiencesPage() {
   };
 
   // Handle "View More" button click
-  const handleViewMore = (experience) => {
-    if (loading) {
-      console.log("Data is still loading. Cannot view details yet.");
-      return;
-    }
-    console.log("Experience ID being passed:", experience.id);
-    navigate('/booking', { state: { experience } });
-  };
+    const handleViewMore = (experience) => {
+        if (loading) {
+            console.log("Data is still loading. Cannot view details yet.");
+            return;
+        }
+        console.log("Experience ID being passed:", experience.id);
+
+        // Construct the URL-friendly name
+        const urlFriendlyName = experience.name.toLowerCase().replace(/ /g, '-');
+
+        // Navigate to the dynamic route
+        navigate(`/booking/${urlFriendlyName}`, { state: { experience } });
+    };
 
   // Initialize refs when experiences are loaded
   if (!loading && !error && acceptedExperiences.length > 0) {

@@ -328,12 +328,14 @@ function GalleryPage() {
 
     const toggleDeleteMode = () => {
         setShowDeleteImages(!showDeleteImages);
-        setImages(showDeleteImages ? userImages : images);
-        if (!showDeleteImages) {
+        // The key change:  Load *all* images when NOT in delete mode, and *only user* images WHEN in delete mode.
+        if (!showDeleteImages) { // Entering delete mode. Show only user images.
+            setImages(userImages);
+        } else { // Exiting delete mode.  Show all images
             loadAllImages();
         }
-        navigate('/galeria');
 
+        navigate('/galeria');
     };
 
     const loadAllImages = async () => {
@@ -388,6 +390,7 @@ function GalleryPage() {
 
         const decodedImageUrl = decodeURIComponent(imageId);
 
+        //  Important: Use *userImages* when in delete mode, otherwise use *images*.
         const selectedImage = showDeleteImages
             ? userImages.find((img) => img.url === decodedImageUrl)
             : images.find((img) => img.url === decodedImageUrl);
@@ -622,6 +625,7 @@ function GalleryPage() {
                     </svg>
                 </button>
                 <div className="image-container-gallery" ref={imageContainerRef}>
+                    {/*  Display *filteredImages*, which are based on 'images'  */}
                     {filteredImages.map((image, index) => (
                         <img
                             key={index}

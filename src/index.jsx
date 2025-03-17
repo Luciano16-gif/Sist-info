@@ -35,9 +35,17 @@ import GuideRequest from './pages/GuideRequest/GuideRequest';
 import SearchTest from './components/SearchTest/SearchTest';
 import UserRequestsPage from './pages/User-requests-page/UserRequestsPage';
 // Admin Pages
-import AdminLanding from './pages/Admin-landing/AdminLanding';
-import AdminExperienceRequests from './pages/Admin-experience-requests/AdminExperienceRequests';
-import AdminGuideRequests from './pages/Admin-guide-requests/AdminGuideRequests';
+import AdminLanding from './pages/Admin-pages/Admin-landing/AdminLanding';
+import GestionGuias from './pages/Admin-pages/Admin-guias/GestionGuias';
+import AdminActividades from './pages/Admin-pages/Admin-actividades/AdminActividades';
+import AdminCalendario from './pages/Admin-pages/Admin-calendario/AdminCalendario';
+import AdminEstadisticas from './pages/Admin-pages/Admin-estadisticas/AdminEstadisticas';
+import AdminForo from './pages/Admin-pages/Admin-foro/AdminForo';
+import AdminGaleria from './pages/Admin-pages/Admin-galeria/AdminGaleria';
+import AdminMensajes from './pages/Admin-pages/Admin-mensajes/AdminMensajes';
+import AdminResenas from './pages/Admin-pages/Admin-resenas/AdminResenas';
+import AdminRutas from './pages/Admin-pages/Admin-rutas/AdminRutas';
+import AdminTips from './pages/Admin-pages/Admin-tips/AdminTips';
 
 //test
 // import PayPalTest from './pages/BookingProcessPage/PalPayTest';
@@ -72,6 +80,7 @@ root.render(
             <Route path="/galeria/:imageId" element={<GalleryPage />} />
             <Route path="/galeria/:hashtag" element={<GalleryPage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking/:experienceName" element={<BookingPage />} />
             <Route path="/booking-process" element={<BookingProcessPage />} />
             <Route path="/estadisticas" element={<Statistics />} />
             <Route path="/reviews" element={<ReviewsPage />} />
@@ -84,10 +93,17 @@ root.render(
           {/* Routes with LayoutAdmin */}
           <Route element={<LayoutAdmin />}>
             {/* Admin Routes */}
-            <Route path="/admin-landing" element={<AdminLanding />} />
-            <Route path="/admin-experiencias-pendientes" element={<AdminExperienceRequests />} />
-            <Route path="/admin-guias-pendientes" element={<AdminGuideRequests />} />
-            {/* <Route path="/paypal-test" element={<PayPalTest />} /> */}
+            <Route path="/homeAdmin" element={<AdminLanding />} />
+            <Route path="/gestion-guias" element={<GestionGuias />} />
+            <Route path="/admin-galeria" element={<AdminGaleria />} />
+            <Route path="/admin-rutas" element={<AdminRutas />} />
+            <Route path="/admin-calendario" element={<AdminCalendario />} />
+            <Route path="/admin-actividades" element={<AdminActividades />} />
+            <Route path="/admin-mensajes" element={<AdminMensajes />} />
+            <Route path="/admin-estadisticas" element={<AdminEstadisticas />} />
+            <Route path="/admin-tips" element={<AdminTips />} />
+            <Route path="/admin-foro" element={<AdminForo />} />
+            <Route path="/admin-resena" element={<AdminResenas />} />
           </Route>
 
         </Routes>

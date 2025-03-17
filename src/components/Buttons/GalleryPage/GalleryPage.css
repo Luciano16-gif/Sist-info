@@ -291,6 +291,8 @@
     justify-content: center; /* Center the filter elements */
 }
 
+
+
 .search-filters-gallery input[type="text"],
 .search-filters-gallery input[type="date"] {
     padding: 10px 15px;
@@ -298,11 +300,17 @@
     border: 1px solid #ccc;
     font-size: 16px;
     background-color: #294129;
-    color: #333;
+    color: #333; /* Original text color - this will be overridden by the more specific rule below */
     width: 250px; /* Specify a width */
     box-sizing: border-box; /* Include padding and border in width */
 }
 
+.search-filters-gallery:hover input[type="text"]{
+    background-color: #0d190f;
+}
+
+
+/*  Change the text color when writing in the input */
 .search-filters-gallery input[type="text"]::placeholder,
 .search-filters-gallery input[type="date"]::placeholder {
      color: #999999; /* Lighter placeholder text */
@@ -310,9 +318,16 @@
 
 .search-filters-gallery input[type="text"]:focus,
 .search-filters-gallery input[type="date"]:focus {
-    border-color: #00a3a1;
+    border-color: #23ff5e;
     outline: none;
     box-shadow: 0 0 5px rgba(0, 163, 161, 0.5);
+}
+
+/*  Most specific rule to set the text color while typing */
+.search-filters-gallery input[type="text"],
+.search-filters-gallery input[type="date"]
+ {
+    color: #fff; /*  Set the text color to white */
 }
 
 

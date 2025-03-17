@@ -15,10 +15,12 @@ body {
     color: #fff; /* Changed text color to white for dark background */
   }
 
-.titulo-search-test {
+.Title-search-test {
     color: #fff; /* White title */
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
+    font-size: 45px;
+    font-weight: bold;
 }
 
 .subtitulo-search-test {
@@ -51,7 +53,7 @@ body {
 .input-search-test {
     padding: 10px;
     padding-right: 35px;
-    border: 1px solid #ccc;
+    border: 1px solid #e8e8e8;
     border-radius: 4px;
     font-size: 16px;
     width: 100%;
@@ -60,7 +62,7 @@ body {
     color: #fff;          /* White text in input */
 }
 .input-search-test::placeholder { /* Style the placeholder text */
-    color: #aaa;
+    color: #c0c0c0;
 }
 
 .input-error-search-test {
@@ -85,12 +87,21 @@ body {
 }
 
 .searching-text {
-    margin-left: 10px; /* Add some spacing */
-    color: #aaa; /*  Lighter text for "Searching..." */
+    /*  Position absolutely, but within the input-container */
+    position: absolute;
+    left: 10px; /*  Position it to the left, adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bbbbbb;
+    /*  Use visibility and opacity for smooth transition and consistent space */
+    visibility: hidden;  /*  Initially hidden */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease; /*  Smooth transition */
+    white-space: nowrap; /*Prevent the text from goint to another line*/
 }
 .input-search-test:disabled {
     background-color: #344938; /*  Slightly lighter gray when disabled */
-    color: #999;
+    color: #b1b1b1;
     cursor: not-allowed;
     border-color: #555;
 }
@@ -146,6 +157,7 @@ body {
     display: inline-block;
     border-radius: 4px;
     transition: background-color 0.3s ease;
+    font-size: 13px;
 }
 
 .result-link:hover {
