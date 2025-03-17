@@ -1,4 +1,3 @@
-// src/pages/Admin-guide-requests/AdminGuideRequests.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminGuideRequests.css';

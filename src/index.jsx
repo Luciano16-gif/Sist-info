@@ -36,7 +36,9 @@ import SearchTest from './components/SearchTest/SearchTest';
 import UserRequestsPage from './pages/User-requests-page/UserRequestsPage';
 // Admin Pages
 import AdminLanding from './pages/Admin-pages/Admin-landing/AdminLanding';
-import GestionGuias from './pages/Admin-pages/Admin-guias/GestionGuias';
+import AdminGuideRequests from './pages/Admin-guide-requests/AdminGuideRequests';
+import AdminExperienceRequests from './pages/Admin-experience-requests/AdminExperienceRequests';
+//import GestionGuias from './pages/Admin-pages/Admin-guias/GestionGuias';
 import AdminActividades from './pages/Admin-pages/Admin-actividades/AdminActividades';
 import AdminCalendario from './pages/Admin-pages/Admin-calendario/AdminCalendario';
 import AdminEstadisticas from './pages/Admin-pages/Admin-estadisticas/AdminEstadisticas';
@@ -94,7 +96,8 @@ root.render(
           <Route element={<LayoutAdmin />}>
             {/* Admin Routes */}
             <Route path="/homeAdmin" element={<AdminLanding />} />
-            <Route path="/gestion-guias" element={<GestionGuias />} />
+            <Route path="/admin-guias-pendientes" element={<AdminGuideRequests />} />
+            <Route path="/admin-experiencias-pendientes" element={<AdminExperienceRequests />} />
             <Route path="/admin-galeria" element={<AdminGaleria />} />
             <Route path="/admin-rutas" element={<AdminRutas />} />
             <Route path="/admin-calendario" element={<AdminCalendario />} />
