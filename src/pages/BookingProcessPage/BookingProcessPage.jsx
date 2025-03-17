@@ -25,15 +25,31 @@ function BookingProcessPage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
+    const [experienceCode, setExperienceCode] = useState(''); // Added experience code state
+
+
+    // --- Generate Experience Code ---
+    useEffect(() => {
+        const generateExperienceCode = () => {
+            // Generates a 6-character alphanumeric code (uppercase letters and numbers)
+            let code = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            for (let i = 0; i < 6; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return code;
+        };
+        setExperienceCode(generateExperienceCode());
+    }, []); // Run only once when the component mounts
 
 
     const savePaymentDetails = async (details) => {
         try {
             const userEmail = auth.currentUser.email;
             if (!userEmail) {
-                throw new Error("User email not found. User might not be logged in.");
+                throw new Error("User email not found.  User might not be logged in.");
             }
-    
+
             // Prepare guide information to store in payment data
             const guidesData = experienceGuides.map(guide => ({
                 id: guide.id,
@@ -41,7 +57,7 @@ function BookingProcessPage() {
                 lastName: guide.lastName,
                 email: guide.email
             }));
-    
+
             const paymentData = {
                 transactionId: details.id,
                 payerName: `${details.payer.name.given_name} ${details.payer.name.surname}`,
@@ -54,15 +70,16 @@ function BookingProcessPage() {
                 userId: currentUser?.id,
                 selectedTime,
                 selectedPeople,
-                guides: guidesData, 
+                guides: guidesData,
                 selectedDate: selectedDate?.toISOString(),
                 selectedDay,
+                experienceCode, // Store the experience code
             };
-    
+
             // Save payment details to Firestore
             const userDocRef = doc(db, "payments", userEmail);
             const userDocSnap = await getDoc(userDocRef);
-    
+
             if (userDocSnap.exists()) {
                 await updateDoc(userDocRef, {
                     bookings: arrayUnion(paymentData)
@@ -72,25 +89,25 @@ function BookingProcessPage() {
                     bookings: [paymentData]
                 });
             }
-    
+
             console.log("Payment details saved to Firestore with email as ID");
-    
-            // Update experience bookings 
+
+            // Update experience bookings
             await updateExperienceBookings({
                 ...paymentData,
-                guides: guidesData // Ensure guides are passed to updateExperienceBookings, doing this to avoid errors, since this is being added just now
+                guides: guidesData // Ensure guides are passed to updateExperienceBookings
             });
-    
+
             // Update available slots in the experience
             const slotsUpdated = await ExperienceBookingService.updateAvailableSlots(
                 experience.id,
                 selectedPeople
             );
-    
+
             if (!slotsUpdated) {
                 console.warn("Failed to update available slots. The payment was processed successfully, but spot count may be inaccurate.");
             }
-    
+
             setIsPaymentSuccessful(true);
         } catch (error) {
             console.error("Error saving payment details to Firestore:", error);
@@ -103,53 +120,54 @@ function BookingProcessPage() {
             console.error("Experience ID is missing. Cannot update bookings.");
             return;
         }
-    
+
         const experienceRef = doc(db, "Experiencias", experience.id);
         const formattedDate = selectedDay; // Use the already formatted date.
         const timeSlot = selectedTime;
-    
+
         try {
-            // Include guide information in the booking data
+            // Include guide information and experience code in the booking data
             const bookingData = {
-                people: parseInt(selectedPeople, 10), // Ensure this is a number
+                people: parseInt(selectedPeople, 10),
                 user: {
                     id: currentUser.id,
                     name: currentUser.name,
                     lastName: currentUser.lastName,
-                    email: auth.currentUser.email // Store user email
+                    email: auth.currentUser.email
                 },
-                guides: paymentData.guides || [], // Store all guides information
-                timestamp: new Date(),  // Capture current timestamp
-                transactionId: paymentData.transactionId, // Referencing the payment
+                guides: paymentData.guides || [],
+                timestamp: new Date(),
+                transactionId: paymentData.transactionId,
+                experienceCode: paymentData.experienceCode, // Include experience code here
             };
-    
+
             // Get the current experience data.
             const expDocSnap = await getDoc(experienceRef);
-    
+
             if (!expDocSnap.exists()) {
                 console.log("No such document!");
                 return;
             }
-    
+
             const expData = expDocSnap.data();
             // Initialize 'reservas' if it doesn't exist.
             const reservas = expData.reservas || {};
-    
+
             // Initialize the date's array if it doesn't exist
             if (!reservas[formattedDate]) {
                 reservas[formattedDate] = {};
             }
-    
+
             // Initialize time slot if doesn't exist
-            if(!reservas[formattedDate][timeSlot]){
+            if (!reservas[formattedDate][timeSlot]) {
                 reservas[formattedDate][timeSlot] = [];
             }
-    
+
             reservas[formattedDate][timeSlot].push(bookingData);
             // Update experience data in Firestore
-            await updateDoc(experienceRef, {reservas});
-            console.log("Experience bookings updated successfully with guide information.");
-    
+            await updateDoc(experienceRef, { reservas });
+            console.log("Experience bookings updated successfully with guide information and experience code.");
+
         } catch (error) {
             console.error("Error updating experience bookings:", error);
         }
@@ -167,7 +185,8 @@ function BookingProcessPage() {
         setIsPaymentSuccessful(false);
     };
 
-    useEffect(() => {
+    // ... (rest of your useEffect hooks and other functions remain unchanged)
+      useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             setError(null);
@@ -347,8 +366,8 @@ function BookingProcessPage() {
         console.log("selectedDay", selectedDay);
         console.log("totalPrice", totalPrice);
         console.log("experienceGuides:", experienceGuides);
-    }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides]);
-
+        console.log("Experience Code:", experienceCode); // Log the experience code
+    }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides, experienceCode]);
     const handleGoBack = () => {
         navigate(-1);
     };
@@ -388,7 +407,7 @@ function BookingProcessPage() {
     if (!experience) {
         return <div>No se encontraron datos de la experiencia.</div>;
     }
-    const formattedDate = selectedDay || "XX / XX / XXXX";
+
 
     return (
         <PayPalScriptProvider options={{ "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: "USD" }}>
@@ -465,16 +484,16 @@ function BookingProcessPage() {
                             <h2 className="details-title-booking-process">DETALLES</h2>
                         </div>
                         <p className='details-booking-process-p'>CÓDIGO DE PARTICIPACIÓN</p>
-                        <h2 className='codigo-participacion-booking-process'>S912AP</h2>
+                        <h2 className='codigo-participacion-booking-process'>{experienceCode}</h2> {/* Display experience code */}
                         <div className='user-details-container-booking-process'>
                             <p className='details-booking-process-p'>USUARIO: {currentUser?.name} {currentUser?.lastName}</p>
                             <p className='details-booking-process-p'>CANTIDAD DE PERSONAS : {selectedPeople}</p>
                             <p className='details-booking-process-p'>RUTA: {experience.name}</p>
-                            <p className='details-booking-process-p date-container-booking-process'>FECHA: {formattedDate}</p>
+                            <p className='details-booking-process-p date-container-booking-process'>FECHA: {selectedDay}</p>
                             <p className='details-booking-process-p'>HORARIO: {selectedTime}</p>
                             <p className='details-booking-process-p'>
-                                GUÍAS: {experienceGuides.length > 0 
-                                    ? experienceGuides.map(g => `${g.name} ${g.lastName}`).join(', ') 
+                                GUÍAS: {experienceGuides.length > 0
+                                    ? experienceGuides.map(g => `${g.name} ${g.lastName}`).join(', ')
                                     : 'No asignados'}
                             </p>
                             <p className='details-booking-process-p'>PRECIO TOTAL: ${totalPrice}.00</p>
@@ -487,7 +506,7 @@ function BookingProcessPage() {
                                     style={{ layout: "horizontal" }}
                                     disabled={!selectedTime || !selectedPeople || !selectedDate || experienceGuides.length === 0}
                                     createOrder={(data, actions) => {
-                                         if (!totalPrice || totalPrice <= 0) {
+                                        if (!totalPrice || totalPrice <= 0) {
                                             alert("El precio total debe ser mayor a 0.");
                                             return;
                                         }
@@ -498,7 +517,7 @@ function BookingProcessPage() {
                                                         currency_code: "USD",
                                                         value: totalPrice.toFixed(2),
                                                     },
-                                                 description: `Reserva para ${experience.name} el ${formattedDate} a las ${selectedTime}`,
+                                                    description: `Reserva para ${experience.name} el ${selectedDay} a las ${selectedTime}`,
                                                 },
                                             ],
                                         });
