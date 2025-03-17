@@ -36,13 +36,14 @@ const UserDropdownMenu = ({
   const getMenuItems = () => {
     // Common menu items for all logged-in users
     const commonItems = [
-      { to: "/profile-management-page", label: "Mi Perfil" }
+      { to: "/profile-management-page", label: "Mi Perfil" },
+      { to: "/user-requests", label: "Mis Solicitudes" }
     ];
     
     // Role-specific menu items
     const roleSpecificItems = {
       usuario: [
-        { to: "/user-requests", label: "Mis Solicitudes" }
+          // Im leaving this empty for now
       ],
       guia: [
         { to: "/crear-experiencia", label: "Crear Experiencia" }
