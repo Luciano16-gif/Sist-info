@@ -160,8 +160,9 @@
     position: relative; /*  For close button positioning */
     max-width: 90%;  /* Limit width - good for responsiveness */
     max-height: 90vh; /* Limit height - good for responsiveness */
-    padding: 20px; /* Add padding */
+    padding: 40px 20px 20px 20px; /* Increased top padding */
     box-sizing: border-box; /* Include padding in width/height */
+    margin-top: 50px; /* Add top margin */
 
 }
 
@@ -215,21 +216,31 @@
     transform: translateY(2px);
 }
 
-/* Close button styles */
+/* Close button styles (Adaptive) */
 .close-button-gallery {
   position: absolute;
-  top: 10px;
-  right: 10px; /* Keep at 10px from the right */
-  background: gray;
+  top: 20px;
+  right: 10px;
+  background: rgba(128, 128, 128, 0.7);
   border: none;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   z-index: 103;
-  padding: 5px;
-  opacity: 0.9;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-width: 30px;
+  min-height: 30px;
+
 }
+
+
 .close-button-gallery:hover {
     color: #ffffff;
     background-color: #e80000;
@@ -237,6 +248,35 @@
 
 .close-button-gallery:active {
   transform: translateY(2px);
+}
+
+
+/* Report button styles (Adaptive) */
+.report-button-gallery {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    background: rgba(128, 128, 128, 0.7);
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 103;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+
+.report-button-gallery:hover {
+    color: #ffffff;
+    background-color: #e80000;
+}
+
+.report-button-gallery:active {
+    transform: translateY(2px);
 }
 
 .upload-progress-bar-container-gallery {
@@ -254,30 +294,6 @@
   line-height: 30px;
   color: white;
   border-radius: 5px;
-}
-
-.report-button-gallery {
-    position: absolute;
-    top: 10px;
-    left: 10px; /* Keep at 10px from the left*/
-    background: gray;
-    border: none;
-    color: white;   
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 103;
-    padding: 5px;
-    opacity: 0.9;
-}
-
-.report-button-gallery:hover {
-    color: #ffffff;
-    background-color: #e80000;
-}
-
-.report-button-gallery:active {
-    transform: translateY(2px);
 }
 
 /* Search Filter Styles */
