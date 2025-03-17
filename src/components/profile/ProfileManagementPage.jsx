@@ -36,8 +36,15 @@ function ProfileManagementPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     
-    // Use the auth context - get updateProfilePhoto function to update photo URL in context
-    const { currentUser, logout, error, setError, updateProfilePhoto, profilePhotoUrl } = useAuth();
+    // Use the auth context with enhanced user profile functionality
+    const { 
+        currentUser, 
+        logout, 
+        error, 
+        setError, 
+        updateUserProfile,
+        firestoreUserData
+    } = useAuth();
 
     // Form validation hook
     const { 
@@ -65,7 +72,7 @@ function ProfileManagementPage() {
         };
     }, [previewImageUrl]);
 
-    // Fetch user data when component mounts
+    // Fetch user data when component mounts or when firestoreUserData changes
     useEffect(() => {
         const fetchUserData = async () => {
             if (!currentUser) {
@@ -75,95 +82,173 @@ function ProfileManagementPage() {
             }
 
             try {
-                const usersCollection = collection(db, 'lista-de-usuarios');
-                const q = query(usersCollection, where("email", "==", currentUser.email));
-                const querySnapshot = await getDocs(q);
+                // If we already have Firestore data in the context, use it
+                if (firestoreUserData) {
+                    // Set form data from Firestore user data
+                    setFormData({
+                        nombreCompleto: `${firestoreUserData.name || ''} ${firestoreUserData.lastName || ''}`.trim(),
+                        correoElectronico: firestoreUserData.email || '',
+                        numeroTelefonico: firestoreUserData.phone || ''
+                    });
 
-                if (querySnapshot.empty) {
-                    console.error('Usuario no encontrado en Firestore.');
-                    setLoading(false);
-                    await logout();
-                    navigate('/login-page');
-                    return;
-                }
+                    setTipoUsuario(firestoreUserData.userType || '');
+                    setFotoPerfilUrl(firestoreUserData['Foto de Perfil'] || currentUser.photoURL || '');
 
-                const userDoc = querySnapshot.docs[0];
-                if (!userDoc.exists()) {
-                    console.error('El documento del usuario no existe en Firestore.');
-                    setLoading(false);
-                    await logout();
-                    navigate('/login-page');
-                    return;
-                }
+                    if (Array.isArray(firestoreUserData.activitiesPerformed)) {
+                        setActivitiesPerformed(firestoreUserData.activitiesPerformed);
+                    } else if (firestoreUserData.activitiesPerformed) {
+                        setActivitiesPerformed([firestoreUserData.activitiesPerformed]);
+                    } else {
+                        setActivitiesPerformed([]);
+                    }
 
-                const userData = userDoc.data();
+                    if (firestoreUserData.mostPerformedActivity && 
+                        typeof firestoreUserData.mostPerformedActivity === 'object' &&
+                        firestoreUserData.mostPerformedActivity.Actividad !== undefined && 
+                        firestoreUserData.mostPerformedActivity.timesPerformed !== undefined) {
+                        setMostPerformedActivity(firestoreUserData.mostPerformedActivity);
+                    } else {
+                        setMostPerformedActivity({ Actividad: '', timesPerformed: 0 });
+                    }
 
-                // Update form data
-                setFormData({
-                    nombreCompleto: `${userData.name || ''} ${userData.lastName || ''}`,
-                    correoElectronico: userData.email || '',
-                    numeroTelefonico: userData.phone || ''
-                });
-
-                setTipoUsuario(userData.userType || '');
-
-                if (currentUser.metadata.creationTime) {
-                    const date = new Date(currentUser.metadata.creationTime);
-                    const day = date.getDate();
-                    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-                    ];
-                    const month = monthNames[date.getMonth()];
-                    const year = date.getFullYear();
-                    setFechaRegistro(`${day} de ${month} del ${year}`);
-                } else {
-                    setFechaRegistro('No disponible');
-                }
-
-                // Set photo URL from Firestore
-                const photoUrl = userData['Foto de Perfil'] || '';
-                setFotoPerfilUrl(photoUrl);
-
-                if (Array.isArray(userData.activitiesPerformed)) {
-                    setActivitiesPerformed(userData.activitiesPerformed);
-                } else if (userData.activitiesPerformed) {
-                    setActivitiesPerformed([userData.activitiesPerformed]);
-                } else {
-                    setActivitiesPerformed([]);
-                }
-
-                if (userData.mostPerformedActivity && typeof userData.mostPerformedActivity === 'object'
-                    && userData.mostPerformedActivity.Actividad !== undefined && userData.mostPerformedActivity.timesPerformed !== undefined) {
-                    setMostPerformedActivity(userData.mostPerformedActivity);
-                } else {
-                    setMostPerformedActivity({ Actividad: '', timesPerformed: 0 });
-                }
-
-                let fetchedActivities = [];
-                if (userData.userType === 'Guia') {
-                    if (userData.actualRoute && userData.days && userData.schedule) {
-                        if (Array.isArray(userData.actualRoute) && Array.isArray(userData.days) && Array.isArray(userData.schedule)
-                            && userData.actualRoute.length === userData.days.length && userData.days.length === userData.schedule.length) {
-                            for (let i = 0; i < userData.actualRoute.length; i++) {
-                                fetchedActivities.push({
-                                    route: userData.actualRoute[i],
-                                    days: userData.days[i],
-                                    schedule: userData.schedule[i],
-                                });
+                    // Process activities for guides
+                    let fetchedActivities = [];
+                    if (firestoreUserData.userType === 'Guia') {
+                        if (firestoreUserData.actualRoute && firestoreUserData.days && firestoreUserData.schedule) {
+                            if (Array.isArray(firestoreUserData.actualRoute) && 
+                                Array.isArray(firestoreUserData.days) && 
+                                Array.isArray(firestoreUserData.schedule) &&
+                                firestoreUserData.actualRoute.length === firestoreUserData.days.length && 
+                                firestoreUserData.days.length === firestoreUserData.schedule.length) {
+                                for (let i = 0; i < firestoreUserData.actualRoute.length; i++) {
+                                    fetchedActivities.push({
+                                        route: firestoreUserData.actualRoute[i],
+                                        days: firestoreUserData.days[i],
+                                        schedule: firestoreUserData.schedule[i],
+                                    });
+                                }
                             }
-                        } else {
-                            console.error("actualRoute, days and schedule are not arrays of the same length or are not arrays");
                         }
                     }
-                }
-                setActivities(fetchedActivities);
+                    setActivities(fetchedActivities);
 
-                if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
-                    setActivitiesCreatedCount(userData.activitiesCreated.length);
+                    // Set activities created count
+                    if (firestoreUserData.activitiesCreated && Array.isArray(firestoreUserData.activitiesCreated)) {
+                        setActivitiesCreatedCount(firestoreUserData.activitiesCreated.length);
+                    } else {
+                        setActivitiesCreatedCount(0);
+                    }
+
+                    // We still need to query for additional details (like the user's creation date)
+                    const usersCollection = collection(db, 'lista-de-usuarios');
+                    const q = query(usersCollection, where("email", "==", currentUser.email));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        // Set registration date
+                        if (currentUser.metadata && currentUser.metadata.creationTime) {
+                            const date = new Date(currentUser.metadata.creationTime);
+                            const day = date.getDate();
+                            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                            ];
+                            const month = monthNames[date.getMonth()];
+                            const year = date.getFullYear();
+                            setFechaRegistro(`${day} de ${month} del ${year}`);
+                        } else {
+                            setFechaRegistro('No disponible');
+                        }
+                    }
                 } else {
-                    setActivitiesCreatedCount(0);
-                }
+                    // Otherwise, query Firestore directly
+                    const usersCollection = collection(db, 'lista-de-usuarios');
+                    const q = query(usersCollection, where("email", "==", currentUser.email));
+                    const querySnapshot = await getDocs(q);
 
+                    if (querySnapshot.empty) {
+                        console.error('Usuario no encontrado en Firestore.');
+                        setLoading(false);
+                        await logout();
+                        navigate('/login-page');
+                        return;
+                    }
+
+                    const userDoc = querySnapshot.docs[0];
+                    if (!userDoc.exists()) {
+                        console.error('El documento del usuario no existe en Firestore.');
+                        setLoading(false);
+                        await logout();
+                        navigate('/login-page');
+                        return;
+                    }
+
+                    const userData = userDoc.data();
+
+                    // Update form data
+                    setFormData({
+                        nombreCompleto: `${userData.name || ''} ${userData.lastName || ''}`.trim(),
+                        correoElectronico: userData.email || '',
+                        numeroTelefonico: userData.phone || ''
+                    });
+
+                    setTipoUsuario(userData.userType || '');
+
+                    if (currentUser.metadata && currentUser.metadata.creationTime) {
+                        const date = new Date(currentUser.metadata.creationTime);
+                        const day = date.getDate();
+                        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                        ];
+                        const month = monthNames[date.getMonth()];
+                        const year = date.getFullYear();
+                        setFechaRegistro(`${day} de ${month} del ${year}`);
+                    } else {
+                        setFechaRegistro('No disponible');
+                    }
+
+                    // Set photo URL from Firestore
+                    setFotoPerfilUrl(userData['Foto de Perfil'] || currentUser.photoURL || '');
+
+                    if (Array.isArray(userData.activitiesPerformed)) {
+                        setActivitiesPerformed(userData.activitiesPerformed);
+                    } else if (userData.activitiesPerformed) {
+                        setActivitiesPerformed([userData.activitiesPerformed]);
+                    } else {
+                        setActivitiesPerformed([]);
+                    }
+
+                    if (userData.mostPerformedActivity && typeof userData.mostPerformedActivity === 'object'
+                        && userData.mostPerformedActivity.Actividad !== undefined && userData.mostPerformedActivity.timesPerformed !== undefined) {
+                        setMostPerformedActivity(userData.mostPerformedActivity);
+                    } else {
+                        setMostPerformedActivity({ Actividad: '', timesPerformed: 0 });
+                    }
+
+                    let fetchedActivities = [];
+                    if (userData.userType === 'Guia') {
+                        if (userData.actualRoute && userData.days && userData.schedule) {
+                            if (Array.isArray(userData.actualRoute) && Array.isArray(userData.days) && Array.isArray(userData.schedule)
+                                && userData.actualRoute.length === userData.days.length && userData.days.length === userData.schedule.length) {
+                                for (let i = 0; i < userData.actualRoute.length; i++) {
+                                    fetchedActivities.push({
+                                        route: userData.actualRoute[i],
+                                        days: userData.days[i],
+                                        schedule: userData.schedule[i],
+                                    });
+                                }
+                            } else {
+                                console.error("actualRoute, days and schedule are not arrays of the same length or are not arrays");
+                            }
+                        }
+                    }
+                    setActivities(fetchedActivities);
+
+                    if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
+                        setActivitiesCreatedCount(userData.activitiesCreated.length);
+                    } else {
+                        setActivitiesCreatedCount(0);
+                    }
+                }
             } catch (error) {
                 console.error('Error al obtener los datos del usuario:', error);
                 setError('Error al cargar los datos. Por favor, inténtalo de nuevo.');
@@ -173,14 +258,14 @@ function ProfileManagementPage() {
         };
 
         fetchUserData();
-    }, [currentUser, navigate, logout, setError, setFormData]);
+    }, [currentUser, navigate, logout, setError, setFormData, firestoreUserData]);
 
-    // Use profilePhotoUrl from context when available
+    // Use currentUser.photoURL to keep photo up to date
     useEffect(() => {
-        if (profilePhotoUrl && !fotoPerfilUrl) {
-            setFotoPerfilUrl(profilePhotoUrl);
+        if (currentUser && currentUser.photoURL && !fotoPerfilUrl) {
+            setFotoPerfilUrl(currentUser.photoURL);
         }
-    }, [profilePhotoUrl]);
+    }, [currentUser, fotoPerfilUrl]);
 
     // Handle success message dismissal
     const handleDismissSuccess = () => {
@@ -223,10 +308,15 @@ function ProfileManagementPage() {
 
             const userRef = querySnapshot.docs[0].ref;
 
+            // Split full name into first and last name
+            const nameParts = formData.nombreCompleto.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
             // Prepare update data
             let updateData = {
-                name: formData.nombreCompleto.split(' ')[0],
-                lastName: formData.nombreCompleto.split(' ').slice(1).join(' '),
+                name: firstName,
+                lastName: lastName,
                 phone: formData.numeroTelefonico,
             };
 
@@ -269,8 +359,8 @@ function ProfileManagementPage() {
                     // Set local state with new image URL
                     setFotoPerfilUrl(uploadedFileData.downloadURL);
                     
-                    // Update photo URL in AuthContext to reflect changes immediately in menus
-                    updateProfilePhoto(uploadedFileData.downloadURL);
+                    // Update user profile in AuthContext to reflect changes immediately in menus
+                    updateUserProfile(updateData);
                     
                     setError('');
                     setSuccessMessage('¡Perfil actualizado correctamente!');
@@ -292,6 +382,10 @@ function ProfileManagementPage() {
             } else {
                 // No new file, just update other fields
                 await updateDoc(userRef, updateData);
+                
+                // Update user profile in AuthContext to reflect name changes immediately in menus
+                updateUserProfile(updateData);
+                
                 setSuccessMessage('¡Perfil actualizado correctamente!');
                 setIsEditing(false);
                 setError('');

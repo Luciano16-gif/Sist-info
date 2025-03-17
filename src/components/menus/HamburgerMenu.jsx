@@ -7,8 +7,8 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
-  // Get profilePhotoUrl from AuthContext
-  const { currentUser, logout, userRole, profilePhotoUrl } = useAuth();
+  // Use enhanced currentUser with updated photoURL
+  const { currentUser, logout, userRole } = useAuth();
 
   // Define base menu items
   const baseMenuItems = [
@@ -66,7 +66,7 @@ const HamburgerMenu = () => {
   const getUserInitials = () => {
     if (!currentUser) return "V";
     
-    // Try to get name from Firebase user
+    // Try to get name from currentUser
     const displayName = currentUser.displayName || "";
     if (displayName) {
       return displayName
@@ -147,11 +147,11 @@ const HamburgerMenu = () => {
           </Link>
           {currentUser ? (
             <div className="flex items-center ml-4">
-              {/* User Avatar - Use profilePhotoUrl from context */}
+              {/* User Avatar - use currentUser.photoURL */}
               <div className="flex items-center">
-                {profilePhotoUrl ? (
+                {currentUser.photoURL ? (
                   <img 
-                    src={profilePhotoUrl} 
+                    src={currentUser.photoURL} 
                     alt="User Profile" 
                     className="w-8 h-8 rounded-full object-cover"
                   />

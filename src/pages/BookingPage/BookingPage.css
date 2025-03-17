@@ -175,7 +175,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -343,5 +343,93 @@
     .time-button-booking {
         padding: 6px 8px;
         font-size: 0.8rem;
+    }
+}
+
+.selected-date {
+    color: #FFF;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.valid-date {
+    background-color: rgba(0, 128, 0, 0.2);
+    border: 1px solid #4CAF50;
+}
+
+.invalid-date {
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 1px solid #f44336;
+}
+
+.date-warning {
+    color: #ffcc00;
+    font-size: clamp(0.8rem, 1.2vw, 1rem);
+    margin-top: 5px;
+}
+
+.no-date-selected {
+    color: #FFF;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.date-error {
+    color: #f44336;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    padding: 10px;
+    margin-top: 15px;
+    background-color: rgba(244, 67, 54, 0.1);
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Update time button styles */
+.time-button-booking.selected {
+    background-color: #ffce66;
+    position: relative;
+}
+
+.time-button-booking.selected:after {
+    content: "✓";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    line-height: 16px;
+    text-align: center;
+}
+
+/* Media queries improvements */
+@media screen and (max-width: 480px) {
+    .selected-date, .no-date-selected, .date-error {
+        font-size: 0.85rem;
+    }
+    
+    .date-warning {
+        font-size: 0.8rem;
+    }
+    
+    .time-button-booking.selected:after {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+        line-height: 14px;
     }
 }
