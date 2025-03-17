@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/calendar/EventCalendar';
 import { db } from '../../firebase-config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import storageService from '../../cloudinary-services/storage-service';
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 
 function BookingPage() {
@@ -22,6 +23,7 @@ function BookingPage() {
     const [reservationsForSelectedDate, setReservationsForSelectedDate] = useState(0);
     const [availableDays, setAvailableDays] = useState([]);
     const [dateError, setDateError] = useState("");
+    const [guides, setGuides] = useState([]);
 
     // Normalize experience data based on the source (admin view vs regular view)
     useEffect(() => {
@@ -47,6 +49,7 @@ function BookingPage() {
             distance: `${experienceData.longitudRecorrido} km`,
             incluidos: experienceData.incluidosExperiencia,
             imageUrl: experienceData.imageUrl,
+            guias: experienceData.guias,
             // Include all raw data for reference
             rawData: experienceData
         } : experienceData;
@@ -67,6 +70,54 @@ function BookingPage() {
             
         const parsedDays = Array.isArray(days) ? days : parseDays(days);
         setAvailableDays(parsedDays);
+        
+        // Fetch guides for the experience
+        const fetchGuides = async () => {
+            const guidesData = normalizedExperience.guias || 
+                              (normalizedExperience.rawData && normalizedExperience.rawData.guias);
+            
+            if (!guidesData || !Array.isArray(guidesData)) return;
+            
+            const fetchedGuides = [];
+            for (const guideRef of guidesData) {
+                if (guideRef && guideRef.email) {
+                    try {
+                        const usersRef = collection(db, "lista-de-usuarios");
+                        const q = query(usersRef, where("email", "==", guideRef.email));
+                        const querySnapshot = await getDocs(q);
+                        
+                        if (!querySnapshot.empty) {
+                            const guideDoc = querySnapshot.docs[0];
+                            const guideData = guideDoc.data();
+                            
+                            // Get guide image
+                            let guideImageUrl = '';
+                            if (guideData["Foto de Perfil"]) {
+                                try {
+                                    guideImageUrl = await storageService.getDownloadURL(guideData["Foto de Perfil"]);
+                                } catch (error) {
+                                    guideImageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                }
+                            } else {
+                                guideImageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                            }
+                            
+                            fetchedGuides.push({
+                                id: guideDoc.id,
+                                name: guideData.name || 'Sin nombre',
+                                lastName: guideData.lastName || '',
+                                image: guideImageUrl,
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error fetching guide data:", error);
+                    }
+                }
+            }
+            setGuides(fetchedGuides);
+        };
+        
+        fetchGuides();
         
     }, [experienceData, navigate, isAdmin]);
 
@@ -236,9 +287,33 @@ function BookingPage() {
             </div>
         );
     };
+    
+    // Render guides function
+    const renderGuides = () => {
+        if (!guides || guides.length === 0) {
+            return <BookingDetail title="Guías" value="No hay guías asignados" />;
+        }
+        
+        const guidesString = guides.map(guide => 
+            `${guide.name} ${guide.lastName}`
+        ).join(', ');
+        
+        return (
+            <div className="detail-booking">
+                <h3 className='detail-title-booking'>Guías</h3>
+                <p className='detail-value-booking'>{guidesString}</p>
+            </div>
+        );
+    };
 
     const handleBookingClick = () => {
-        // Check if date and time are selected
+        // For admin users, just go back to the admin page without date/time validation
+        if (isAdmin) {
+            navigate('/admin-experiencias-pendientes');
+            return;
+        }
+        
+        // Only check date and time for regular users making a reservation
         if (!selectedDate) {
             setDateError("Por favor, selecciona una fecha antes de reservar.");
             return;
@@ -249,12 +324,7 @@ function BookingPage() {
             return;
         }
 
-        if (isAdmin) {
-            // For admin users, just go back to the admin page
-            navigate('/admin-experiencias-pendientes');
-        } else {
-            navigate('/booking-process', { state: { experience, selectedDate, selectedTime } });
-        }
+        navigate('/booking-process', { state: { experience, selectedDate, selectedTime } });
     };
 
     const handleShowCalendar = () => {
@@ -346,6 +416,7 @@ function BookingPage() {
                             <BookingDetail title="Precio P/P" value={`${experience.price}$`} />
                             {renderIncluidos()}
                             <BookingDetail title="Distancia a Recorrer" value={experience.distance} />
+                            {renderGuides()}
                         </div>
                     </div>
 
