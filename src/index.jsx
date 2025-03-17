@@ -69,6 +69,8 @@ root.render(
             <Route path="/crear-experiencia" element={<CreateExperience />} />
             <Route path="/profile-management-page" element={<ProfileManagementPage />} />
             <Route path="/galeria" element={<GalleryPage />} />
+            <Route path="/galeria/:imageId" element={<GalleryPage />} />
+            <Route path="/galeria/:hashtag" element={<GalleryPage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/booking-process" element={<BookingProcessPage />} />
             <Route path="/estadisticas" element={<Statistics />} />

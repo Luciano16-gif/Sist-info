@@ -1,16 +1,17 @@
-// GalleryPage.jsx
+// --- START OF FILE GalleryPagejsx.txt ---
+
+// GalleryPage.jsx (Modified)
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from '../../../firebase-config';
 import { collection, doc, setDoc, getDoc, updateDoc, arrayUnion, query, where, getDocs, arrayRemove, runTransaction, onSnapshot } from 'firebase/firestore';
 import './GalleryPage.css';
 import storageService from '../../../cloudinary-services/storage-service';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 function GalleryPage() {
     const [images, setImages] = useState([]);
     const [userImages, setUserImages] = useState([]);
     const imageContainerRef = useRef(null);
-    const [selectedImage, setSelectedImage] = useState(null);
     const [zoomLevel, setZoomLevel] = useState(1);
     const modalImageRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -25,9 +26,14 @@ function GalleryPage() {
     const [availableHashtags, setAvailableHashtags] = useState([]);
     const [newHashtag, setNewHashtag] = useState("");
     const [hashtagError, setHashtagError] = useState("");
+    const [searchHashtag, setSearchHashtag] = useState("");
+    const [searchDate, setSearchDate] = useState(""); //  "YYYY-MM-DD" format
+    const [filteredImages, setFilteredImages] = useState([]);
+
 
     const location = useLocation();
-    const imagesLoadedRef = useRef(false); // Ref to track if images have been loaded
+    const navigate = useNavigate();
+    const imagesLoadedRef = useRef(false);
 
     useEffect(() => {
         const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
@@ -52,20 +58,42 @@ function GalleryPage() {
             unsubscribeAuth();
             unsubscribeHashtags();
         };
-    }, []); // Empty dependency array: runs only on mount
+    }, []);
 
     useEffect(() => {
-      if (imagesLoadedRef.current && location.state && location.state.imageData) {
-        const imageUrlToFind = location.state.imageData.url;
-        // Find the image in the `images` array
-        const foundImage = images.find(img => img.url === imageUrlToFind);
-        if (foundImage) {
-            openImage(foundImage);
-        } else {
-            console.warn("Image not found in loaded images:", imageUrlToFind);
+        if (imagesLoadedRef.current && location.state && location.state.imageData) {
+            const imageUrlToFind = location.state.imageData.url;
+            const foundImage = images.find(img => img.url === imageUrlToFind);
+            if (foundImage) {
+                openImage(foundImage);
+            } else {
+                console.warn("Image not found in loaded images:", imageUrlToFind);
+            }
         }
-    }
-}, [images, location.state]); // Depend on `images` and `location.state`
+    }, [images, location.state]);
+
+    useEffect(() => {
+        let result = [...images];
+
+        if (searchHashtag) {
+            const searchTerm = searchHashtag.toLowerCase(); // Convert search term to lowercase
+            result = result.filter(image =>
+                image.hashtags && image.hashtags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        if (searchDate) {
+            result = result.filter(image => {
+                const [day, month, yearAndTime] = image.uploadDate.split('/');
+                const [year] = yearAndTime.split('/');
+                const normalizedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                return normalizedDate === searchDate;
+            });
+        }
+
+        setFilteredImages(result);
+    }, [images, searchHashtag, searchDate]);
+
 
     const scrollLeft = () => {
         if (imageContainerRef.current) {
@@ -81,35 +109,27 @@ function GalleryPage() {
 
     const openImage = (image) => {
         if (!showDeleteImages) {
-            setSelectedImage(image);
-            setZoomLevel(1);
-            setDragOffset({ x: 0, y: 0 });
-        } else {
-            setSelectedImage(image); // Allow selection in delete mode
+            const encodedImageUrl = encodeURIComponent(image.url);
+            navigate(`/galeria/${encodedImageUrl}`, { state: { image } });
         }
     };
 
     const closeImage = () => {
-        setSelectedImage(null);
-        setZoomLevel(1);
-        setDragOffset({ x: 0, y: 0 });
+        navigate('/galeria');
     };
 
     const handleZoomIn = () => setZoomLevel(prevZoom => Math.min(prevZoom + 0.2, 3));
     const handleZoomOut = () => setZoomLevel(prevZoom => Math.max(prevZoom - 0.2, 0.4));
 
-    // ... (rest of the component, including handleWheel, handleMouseDown, etc.) ...
-    //ALL OF THE OTHER FUNCTIONS ARE THE SAME AS BEFORE
-
-  const handleWheel = (event) => {
-        if (selectedImage && !showDeleteImages) {
+    const handleWheel = (event) => {
+        if (!showDeleteImages) {
             event.preventDefault();
             event.deltaY < 0 ? handleZoomIn() : handleZoomOut();
         }
     };
 
-     const handleMouseDown = (event) => {
-        if (selectedImage && !showDeleteImages) {
+    const handleMouseDown = (event) => {
+        if (!showDeleteImages) {
             event.preventDefault();
             setIsDragging(true);
             setDragStart({ x: event.clientX - dragOffset.x, y: event.clientY - dragOffset.y });
@@ -127,7 +147,7 @@ function GalleryPage() {
     const handleMouseLeave = () => setIsDragging(false);
 
     const handleTouchStart = (event) => {
-        if (selectedImage && !showDeleteImages) {
+        if (!showDeleteImages) {
             setIsDragging(true);
             setDragStart({
                 x: event.touches[0].clientX - dragOffset.x,
@@ -138,7 +158,7 @@ function GalleryPage() {
 
     const handleTouchMove = (event) => {
         if (!isDragging) return;
-         const x = event.touches[0].clientX - dragStart.x;
+        const x = event.touches[0].clientX - dragStart.x;
         const y = event.touches[0].clientY - dragStart.y;
         setDragOffset({ x, y });
     };
@@ -182,7 +202,7 @@ function GalleryPage() {
             if (!auth.currentUser) {
                 console.error("No user logged in.");
                 alert("Please log in to upload images.");
-                return; // Early return if no user
+                return;
             }
 
             const user = auth.currentUser;
@@ -192,7 +212,7 @@ function GalleryPage() {
 
             if (userQuerySnapshot.empty) {
                 console.error('User not found in Firestore.');
-                return; // Early return if user not found
+                return;
             }
 
             const userDoc = userQuerySnapshot.docs[0];
@@ -229,7 +249,7 @@ function GalleryPage() {
                 if (hashtagDoc.exists()) {
                     // Increment count using a transaction (for concurrency safety)
                     await runTransaction(db, async (transaction) => {
-                        const currentDoc = await transaction.get(hashtagRef); // Re-fetch in transaction
+                        const currentDoc = await transaction.get(hashtagRef);
                         const currentCount = currentDoc.exists() ? currentDoc.data().count : 0;
                         transaction.update(hashtagRef, { count: currentCount + 1 });
                     });
@@ -265,7 +285,7 @@ function GalleryPage() {
 
     const handleAddHashtag = () => {
         if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
-             const hashtagRegex = /^[a-zA-Z0-9_]+$/;
+            const hashtagRegex = /^[a-zA-Z0-9_]+$/;
             if (!hashtagRegex.test(newHashtag.trim())) {
                 setHashtagError("Hashtags can only contain letters, numbers, and underscores.");
                 return;
@@ -307,16 +327,16 @@ function GalleryPage() {
     };
 
     const toggleDeleteMode = () => {
-        setSelectedImage(null);
         setShowDeleteImages(!showDeleteImages);
-        setImages(showDeleteImages ? userImages : images); // Corrected toggle
+        setImages(showDeleteImages ? userImages : images);
         if (!showDeleteImages) {
-            loadAllImages(); // Ensure all images are loaded when exiting delete mode
+            loadAllImages();
         }
+        navigate('/galeria');
 
     };
 
-     const loadAllImages = async () => {
+    const loadAllImages = async () => {
         try {
             const galleryCollection = collection(db, 'Galeria de Imágenes');
             const querySnapshot = await getDocs(galleryCollection);
@@ -326,13 +346,12 @@ function GalleryPage() {
                 const galleryData = doc.data();
                 if (galleryData.images && Array.isArray(galleryData.images)) {
                     galleryData.images.forEach(image => {
-                        if (image.url) { firestoreImages.push(image);}
-                        else {console.warn("Skipping image with missing URL:", image);}
+                        if (image.url) { firestoreImages.push(image); }
+                        else { console.warn("Skipping image with missing URL:", image); }
                     });
                 }
             });
 
-            //Report filtering.
             let reportedImageRefs = [];
             if (auth.currentUser) {
                 const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
@@ -346,10 +365,10 @@ function GalleryPage() {
                     }
                 }
             }
-           firestoreImages = firestoreImages.filter(image => !reportedImageRefs.includes(image.publicId || image.url));
+            firestoreImages = firestoreImages.filter(image => !reportedImageRefs.includes(image.publicId || image.url));
 
             setImages(firestoreImages);
-            imagesLoadedRef.current = true; // Set the ref to true after images are loaded
+            imagesLoadedRef.current = true;
 
         } catch (error) {
             console.error("Error loading images from Firestore:", error);
@@ -358,12 +377,24 @@ function GalleryPage() {
 
 
     const handleDeleteImage = async () => {
-        if (!selectedImage) {
-            alert("Please select an image to delete.");
-            return;
-        }
+
         if (!auth.currentUser) {
             alert("Please log in to delete images.");
+            return;
+        }
+
+        const { imageId } = useParams();
+        if (!imageId) return;
+
+        const decodedImageUrl = decodeURIComponent(imageId);
+
+        const selectedImage = showDeleteImages
+            ? userImages.find((img) => img.url === decodedImageUrl)
+            : images.find((img) => img.url === decodedImageUrl);
+
+
+        if (!selectedImage) {
+            console.error("Image to delete not found");
             return;
         }
 
@@ -382,18 +413,17 @@ function GalleryPage() {
             const userGalleryDocRef = doc(galleryCollection, user.email);
             await updateDoc(userGalleryDocRef, { images: arrayRemove(selectedImage) });
 
-            // Remove hashtags from Hashtags collection (decrement count)
-             if (selectedImage.hashtags && Array.isArray(selectedImage.hashtags)) {
+            if (selectedImage.hashtags && Array.isArray(selectedImage.hashtags)) {
                 for (const hashtag of selectedImage.hashtags) {
                     const hashtagRef = doc(db, 'Hashtags', hashtag);
                     await runTransaction(db, async (transaction) => {
                         const currentDoc = await transaction.get(hashtagRef);
-                        if (currentDoc.exists()) { // Check if still exists
+                        if (currentDoc.exists()) {
                             const currentCount = currentDoc.data().count;
                             if (currentCount > 1) {
                                 transaction.update(hashtagRef, { count: currentCount - 1 });
                             } else {
-                                transaction.delete(hashtagRef); // Delete if count is 1
+                                transaction.delete(hashtagRef);
                             }
                         }
                     });
@@ -402,9 +432,9 @@ function GalleryPage() {
 
             setUserImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
             setImages(prevImages => prevImages.filter(img => img.url !== selectedImage.url));
-            setSelectedImage(null);
             alert("Image deleted successfully.");
             await loadUserImages(auth.currentUser.email);
+            navigate('/galeria');
 
         } catch (error) {
             console.error("Error deleting image:", error);
@@ -429,7 +459,7 @@ function GalleryPage() {
 
         try {
             const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
-            const reporterDocRef = doc(reportedImagesCollection, reporterEmail);
+            const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
             const reporterDocSnap = await getDoc(reporterDocRef);
 
             const reportData = { imageRef, uploaderEmail: image.uploadedBy };
@@ -444,6 +474,7 @@ function GalleryPage() {
 
             setImages(prevImages => prevImages.filter(img => img.url !== image.url));
             alert("Image reported successfully.");
+            navigate('/galeria');
 
         } catch (error) {
             console.error("Error reporting image:", error);
@@ -451,40 +482,139 @@ function GalleryPage() {
         }
     };
 
-       const loadAvailableHashtags = async () => {
+    const loadAvailableHashtags = async () => {
         try {
-            // Try to load from cache first
             const cachedHashtags = localStorage.getItem('availableHashtags');
             const cacheTimestamp = localStorage.getItem('hashtagsTimestamp');
 
-            if (cachedHashtags && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 3600000) { // 1 hour
+            if (cachedHashtags && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < 3600000) {
                 setAvailableHashtags(JSON.parse(cachedHashtags));
-                return; // Exit early if loaded from cache
+                return;
             }
 
-            // If not in cache, or cache is expired, fetch from Firestore
             const hashtagsCollection = collection(db, 'Hashtags');
             const querySnapshot = await getDocs(hashtagsCollection);
             const fetchedHashtags = [];
             querySnapshot.forEach((doc) => {
-                fetchedHashtags.push(doc.id); // The ID is the hashtag
+                fetchedHashtags.push(doc.id);
             });
 
             setAvailableHashtags(fetchedHashtags);
 
-            // Update cache
             localStorage.setItem('availableHashtags', JSON.stringify(fetchedHashtags));
             localStorage.setItem('hashtagsTimestamp', Date.now().toString());
 
         } catch (error) {
             console.error("Error loading available hashtags:", error);
-            // Handle error appropriately (e.g., show a message to the user)
         }
     };
+
+    const renderImageModal = () => {
+        const { imageId } = useParams();
+
+        if (showDeleteImages || !imageId) {
+            return null;
+        }
+
+        const decodedImageUrl = decodeURIComponent(imageId);
+        const selectedImage = images.find(img => img.url === decodedImageUrl);
+
+        if (!selectedImage) {
+            return null;
+        }
+
+
+        return (
+            <div className="modal-overlay-gallery" onWheel={handleWheel}>
+                <div className="modal-content-container-gallery"
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseLeave}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button className="close-button-gallery" onClick={(e) => { e.stopPropagation(); closeImage(); }}>
+                        X
+                    </button>
+                    <button
+                        className="report-button-gallery"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            reportImage(selectedImage);
+                        }}
+                    >
+                        Reportar imagen
+                    </button>
+                    <img
+                        src={selectedImage.url}
+                        alt="Imagen Ampliada"
+                        className="modal-image-gallery"
+                        style={{
+                            transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+                            cursor: isDragging ? 'grabbing' : 'grab',
+                        }}
+                        ref={modalImageRef}
+                        onClick={(e) => e.stopPropagation()}
+                    />
+
+                    <div className="image-info-gallery">
+                        <p>Publicado por: {selectedImage.uploadedBy}</p>
+                        <p>Fecha: {selectedImage.uploadDate}</p>
+                        {selectedImage.hashtags && selectedImage.hashtags.length > 0 && (
+                            <p>Hashtags: {selectedImage.hashtags.join(', ')}</p>
+                        )}
+                    </div>
+
+                    <div className="zoom-controls-gallery">
+                        <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}>+</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}>-</button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const handleSearchChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === 'hashtag') {
+            setSearchHashtag(value);
+        } else if (name === 'date') {
+            setSearchDate(value);
+        }
+    }
+
+    const handleClearFilters = () => {
+        setSearchHashtag("");
+        setSearchDate("");
+    }
 
     return (
         <div className="galeria-page-gallery">
             <h1 className="title-gallery">GALERIA</h1>
+
+            {/* Search Filters */}
+            <div className="search-filters-gallery">
+                <input
+                    type="text"
+                    placeholder="Buscar por hashtag..."
+                    value={searchHashtag}
+                    onChange={handleSearchChange}
+                    name="hashtag"
+                />
+                <input
+                    type="date"
+                    placeholder="Buscar por fecha (YYYY-MM-DD)..."
+                    value={searchDate}
+                    onChange={handleSearchChange}
+                    name="date"
+                />
+                <button onClick={handleClearFilters}>Limpiar Filtros</button>
+            </div>
+
             <div className="gallery-content-gallery">
                 <button className="scroll-button-gallery left-gallery" onClick={scrollLeft}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -492,12 +622,13 @@ function GalleryPage() {
                     </svg>
                 </button>
                 <div className="image-container-gallery" ref={imageContainerRef}>
-                    {images.map((image, index) => (
+                    {filteredImages.map((image, index) => (
                         <img
                             key={index}
                             src={image.url}
                             alt={`Imagen ${index}`}
-                            className={`gallery-image-gallery ${selectedImage?.url === image.url && showDeleteImages ? 'selected-gallery' : ''}`}
+                            className={`gallery-image-gallery ${location.pathname.includes(encodeURIComponent(image.url)) && showDeleteImages ? 'selected-gallery' : ''
+                                }`}
                             onClick={() => openImage(image)}
                         />
                     ))}
@@ -532,7 +663,6 @@ function GalleryPage() {
                 </div>
             )}
 
-            {/* Upload Modal */}
             {showUploadModal && (
                 <div className="modal-overlay-gallery">
                     <div className="modal-content-container-gallery" style={{ maxWidth: '500px' }}>
@@ -542,7 +672,6 @@ function GalleryPage() {
                             <img src={URL.createObjectURL(selectedFile)} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
                         )}
 
-                        {/* Hashtag Input */}
                         <div style={{ marginTop: '20px', marginBottom: '10px', width: "100%" }}>
                             <label htmlFor="hashtag-input" style={{ color: 'white', display: 'block', marginBottom: "5px" }}>Hashtags:</label>
 
@@ -561,7 +690,6 @@ function GalleryPage() {
                             </div>
                             {hashtagError && <p style={{ color: 'red', marginTop: '5px' }}>{hashtagError}</p>}
 
-                            {/* Display added hashtags */}
                             <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                 {hashtags.map((tag) => (
                                     <span key={tag} style={{ backgroundColor: '#ddd', padding: '5px', borderRadius: '4px', display: 'flex', alignItems: "center", gap: '2px' }}>
@@ -571,7 +699,6 @@ function GalleryPage() {
                                 ))}
                             </div>
 
-                            {/* Display available hashtags */}
                             <div style={{ marginTop: '10px' }}>
                                 <p style={{ color: 'white', marginBottom: '5px' }}>Hashtags Disponibles:</p>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
@@ -585,65 +712,14 @@ function GalleryPage() {
                         </div>
 
                         <button disabled={uploading} onClick={handleConfirmUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', border: 'none', marginTop: "20px" }}>
-                        {uploading ? 'Subiendo...' : 'Publicar imagen'}
+                            {uploading ? 'Subiendo...' : 'Publicar imagen'}
                         </button>
                         <button onClick={handleCancelUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#ccc', color: 'black', border: 'none', marginTop: '10px', marginLeft: '3px' }}>Cancelar</button>
                     </div>
                 </div>
             )}
 
-            {selectedImage && !showDeleteImages && (
-                <div className="modal-overlay-gallery" onWheel={handleWheel}>
-                    <div className="modal-content-container-gallery"
-                         onMouseDown={handleMouseDown}
-                        onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseUp}
-                        onMouseLeave={handleMouseLeave}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button className="close-button-gallery" onClick={(e) => { e.stopPropagation(); closeImage(e); }}>
-                            X
-                        </button>
-                        <button
-                            className="report-button-gallery"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                reportImage(selectedImage);
-                            }}
-                        >
-                            Reportar imagen
-                        </button>
-                        <img
-                            src={selectedImage.url}
-                            alt="Imagen Ampliada"
-                            className="modal-image-gallery"
-                            style={{
-                                transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-                                cursor: isDragging ? 'grabbing' : 'grab',
-                            }}
-                            ref={modalImageRef}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-
-                        <div className="image-info-gallery">
-                            <p>Publicado por: {selectedImage.uploadedBy}</p>
-                            <p>Fecha: {selectedImage.uploadDate}</p>
-                            {/* Display Hashtags */}
-                            {selectedImage.hashtags && selectedImage.hashtags.length > 0 && (
-                                <p>Hashtags: {selectedImage.hashtags.join(', ')}</p>
-                            )}
-                        </div>
-
-                        <div className="zoom-controls-gallery">
-                            <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}>+</button>
-                            <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}>-</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {renderImageModal()}
         </div>
     );
 }

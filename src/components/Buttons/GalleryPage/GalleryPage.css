@@ -1,3 +1,5 @@
+/* --- START OF FILE GalleryPagecss.txt --- */
+
 .galeria-page-gallery {
     display: flex;
     flex-direction: column;
@@ -276,4 +278,59 @@
 
 .report-button-gallery:active {
     transform: translateY(2px);
+}
+
+/* Search Filter Styles */
+.search-filters-gallery {
+    display: flex;
+    flex-wrap: wrap; /* Wrap to next line on smaller screens */
+    gap: 10px;
+    align-items: center; /* Vertically align items */
+    margin-bottom: 20px;
+    width: 100%; /* Take full width */
+    justify-content: center; /* Center the filter elements */
+}
+
+.search-filters-gallery input[type="text"],
+.search-filters-gallery input[type="date"] {
+    padding: 10px 15px;
+    border-radius: 20px; /* Rounded corners like buttons */
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #f8f8f8;
+    color: #333;
+    width: 250px; /* Specify a width */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.search-filters-gallery input[type="text"]::placeholder,
+.search-filters-gallery input[type="date"]::placeholder {
+     color: #999; /* Lighter placeholder text */
+}
+
+.search-filters-gallery input[type="text"]:focus,
+.search-filters-gallery input[type="date"]:focus {
+    border-color: #00a3a1;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 163, 161, 0.5);
+}
+
+
+.search-filters-gallery button {
+    padding: 10px 20px;
+    border-radius: 20px; /* Rounded corners */
+    border: none;
+    background-color: #bdbdbdde;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-filters-gallery button:hover {
+    background-color: #00a3a1;
+}
+
+.search-filters-gallery button:active {
+     transform: translateY(2px);
 }

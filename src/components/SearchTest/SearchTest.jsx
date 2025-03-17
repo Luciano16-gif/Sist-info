@@ -1,17 +1,19 @@
-// SearchTest.jsx (Modified for Correct Forum URLs and Comment Searching)
+/* eslint-disable no-loop-func */
+// SearchTest.jsx (Modified to filter GalleryPage based on hashtag search)
 import React, { useState, useEffect } from 'react';
 import './SearchTest.css';
 import searchIcon from '../../../src/assets/images/lupa-search.png';
 import { db } from './../../firebase-config';
 import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function SearchTest() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchError, setSearchError] = useState('');
+    const navigate = useNavigate(); // Use useNavigate hook
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -110,19 +112,10 @@ function SearchTest() {
         return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     };
 
-    //NEW: Helper function to find image
-    const findImageWithHashtag = (docData, hashtag) => {
-        if (docData && docData.images && Array.isArray(docData.images)) {
-            for (const image of docData.images) {
-                if (image.hashtags && image.hashtags.includes(hashtag)) {
-                    return image;
-                }
-            }
-        }
-        return null; // No image found with the hashtag
-    };
+    // No longer needed for this approach.
+    // const findImageWithHashtag = (docData, hashtag) => { ... };
 
-    const performSearch = async (term) => {
+      const performSearch = async (term) => {
         try {
             const collectionsToSearch = Object.keys(collectionToPageMap);
             let allResults = [];
@@ -131,6 +124,9 @@ function SearchTest() {
             const numericTerm = parseInt(term);
             const normalizedTerm = normalizeString(term);
             const isRatingKeyword = ['puntuacion', 'calificacion'].some(keyword => normalizeString(keyword).startsWith(normalizedTerm));
+
+            // Flag to check if the search term is a hashtag.
+            let isHashtagSearch = false;
 
             for (const collectionName of collectionsToSearch) {
                 let collectionRef = collection(db, collectionName);
@@ -157,7 +153,7 @@ function SearchTest() {
                     }
 
                     if (docId.toLowerCase().startsWith(lowerCaseTerm) && docId.length >= 3) {
-                        allResults.push({
+                         allResults.push({ //Added
                             id: docId,
                             page: page,
                             displayName: displayName,
@@ -174,7 +170,7 @@ function SearchTest() {
                                     if (currentCollection === 'Configuraciones de Experiencias') {
                                         if (typeof obj[key] === 'string') {
                                             const lowerCaseValue = obj[key].toLowerCase();
-                                            if (lowerCaseValue.startsWith(lowerCaseTerm)) {
+                                              if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
                                                 allResults.push({
                                                     id: currentDocId,
                                                     page: '/galeria',
@@ -185,7 +181,7 @@ function SearchTest() {
                                         }
                                         else if (Array.isArray(obj[key])) {
                                             for (const item of obj[key]) {
-                                                if (typeof item === 'string' && item.toLowerCase().startsWith(lowerCaseTerm)) {
+                                                if (typeof item === 'string' && item.toLowerCase().startsWith(lowerCaseTerm)) { //Added
                                                     allResults.push({
                                                         id: currentDocId,
                                                         page: '/galeria',
@@ -200,7 +196,7 @@ function SearchTest() {
                                     // Specific check for 'Title' or 'description' field in 'Foros'
                                     else if (currentCollection === 'Foros' && (key === 'Title' || key === 'description')) {
                                         const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) {
+                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
                                             allResults.push({
                                                 id: currentDocId,
                                                 page: `/foro/${currentDocId}`, // DYNAMIC URL
@@ -216,8 +212,8 @@ function SearchTest() {
                                     }
                                     // Specific check for 'descripcion' in 'Experiencias'
                                     else if (currentCollection === 'Experiencias' && key === 'descripcion') {
-                                        const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) {
+                                       const lowerCaseValue = obj[key].toLowerCase();
+                                        if (lowerCaseValue.startsWith(lowerCaseTerm)) { //Added
                                             allResults.push({
                                                 id: currentDocId,
                                                 page: page,
@@ -229,7 +225,7 @@ function SearchTest() {
                                     // Check for other name fields
                                     else if (typeof obj[key] === 'string' && isNameField(currentCollection, key)) {
                                         const lowerCaseValue = obj[key].toLowerCase();
-                                        if (lowerCaseValue.startsWith(lowerCaseTerm) && lowerCaseValue.length >= 3) {
+                                        if (lowerCaseValue.startsWith(lowerCaseTerm) && lowerCaseValue.length >= 3) { //Added
                                             allResults.push({
                                                 id: currentDocId,
                                                 page: page,
@@ -244,27 +240,19 @@ function SearchTest() {
                                         if (Array.isArray(obj[key])) {
                                             for (const hashtag of obj[key]) {
                                                 if (normalizeString(hashtag).startsWith(normalizedTerm)) {
-                                                    // Find the image object containing the hashtag
-                                                    const image = findImageWithHashtag(docData, hashtag);
-                                                    if (image) {
-                                                        allResults.push({
-                                                            id: currentDocId, // or a unique identifier for the image
-                                                            page: page,
-                                                            displayName: displayName,
-                                                            value: image.url,
-                                                            imageData: image, // Pass the ENTIRE image object
-                                                        });
-                                                    }
-
+                                                    // Set the flag to indicate a hashtag search.
+                                                    isHashtagSearch = true;
+                                                    break; // Exit inner loop, we found a match.
                                                 }
                                             }
+                                            if (isHashtagSearch) break; // Exit outer loop if a hashtag match is found
                                         }
                                     }
                                     // --- Numeric Field Checks (Experiencias) ---
                                     else if (currentCollection === 'Experiencias' && !isNaN(numericTerm)) {
                                         if (key === 'longitudRecorrido' || key === 'maximoUsuarios' || key === 'minimoUsuarios' || key === 'precio') {
                                             if (obj[key] === numericTerm) {
-                                                allResults.push({
+                                               allResults.push({ //Added
                                                     id: currentDocId,
                                                     page: page,
                                                     displayName: displayName,
@@ -303,7 +291,7 @@ function SearchTest() {
                                 continue;
                             }
 
-                            if (reviewData.text && reviewData.text.toLowerCase().startsWith(lowerCaseTerm)) {
+                              if (reviewData.text && reviewData.text.toLowerCase().startsWith(lowerCaseTerm)) { //Added
                                 allResults.push({
                                     id: reviewDoc.id,
                                     page: page,
@@ -313,14 +301,14 @@ function SearchTest() {
                             }
 
                             if (!isNaN(numericTerm) && reviewData.rating === numericTerm) {
-                                allResults.push({
+                                 allResults.push({ //Added
                                     id: reviewDoc.id,
                                     page: page,
                                     displayName: displayName,
                                     value: reviewData.rating,
                                 });
                             } else if (isRatingKeyword) {
-                                allResults.push({
+                                allResults.push({ //Added
                                     id: reviewDoc.id,
                                     page: page,
                                     displayName: displayName,
@@ -337,14 +325,14 @@ function SearchTest() {
                         if (reviewCount > 0) {
                             const averageRating = totalRating / reviewCount;
                             if (!isNaN(numericTerm) && averageRating === numericTerm) {
-                                allResults.push({
+                                allResults.push({ //Added
                                     id: docId,
                                     page: page,
                                     displayName: displayName,
                                     value: averageRating,
                                 });
                             } else if (isRatingKeyword) {
-                                allResults.push({
+                                allResults.push({ //Added
                                     id: docId,
                                     page: page,
                                     displayName: displayName,
@@ -360,7 +348,7 @@ function SearchTest() {
                          // Get forum data
                         const forumData = docSnap.data();
 
-                        if (forumData.description && forumData.description.toLowerCase().startsWith(lowerCaseTerm)) {
+                         if (forumData.description && forumData.description.toLowerCase().startsWith(lowerCaseTerm)) { //Added
                             allResults.push({
                                 id: docId,
                                 page: `/foro/${docId}`,
@@ -390,7 +378,7 @@ function SearchTest() {
                                 continue;
                             }
 
-                            if (commentData.description && commentData.description.toLowerCase().startsWith(lowerCaseTerm)) {
+                            if (commentData.description && commentData.description.toLowerCase().startsWith(lowerCaseTerm)) { //Added
                                 allResults.push({
                                     id: commentId,
                                     page: `/foro/${docId}`, //  Go to the forum page
@@ -407,10 +395,18 @@ function SearchTest() {
                     }
 
                     searchRecursive(filteredData, collectionName, docId);
+                    if(isHashtagSearch) break;
                 }
+                if(isHashtagSearch) break; //And here
             }
 
-            setSearchResults(allResults);
+
+             if (isHashtagSearch) {
+                // Navigate to /galeria with the hashtag as a query parameter.
+                navigate(`/galeria?hashtag=${encodeURIComponent(normalizedTerm)}`);
+            } else {
+                setSearchResults(allResults); //  Show other results if not a hashtag search
+           }
         } catch (error) {
             console.error('Error searching Firestore:', error);
             setSearchError('Error searching. Please try again.');
@@ -447,7 +443,8 @@ function SearchTest() {
             </form>
             {searchError && <div className="error-message-search-test">{searchError}</div>}
 
-            {searchResults.length > 0 && (
+            {/*Conditionally render results based on isHashtagSearch*/}
+            {!searchTerm.trim() || (searchResults.length > 0) ? (
                 <div className='results-container-search-test'>
                     <h2>Results:</h2>
                     <div className="results-wrapper">
@@ -466,12 +463,12 @@ function SearchTest() {
                                 </div>
                                 <Link
                                     to={{
-                                        pathname: item.page,  //  Use item.page directly
+                                        pathname: item.page,
                                         state: item.forumData
                                             ? { forumData: item.forumData }
-                                            : item.imageData
+                                            : item.imageData  // Keep imageData handling
                                                 ? { imageData: item.imageData }
-                                                : {} // Default to empty object if neither is present
+                                                : {}
                                     }}
                                     className="result-link"
                                 >
@@ -481,7 +478,8 @@ function SearchTest() {
                         ))}
                     </div>
                 </div>
-            )}
+            ) : null}
+
         </div>
     );
 }
