@@ -2,7 +2,7 @@
 
 const MensajeCard = ({img, name, who, asunto, context}) => {
     return (
-        <div className="bg-[#3A4C2E] text-black p-4 max-w-full rounded-full flex-shrink-0 flex flex-row space-x-5">
+        <div className="bg-[#3A4C2E] text-black p-6 max-w-auto h-32 rounded-full flex-shrink-0 flex flex-row space-x-5">
             <img src={img} className="w-20 h-20 rounded-full"></img>
             <div className="flex flex-col">
                 <div className="flex flex-row space-x-5 w-auto">
@@ -19,6 +19,7 @@ const MensajeCard = ({img, name, who, asunto, context}) => {
                     <p className="text-xs text-white">{context}</p>
                 </div>
             </div>
+            <div class=" relative w-4 h-4 bg-red-600 rounded-full"></div>
         </div>
     );
 }

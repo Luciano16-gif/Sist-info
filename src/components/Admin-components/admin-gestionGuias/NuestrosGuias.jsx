@@ -11,18 +11,18 @@ const NuestrosGuias = () => {
         { name: "Santiago Zabala", stars: 4, number: 21, status: 3, solicitudes: 5 },
         { name: "Valery Villas", stars: 4, number: 21, status: 3, solicitudes: 5 },
         { name: "Daniela Pereira", stars: 4, number: 21, status: 3, solicitudes: 5 },
+        { name: "Someone random", stars: 4, number: 21, status: 3, solicitudes: 5 },
     ]
-
+//gap-y-8 gap-x-12 overflow-x-auto rounded-lg bg-[#121F0A] text-gray-300 p-6  w-full h-full
     return (
-        <section className="bg-[#121F0A] text-gray-300 p-6  w-full h-full">
-            <div className="grid sm:grid-cols-1 gap-y-8 gap-x-12 overflow-x-auto md:grid-cols-3 md:grid-rows-2 rounded-lg"> {/* Moved rounded-lg here */}
+        <div className="grid grid-flow-col grid-rows-3 auto-cols-max gap-y-36 gap-x-6 overflow-x-auto max-w-full h-full
+    bg-[#121F0A] text-gray-300 p-6rounded-lg"> {/* Moved rounded-lg here */}
                 {Messages.map((message, index) => (
                     <GuiaCard key={index} img={blank} name={message.name} stars={message.stars}
                         number={message.number} status={message.status} solicitudes={message.solicitudes}
                     />
                 ))}
             </div>
-        </section>
     );
 }
 
