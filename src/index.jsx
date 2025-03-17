@@ -20,7 +20,7 @@ import SignUpPage from './components/Auth/SignUpPage';
 
 // Main Pages
 import AvilaLanding from './pages/landing-page/AvilaLanding';
-import ProfileManagementPage from './components/Buttons/ProfileManagementPage/ProfileManagementPage';
+import ProfileManagementPage from './components/profile/ProfileManagementPage';
 import GalleryPage from './components/Buttons/GalleryPage/GalleryPage';
 import ForumPage from './components/Buttons/ForumPage/ForumPage';
 import CreateExperience from './components/experiences/createExperience/createExperience';
