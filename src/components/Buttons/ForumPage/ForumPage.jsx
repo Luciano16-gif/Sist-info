@@ -696,9 +696,9 @@ function ForumPage() {
                                             <p className="comment-date-forum">{comment.Date}</p>
                                             <p className="comment-text-forum">{comment.description}</p>
                                             <div className="comment-button-container-forum">
-                                                <span className="forum-button-forum" onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}>Comentar</span>
+                                                <span className="comment-button-forum" onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}>Comentar</span>
                                                 {/* --- Use openReportModal --- */}
-                                                <span className="forum-button-forum" onClick={() => openReportModal('comment', comment.firestoreId)}>
+                                                <span className="comment-button-forum" onClick={() => openReportModal('comment', comment.firestoreId)}>
                                                     Reportar
                                                 </span>
                                                 {/* --- End Use openReportModal --- */}

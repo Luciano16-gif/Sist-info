@@ -4,7 +4,7 @@ import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/calendar/EventCalendar';
 import { db } from '../../firebase-config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import storageService from '../../cloudinary-services/storage-service';
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 
@@ -24,6 +24,8 @@ function BookingPage() {
     const [availableDays, setAvailableDays] = useState([]);
     const [dateError, setDateError] = useState("");
     const [guides, setGuides] = useState([]);
+    // Add this state for available slots
+    const [availableSlots, setAvailableSlots] = useState(0);
 
     // Normalize experience data based on the source (admin view vs regular view)
     useEffect(() => {
@@ -107,6 +109,7 @@ function BookingPage() {
                                 name: guideData.name || 'Sin nombre',
                                 lastName: guideData.lastName || '',
                                 image: guideImageUrl,
+                                email: guideRef.email,  // Add email to ensure we have it for the booking process
                             });
                         }
                     } catch (error) {
@@ -198,7 +201,12 @@ function BookingPage() {
                 const paymentsSnapshot = await getDocs(q);
                 let totalPeople = 0;
                 paymentsSnapshot.forEach((doc) => {
-                    totalPeople += Number(doc.data().selectedPeople) || 0;
+                    const bookings = doc.data().bookings || [];
+                    bookings.forEach(booking => {
+                        if (booking.experienceId === experience.id) {
+                            totalPeople += parseInt(booking.selectedPeople, 10) || 0;
+                        }
+                    });
                 });
                 setTotalPaidUsers(totalPeople);
             } catch (error) {
@@ -216,6 +224,7 @@ function BookingPage() {
             if (!experience || !selectedDate || !selectedTime) {
                 setReservationsForSelectedTime(0);
                 setReservationsForSelectedDate(0);
+                setAvailableSlots(0);
                 return; // Early return if missing data
             }
 
@@ -226,45 +235,68 @@ function BookingPage() {
             const formattedDate = `${day}/${month}/${year}`;
 
             try {
+                // First, get the experience document to check current available slots
+                const experienceRef = doc(db, "Experiencias", experience.id);
+                const expSnapshot = await getDoc(experienceRef);
+                
+                if (!expSnapshot.exists()) {
+                    console.error("Experience not found");
+                    return;
+                }
+                
+                const expData = expSnapshot.data();
+                const maxCapacity = expData.maximoUsuarios || experience.maxPeople || 0;
+                const currentAvailableSlots = expData.cuposDisponibles || 0;
+
                 // Query the 'payments' collection
                 const paymentsRef = collection(db, "payments");
                 const q = query(
                     paymentsRef,
                     where("experienceId", "==", experience.id),
-                    where("selectedDate", "==", formattedDate),
-                    where("selectedTime", "==", selectedTime),
                     where("status", "==", "COMPLETED") // Important: Only completed payments
                 );
 
                 const querySnapshot = await getDocs(q);
 
                 let peopleInSlot = 0;
-                querySnapshot.forEach((doc) => {
-                    // Add up the 'selectedPeople' from each matching document
-                    peopleInSlot += Number(doc.data().selectedPeople) || 0; // Handle potential undefined/NaN
-                });
-                setReservationsForSelectedTime(peopleInSlot);
-
-                const q2 = query(
-                    paymentsRef,
-                    where("experienceId", "==", experience.id),
-                    where("selectedDate", "==", formattedDate),
-                    where("status", "==", "COMPLETED") // Important: Only completed payments
-                );
-
-                const querySnapshot2 = await getDocs(q2);
-
                 let peopleInDate = 0;
-                querySnapshot2.forEach((doc) => {
-                    // Add up the 'selectedPeople' from each matching document
-                    peopleInDate += Number(doc.data().selectedPeople) || 0; // Handle potential undefined/NaN
-                });
 
+                querySnapshot.forEach((doc) => {
+                    // Process bookings array inside each payment document
+                    const bookings = doc.data().bookings || [];
+                    
+                    bookings.forEach(booking => {
+                        // Match for time slot - checks both date AND time
+                        if (booking.selectedDay === formattedDate && 
+                            booking.selectedTime === selectedTime &&
+                            booking.experienceId === experience.id) {
+                            peopleInSlot += parseInt(booking.selectedPeople, 10) || 0;
+                        }
+                        
+                        // Match for whole date - checks only date
+                        if (booking.selectedDay === formattedDate &&
+                            booking.experienceId === experience.id) {
+                            peopleInDate += parseInt(booking.selectedPeople, 10) || 0;
+                        }
+                    });
+                });
+                
+                setReservationsForSelectedTime(peopleInSlot);
                 setReservationsForSelectedDate(peopleInDate);
+                
+                // Calculate actual available slots for the time slot
+                const actualAvailableSlots = Math.max(0, currentAvailableSlots - peopleInSlot);
+                setAvailableSlots(actualAvailableSlots);
+                
+                console.log(`Available slots for ${selectedTime} on ${formattedDate}: ${actualAvailableSlots}`);
+                console.log(`People already booked: ${peopleInSlot}`);
+                console.log(`Total capacity: ${currentAvailableSlots}`);
+                
             } catch (error) {
                 console.error("Error fetching reservations:", error);
                 setReservationsForSelectedTime(0);
                 setReservationsForSelectedDate(0);
+                setAvailableSlots(0);
             }
         };
 
@@ -323,8 +355,26 @@ function BookingPage() {
             setDateError("Por favor, selecciona un horario antes de reservar.");
             return;
         }
+        
+        if (availableSlots <= 0) {
+            setDateError("No hay cupos disponibles para este horario.");
+            return;
+        }
 
-        navigate('/booking-process', { state: { experience, selectedDate, selectedTime } });
+        // Format date for passing to next page
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const year = selectedDate.getFullYear();
+        const formattedDate = `${day}/${month}/${year}`;
+
+        navigate('/booking-process', { 
+            state: { 
+                experience, 
+                selectedDate, 
+                selectedTime,
+                selectedDay: formattedDate // Add formatted date for consistency
+            } 
+        });
     };
 
     const handleShowCalendar = () => {
@@ -411,6 +461,17 @@ function BookingPage() {
                                     : `${reservationsForSelectedDate} / ${experience.maxPeople} (Total para la fecha: ${reservationsForSelectedDate})`
                                 }
                             />
+                            {/* New field showing available slots */}
+                            {selectedTime && (
+                                <BookingDetail 
+                                    title="Cupos Disponibles" 
+                                    value={
+                                        availableSlots > 0 
+                                            ? `${availableSlots} cupos` 
+                                            : "No hay cupos disponibles"
+                                    } 
+                                />
+                            )}
                         </div>
                         <div className='details-column-booking'>
                             <BookingDetail title="Precio P/P" value={`${experience.price}$`} />
@@ -460,7 +521,18 @@ function BookingPage() {
                         </div>
                     )}
 
-                    <button className="reserve-button-booking" onClick={handleBookingClick}>
+                    {/* Show available slots message */}
+                    {selectedTime && availableSlots <= 0 && (
+                        <div className="no-slots-message" style={{ color: 'red', textAlign: 'center', margin: '10px 0' }}>
+                            No hay cupos disponibles para este horario.
+                        </div>
+                    )}
+
+                    <button 
+                        className={`reserve-button-booking ${(selectedTime && availableSlots <= 0) ? 'disabled' : ''}`} 
+                        onClick={handleBookingClick}
+                        disabled={!isAdmin && selectedTime && availableSlots <= 0}
+                    >
                         {isAdmin ? "Volver" : "Reserva tu Cupo"}
                     </button>
                 </div>

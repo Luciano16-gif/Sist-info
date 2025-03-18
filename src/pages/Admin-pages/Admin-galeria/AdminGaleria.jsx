@@ -7,6 +7,7 @@ import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase-config';
 import './AdminGaleria.css';  // Make sure this path is correct
 import { useNavigate } from 'react-router-dom'; // Import if you use it
+import LoadingState from '../../../components/common/LoadingState/LoadingState';
 
 const AdminGaleria = () => {
     const {
@@ -106,7 +107,7 @@ const AdminGaleria = () => {
     const handleTouchEnd = () => setIsDragging(false);
 
     if (loading || loadingImages) {
-        return <div>Cargando métricas de la galería...</div>;
+        return <LoadingState text='Cargando métricas de galería...' />;
     }
 
     if (error || imagesError) {

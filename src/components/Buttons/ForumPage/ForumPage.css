@@ -791,3 +791,44 @@
         padding: 8px 12px;
     }
 }
+
+/* Comment button styles */
+.comment-button-forum {
+    cursor: pointer;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.comment-button-forum:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.comment-button-forum:active {
+    background-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(0);
+}
+
+.comment-button-forum.report-button {
+    background-color: rgba(255, 230, 230, 0.2);
+}
+
+.comment-button-forum.report-button:hover {
+    background-color: rgba(255, 200, 200, 0.3);
+}
+
+.comment-button-container-forum {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 16px;
+    gap: 15px;
+    width: 100%;
+}
