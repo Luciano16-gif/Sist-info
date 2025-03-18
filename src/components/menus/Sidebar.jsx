@@ -19,7 +19,7 @@ const SIDEBAR_ITEMS = [
   { href: "/homeAdmin", label: "Inicio", icon: homeIcon },
   { href: "/admin-guias-pendientes", label: "Gestion Guias", icon: groupIcon },
   { href: "/admin-galeria", label: "Galería", icon: applicationIcon },
-  { href: "/admin-rutas", label: "Rutas", icon: wayIcon },
+  { href: "/admin-rutas", label: "Gestión Rutas", icon: wayIcon },
   { href: "/admin-calendario", label: "Calendario", icon: calendarIcon },
   { href: "/admin-actividades", label: "Actividades", icon: puzzleIcon },
   { href: "/admin-mensajes", label: "Mensajes", icon: messagesIcon },

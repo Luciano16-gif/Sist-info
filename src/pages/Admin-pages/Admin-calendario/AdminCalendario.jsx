@@ -3,6 +3,7 @@ import EventCalendar from '../../../components/calendar/EventCalendar';
 import experienceFormService from '../../../components/services/experienceFormService';
 import { useExperiences } from '../../../components/hooks/experiences-hooks/useExperiences';
 import { experiencesToCalendarEvents, getEventsForDay } from '../../../components/utils/calendarUtils';
+import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
 
 const AdminCalendario = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -103,7 +104,7 @@ const AdminCalendario = () => {
   };
   
   return (
-    <div className="inset-0 mx-2 sm:mx-4 md:mx-8 lg:mx-16 xl:mx-24 my-6 flex flex-col justify-start items-start px-2 sm:px-4 md:px-8 space-y-4 z-10">
+    <div className={`inset-0 mx-2 sm:mx-4 md:mx-8 lg:mx-16 xl:mx-24 my-6 flex flex-col justify-start items-start px-4 md:px-8 ${adminBaseStyles}`}>
       {/* Header content */}
       <h1 className="text-white text-3xl sm:text-4xl md:text-5xl font-bold">Calendario</h1>
       <h1 className="text-white text-base sm:text-lg md:text-lg">

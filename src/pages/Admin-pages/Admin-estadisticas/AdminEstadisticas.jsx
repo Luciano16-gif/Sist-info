@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
-import GraficoAdmin from "../../../components/Admin-components/admin-estadisticas/GraficoAdmin"; 
+import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
 
 const AdminEstadisticas = () => {
 
@@ -12,7 +11,7 @@ const AdminEstadisticas = () => {
   const Comentarios = 4731;
 
   return (
-    <div className="absolute inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
+    <div className={`inset-0 mx-2 sm:mx-4 md:mx-8 lg:mx-16 xl:mx-24 my-6 flex flex-col justify-start items-start px-4 md:px-8 ${adminBaseStyles}`}>
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Estadísticas
       </h1>
@@ -28,12 +27,9 @@ const AdminEstadisticas = () => {
         <RelevantInfoS number = {Participacion} description ="Participacion de los usuarios" />
         <RelevantInfoS number = {Duracion} description ="Duracion promedio de excursiones" />
         <RelevantInfoS number = {Promedio} description ="Promedio de participantes por excursion" />
-        <RelevantInfoS number = {Comentarios} description ="Comentarios y resenas recopiladas" />
+        <RelevantInfoS number = {Comentarios} description ="Comentarios y reseñas recopiladas" />
       </div>
       <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-
-      {/* Añadir componente de gráfico */}
-      <GraficoAdmin />
       
     </div>
     

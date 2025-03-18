@@ -1,297 +1,379 @@
-/* src/pages/Admin-experience-requests/AdminExperienceRequests.css */
-
 .admin-experience-requests-container {
-    background-color: #172819;
-    padding: 20px;
-    min-height: calc(100vh + 64px);
-    color: #fff;
-    font-family: "Ysabeau SC", sans-serif;
+  background-color: #172819;
+  padding: 16px;
+  min-height: 100%;
+  min-width: 100%;
+  border-radius: 16px;
+  color: #fff;
+  font-family: "Ysabeau SC", sans-serif;
 }
-  
+
 .admin-experience-requests-title {
-    color: #FFF;
-    text-align: center;
-    font-size: 48px;
-    font-weight: 600;
-    line-height: normal;
-    margin-bottom: 20px;
+  color: #FFF;
+  text-align: center;
+  font-size: 28px; /* Smaller base size for mobile */
+  font-weight: 600;
+  line-height: normal;
+  margin-bottom: 16px;
 }
-  
+
 .admin-experience-requests-subtitle {
-    color: #FFF;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 400;
-    margin-bottom: 30px;
+  color: #FFF;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 24px;
 }
-  
+
 .requests-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 1000px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
-  
+
 .request-card {
-    background-color: #2a3a2a;
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+  background-color: #2a3a2a;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-  
+
 .request-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
+
+.request-header {
+  display: flex;
+  flex-direction: column; /* Stack on mobile */
+  gap: 4px;
+}
+
+.request-title {
+  font-size: 20px; /* Smaller for mobile */
+  font-weight: 600;
+}
+
+.request-created-by {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.request-date {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.request-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Smaller minimum size */
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.detail-value {
+  font-size: 15px;
+}
+
+.request-description {
+  margin-top: 8px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically on mobile */
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.approve-button,
+.reject-button,
+.view-details-button {
+  width: 100%; /* Full width on mobile */
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  text-align: center;
+}
+
+.approve-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.approve-button:hover {
+  background-color: #45a049;
+}
+
+.reject-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.reject-button:hover {
+  background-color: #d32f2f;
+}
+
+.view-details-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.view-details-button:hover {
+  background-color: #0b7dda;
+}
+
+.no-requests {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 40px;
+  color: #ccc;
+}
+
+.experience-request-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 0 16px; /* Add padding for mobile */
+}
+
+.modal-content {
+  background-color: #2a3a2a;
+  padding: 16px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.feedback-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  background-color: #3a4a3a;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  margin-bottom: 15px;
+  resize: vertical;
+  font-family: "Ysabeau SC", sans-serif;
+}
+
+.feedback-submit {
+  background-color: #f44336;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  width: 100%; /* Full width on mobile */
+  transition: background-color 0.3s;
+}
+
+.feedback-submit:hover {
+  background-color: #d32f2f;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  border-radius: 5px;
+  color: white;
+  font-weight: 600;
+  z-index: 1100;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  max-width: calc(100% - 40px); /* Prevent overflow on small screens */
+}
+
+.notification.success {
+  background-color: #4CAF50;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+
+.unauthorized-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.back-button {
+  background-color: #fff;
+  color: #172819;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #fcff54;
+}
+
+/* Media queries for responsive design */
+@media (min-width: 480px) {
+  .admin-experience-requests-container {
+    padding: 20px;
+  }
   
-  .request-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .admin-experience-requests-title {
+    font-size: 32px;
   }
   
   .request-title {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 22px;
+  }
+}
+
+@media (min-width: 640px) {
+  .admin-experience-requests-title {
+    font-size: 36px;
+    margin-bottom: 20px;
   }
   
-  .request-created-by {
-    font-size: 14px;
-    color: #ccc;
+  .admin-experience-requests-subtitle {
+    font-size: 17px;
   }
   
-  .request-date {
-    font-size: 14px;
-    color: #ccc;
+  .request-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
   
-  .request-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+  .request-card {
+    padding: 18px;
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-experience-requests-title {
+    font-size: 42px;
   }
   
-  .detail-item {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .detail-label {
-    font-size: 14px;
-    color: #aaa;
-  }
-  
-  .detail-value {
-    font-size: 16px;
-  }
-  
-  .request-description {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    font-size: 14px;
-    line-height: 1.4;
+  .admin-experience-requests-subtitle {
+    font-size: 18px;
+    margin-bottom: 30px;
   }
   
   .request-actions {
-    display: flex;
+    flex-direction: row;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
   }
   
-  .approve-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  .approve-button:hover {
-    background-color: #45a049;
-  }
-  
-  .reject-button {
-    background-color: #f44336;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-  }
-  
-  .reject-button:hover {
-    background-color: #d32f2f;
-  }
-  
+  .approve-button,
+  .reject-button,
   .view-details-button {
-    background-color: #2196F3;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
+    width: auto;
   }
   
-  .view-details-button:hover {
-    background-color: #0b7dda;
-  }
-  
-  .no-requests {
-    text-align: center;
-    font-size: 18px;
-    margin-top: 50px;
-    color: #ccc;
-  }
-  
-  .request-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-  
-  .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-  }
-  
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background-color: #2a3a2a;
-    padding: 20px;
-    border-radius: 10px;
-    width: 500px;
-    max-width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+  .request-details {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
   
   .modal-title {
     font-size: 24px;
-    font-weight: 600;
-    color: #fff;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-experience-requests-title {
+    font-size: 48px;
   }
   
-  .close-button {
-    background: none;
-    border: none;
-    color: #fff;
+  .request-title {
     font-size: 24px;
-    cursor: pointer;
   }
   
-  .feedback-textarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 10px;
-    background-color: #3a4a3a;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: white;
-    font-size: 14px;
-    margin-bottom: 15px;
-    resize: vertical;
-    font-family: "Ysabeau SC", sans-serif;
+  .request-card {
+    padding: 20px;
   }
   
-  .feedback-submit {
-    background-color: #f44336;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
+  .experience-request-image {
+    height: 200px;
   }
-  
-  .feedback-submit:hover {
-    background-color: #d32f2f;
-  }
-  
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 5px;
-    color: white;
-    font-weight: 600;
-    z-index: 1100;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-  }
-  
-  .notification.success {
-    background-color: #4CAF50;
-  }
-  
-  .notification.error {
-    background-color: #f44336;
-  }
-  
-  .unauthorized-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 50vh;
-    text-align: center;
-  }
-  
-  .back-button {
-    background-color: #fff;
-    color: #172819;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 20px;
-    transition: background-color 0.3s;
-  }
-  
-  .back-button:hover {
-    background-color: #fcff54;
-  }
+}

@@ -207,88 +207,90 @@ function SearchTest() {
     };
 
     return (
-        <div className="container-search-test">
-            <h1 className="Title-search-test">Búsquedas</h1>
-            <p className="subtitulo-search-test">Ingresa un término de búsqueda.</p>
+        <div className='min-h-screen pt-10 bg-[#172a1a]'>
+            <div className="container-search-test">
+                <h1 className="Title-search-test">Búsquedas</h1>
+                <p className="subtitulo-search-test">Ingresa un término de búsqueda.</p>
 
-            <form className="form-search-test" onSubmit={handleSearchSubmit}>
-                <div className="campo-search-test">
-                    <label htmlFor="search-input">Buscar:</label>
-                    <div className="input-container">
-                        <input
-                            type="text"
-                            id="search-input"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                            onKeyDown={handleKeyDown}
-                            className={`input-search-test ${searchError ? "input-error-search-test" : ""}`}
-                            placeholder="Escriba el término a buscar..."
-                            disabled={isSearching || loading}
-                        />
-                        <img src={searchIcon} alt="Search" className="search-icon" />
-                        {isSearching && <span className="searching-text">Buscando...</span>}
-                        {loading && <span className="searching-text">Cargando experiencias...</span>}
+                <form className="form-search-test" onSubmit={handleSearchSubmit}>
+                    <div className="campo-search-test">
+                        <label htmlFor="search-input">Buscar:</label>
+                        <div className="input-container">
+                            <input
+                                type="text"
+                                id="search-input"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                onKeyDown={handleKeyDown}
+                                className={`input-search-test ${searchError ? "input-error-search-test" : ""}`}
+                                placeholder="Escriba el término a buscar..."
+                                disabled={isSearching || loading}
+                            />
+                            <img src={searchIcon} alt="Search" className="search-icon" />
+                            {isSearching && <span className="searching-text">Buscando...</span>}
+                            {loading && <span className="searching-text">Cargando experiencias...</span>}
+                        </div>
                     </div>
-                </div>
-            </form>
-            {searchError && <div className="error-message-search-test">{searchError}</div>}
+                </form>
+                {searchError && <div className="error-message-search-test">{searchError}</div>}
 
-            {searchResults.length > 0 && (
-                <div className='results-container-search-test'>
-                    <h2>Resultados:</h2>
-                    <div className="results-wrapper">
-                        {searchResults.map((item, index) => (
-                            <div key={index} className="result-item">
-                                <div className="result-details">
-                                    <p><strong>Página:</strong> {item.coleccion}</p>
-                                    {/*Foros*/}
-                                    {item.coleccion === 'Foros' && (
-                                        <>
-                                            {item.title && <p><strong>Título:</strong> {item.title}</p>}
-                                            {item.userName && <p><strong>Usuario:</strong> {item.userName}</p>}
-                                        </>
-                                    )}
-                                    {/*Galeria de Imagenes - No URL display */}
-                                    {item.coleccion === 'Galeria de Imágenes' && (
-                                        <>
-                                            {/* No URL displayed here */}
-                                        </>
-                                    )}
+                {searchResults.length > 0 && (
+                    <div className='results-container-search-test'>
+                        <h2>Resultados:</h2>
+                        <div className="results-wrapper">
+                            {searchResults.map((item, index) => (
+                                <div key={index} className="result-item">
+                                    <div className="result-details">
+                                        <p><strong>Página:</strong> {item.coleccion}</p>
+                                        {/*Foros*/}
+                                        {item.coleccion === 'Foros' && (
+                                            <>
+                                                {item.title && <p><strong>Título:</strong> {item.title}</p>}
+                                                {item.userName && <p><strong>Usuario:</strong> {item.userName}</p>}
+                                            </>
+                                        )}
+                                        {/*Galeria de Imagenes - No URL display */}
+                                        {item.coleccion === 'Galeria de Imágenes' && (
+                                            <>
+                                                {/* No URL displayed here */}
+                                            </>
+                                        )}
 
-                                    {/*Experiencias*/}
-                                    {item.coleccion === 'Experiencias' && (
-                                        <>
-                                            {item.nombre && <p><strong>Nombre:</strong> {item.nombre}</p>}
-                                            {item.precio && <p><strong>Precio:</strong> {item.precio} $</p>}
-                                            {item.puntoDeSalida && <p><strong>Punto de Salida:</strong> {item.puntoDeSalida}</p>}
-                                            {item.longitudRecorrido && <p><strong>Longitud Recorrido:</strong> {item.longitudRecorrido}</p>}
-                                            {item.horarioInicio && item.horarioFin && (
-                                                <p><strong>Horario:</strong> {item.horarioInicio} - {item.horarioFin}</p>
-                                            )}
-                                            {item.minimoUsuarios && <p><strong>Minimo Usuarios:</strong> {item.minimoUsuarios}</p>}
-                                            {item.maximoUsuarios && <p><strong>Maximo Usuarios:</strong> {item.maximoUsuarios}</p>}
-                                            {item.dificultad !== undefined && <p><strong>Dificultad:</strong> {item.dificultad}</p>}
-                                        </>
+                                        {/*Experiencias*/}
+                                        {item.coleccion === 'Experiencias' && (
+                                            <>
+                                                {item.nombre && <p><strong>Nombre:</strong> {item.nombre}</p>}
+                                                {item.precio && <p><strong>Precio:</strong> {item.precio} $</p>}
+                                                {item.puntoDeSalida && <p><strong>Punto de Salida:</strong> {item.puntoDeSalida}</p>}
+                                                {item.longitudRecorrido && <p><strong>Longitud Recorrido:</strong> {item.longitudRecorrido}</p>}
+                                                {item.horarioInicio && item.horarioFin && (
+                                                    <p><strong>Horario:</strong> {item.horarioInicio} - {item.horarioFin}</p>
+                                                )}
+                                                {item.minimoUsuarios && <p><strong>Minimo Usuarios:</strong> {item.minimoUsuarios}</p>}
+                                                {item.maximoUsuarios && <p><strong>Maximo Usuarios:</strong> {item.maximoUsuarios}</p>}
+                                                {item.dificultad !== undefined && <p><strong>Dificultad:</strong> {item.dificultad}</p>}
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* Different handling for different collections */}
+                                    {item.coleccion === 'Experiencias' ? (
+                                        <button 
+                                            onClick={() => handleExperienceClick(item.id)} 
+                                            className="result-link">
+                                            Ir a la Experiencia
+                                        </button>
+                                    ) : (
+                                        <Link to={item.page} className="result-link">
+                                            Ir a la Página
+                                        </Link>
                                     )}
                                 </div>
-
-                                {/* Different handling for different collections */}
-                                {item.coleccion === 'Experiencias' ? (
-                                    <button 
-                                        onClick={() => handleExperienceClick(item.id)} 
-                                        className="result-link">
-                                        Ir a la Experiencia
-                                    </button>
-                                ) : (
-                                    <Link to={item.page} className="result-link">
-                                        Ir a la Página
-                                    </Link>
-                                )}
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }
