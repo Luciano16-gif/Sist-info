@@ -694,7 +694,7 @@
     to { transform: rotate(360deg); }
 }
 
-/* Improved empty reviews message */
+/* empty reviews message */
 .empty-reviews-message {
     background-color: rgba(28, 53, 31, 0.8);
     border-radius: 8px;
