@@ -420,3 +420,32 @@
         font-size: clamp(1.2rem, 2.5vw, 2rem);
     }
 }
+
+.time-buttons-booking-process button:disabled,
+.quantity-buttons-booking-process button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+.time-buttons-booking-process button:disabled:hover,
+.quantity-buttons-booking-process button:disabled:hover {
+    background-color: #a0a0a0;
+}
+
+.available-slots-message {
+    color: #ffffff;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: "Ysabeau SC", sans-serif;
+}
+
+.no-slots-message {
+    color: #ff6666;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: "Ysabeau SC", sans-serif;
+}

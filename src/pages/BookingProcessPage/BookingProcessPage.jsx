@@ -1,6 +1,7 @@
 // BookingProcessPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
+// Additional CSS styles for disabled buttons are added to BookingProcessPage.css
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db, auth } from '../../firebase-config';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
@@ -25,6 +26,8 @@ function BookingProcessPage() {
     const [currentUser, setCurrentUser] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
+    const [availableSlots, setAvailableSlots] = useState(0);
+    const [reservationsForTime, setReservationsForTime] = useState(0);
 
 
     const savePaymentDetails = async (details) => {
@@ -234,7 +237,6 @@ function BookingProcessPage() {
                             minPeople: data.minimoUsuarios,
                             availableSlots: data.cuposDisponibles,
                             imageUrl,
-                            rating: data.puntuacion,
                             registeredUsers: data.usuariosInscritos,
                             incluidos: data.incluidosExperiencia,
                             puntoDeSalida: data.puntoSalida,
@@ -277,7 +279,6 @@ function BookingProcessPage() {
                                             id: guideDoc.id,
                                             name: guideData.name,
                                             lastName: guideData.lastName,
-                                            rating: guideData.puntuacion || 0,
                                             image: guideImageUrl,
                                             email: guideRef.email,
                                         });
@@ -340,27 +341,81 @@ function BookingProcessPage() {
         }
     }, [experience, selectedPeople]);
 
+    // Fetch reservations and calculate available slots
     useEffect(() => {
+        const fetchReservations = async () => {
+            if (!experience || !selectedTime || !selectedDay) {
+                return;
+            }
+            
+            try {
+                // Get the experience document to check current available slots
+                const experienceRef = doc(db, "Experiencias", experience.id);
+                const expSnapshot = await getDoc(experienceRef);
+                
+                if (!expSnapshot.exists()) {
+                    console.error("Experience not found");
+                    return;
+                }
+                
+                const expData = expSnapshot.data();
+                const maxCapacity = expData.maximoUsuarios || experience.maxPeople || 0;
+                const currentAvailableSlots = expData.cuposDisponibles || 0;
+                
+                // Check reservations for this specific date and time
+                const paymentsRef = collection(db, "payments");
+                const q = query(
+                    paymentsRef,
+                    where("experienceId", "==", experience.id),
+                    where("selectedDay", "==", selectedDay),
+                    where("selectedTime", "==", selectedTime),
+                    where("status", "==", "COMPLETED")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                let reservedSlots = 0;
+                querySnapshot.forEach((doc) => {
+                    // Sum up all selected people for this time slot
+                    const bookings = doc.data().bookings || [];
+                    bookings.forEach(booking => {
+                        if (booking.selectedTime === selectedTime && 
+                            booking.selectedDay === selectedDay &&
+                            booking.experienceId === experience.id) {
+                            reservedSlots += parseInt(booking.selectedPeople, 10) || 0;
+                        }
+                    });
+                });
+                
+                setReservationsForTime(reservedSlots);
+                
+                // Calculate actual available slots based on reservations
+                const actualAvailableSlots = Math.max(0, currentAvailableSlots - reservedSlots);
+                setAvailableSlots(actualAvailableSlots);
+                
+                // Reset selected people if exceeds available slots
+                if (parseInt(selectedPeople, 10) > actualAvailableSlots) {
+                    setSelectedPeople('');
+                }
+                
+            } catch (error) {
+                console.error("Error fetching reservations:", error);
+            }
+        };
+
+        fetchReservations();
+        
         console.log("selectedTime:", selectedTime);
         console.log("selectedPeople:", selectedPeople);
         console.log("selectedDate:", selectedDate);
         console.log("selectedDay", selectedDay);
         console.log("totalPrice", totalPrice);
         console.log("experienceGuides:", experienceGuides);
-    }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides]);
+        console.log("availableSlots:", availableSlots);
+    }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides, experience]);
 
     const handleGoBack = () => {
         navigate(-1);
-    };
-
-    const renderRatingDots = (rating) => {
-        const dots = [];
-        for (let i = 0; i < 5; i++) {
-            dots.push(
-                <span key={i} className={`dot-booking-process ${i < rating ? 'yellow-dot-booking-process' : 'white-dot-booking-process'}`}></span>
-            );
-        }
-        return dots;
     };
 
     const handleScroll = (direction) => {
@@ -373,10 +428,20 @@ function BookingProcessPage() {
 
     const handleTimeSelection = (time) => {
         setSelectedTime(time);
+        // Reset selected people when changing time
+        setSelectedPeople('');
     };
 
     const handlePeopleSelection = (people) => {
-        setSelectedPeople(people);
+        const peopleCount = parseInt(people, 10);
+        
+        // Ensure the selected number doesn't exceed available slots
+        if (peopleCount <= availableSlots) {
+            setSelectedPeople(people);
+        } else {
+            // Optional: Show an alert or message
+            alert(`Solo hay ${availableSlots} cupos disponibles para este horario.`);
+        }
     };
 
     if (loading) {
@@ -422,11 +487,41 @@ function BookingProcessPage() {
                         <div className="selection-box-booking-process">
                             <label>CANTIDAD DE PERSONAS</label>
                             <div className="quantity-buttons-booking-process">
-                                <button onClick={() => handlePeopleSelection('1')} className={selectedPeople === '1' ? 'selected' : ''}>1 PERSONA</button>
-                                <button onClick={() => handlePeopleSelection('2')} className={selectedPeople === '2' ? 'selected' : ''}>2 PERSONAS</button>
-                                <button onClick={() => handlePeopleSelection('3')} className={selectedPeople === '3' ? 'selected' : ''}>3 PERSONAS</button>
-                                <button onClick={() => handlePeopleSelection('4')} className={selectedPeople === '4' ? 'selected' : ''}>4 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('1')} 
+                                    className={selectedPeople === '1' ? 'selected' : ''}
+                                    disabled={availableSlots < 1}
+                                    title={availableSlots < 1 ? 'No hay cupos disponibles' : ''}
+                                >1 PERSONA</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('2')} 
+                                    className={selectedPeople === '2' ? 'selected' : ''}
+                                    disabled={availableSlots < 2}
+                                    title={availableSlots < 2 ? 'No hay suficientes cupos disponibles' : ''}
+                                >2 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('3')} 
+                                    className={selectedPeople === '3' ? 'selected' : ''}
+                                    disabled={availableSlots < 3}
+                                    title={availableSlots < 3 ? 'No hay suficientes cupos disponibles' : ''}
+                                >3 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('4')} 
+                                    className={selectedPeople === '4' ? 'selected' : ''}
+                                    disabled={availableSlots < 4}
+                                    title={availableSlots < 4 ? 'No hay suficientes cupos disponibles' : ''}
+                                >4 PERSONAS</button>
                             </div>
+                            {availableSlots === 0 && (
+                                <p className="no-slots-message">
+                                    No hay cupos disponibles para este horario.
+                                </p>
+                            )}
+                            {availableSlots > 0 && (
+                                <p className="available-slots-message">
+                                    Cupos disponibles: {availableSlots}
+                                </p>
+                            )}
                         </div>
                         {/* Guide Display Section (replaces Guide Selection) */}
                         <div className="selection-box-booking-process">
@@ -442,9 +537,6 @@ function BookingProcessPage() {
                                             <div className="guide-info-booking-process">
                                                 <p>{guide.name}</p>
                                                 <p>{guide.lastName}</p>
-                                                <div className="rating-dots-booking-process">
-                                                    {renderRatingDots(guide.rating)}
-                                                </div>
                                             </div>
                                         </div>
                                     ))}
