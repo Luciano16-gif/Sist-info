@@ -213,7 +213,7 @@ const AdminExperienceRequests = () => {
       
       {/* Loading state */}
       {loading && (
-        <div className="loading-container">
+        <div className="loading-container min-h-screen">
           <p>Cargando solicitudes...</p>
         </div>
       )}
