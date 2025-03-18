@@ -7,7 +7,6 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
-  // Use enhanced currentUser with updated photoURL
   const { currentUser, logout, userRole } = useAuth();
 
   // Define base menu items
@@ -26,12 +25,9 @@ const HamburgerMenu = () => {
     menuItems.splice(1, 0, { href: "/crear-experiencia", label: "Crear Experiencia" });
   }
 
-  // Add admin-specific menu items
+  // Add "Panel Admin" for admin users only
   if (currentUser && userRole === 'admin') {
-    menuItems.push(
-      { href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" },
-      { href: "/admin-guias-pendientes", label: "Guías Pendientes" }
-    );
+    menuItems.splice(2, 0, { href: "/homeAdmin", label: "Panel Admin" });
   }
 
   const sesionItems = [
