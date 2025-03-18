@@ -1,13 +1,14 @@
-// ForumPage.jsx (Persistent Reporting)
 import React, { useState, useRef, useEffect } from 'react';
 import { collection, getDocs, addDoc, doc, getDoc, query, orderBy, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from './../../../firebase-config';
 import './ForumPage.css';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import LazyImage from '../../common/LazyImage/LazyImage';
+import LoadingState from '../../common/LoadingState/LoadingState';
+import ErrorBoundary from '../../common/errorBoundary/ErrorBoundary';
 
 const getCurrentUser = () => {
-  // ... (getCurrentUser function remains the same) ...
     return new Promise((resolve, reject) => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -79,7 +80,7 @@ function ForumPage() {
     const [reportingItem, setReportingItem] = useState(null);
     // --- End Report Modal State ---
 
-    // --- Load Reported Data (Corrected and Efficient) ---
+    // --- Load Reported Data ---
     useEffect(() => {
         const loadReportedData = async () => {
             const user = await getCurrentUser();
@@ -96,8 +97,6 @@ function ForumPage() {
         loadReportedData();
     }, []); // Empty dependency array: only run once on component mount
     // --- End Load Reported Data ---
-
-
 
     // --- Fetch Forums (Filtered by Reported Status) ---
     useEffect(() => {
@@ -153,8 +152,6 @@ function ForumPage() {
         fetchForums();
     }, [reportedForums]); //  Depend on reportedForums
     // --- End Fetch Forums ---
-
-
 
     // --- Fetch Comments (Filtered by Reported Status) ---
     useEffect(() => {
@@ -214,6 +211,7 @@ function ForumPage() {
         }
     }, [forumId, reportedComments]); // Depend on reportedComments
     // --- End Fetch Comments ---
+
     useEffect(() => {
         if (forumsLoaded.current && location.state && location.state.forumData) {
             const { forumId: stateForumId, showComments, openCommentPopup } = location.state.forumData;
@@ -231,9 +229,9 @@ function ForumPage() {
         }
     }, [forums, location.state, navigate, forumsLoaded.current]);
 
-      useEffect(() => {
+    useEffect(() => {
         //Check the showPopup flag AND if the popup hasn't been opened yet
-        if (location.state && location.state.showPopup && !popupOpened.current && forumId ) {
+        if (location.state && location.state.showPopup && !popupOpened.current && forumId) {
             setShowCommentPopup(true);
             popupOpened.current = true; // Mark the popup as opened
 
@@ -242,19 +240,58 @@ function ForumPage() {
         }
     }, [location, navigate, forumId, popupOpened]);
 
-
     const scrollLeft = () => {
         if (forumContainerRef.current) {
-            forumContainerRef.current.scrollBy({ left: -520, behavior: 'smooth' });
+            // Store the original snap type to restore it later
+            const originalSnapType = forumContainerRef.current.style.scrollSnapType;
+            
+            // Temporarily disable snap behavior
+            forumContainerRef.current.style.scrollSnapType = "none";
+            
+            // Calculate scroll amount
+            const containerWidth = forumContainerRef.current.clientWidth;
+            const scrollAmount = window.innerWidth < 768 ? 
+                forumContainerRef.current.querySelector('.forum-item-forum')?.clientWidth + 20 : 520;
+            
+            // Perform smooth scroll
+            forumContainerRef.current.scrollBy({ 
+                left: -Math.min(scrollAmount, containerWidth / 2), 
+                behavior: 'smooth' 
+            });
+            
+            // Re-enable snap behavior after scrolling finishes
+            setTimeout(() => {
+                forumContainerRef.current.style.scrollSnapType = originalSnapType || "x mandatory";
+            }, 500);
         }
     };
 
     const scrollRight = () => {
         if (forumContainerRef.current) {
-            forumContainerRef.current.scrollBy({ left: 520, behavior: 'smooth' });
+            // Store the original snap type to restore it later
+            const originalSnapType = forumContainerRef.current.style.scrollSnapType;
+            
+            // Temporarily disable snap behavior
+            forumContainerRef.current.style.scrollSnapType = "none";
+            
+            // Calculate scroll amount
+            const containerWidth = forumContainerRef.current.clientWidth;
+            const scrollAmount = window.innerWidth < 768 ? 
+                forumContainerRef.current.querySelector('.forum-item-forum')?.clientWidth + 20 : 520;
+            
+            // Perform smooth scroll
+            forumContainerRef.current.scrollBy({ 
+                left: Math.min(scrollAmount, containerWidth / 2), 
+                behavior: 'smooth' 
+            });
+            
+            // Re-enable snap behavior after scrolling finishes
+            // The timeout should match the approximate duration of the smooth scroll
+            setTimeout(() => {
+                forumContainerRef.current.style.scrollSnapType = originalSnapType || "x mandatory";
+            }, 500); // 500ms is a typical duration for smooth scrolling
         }
     };
-
     const handleViewComments = (forumId) => {
         navigate(`/foro/${forumId}`);
     };
@@ -269,7 +306,6 @@ function ForumPage() {
         navigate(`/foro/${forumId}`, { state: { showPopup: true } }); // Pass showPopup in state
     };
 
-
     const handleAddCommentToComment = (forumId, commentId, replyingToUser) => {
         const user = getCurrentUser();
         if (!user) {
@@ -278,7 +314,7 @@ function ForumPage() {
         }
         setReplyingTo(commentId);
         setReplyingToUserName(replyingToUser);
-         navigate(`/foro/${forumId}`, { state: { showPopup: true } });
+        navigate(`/foro/${forumId}`, { state: { showPopup: true } });
     };
 
     const handleCloseCommentPopup = () => {
@@ -286,9 +322,9 @@ function ForumPage() {
         setReplyingTo(null);
         setNewComment("");
         setReplyingToUserName(null);
-          //Remove state after closing
+        //Remove state after closing
         if (location.state && location.state.showPopup) {
-             navigate(location.pathname, { state: null, replace: true });
+            navigate(location.pathname, { state: null, replace: true });
         }
         popupOpened.current = false; // Reset the popupOpened ref
     };
@@ -298,7 +334,7 @@ function ForumPage() {
     };
 
     const handlePublishComment = async () => {
-       const user = await getCurrentUser();
+        const user = await getCurrentUser();
         if (!user) {
             setError("Debes iniciar sesión para publicar un comentario.");
             return;
@@ -342,9 +378,9 @@ function ForumPage() {
                 profileImage: user.profileImage,
             };
             await setDoc(doc(commentsRef, newCommentId), newCommentData);
-             const newCom = { ...newCommentData, firestoreId: newCommentId }
+            const newCom = { ...newCommentData, firestoreId: newCommentId }
             setComments(prevComments => [ ...prevComments, newCom]);
-             //Remove state after publishing
+            //Remove state after publishing
             if (location.state && location.state.showPopup) {
                 navigate(location.pathname, { state: null, replace: true });
             }
@@ -353,7 +389,6 @@ function ForumPage() {
             setReplyingTo(null);
             setReplyingToUserName(null);
             popupOpened.current = false; // Reset after publishing
-
 
         } catch (err) {
             console.error("Error al publicar el comentario:", err);
@@ -391,7 +426,7 @@ function ForumPage() {
     };
 
     const handlePublishForum = async () => {
-         const user = await getCurrentUser();
+        const user = await getCurrentUser();
         if (!user) {
             setError("Debes iniciar sesión para publicar un foro.");
             return;
@@ -434,7 +469,6 @@ function ForumPage() {
         }
     };
 
-
     // --- Report Modal Handlers ---
     const openReportModal = (type, id) => {
         setReportingItem({ type, id });
@@ -447,6 +481,7 @@ function ForumPage() {
         setReportingItem(null);
         setReportReason("");
     };
+    
     // --- Submit Report (Corrected for Persistent Storage) ---
     const handleReportSubmit = async () => {
         if (!reportingItem || !reportReason.trim()) {
@@ -537,179 +572,208 @@ function ForumPage() {
     const selectedForum = forums.find(f => f.firestoreId === forumId);
 
     if (loadingForums) {
-        return <div>Cargando foros...</div>;
+        return <LoadingState text="Cargando foros..." />;
     }
-    if (loadingComments && forumId){
-        return <div>Cargando comentarios...</div>
+    
+    if (loadingComments && forumId) {
+        return <LoadingState text="Cargando comentarios..." />;
     }
 
-
-   return (
-    <div className="forum-page-forum">
-        {error && <div>Error: {error}</div>}
-        {!forumId && <h1 className="forum-title-forum">Foros</h1>}
-        <div className="forum-wrapper-forum">
-            {forumId ? (
-                <div className="comments-view-forum">
-                    <button className="back-button-forum" onClick={handleBackToForums}>
-                        {"< Volver a Foros"}
-                    </button>
-                    {selectedForum ? (
-                        <div className="original-post-forum">
-                            <div className="profile-image-container-forum">
-                                <img src={selectedForum.profileImage} alt="Profile" className="profile-image-forum" />
-                            </div>
-                            <div className="forum-content-forum">
-                                <h2 className="forum-subtitle-forum">{selectedForum.Title}</h2>
-                                <p className='forum-date-forum'>{selectedForum.Date}</p>
-                                <p className="forum-text-forum forum-text-no-fade-forum">{selectedForum.description}</p>
-                                <div className="forum-buttons-forum" style={{ marginLeft: "auto", marginRight: "auto", marginTop: "10px" }}>
-                                    <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.firestoreId)}>
-                                        Comentar
-                                    </span>
-                                     {/* --- Use openReportModal --- */}
-                                    <span className="forum-button-forum" onClick={() => openReportModal('forum', selectedForum.firestoreId)}>
-                                        Reportar Foro
-                                    </span>
-                                     {/* --- End Use openReportModal --- */}
+    return (
+        <ErrorBoundary>
+            <div className="forum-page-forum">
+                {error && <div className="error-message">{error}</div>}
+                {!forumId && <h1 className="forum-title-forum">Foros</h1>}
+                <div className="forum-wrapper-forum">
+                    {forumId ? (
+                        <div className="comments-view-forum">
+                            <button className="back-button-forum" onClick={handleBackToForums}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                                Volver a Foros
+                            </button>
+                            {selectedForum ? (
+                                <div className="original-post-forum">
+                                    <div className="profile-image-container-forum">
+                                        <LazyImage 
+                                            src={selectedForum.profileImage} 
+                                            alt="Profile" 
+                                            fallbackSrc="/src/assets/images/landing-page/profile_managemente/profile_picture_1.png"
+                                            threshold={0.1}
+                                        />
+                                    </div>
+                                    <div className="forum-content-forum">
+                                        <h2 className="forum-subtitle-forum">{selectedForum.Title}</h2>
+                                        <p className='forum-date-forum'>{selectedForum.Date}</p>
+                                        <p className="forum-text-forum forum-text-no-fade-forum">{selectedForum.description}</p>
+                                        <div className="forum-buttons-forum" style={{ marginLeft: "auto", marginRight: "auto", marginTop: "16px" }}>
+                                            <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.firestoreId)}>
+                                                Comentar
+                                            </span>
+                                             {/* --- Use openReportModal --- */}
+                                            <span className="forum-button-forum" onClick={() => openReportModal('forum', selectedForum.firestoreId)}>
+                                                Reportar Foro
+                                            </span>
+                                             {/* --- End Use openReportModal --- */}
+                                        </div>
+                                    </div>
                                 </div>
+                            ) : (
+                                <div>No se ha seleccionado ningún foro, o el foro no existe.</div>
+                            )}
+                            <div className="comments-container-forum">
+                                {comments.map(comment => (
+                                    <div className="comment-item-forum" key={comment.firestoreId}>
+                                        <div className="profile-image-container-forum">
+                                            <LazyImage 
+                                                src={comment.profileImage} 
+                                                alt="Profile" 
+                                                fallbackSrc="/src/assets/images/landing-page/profile_managemente/profile_picture_1.png"
+                                                threshold={0.1}
+                                            />
+                                        </div>
+                                        <div className="comment-content-forum">
+                                            <p className="comment-user-forum">
+                                                {comment.userName}
+                                                {comment.replyingTo && <span className="replying-to-text"> Respondiendo a {comment.replyingTo}</span>}
+                                            </p>
+                                            <p className="comment-date-forum">{comment.Date}</p>
+                                            <p className="comment-text-forum">{comment.description}</p>
+                                            <div className="comment-button-container-forum">
+                                                <span className="forum-button-forum" onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}>Comentar</span>
+                                                {/* --- Use openReportModal --- */}
+                                                <span className="forum-button-forum" onClick={() => openReportModal('comment', comment.firestoreId)}>
+                                                    Reportar
+                                                </span>
+                                                {/* --- End Use openReportModal --- */}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {comments.length === 0 && !loadingComments && (
+                                    <p style={{ color: 'white', textAlign: 'center', margin: '20px 0' }}>
+                                        No hay comentarios aún. ¡Sé el primero en comentar!
+                                    </p>
+                                )}
                             </div>
+                            {showCommentPopup && (
+                                <div className="comment-popup-overlay">
+                                    <div className="comment-popup">
+                                        <span className="close-button" onClick={handleCloseCommentPopup}>×</span>
+                                        <p className="replying-to-popup">
+                                            {replyingToUserName ? `Respondiendo a ${replyingToUserName}` : 'Escribe un comentario'}
+                                        </p>
+                                        <textarea
+                                            className="comment-input"
+                                            placeholder="Introduce un texto"
+                                            value={newComment}
+                                            onChange={handleCommentInputChange}
+                                        />
+                                        <button className="publish-button" onClick={handlePublishComment}>Publicar</button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
-                        <div>No se ha seleccionado ningún foro, o el foro no existe.</div>
-                    )}
-                    <div className="comments-container-forum">
-                        {comments.map(comment => (
-                            <div className="comment-item-forum" key={comment.firestoreId}>
-                                <div className="profile-image-container-forum">
-                                    <img src={comment.profileImage} alt="Profile" className="profile-image-forum" />
-                                </div>
-                                <div className="comment-content-forum">
-                                    <p className="comment-user-forum">
-                                        {comment.userName}
-                                        {comment.replyingTo && <span className="replying-to-text"> Respondiendo a {comment.replyingTo}</span>}
-                                    </p>
-                                    <p className="comment-date-forum">{comment.Date}</p>
-                                    <p className="comment-text-forum">{comment.description}</p>
-                                    <div className="comment-button-container-forum">
-                                        <span className="forum-button-forum" onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}>Comentar</span>
-                                         {/* --- Use openReportModal --- */}
-                                        <span className="forum-button-forum" onClick={() => openReportModal('comment', comment.firestoreId)}>
-                                             Reportar
-                                        </span>
-                                         {/* --- End Use openReportModal --- */}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    {showCommentPopup && (
-                        <div className="comment-popup-overlay">
-                            <div className="comment-popup">
-                                <span className="close-button" onClick={handleCloseCommentPopup}>×</span>
-                                <p className="replying-to-popup">
-                                    {replyingToUserName ? `Respondiendo a ${replyingToUserName}` : 'Escribe un comentario'}
-                                </p>
-                                <textarea
-                                    className="comment-input"
-                                    placeholder="Introduce un texto"
-                                    value={newComment}
-                                    onChange={handleCommentInputChange}
-                                />
-                                <button className="publish-button" onClick={handlePublishComment}>Publicar</button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <>
-                    <div className="scroll-buttons-container-forum">
-                        <button className="scroll-button-forum left-forum" onClick={scrollLeft}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="15 18 9 12 15 6"></polyline>
-                            </svg>
-                        </button>
-                        <button className="scroll-button-forum right-forum" onClick={scrollRight}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="forum-container-forum" ref={forumContainerRef}>
-                        {forums.map((forum) => (
-                            <div className="forum-item-forum" key={forum.firestoreId}>
-                                <div className="profile-image-container-forum">
-                                    <img src={forum.profileImage} alt="Profile" className="profile-image-forum" />
-                                </div>
-                                <div className="forum-content-forum">
-                                    <h2 className="forum-subtitle-forum">{forum.Title}</h2>
-                                    <p className='forum-date-forum'>{forum.Date}</p>
-                                    <p className="forum-text-forum">{forum.description}</p>
-                                    <div className="forum-buttons-forum">
-                                        <span className="forum-button-forum" onClick={() => handleViewComments(forum.firestoreId)}>
-                                            Ver Comentarios
-                                        </span>
-                                        <span className="forum-button-forum" onClick={() => handleAddComment(forum.firestoreId)}>
-                                            Comentar
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <button className="create-topic-button-forum" onClick={handleCreateTopic}>
-                        Crear un Tema
-                    </button>
-                    {showCreateForumPopup && (
-                        <div className="comment-popup-overlay">
-                            <div className="comment-popup">
-                                <span className="close-button" onClick={handleCloseCreateForumPopup}>
-                                    ×
-                                </span>
-                                <p className="replying-to-popup">Crear Nuevo Foro</p>
-                                <input
-                                    type="text"
-                                    className="comment-input"
-                                    placeholder="Título del foro"
-                                    value={newForumTitle}
-                                    onChange={handleForumTitleChange}
-                                    style={{ height: "45px" }}
-                                />
-                                <textarea
-                                    className="comment-input"
-                                    placeholder="Descripción del foro"
-                                    value={newForumDescription}
-                                    onChange={handleForumDescriptionChange}
-                                />
-                                <button className="publish-button" onClick={handlePublishForum}>
-                                    Publicar Foro
+                        <>
+                            <div className="scroll-buttons-container-forum">
+                                <button className="scroll-button-forum left-forum" onClick={scrollLeft} aria-label="Desplazar a la izquierda">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <button className="scroll-button-forum right-forum" onClick={scrollRight} aria-label="Desplazar a la derecha">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
                                 </button>
                             </div>
-                        </div>
+                            <div className="forum-container-forum" ref={forumContainerRef}>
+                                {forums.map((forum) => (
+                                    <div className="forum-item-forum" key={forum.firestoreId}>
+                                        <div className="profile-image-container-forum">
+                                            <LazyImage 
+                                                src={forum.profileImage} 
+                                                alt="Profile" 
+                                                fallbackSrc="/src/assets/images/landing-page/profile_managemente/profile_picture_1.png"
+                                                threshold={0.1}
+                                            />
+                                        </div>
+                                        <div className="forum-content-forum">
+                                            <h2 className="forum-subtitle-forum">{forum.Title}</h2>
+                                            <p className='forum-date-forum'>{forum.Date}</p>
+                                            <p className="forum-text-forum">{forum.description}</p>
+                                            <div className="forum-buttons-forum">
+                                                <span className="forum-button-forum" onClick={() => handleViewComments(forum.firestoreId)}>
+                                                    Ver Comentarios
+                                                </span>
+                                                <span className="forum-button-forum" onClick={() => handleAddComment(forum.firestoreId)}>
+                                                    Comentar
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {forums.length === 0 && !loadingForums && (
+                                    <div style={{ color: 'white', textAlign: 'center', width: '100%', padding: '40px 20px' }}>
+                                        No hay foros disponibles. ¡Crea el primer tema!
+                                    </div>
+                                )}
+                            </div>
+                            <button className="create-topic-button-forum" onClick={handleCreateTopic}>
+                                Crear un Tema
+                            </button>
+                            {showCreateForumPopup && (
+                                <div className="comment-popup-overlay">
+                                    <div className="comment-popup">
+                                        <span className="close-button" onClick={handleCloseCreateForumPopup}>
+                                            ×
+                                        </span>
+                                        <p className="replying-to-popup">Crear Nuevo Foro</p>
+                                        <input
+                                            type="text"
+                                            className="comment-input"
+                                            placeholder="Título del foro"
+                                            value={newForumTitle}
+                                            onChange={handleForumTitleChange}
+                                            style={{ height: "50px" }}
+                                        />
+                                        <textarea
+                                            className="comment-input"
+                                            placeholder="Descripción del foro"
+                                            value={newForumDescription}
+                                            onChange={handleForumDescriptionChange}
+                                        />
+                                        <button className="publish-button" onClick={handlePublishForum}>
+                                            Publicar Foro
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
-                </>
-            )}
-        </div>
-         {/* Report Modal */}
-        {showReportModal && (
-            <div className="comment-popup-overlay">
-                <div className="comment-popup">
-                    <span className="close-button" onClick={closeReportModal}>×</span>
-                    <p className="replying-to-popup">Reportar {reportingItem.type === 'forum' ? 'Foro' : 'Comentario'}</p>
-                    <textarea
-                        className="comment-input"
-                        placeholder="Motivo del reporte..."
-                        value={reportReason}
-                        onChange={(e) => setReportReason(e.target.value)}
-                    />
-                    {/* Changed class name to avoid style conflicts */}
-                    <button className="publish-report-button" onClick={handleReportSubmit}>Enviar Reporte</button>
                 </div>
+                {/* Report Modal */}
+                {showReportModal && (
+                    <div className="comment-popup-overlay">
+                        <div className="comment-popup">
+                            <span className="close-button" onClick={closeReportModal}>×</span>
+                            <p className="replying-to-popup">Reportar {reportingItem.type === 'forum' ? 'Foro' : 'Comentario'}</p>
+                            <textarea
+                                className="comment-input"
+                                placeholder="Motivo del reporte..."
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                            />
+                            <button className="publish-report-button" onClick={handleReportSubmit}>Enviar Reporte</button>
+                        </div>
+                    </div>
+                )}
+                {/* End Report Modal */}
             </div>
-        )}
-        {/* End Report Modal */}
-    </div>
-);
+        </ErrorBoundary>
+    );
 }
 
 export default ForumPage;
