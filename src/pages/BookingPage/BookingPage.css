@@ -185,6 +185,7 @@
   
 .calendar-container {
     background-color: rgb(20, 47, 20);
+    margin-top: 6rem;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
