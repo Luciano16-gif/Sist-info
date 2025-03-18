@@ -248,7 +248,7 @@ const AdminExperienceRequests = () => {
                 <img 
                   src={experience.imageUrl} 
                   alt={experience.nombre} 
-                  className="request-image" 
+                  className="experience-request-image" 
                 />
               )}
               

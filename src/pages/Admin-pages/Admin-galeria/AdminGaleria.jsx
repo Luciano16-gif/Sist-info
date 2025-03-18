@@ -3,14 +3,14 @@ import RelevantInfoS from "../../../components/Admin-components/admin-buttons/In
 import GaleriaGrid from "../../../components/Admin-components/admin-galeria/GaleriaGrid";
 // import GridTest from "../../../components/Admin-components/admin-galeria/GridTest";
 import PhotoRequests from '../../../components/Admin-components/admin-galeria/PhotoRequets';
+import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
 
 const AdminGaleria = () => {
   const FotosActuales = 284;
   const Solicitudes = 87;
 
   return (
-    <div className="absolute inset-0 z-10">
-      <div className=" overflow-x-scroll mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 space-y-4">
+      <div className={`overflow-x-scroll my-8 flex flex-col justify-start items-start px-8 md:px-16 ${adminBaseStyles}`}>
         <h1 className=" text-white text-4xl md:text-5xl font-bold">
           Galería
         </h1>
@@ -36,8 +36,6 @@ const AdminGaleria = () => {
         <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
         <PhotoRequests />
         </div>
-      
-    </div>
   );
 };
   

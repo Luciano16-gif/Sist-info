@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminGuideRequests.css';
+import { adminBaseStyles } from '../../components/Admin-components/adminBaseStyles';
 
 // Auth Context
 import { useAuth } from '../../components/contexts/AuthContext';
@@ -211,7 +212,7 @@ const AdminGuideRequests = () => {
   }
   
   return (
-    <div className="admin-guide-requests-container">
+    <div className={`admin-guide-requests-container ${adminBaseStyles}`}>
       {/* Notification */}
       {notification.show && (
         <div className={`notification ${notification.type}`}>

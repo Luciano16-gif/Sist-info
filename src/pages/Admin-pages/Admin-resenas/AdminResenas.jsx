@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'; // Add useEffect
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import Reviews from '../../../components/Admin-components/admin-resenas/ReviewAdmin';
+import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
+adminBaseStyles
 
 const AdminResenas = () => {
 
@@ -13,7 +14,7 @@ const AdminResenas = () => {
   const Resenas1e = 4;
 
   return (
-    <div className="absolute inset-0 mx-32 my-16 flex flex-col justify-start items-start px-8 md:px-16 space-y-4 z-10">
+    <div className={`inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 ${adminBaseStyles}`}> 
       <h1 className=" text-white text-4xl md:text-5xl font-bold">
         Reseñas
       </h1>
