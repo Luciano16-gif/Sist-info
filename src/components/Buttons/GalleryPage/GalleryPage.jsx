@@ -27,6 +27,10 @@ function GalleryPage() {
     const [searchDate, setSearchDate] = useState(""); //  "YYYY-MM-DD" format
     const [filteredImages, setFilteredImages] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]); // New state for selected images
+    const [showReportModal, setShowReportModal] = useState(false); // State to control report modal visibility
+    const [reportReason, setReportReason] = useState("");       // State to store the report reason
+    const [reportingImage, setReportingImage] = useState(null); // State to store the image being reported
+    // Remove reportModalPosition, it's no longer needed
 
 
     const location = useLocation();
@@ -456,62 +460,105 @@ function GalleryPage() {
         }
     };
 
-    const reportImage = async (image) => {
-        if (!auth.currentUser) {
-            alert("Please log in to report images.");
-            return;
-        }
-        const reporterEmail = auth.currentUser.email;
-
-        //Obtenemos el email del que subio la imagen, a partir de la URL
-        const galleryCollection = collection(db, 'Galeria de Imágenes');
-        const querySnapshot = await getDocs(galleryCollection);
-        let uploaderEmail = null;
-
-        querySnapshot.forEach((doc) => {
-            const galleryData = doc.data();
-            if (galleryData.images && Array.isArray(galleryData.images)) {
-                galleryData.images.forEach(img => {
-                    if (img.url === image.url) {
-                        uploaderEmail = doc.id; // El ID del documento es el email del uploader
-                    }
-                });
-            }
-        });
-
-
-        if (reporterEmail === uploaderEmail) {
-            alert("You cannot report your own images.");
-            return;
-        }
-
-        const imageIdentifier = image.publicId || image.url;
-        const imageRef = imageIdentifier;
-
-        try {
-            const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
-            const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
-            const reporterDocSnap = await getDoc(reporterDocRef);
-
-            const reportData = { imageRef, uploaderEmail: uploaderEmail };
-
-            if (reporterDocSnap.exists()) {
-                await updateDoc(reporterDocRef, { images: arrayUnion(reportData) });
-                console.log("Image report added to existing document.");
-            } else {
-                await setDoc(reporterDocRef, { images: [reportData] });
-                console.log("New report document created.");
-            }
-
-            setImages(prevImages => prevImages.filter(img => img.url !== image.url));
-            alert("Image reported successfully.");
-            navigate('/galeria');
-
-        } catch (error) {
-            console.error("Error reporting image:", error);
-            alert("Error reporting image: " + error.message);
-        }
+    const openReportModal = (image, event) => {
+        event.stopPropagation();
+        setReportingImage(image);
+        setShowReportModal(true);
+        setReportReason("");
+        // No need to calculate position anymore
     };
+
+    const closeReportModal = () => {
+      setShowReportModal(false);
+      setReportingImage(null);
+    }
+
+  const handleReportSubmit = async () => {
+    if (!reportingImage) return;
+
+    if (!auth.currentUser) {
+        alert("Please log in to report images.");
+        closeReportModal();
+        return;
+    }
+    const reporterEmail = auth.currentUser.email;
+
+    // Obtenemos el email del que subio la imagen, a partir de la URL
+    const galleryCollection = collection(db, 'Galeria de Imágenes');
+    const querySnapshot = await getDocs(galleryCollection);
+    let uploaderEmail = null;
+
+    querySnapshot.forEach((doc) => {
+        const galleryData = doc.data();
+        if (galleryData.images && Array.isArray(galleryData.images)) {
+            galleryData.images.forEach(img => {
+                if (img.url === reportingImage.url) {
+                    uploaderEmail = doc.id; // El ID del documento es el email del uploader
+                }
+            });
+        }
+    });
+
+    if (reporterEmail === uploaderEmail) {
+        alert("You cannot report your own images.");
+        closeReportModal();
+        return;
+    }
+
+    const imageIdentifier = reportingImage.publicId || reportingImage.url;
+    const imageRef = imageIdentifier;
+
+
+    if (!reportReason.trim()) {
+        alert("Please provide a reason for reporting.");
+        return;
+    }
+
+
+    try {
+        const reportedImagesCollection = collection(db, 'Imágenes Reportadas');
+        const reporterDocRef = doc(reportedImagesCollection, auth.currentUser.email);
+        const reporterDocSnap = await getDoc(reporterDocRef);
+
+        // --- Date Formatting ---
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0'); // Added minutes for more precision
+        const formattedReportDate = `${day}/${month}/${year} - ${hours}:${minutes}`;
+        // --- End Date Formatting ---
+
+
+        const reportData = {
+            imageRef,
+            uploaderEmail: uploaderEmail,
+            reportReason: reportReason,
+            reportDate: formattedReportDate // Use the formatted date
+        };
+
+
+        if (reporterDocSnap.exists()) {
+            await updateDoc(reporterDocRef, { images: arrayUnion(reportData) });
+            console.log("Image report added to existing document.");
+        } else {
+            await setDoc(reporterDocRef, { images: [reportData] });
+            console.log("New report document created.");
+        }
+
+        setImages(prevImages => prevImages.filter(img => img.url !== reportingImage.url));
+        alert("Image reported successfully.");
+        closeReportModal();
+        navigate('/galeria');
+
+    } catch (error) {
+        console.error("Error reporting image:", error);
+        alert("Error reporting image: " + error.message);
+    }
+};
+
+
 
     const loadAvailableHashtags = async () => {
         try {
@@ -541,72 +588,92 @@ function GalleryPage() {
     };
 
     const renderImageModal = () => {
-        const { imageId } = useParams();
+      const { imageId } = useParams();
 
-        if (showDeleteImages || !imageId) {
-            return null;
-        }
-
+      // Check if we are NOT in delete mode AND we have an imageId
+      if (!showDeleteImages && imageId) {
         const decodedImageUrl = decodeURIComponent(imageId);
-        const selectedImage = images.find(img => img.url === decodedImageUrl);
+        const selectedImage = images.find((img) => img.url === decodedImageUrl);
 
-        if (!selectedImage) {
-            return null;
-        }
-
-
-        return (
+        // If we found the image, render the modal
+        if (selectedImage) {
+          return (
             <div className="modal-overlay-gallery" onWheel={handleWheel}>
-                <div className="modal-content-container-gallery"
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseLeave}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={(e) => e.stopPropagation()}
+              <div
+                className="modal-content-container-gallery"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className="close-button-gallery"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeImage();
+                  }}
                 >
-                    <button className="close-button-gallery" onClick={(e) => { e.stopPropagation(); closeImage(); }}>
-                        X
-                    </button>
-                    <button
-                        className="report-button-gallery"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            reportImage(selectedImage);
-                        }}
-                    >
-                        Reportar imagen
-                    </button>
-                    <img
-                        src={selectedImage.url}
-                        alt="Imagen Ampliada"
-                        className="modal-image-gallery"
-                        style={{
-                            transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-                            cursor: isDragging ? 'grabbing' : 'grab',
-                        }}
-                        ref={modalImageRef}
-                        onClick={(e) => e.stopPropagation()}
-                    />
+                  X
+                </button>
+                <button
+                  className="report-button-gallery"
+                  onClick={(e) => openReportModal(selectedImage, e)}
+                >
+                  Reportar imagen
+                </button>
+                <img
+                  src={selectedImage.url}
+                  alt="Imagen Ampliada"
+                  className="modal-image-gallery"
+                  style={{
+                    transform: `scale(${zoomLevel}) translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+                    cursor: isDragging ? "grabbing" : "grab",
+                  }}
+                  ref={modalImageRef}
+                  onClick={(e) => e.stopPropagation()}
+                />
 
-                    <div className="image-info-gallery">
-                        <p>Publicado por: {selectedImage.uploadedBy}</p>
-                        <p>Fecha: {selectedImage.uploadDate}</p>
-                        {selectedImage.hashtags && selectedImage.hashtags.length > 0 && (
-                            <p>Hashtags: {selectedImage.hashtags.join(', ')}</p>
-                        )}
-                    </div>
-
-                    <div className="zoom-controls-gallery">
-                        <button onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}>+</button>
-                        <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}>-</button>
-                    </div>
+                <div className="image-info-gallery">
+                  <p>Publicado por: {selectedImage.uploadedBy}</p>
+                  <p>Fecha: {selectedImage.uploadDate}</p>
+                  {selectedImage.hashtags &&
+                    selectedImage.hashtags.length > 0 && (
+                      <p>Hashtags: {selectedImage.hashtags.join(", ")}</p>
+                    )}
                 </div>
+
+                <div className="zoom-controls-gallery">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleZoomIn();
+                    }}
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleZoomOut();
+                    }}
+                  >
+                    -
+                  </button>
+                </div>
+              </div>
             </div>
-        );
+          );
+        }
+      }
+
+      // In all other cases (delete mode, no imageId, image not found), return null
+      return null;
     };
+
 
     const handleSearchChange = (e) => {
         const { name, value } = e.target;
@@ -754,6 +821,23 @@ function GalleryPage() {
                     </div>
                 </div>
             )}
+
+             {showReportModal && (
+                <div className="modal-overlay-gallery" style={{position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto', zIndex: 1001}}>
+                    <div className="modal-content-container-gallery" style={{position: 'relative'}}>
+                        <button className="close-button-gallery" onClick={closeReportModal} style={{position: 'absolute', top: '10px', right: '10px'}}>X</button>
+                        <h2>Reportar Imagen</h2>
+                        <p>Escriba el motivo de su reporte:</p>
+                        <textarea
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="Escriba su motivo..."
+                            style={{width: '100%',  padding: '8px',  marginBottom: '10px',  borderRadius: '4px',  border: '1px solid #ccc'}}
+                        />
+                        <button onClick={handleReportSubmit}>Subir Reporte</button>
+                    </div>
+                </div>
+                )}
 
             {renderImageModal()}
         </div>
