@@ -45,6 +45,7 @@ function ReviewsPage() {
     const [userData, setUserData] = useState(null);
     const [isLoadingUserData, setIsLoadingUserData] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
     // Check if device is mobile
     useEffect(() => {
@@ -174,10 +175,45 @@ function ReviewsPage() {
 
     const handleViewMore = (experience) => {
         setSelectedReview(experience);
+        setIsLoadingReviews(true);
+        
+        // Fetch reviews for this specific experience
+        const fetchExperienceReviews = async () => {
+            try {
+                const experienceRef = doc(db, 'Experiencias', experience.id);
+                const reviewsCollectionRef = collection(experienceRef, 'reviews');
+                const querySnapshot = await getDocs(reviewsCollectionRef);
+
+                const reviews = [];
+                querySnapshot.forEach((doc) => {
+                    reviews.push({ id: doc.id, ...doc.data() });
+                });
+
+                const averageRating = calculateAverageRating(reviews);
+                
+                // Update reviews for this specific experience
+                setAllReviews(prevReviews => ({
+                    ...prevReviews,
+                    [experience.id]: reviews,
+                    [`${experience.id}-averageRating`]: averageRating
+                }));
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+                setError("Error al cargar las reseñas");
+            } finally {
+                // Add a small delay to prevent flashing if loading is too quick
+                setTimeout(() => {
+                    setIsLoadingReviews(false);
+                }, 500);
+            }
+        };
+        
+        fetchExperienceReviews();
     };
 
     const handleBackToReviews = () => {
         setSelectedReview(null);
+        setIsLoadingReviews(false);
         // When going back to review list, ensure we're scrolled to the start
         setTimeout(scrollToStart, 100);
     };
@@ -350,7 +386,7 @@ function ReviewsPage() {
 
     const renderContent = () => {
         if (loading) {
-            return <LoadingState text="Cargando reseñas..." />;
+            return <LoadingState text="Cargando experiencias..." />;
         }
         if (error) {
             return <ErrorState message={error} />;
@@ -372,6 +408,14 @@ function ReviewsPage() {
             />
         ));
     };
+    
+    // Custom loading spinner component for reviews
+    const ReviewsLoadingSpinner = () => (
+        <div className="reviews-loading-container">
+            <div className="reviews-loading-text">Cargando reseñas...</div>
+            <div className="reviews-loading-spinner"></div>
+        </div>
+    );
     
     const renderRatingCircles = (rating) => {
         const circles = [];
@@ -443,7 +487,9 @@ function ReviewsPage() {
                     
 
                     <div className="reviews-list">
-                        {allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
+                        {isLoadingReviews ? (
+                            <ReviewsLoadingSpinner />
+                        ) : allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
                             allReviews[selectedReview.id]
                                 .filter(review => !reportedReviews.includes(review.id)) // Filter out reported reviews
                                 .map((review) => (

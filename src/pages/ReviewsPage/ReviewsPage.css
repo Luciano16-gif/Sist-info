@@ -660,3 +660,65 @@
         margin-top: 15px;
     }
 }
+
+.reviews-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 200px;
+    padding: 30px;
+    background-color: rgba(28, 53, 31, 0.5);
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.reviews-loading-text {
+    color: #FFF;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.reviews-loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #FFF;
+    animation: spin-reviews 1s ease-in-out infinite;
+}
+
+@keyframes spin-reviews {
+    to { transform: rotate(360deg); }
+}
+
+/* Improved empty reviews message */
+.empty-reviews-message {
+    background-color: rgba(28, 53, 31, 0.8);
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    margin: 20px 0;
+    border-left: 4px solid #5a8146;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.empty-reviews-message p {
+    color: #fff;
+    font-family: "Ysabeau SC", sans-serif;
+    margin: 8px 0;
+}
+
+.empty-reviews-message p:first-child {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.empty-reviews-message p:last-child {
+    font-size: 16px;
+    color: #b0b0b0;
+    font-style: italic;
+}
