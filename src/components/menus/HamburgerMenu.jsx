@@ -11,14 +11,18 @@ const HamburgerMenu = () => {
 
   // Define base menu items
   const baseMenuItems = [
-    { href: "/experiencias", label: "Experiencias" },
-    { href: "/user-requests", label: "Mis Solicitudes" }, 
+    { href: "/experiencias", label: "Experiencias" }, 
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
+    { href: "/foro", label: "Foro" },
   ];
   // Create final menu items array with conditional item for admin/guide
   const menuItems = [...baseMenuItems];
+
+  if (currentUser) {
+    menuItems.push({ href: "/user-requests", label: "Mis Solicitudes" });
+  }
   
   // Add "Crear Experiencia" for admin and guide users after "Experiencias"
   if (currentUser && (userRole === 'admin' || userRole === 'guia')) {

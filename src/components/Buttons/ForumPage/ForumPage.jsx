@@ -78,6 +78,7 @@ function ForumPage() {
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportReason, setReportReason] = useState("");
     const [reportingItem, setReportingItem] = useState(null);
+    const [reportError, setReportError] = useState(""); // New state for report errors
     // --- End Report Modal State ---
 
     // --- Load Reported Data ---
@@ -240,58 +241,112 @@ function ForumPage() {
         }
     }, [location, navigate, forumId, popupOpened]);
 
+    // Center forums on initial load for mobile and tablets
+    useEffect(() => {
+        if (forumContainerRef.current && forums.length > 0 && !forumId) {
+            const isMobile = window.innerWidth <= 1024;
+            if (isMobile) {
+                // Reset scroll position to start
+                forumContainerRef.current.scrollLeft = 0;
+            }
+        }
+    }, [forums, forumId]);
+
+    // UPDATED: Improved scrolling function for left scroll
     const scrollLeft = () => {
         if (forumContainerRef.current) {
-            // Store the original snap type to restore it later
-            const originalSnapType = forumContainerRef.current.style.scrollSnapType;
+            // Get the forum item width more reliably
+            const forumItems = forumContainerRef.current.querySelectorAll('.forum-item-forum');
+            if (forumItems.length === 0) return;
             
-            // Temporarily disable snap behavior
-            forumContainerRef.current.style.scrollSnapType = "none";
+            // Calculate scroll amount based on the actual item width
+            const itemWidth = forumItems[0].offsetWidth;
+            const margin = 20; // Gap between items
+            const scrollAmount = itemWidth + margin;
             
-            // Calculate scroll amount
-            const containerWidth = forumContainerRef.current.clientWidth;
-            const scrollAmount = window.innerWidth < 768 ? 
-                forumContainerRef.current.querySelector('.forum-item-forum')?.clientWidth + 20 : 520;
-            
-            // Perform smooth scroll
+            // Perform smooth scroll with a fixed amount based on item width
             forumContainerRef.current.scrollBy({ 
-                left: -Math.min(scrollAmount, containerWidth / 2), 
+                left: -scrollAmount, 
                 behavior: 'smooth' 
             });
-            
-            // Re-enable snap behavior after scrolling finishes
-            setTimeout(() => {
-                forumContainerRef.current.style.scrollSnapType = originalSnapType || "x mandatory";
-            }, 500);
         }
     };
 
+    // UPDATED: Improved scrolling function for right scroll
     const scrollRight = () => {
         if (forumContainerRef.current) {
-            // Store the original snap type to restore it later
-            const originalSnapType = forumContainerRef.current.style.scrollSnapType;
+            // Get the forum item width more reliably
+            const forumItems = forumContainerRef.current.querySelectorAll('.forum-item-forum');
+            if (forumItems.length === 0) return;
             
-            // Temporarily disable snap behavior
-            forumContainerRef.current.style.scrollSnapType = "none";
+            // Calculate scroll amount based on the actual item width
+            const itemWidth = forumItems[0].offsetWidth;
+            const margin = 20; // Gap between items
+            const scrollAmount = itemWidth + margin;
             
-            // Calculate scroll amount
-            const containerWidth = forumContainerRef.current.clientWidth;
-            const scrollAmount = window.innerWidth < 768 ? 
-                forumContainerRef.current.querySelector('.forum-item-forum')?.clientWidth + 20 : 520;
-            
-            // Perform smooth scroll
+            // Perform smooth scroll with a fixed amount based on item width
             forumContainerRef.current.scrollBy({ 
-                left: Math.min(scrollAmount, containerWidth / 2), 
+                left: scrollAmount, 
                 behavior: 'smooth' 
             });
-            
-            // Re-enable snap behavior after scrolling finishes
-            // The timeout should match the approximate duration of the smooth scroll
-            setTimeout(() => {
-                forumContainerRef.current.style.scrollSnapType = originalSnapType || "x mandatory";
-            }, 500); // 500ms is a typical duration for smooth scrolling
         }
     };
+
+    // NEW: Touch event handling for mobile devices
+    useEffect(() => {
+        const container = forumContainerRef.current;
+        if (!container) return;
+        
+        // Touch scrolling variables
+        let startX;
+        let scrollLeft;
+        let isScrolling = false;
+        
+        const handleTouchStart = (e) => {
+            isScrolling = true;
+            startX = e.touches[0].pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        };
+        
+        const handleTouchMove = (e) => {
+            if (!isScrolling) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll speed multiplier
+            container.scrollLeft = scrollLeft - walk;
+        };
+        
+        const handleTouchEnd = () => {
+            isScrolling = false;
+            
+            // Get the item width for smooth stopping
+            const itemWidth = container.querySelector('.forum-item-forum')?.offsetWidth || 0;
+            const margin = 20; // Gap between items
+            const totalItemWidth = itemWidth + margin;
+            
+            if (totalItemWidth > 0) {
+                // Calculate the nearest item position for smooth stopping
+                const position = Math.round(container.scrollLeft / totalItemWidth) * totalItemWidth;
+                container.scrollTo({
+                    left: position,
+                    behavior: 'smooth'
+                });
+            }
+        };
+        
+        // Add touch event listeners
+        container.addEventListener('touchstart', handleTouchStart, { passive: false });
+        container.addEventListener('touchmove', handleTouchMove, { passive: false });
+        container.addEventListener('touchend', handleTouchEnd);
+        
+        return () => {
+            // Clean up event listeners
+            container.removeEventListener('touchstart', handleTouchStart);
+            container.removeEventListener('touchmove', handleTouchMove);
+            container.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [forumContainerRef.current]); // Only run once when the ref is set
+
     const handleViewComments = (forumId) => {
         navigate(`/foro/${forumId}`);
     };
@@ -474,24 +529,26 @@ function ForumPage() {
         setReportingItem({ type, id });
         setShowReportModal(true);
         setReportReason(""); // Clear previous reason
+        setReportError(""); // Clear any previous errors
     };
 
     const closeReportModal = () => {
         setShowReportModal(false);
         setReportingItem(null);
         setReportReason("");
+        setReportError(""); // Clear error when closing modal
     };
     
     // --- Submit Report (Corrected for Persistent Storage) ---
     const handleReportSubmit = async () => {
         if (!reportingItem || !reportReason.trim()) {
-            alert("Please provide a reason for the report.");
+            setReportError("Por favor, proporciona un motivo para el reporte.");
             return;
         }
 
         const user = await getCurrentUser();
         if (!user) {
-            alert("You must be logged in to report.");
+            setReportError("Debes iniciar sesión para reportar contenido.");
             return;
         }
 
@@ -501,15 +558,13 @@ function ForumPage() {
         if (type === 'forum') {
             const forum = forums.find(f => f.firestoreId === id);
             if (forum && forum.Email === user.email) {
-                alert("You cannot report your own forum.");
-                closeReportModal();
+                setReportError("No puedes reportar tu propio foro.");
                 return;
             }
         } else if (type === 'comment') {
             const comment = comments.find(c => c.firestoreId === id);
             if (comment && comment.Email === user.email) {
-                alert("You cannot report your own comment.");
-                closeReportModal();
+                setReportError("No puedes reportar tu propio comentario.");
                 return;
             }
         }
@@ -551,19 +606,19 @@ function ForumPage() {
             if (type === 'forum') {
               setReportedForums(prev => [...prev, id]); // Add to reported forums
               setForums(prevForums => prevForums.filter(f => f.firestoreId !== id)); // Remove from UI
-              alert("Report submitted successfully. Redirecting to forums page.");
+              alert("Reporte enviado con éxito. Redirigiendo a la página de foros."); // Keep alert for success message
               closeReportModal();
               navigate('/foro', { replace: true });
               window.location.reload();
             } else { // Comment
                 setReportedComments(prev => [...prev, id]); // Add to reported comments
                 setComments(prevComments => prevComments.filter(c => c.firestoreId !== id)); // Remove from UI.
-                alert("Report submitted successfully.");
+                alert("Reporte enviado con éxito."); // Keep alert for success message
                 closeReportModal();
             }
         } catch (error) {
             console.error("Error submitting report:", error);
-            alert("Error submitting report: " + error.message);
+            setReportError("Error al enviar el reporte: " + error.message);
         }
     };
     // --- End Submit Report ---
@@ -760,6 +815,14 @@ function ForumPage() {
                         <div className="comment-popup">
                             <span className="close-button" onClick={closeReportModal}>×</span>
                             <p className="replying-to-popup">Reportar {reportingItem.type === 'forum' ? 'Foro' : 'Comentario'}</p>
+                            
+                            {/* New Error Message Display */}
+                            {reportError && (
+                                <div className="report-error-message">
+                                    {reportError}
+                                </div>
+                            )}
+                            
                             <textarea
                                 className="comment-input"
                                 placeholder="Motivo del reporte..."

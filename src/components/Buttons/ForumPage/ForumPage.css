@@ -45,6 +45,10 @@
     position: relative;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    /* scroll-snap-type has been removed as requested */
+    scroll-behavior: smooth; /* Smooth scrolling by default */
+    touch-action: pan-x; /* Optimize for horizontal touch gestures */
 }
 
 /* Scrollbar styles */
@@ -73,7 +77,6 @@
     width: 500px;
     min-width: 500px;
     flex-shrink: 0;
-    scroll-snap-align: start;
     max-height: 480px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -97,7 +100,7 @@
     justify-content: space-between;
     padding: 0 10px;
     box-sizing: border-box;
-    z-index: 3;
+    z-index: 10;
     pointer-events: none;
 }
 
@@ -237,7 +240,7 @@
     color: white;
     cursor: pointer;
     padding: 0;
-    z-index: 5;
+    z-index: 15;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -568,8 +571,41 @@
     }
 }
 
+/* Tablet-specific styles */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .scroll-buttons-container-forum {
+        position: relative;
+        top: auto;
+        transform: none;
+        margin-bottom: 20px;
+        padding: 0 20px;
+    }
+    
+    .scroll-button-forum {
+        position: relative;
+        top: auto;
+        transform: none;
+        margin: 0 10px;
+    }
+    
+    .scroll-button-forum.left-forum {
+        left: auto;
+    }
+    
+    .scroll-button-forum.right-forum {
+        right: auto;
+    }
+    
+    /* Fix initial centering */
+    .forum-container-forum {
+        scroll-padding-left: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* Mobile styles */
 @media screen and (max-width: 768px) {
-    /* Keep existing styles, only updating the scroll button positioning */
     .forum-page-forum {
         padding: 20px 10px;
     }
@@ -580,9 +616,17 @@
         margin-bottom: 30px;
     }
     
+    /* Fix initial positioning */
+    .forum-container-forum {
+        padding: 20px 10px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     .forum-item-forum {
-        width: 85vw;
-        min-width: 85vw;
+        width: calc(100vw - 50px); /* Adjusted width */
+        min-width: calc(100vw - 50px);
+        max-width: none;
         padding: 20px;
         flex-direction: column;
         align-items: center;
@@ -629,36 +673,30 @@
         justify-content: center;
     }
     
-    /* Fix for scroll buttons on mobile/tablet */
     .scroll-buttons-container-forum {
+        position: relative;
+        width: 100%;
         top: 50%;
         transform: translateY(-50%);
-        width: 100%;
-        z-index: 20;
+        z-index: 30;
+        padding: 0;
     }
     
     .scroll-button-forum {
         width: 36px;
         height: 36px;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0.8;
         background-color: rgba(90, 129, 70, 0.9);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        position: absolute;
+        z-index: 40;
     }
     
     .scroll-button-forum.left-forum {
-        left: -12px;
+        left: 10px;
     }
     
     .scroll-button-forum.right-forum {
-        right: -12px;
-    }
-    
-    /* Adjust padding for forum items to prevent text overlap with buttons */
-    .forum-item-forum {
-        padding-left: 25px;
-        padding-right: 25px;
+        right: 10px;
     }
     
     .create-topic-button-forum {
@@ -684,5 +722,72 @@
         width: 180px;
         height: 44px;
         font-size: 18px;
+    }
+    
+    /* Improve the touch area of buttons */
+    .scroll-button-forum svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* Small mobile specific styles */
+@media screen and (max-width: 480px) {
+    .forum-container-forum {
+        gap: 15px;
+        padding: 15px 5px;
+    }
+    
+    .forum-item-forum {
+        width: calc(100vw - 40px); /* Even more adjusted width */
+        min-width: calc(100vw - 40px);
+        padding: 15px;
+        padding-bottom: 60px;
+    }
+    
+    .scroll-button-forum {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .scroll-button-forum.left-forum {
+        left: 5px;
+    }
+    
+    .scroll-button-forum.right-forum {
+        right: 5px;
+    }
+}
+
+/* Error message styles */
+.report-error-message {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    font-family: "Ysabeau SC";
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Responsive styles for error message */
+@media screen and (max-width: 768px) {
+    .report-error-message {
+        font-size: 14px;
+        padding: 8px 12px;
     }
 }

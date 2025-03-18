@@ -6,11 +6,12 @@ const HeroText = () => {
     return (
         <div className="min-h-screen text-white relative">
             { currentUser ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 sm:space-y-3 md:space-y-4 px-4 sm:px-6 md:px-8 lg:px-16 z-10 text-center">
-                    <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wide">
+                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 sm:space-y-3 md:space-y-4 px-4 sm:px-6 md:px-8 lg:px-16 
+                z-10 text-center">
+                    <h1 className="text-lg sm:text-2xl md:text-2xl lg:text-3xl font-bold tracking-wide">
                         The call of the
                     </h1>
-                    <h1 className="xltext-5xl sm:text-6 md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
+                    <h1 className="text-5xl sm:text-6 md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
                         MOUNTAINS
                     </h1>
                     <Link to={'/galeria'}>
