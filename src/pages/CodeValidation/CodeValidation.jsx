@@ -271,23 +271,6 @@ function CodeValidation() {
                             <p><strong>ID de Transacción:</strong> {bookingDetails.transactionId}</p>
                         )}
 
-                         {/* Safe Navigation and Default Values */}
-                        <Link
-                            to={
-                                bookingDetails.experienceName
-                                    ? `/booking/${bookingDetails.experienceName.replace(/ /g, '-')}`
-                                    : '/booking'
-                            }
-                            state={{
-                                selectedTime: bookingDetails.selectedTime,
-                                selectedDate: bookingDetails.selectedDate,
-                                experience: { id: bookingDetails.experienceId || null },
-                            }}
-                            className='result-link-code-validation'
-                        >
-                            Ir a la Experiencia
-                        </Link>
-
                     </div>
                 </div>
             )}
