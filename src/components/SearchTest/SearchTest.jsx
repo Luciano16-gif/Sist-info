@@ -1,18 +1,22 @@
-/* eslint-disable no-loop-func */
 // SearchTest.jsx
 import React, { useState } from 'react';
 import './SearchTest.css';
 import searchIcon from '../../../src/assets/images/lupa-search.png';
 import { db } from './../../firebase-config';
-import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
 
 function SearchTest() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searchError, setSearchError] = useState('');
+    const navigate = useNavigate();
+    
+    // Use the same hook that ExperiencesPage uses to ensure consistent data format
+    const { experiences, loading } = useExperiences();
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -41,19 +45,28 @@ function SearchTest() {
         });
     };
 
-
-    const collectionToPageMap = {
-        'Experiencias': '/experiencias',
-        'Foros': '/foro',
-        'Galeria de Imágenes': '/galeria',
+    // Function to handle navigation to experience details - now using the pre-fetched experiences
+    const handleExperienceClick = (experienceId) => {
+        // Find the experience in our pre-loaded experiences array
+        const experience = experiences.find(exp => exp.id === experienceId);
+        
+        if (experience) {
+            // Create the URL-friendly name
+            const urlFriendlyName = experience.name.toLowerCase().replace(/ /g, '-');
+            
+            // Use the same navigation method as ExperiencesPage
+            navigate(`/booking/${urlFriendlyName}`, { state: { experience } });
+        } else {
+            console.error("Experience not found in loaded experiences");
+            setSearchError("No se pudo encontrar la experiencia.");
+        }
     };
-
 
     const performSearch = async (term) => {
         try {
             const lowerCaseTerm = term.toLowerCase().trim();
             if (!lowerCaseTerm) {
-                setSearchError("Please enter a search term.");
+                setSearchError("Por favor, ingrese un término de búsqueda.");
                 setIsSearching(false);
                 return;
             }
@@ -90,7 +103,7 @@ function SearchTest() {
             }
 
             // --- Galeria de Imágenes ---
-             const galeriaRef = collection(db, 'Galeria de Imágenes');
+            const galeriaRef = collection(db, 'Galeria de Imágenes');
             const galeriaSnapshot = await getDocs(galeriaRef);
             let reportedImageRefs = [];
 
@@ -98,9 +111,7 @@ function SearchTest() {
                 const reportedImagesRef = collection(db, 'Imágenes Reportadas');
                 const reportedImagesSnapshot = await getDocs(reportedImagesRef);
 
-
                 for (const reportedDoc of reportedImagesSnapshot.docs) {
-
                     if(reportedDoc.id === currentUser.uid){
                         const reportedData = reportedDoc.data();
 
@@ -110,12 +121,10 @@ function SearchTest() {
                                   reportedImageRefs.push(image.imageRef);
                                 }
                             });
-
                         }
                     }
                 }
             }
-
 
             for (const docSnap of galeriaSnapshot.docs) {
                 const docData = docSnap.data();
@@ -140,62 +149,53 @@ function SearchTest() {
                 }
             }
 
-
             // --- Experiencias ---
-            const experienciasRef = collection(db, 'Experiencias');
-            const experienciasSnapshot = await getDocs(experienciasRef);
-            for (const docSnap of experienciasSnapshot.docs) {
-                const docData = docSnap.data();
-                const docId = docSnap.id;
-
-                const fieldsToCheck = ['nombre', 'puntoSalida', 'longitudRecorrido', 'horarioInicio', 'horarioFin', 'maximoUsuarios', 'minimoUsuarios', 'dificultad', 'puntuacion', 'precio'];
-                for (const field of fieldsToCheck) {
-                    if (docData[field] !== undefined) {
-                        if (typeof docData[field] === 'string' && docData[field].toLowerCase().startsWith(lowerCaseTerm)) {
-                            // Construct URL-friendly name
-                            const urlFriendlyName = docData.nombre.toLowerCase().replace(/ /g, '-');
-                            allResults.push({
-                                coleccion: 'Experiencias',
-                                id: docId,
-                                nombre: docData.nombre,
-                                page: `/booking/${urlFriendlyName}`, // Use dynamic route
-                                puntoDeSalida: docData.puntoSalida,
-                                longitudRecorrido: docData.longitudRecorrido,
-                                horarioInicio: docData.horarioInicio,
-                                horarioFin: docData.horarioFin,
-                                maximoUsuarios: docData.maximoUsuarios,
-                                minimoUsuarios: docData.minimoUsuarios,
-                                dificultad: docData.dificultad,
-                                precio: docData.precio,
-                                // puntuacion: docData.puntuacion
-
-                            });
-                            break; // Stop checking other fields if one matches.
-                        } else if (typeof docData[field] === 'number' && docData[field].toString().startsWith(lowerCaseTerm)) {
-                            // Construct URL-friendly name (still need name for the URL)
-                             const urlFriendlyName = docData.nombre.toLowerCase().replace(/ /g, '-');
-                              allResults.push({
-                                coleccion: 'Experiencias',
-                                id: docId,
-                                nombre: docData.nombre,
-                                page: `/booking/${urlFriendlyName}`, // Use dynamic route.
-                                puntoDeSalida: docData.puntoSalida,
-                                longitudRecorrido: docData.longitudRecorrido,
-                                horarioInicio: docData.horarioInicio,
-                                horarioFin: docData.horarioFin,
-                                maximoUsuarios: docData.maximoUsuarios,
-                                minimoUsuarios: docData.minimoUsuarios,
-                                dificultad: docData.dificultad,
-                                precio: docData.precio,
-                                // puntuacion: docData.puntuacion
-                            });
-                            break; // Stop checking other fields
-                        }
-                    }
+            // Instead of querying Firestore directly, filter the experiences from the hook
+            const matchingExperiences = experiences.filter(experience => {
+                // Only include experiences with accepted status or no status
+                if (experience.rawData && experience.rawData.status && 
+                    experience.rawData.status !== 'accepted') {
+                    return false;
                 }
-            }
 
-
+                // Search in normalized data fields
+                const nameMatch = experience.name.toLowerCase().startsWith(lowerCaseTerm);
+                const locationMatch = experience.puntoDeSalida && 
+                                     experience.puntoDeSalida.toLowerCase().startsWith(lowerCaseTerm);
+                
+                // Search in raw data fields if needed
+                let rawDataMatch = false;
+                if (experience.rawData) {
+                    // Check numeric fields
+                    const priceMatch = experience.rawData.precio && 
+                                     experience.rawData.precio.toString().startsWith(lowerCaseTerm);
+                    const distanceMatch = experience.rawData.longitudRecorrido && 
+                                        experience.rawData.longitudRecorrido.toString().startsWith(lowerCaseTerm);
+                    
+                    rawDataMatch = priceMatch || distanceMatch;
+                }
+                
+                return nameMatch || locationMatch || rawDataMatch;
+            });
+            
+            // Format the matching experiences for display in search results
+            matchingExperiences.forEach(experience => {
+                allResults.push({
+                    coleccion: 'Experiencias',
+                    id: experience.id,
+                    nombre: experience.name,
+                    precio: experience.price,
+                    puntoDeSalida: experience.puntoDeSalida,
+                    longitudRecorrido: experience.distance,
+                    horarioInicio: experience.rawData?.horarioInicio,
+                    horarioFin: experience.rawData?.horarioFin,
+                    minimoUsuarios: experience.minPeople,
+                    maximoUsuarios: experience.maxPeople,
+                    dificultad: experience.difficulty,
+                    // This creates a reference to our useExperiences data
+                    experienceObject: experience
+                });
+            });
 
             setSearchResults(allResults);
         } catch (error) {
@@ -206,12 +206,10 @@ function SearchTest() {
         }
     };
 
-
-
     return (
         <div className="container-search-test">
             <h1 className="Title-search-test">Búsquedas</h1>
-            <p className="subtitulo-search-test">Ingresa un término de búsqueda.</p>
+            <p className="subtitulo-search-test">Ingresa un término de búsqueda.</p>
 
             <form className="form-search-test" onSubmit={handleSearchSubmit}>
                 <div className="campo-search-test">
@@ -225,10 +223,11 @@ function SearchTest() {
                             onKeyDown={handleKeyDown}
                             className={`input-search-test ${searchError ? "input-error-search-test" : ""}`}
                             placeholder="Escriba el término a buscar..."
-                            disabled={isSearching}
+                            disabled={isSearching || loading}
                         />
                         <img src={searchIcon} alt="Search" className="search-icon" />
                         {isSearching && <span className="searching-text">Buscando...</span>}
+                        {loading && <span className="searching-text">Cargando experiencias...</span>}
                     </div>
                 </div>
             </form>
@@ -242,45 +241,49 @@ function SearchTest() {
                             <div key={index} className="result-item">
                                 <div className="result-details">
                                     <p><strong>Página:</strong> {item.coleccion}</p>
-                                     {/*Foros*/}
+                                    {/*Foros*/}
                                     {item.coleccion === 'Foros' && (
                                         <>
-                                            {/* <p><strong>ID:</strong> {item.id}</p> */}
                                             {item.title && <p><strong>Título:</strong> {item.title}</p>}
-                                            {/* {item.descripcion && <p><strong>Descripción:</strong> {item.descripcion}</p>} */}
-                                             {item.userName && <p><strong>Usuario:</strong> {item.userName}</p>}
+                                            {item.userName && <p><strong>Usuario:</strong> {item.userName}</p>}
                                         </>
                                     )}
                                     {/*Galeria de Imagenes - No URL display */}
-                                     {item.coleccion === 'Galeria de Imágenes' && (
+                                    {item.coleccion === 'Galeria de Imágenes' && (
                                         <>
                                             {/* No URL displayed here */}
                                         </>
                                     )}
 
                                     {/*Experiencias*/}
-                                      {item.coleccion === 'Experiencias' && (
-                                         <>
-                                            {/* <p><strong>ID:</strong> {item.id}</p> */}
+                                    {item.coleccion === 'Experiencias' && (
+                                        <>
                                             {item.nombre && <p><strong>Nombre:</strong> {item.nombre}</p>}
                                             {item.precio && <p><strong>Precio:</strong> {item.precio} $</p>}
                                             {item.puntoDeSalida && <p><strong>Punto de Salida:</strong> {item.puntoDeSalida}</p>}
-                                            {item.longitudRecorrido && <p><strong>Longitud Recorrido:</strong> {item.longitudRecorrido} km</p>}
-                                            {item.horarioInicio && <p><strong>Horario de Inicio:</strong> {item.horarioInicio}</p>}
-                                            {item.horarioFin && <p><strong>Horario de Fin:</strong> {item.horarioFin}</p>}
+                                            {item.longitudRecorrido && <p><strong>Longitud Recorrido:</strong> {item.longitudRecorrido}</p>}
+                                            {item.horarioInicio && item.horarioFin && (
+                                                <p><strong>Horario:</strong> {item.horarioInicio} - {item.horarioFin}</p>
+                                            )}
                                             {item.minimoUsuarios && <p><strong>Minimo Usuarios:</strong> {item.minimoUsuarios}</p>}
                                             {item.maximoUsuarios && <p><strong>Maximo Usuarios:</strong> {item.maximoUsuarios}</p>}
-                                            {item.dificultad && <p><strong>Dificultad:</strong> {item.dificultad}</p>}
-                                            {/* {item.puntuacion && <p><strong>Puntuacion:</strong> {item.puntuacion}</p>} */}
+                                            {item.dificultad !== undefined && <p><strong>Dificultad:</strong> {item.dificultad}</p>}
                                         </>
                                     )}
-
                                 </div>
 
-                                 <Link to={item.page} className="result-link">
-                                        Ir a la Página  
-                                </Link>
-
+                                {/* Different handling for different collections */}
+                                {item.coleccion === 'Experiencias' ? (
+                                    <button 
+                                        onClick={() => handleExperienceClick(item.id)} 
+                                        className="result-link">
+                                        Ir a la Experiencia
+                                    </button>
+                                ) : (
+                                    <Link to={item.page} className="result-link">
+                                        Ir a la Página
+                                    </Link>
+                                )}
                             </div>
                         ))}
                     </div>
