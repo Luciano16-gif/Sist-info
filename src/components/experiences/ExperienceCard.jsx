@@ -89,7 +89,7 @@ export const ExperienceStats = ({ distance, time, minPeople, maxPeople }) => {
       </p>
       <p className="data-text-experiences">
         <img src={calendarioIcon} alt="Calendario" className="calendar-icon-experiences" />
-        <i className="far fa-clock"></i> {time}
+        {time}
       </p>
       <p className="data-text-experiences">
         <img src={participantesIcon} alt="Participantes" className="participantes-icon-experiences" />
@@ -136,7 +136,8 @@ export const ExperienceImage = ({ imageUrl, price, alt }) => {
   const imageStyle = {
     objectFit: 'cover',
     height: '100%',
-    width: '100%'
+    width: '100%',
+    borderRadius: isMobile ? '8px 8px 0 0' : '8px 0 0 8px'
   };
 
   return (

@@ -1,4 +1,4 @@
-// ReviewsPage.jsx - Updated with better responsiveness and fixed scrolling
+// ReviewsPage.jsx - Updated with better responsiveness and improved styling
 import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
@@ -8,13 +8,7 @@ import { doc, updateDoc, getDoc, collection, serverTimestamp, getDocs, setDoc } 
 import { db } from './../../firebase-config';
 import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
 import { useAuth } from '../../components/contexts/AuthContext'; // Import useAuth hook
-
-const LoadingState = () => (
-    <div className="loading-container">
-        <p>Cargando experiencias...</p>
-        <div className="loading-spinner"></div>
-    </div>
-);
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 const ErrorState = ({ message }) => (
     <div className="error-container">
@@ -356,7 +350,7 @@ function ReviewsPage() {
 
     const renderContent = () => {
         if (loading) {
-            return <LoadingState />;
+            return <LoadingState text="Cargando reseñas..." />;
         }
         if (error) {
             return <ErrorState message={error} />;
@@ -434,16 +428,19 @@ function ReviewsPage() {
                     <button className="back-button-reviews" onClick={handleBackToReviews}>
                         {"< Volver a Reseñas"}
                     </button>
-                    <ExperienceCard
-                        key={selectedReview.id}
-                        experience={{
-                            ...selectedReview,
-                            reviews: allReviews[selectedReview.id] || [], // Pass reviews even for selected review
-                        }}
-                        isExpanded={true}
-                        isReviewsPage={true}
-                        onViewMore={handleViewMore} // Pass the required onViewMore prop
-                    />
+                    <div className='flex w-full justify-center'>
+                        <ExperienceCard
+                            key={selectedReview.id}
+                            experience={{
+                                ...selectedReview,
+                                reviews: allReviews[selectedReview.id] || [], // Pass reviews even for selected review
+                            }}
+                            isExpanded={true}
+                            isReviewsPage={true}
+                            onViewMore={handleViewMore} // Pass the required onViewMore prop
+                        />  
+                    </div>
+                    
 
                     <div className="reviews-list">
                         {allReviews[selectedReview.id] && allReviews[selectedReview.id].length > 0 ? (
@@ -452,33 +449,36 @@ function ReviewsPage() {
                                 .map((review) => (
                                     <div key={review.id} className="review-item-container">
                                         <div className="review-header">
-                                            <img src={review.profileImage || profileFallbackImage} alt="User" className="review-profile-image" />
-                                            <div className="user-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                                                <div style={{ width: 'fit-content' }}>
+                                            <img 
+                                                src={review.profileImage || profileFallbackImage} 
+                                                alt="User" 
+                                                className="review-profile-image" 
+                                            />
+                                            <div className="user-info">
+                                                <div>
                                                     <p className="review-user-name">{review.user}</p>
-                                                    <p className="review-date">
-                                                        {formatDate(review.date)}
-                                                    </p>
+                                                    <p className="review-date">{formatDate(review.date)}</p>
                                                 </div>
                                                 {renderRatingCircles(review.rating)}
                                             </div>
                                         </div>
                                         <p className="review-text-content">{review.text}</p>
-                                        {/* Report Button */}
                                         <button
                                             className="report-button"
                                             onClick={() => handleReportReview(selectedReview.id, review.id)}
                                         >
                                             Reportar Reseña
                                         </button>
-                                        {/* Display review-specific error */}
                                         {reviewReportErrors[review.id] && (
                                             <div className="review-error">{reviewReportErrors[review.id]}</div>
                                         )}
                                     </div>
                                 ))
                         ) : (
-                            <p>No hay reseñas para esta experiencia.</p>
+                            <div className="empty-reviews-message">
+                                <p>No hay reseñas para esta experiencia.</p>
+                                <p>¡Sé el primero en dejar tu opinión!</p>
+                            </div>
                         )}
                     </div>
 
