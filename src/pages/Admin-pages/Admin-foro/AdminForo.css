@@ -1,0 +1,21 @@
+/* AdminForo.css */
+.forum-item {
+    overflow: hidden;
+    width: 100%; /* Ensure it takes full width of its parent */
+  }
+  
+  .forum-title, .comment-description {
+      word-wrap: break-word;    /* or overflow-wrap: anywhere; */
+      white-space: pre-wrap;
+      width: 100%; /* Add this to make sure it respects the container width */
+  }
+  
+  .forum-info, .comment-info {
+      word-wrap: break-word;  /* or overflow-wrap: anywhere; */
+      white-space: pre-wrap;
+      width: 100%;
+  }
+  .comment-item{
+      overflow: hidden;
+      width: 100%;
+  }

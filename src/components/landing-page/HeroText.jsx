@@ -1,4 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const HeroText = () => {
   const { currentUser } = useAuth();
@@ -9,7 +10,7 @@ const HeroText = () => {
                     <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wide">
                         The call of the
                     </h1>
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
+                    <h1 className="xltext-5xl sm:text-6 md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-none">
                         MOUNTAINS
                     </h1>
                     <div className="mt-2 sm:mt-4 md:mt-6">
@@ -28,9 +29,12 @@ const HeroText = () => {
                     <p className="text-sm md:text-base max-w-2xl">
                       Tu aventura comienza aquí. Reserva tu excursión hoy mismo y vive una experiencia inolvidable en Caracas.
                     </p>
-                    <button className="bg-[#AAACA8] text-white px-6 py-3 rounded-full mt-4 hover:bg-opacity-90 transition-all">
-                      Únete a la aventura
-                    </button>
+                    <Link to={"/SignUpPage"}>
+                        <button className="bg-[#AAACA8] text-white px-6 py-3 rounded-full mt-4 hover:bg-opacity-90 transition-all">
+                        Únete a la aventura
+                        </button>
+                    </Link>
+
                 </div>
             )}
         </div>

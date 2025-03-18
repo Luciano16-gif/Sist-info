@@ -1,11 +1,10 @@
-
-
 .galeria-page-gallery {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    background-color: #223A26;
     padding: 40px;
     box-sizing: border-box;
     overflow: hidden;
@@ -147,7 +146,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 1000;  /* Ensure it's on top, but below report modal */
     overflow: auto; /* Allow scrolling within modal if needed */
 }
 
@@ -159,8 +158,11 @@
     position: relative; /*  For close button positioning */
     max-width: 90%;  /* Limit width - good for responsiveness */
     max-height: 90vh; /* Limit height - good for responsiveness */
-    padding: 20px; /* Add padding */
+    padding: 40px 20px 20px 20px; /* Increased top padding */
     box-sizing: border-box; /* Include padding in width/height */
+    margin-top: 50px; /* Add top margin */
+    background-color: #223A26; /* Add a background */
+    border-radius: 10px;
 
 }
 
@@ -190,7 +192,7 @@
 .zoom-controls-gallery {
     display: flex;
     gap: 10px;
-    z-index: 102;
+    z-index: 1002; /* Above image, below report modal */
     margin-bottom: 1rem;
 }
 
@@ -214,21 +216,31 @@
     transform: translateY(2px);
 }
 
-/* Close button styles */
+/* Close button styles (Adaptive) */
 .close-button-gallery {
   position: absolute;
-  top: 10px;
-  right: 10px; /* Keep at 10px from the right */
-  background: gray;
+  top: 10px; /* Adjusted top position */
+  right: 10px;
+  background: rgba(128, 128, 128, 0.7);
   border: none;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
-  z-index: 103;
-  padding: 5px;
-  opacity: 0.9;
+  z-index: 1002; /* Above image and zoom, below report modal */
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-width: 30px;
+  min-height: 30px;
+
 }
+
+
 .close-button-gallery:hover {
     color: #ffffff;
     background-color: #e80000;
@@ -236,6 +248,35 @@
 
 .close-button-gallery:active {
   transform: translateY(2px);
+}
+
+
+/* Report button styles (Adaptive) */
+.report-button-gallery {
+    position: absolute;
+    top: 10px; /* Adjusted top position */
+    left: 10px;
+    background: rgba(128, 128, 128, 0.7);
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002; /* Above image and zoom */
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+
+.report-button-gallery:hover {
+    color: #ffffff;
+    background-color: #e80000;
+}
+
+.report-button-gallery:active {
+    transform: translateY(2px);
 }
 
 .upload-progress-bar-container-gallery {
@@ -255,26 +296,149 @@
   border-radius: 5px;
 }
 
-.report-button-gallery {
-    position: absolute;
-    top: 10px;
-    left: 10px; /* Keep at 10px from the left*/
-    background: gray;
+/* Search Filter Styles */
+.search-filters-gallery {
+    display: flex;
+    flex-wrap: wrap; /* Wrap to next line on smaller screens */
+    gap: 10px;
+    align-items: center; /* Vertically align items */
+    margin-bottom: 20px;
+    width: 100%; /* Take full width */
+    justify-content: center; /* Center the filter elements */
+}
+
+
+
+.search-filters-gallery input[type="text"],
+.search-filters-gallery input[type="date"] {
+    padding: 10px 15px;
+    border-radius: 20px; /* Rounded corners like buttons */
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: #294129;
+    color: #333; /* Original text color - this will be overridden by the more specific rule below */
+    width: 250px; /* Specify a width */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.search-filters-gallery:hover input[type="text"]{
+    background-color: #0d190f;
+}
+
+
+/*  Change the text color when writing in the input */
+.search-filters-gallery input[type="text"]::placeholder,
+.search-filters-gallery input[type="date"]::placeholder {
+     color: #999999; /* Lighter placeholder text */
+}
+
+.search-filters-gallery input[type="text"]:focus,
+.search-filters-gallery input[type="date"]:focus {
+    border-color: #23ff5e;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 163, 161, 0.5);
+}
+
+/*  Most specific rule to set the text color while typing */
+.search-filters-gallery input[type="text"],
+.search-filters-gallery input[type="date"]
+ {
+    color: #fff; /*  Set the text color to white */
+}
+
+
+.search-filters-gallery button {
+    padding: 10px 20px;
+    border-radius: 20px; /* Rounded corners */
     border: none;
-    color: white;   
-    font-size: 18px;
-    font-weight: bold;
+    background-color: #bdbdbdde;
+    color: white;
+    font-size: 16px;
     cursor: pointer;
-    z-index: 103;
-    padding: 5px;
-    opacity: 0.9;
+    transition: background-color 0.2s ease;
 }
 
-.report-button-gallery:hover {
-    color: #ffffff;
-    background-color: #e80000;
+.search-filters-gallery button:hover {
+    background-color: #00a3a1;
 }
 
-.report-button-gallery:active {
-    transform: translateY(2px);
+.search-filters-gallery button:active {
+     transform: translateY(2px);
+}
+
+/* Styles for the Report Image Modal */
+.modal-overlay-gallery[style*="z-index: 1001"] { /* Select by inline style */
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.modal-overlay-gallery[style*="z-index: 1001"] .modal-content-container-gallery {
+	background-color: #223A26; /* CHANGED: Green background */
+	padding: 20px;
+	border-radius: 5px;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	max-width: 500px;
+	width: 80%;
+	text-align: center;
+    position: relative; /* Make sure the close button is positioned relative to this */
+    z-index: 1003;
+
+}
+
+.modal-overlay-gallery[style*="z-index: 1001"] h2 {
+	color: #ffffff; /* CHANGED TO WHITE */
+	margin-bottom: 15px;
+
+}
+
+.modal-overlay-gallery[style*="z-index: 1001"] p {
+	color: #ffffff; /* CHANGED TO WHITE */
+	margin-bottom: 10px;
+
+}
+
+.modal-overlay-gallery[style*="z-index: 1001"] textarea {
+	width: calc(100% - 20px); /*  Full width minus padding */
+	padding: 10px;
+	margin-bottom: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-sizing: border-box; /*  Include padding and border in width */
+	resize: vertical; /*  Allow vertical resizing */
+    color: black; /* Text color inside textarea */
+
+}
+
+.modal-overlay-gallery[style*="z-index: 1001"] button {
+    background-color: #e80000; /* CHANGED: Red button */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+
+}
+
+.modal-overlay-gallery[style*="z-index: 1001"] button:hover {
+	background-color: #a80000; /* CHANGED: Darker red on hover */
+
+}
+
+.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]{
+    top: 10px;
+    right: 10px;
+    background: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #aaa;
+    border: none;
+
+}
+.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]:hover{
+    color: white;
+    background: none;
 }

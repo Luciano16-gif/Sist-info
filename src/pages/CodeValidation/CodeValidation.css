@@ -1,0 +1,163 @@
+/* CodeValidation.css */
+
+.container-code-validation {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #172a1a; /* Consistent background */
+    color: #fff;
+}
+
+.title-code-validation {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 45px;
+    font-weight: bold;
+}
+
+.subtitle-code-validation {
+    color: #ccc;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-code-validation {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-container-code-validation {
+    display: flex;
+    flex-direction: column;
+}
+.input-container-code-validation  label{
+    margin-bottom: 0.3rem;
+    color: #fff; /* White label text */
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+
+.input-code-validation {
+    padding: 10px;
+    padding-right: 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #283f2c; /* Darker input background */
+    color: #fff;          /* White text in input */
+}
+.input-code-validation::placeholder { /* Style the placeholder text */
+    color: #c0c0c0;
+}
+
+.input-error-code-validation {
+    border-color: red;
+}
+
+.error-message-code-validation {
+    color: red;
+    margin-top: 0.5rem;
+}
+
+.search-icon-code-validation {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none; /*  Make it non-clickable */
+}
+
+.searching-text-code-validation{
+      /*  Position absolutely, but within the input-container */
+    position: absolute;
+    left: 10px; /*  Position it to the left, adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bbbbbb;
+    /*  Use visibility and opacity for smooth transition and consistent space */
+    visibility: hidden;  /*  Initially hidden */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease; /*  Smooth transition */
+    white-space: nowrap; /*Prevent the text from goint to another line*/
+}
+
+.input-code-validation:disabled {
+    background-color: #344938; /*  Slightly lighter gray when disabled */
+    color: #b1b1b1;
+    cursor: not-allowed;
+    border-color: #555;
+}
+
+.input-code-validation:disabled + .search-icon {
+  opacity: 0.5;
+}
+
+.results-container-code-validation {
+    margin-top: 20px;
+}
+
+.results-container-code-validation h2 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.result-item-code-validation {
+    background-color: #283f2c; /* Darker background for result items */
+    border: 1px solid #555; /* Slightly darker border */
+    padding: 15px;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;  /* Stack content vertically */
+    gap: 5px; /* Add some space between the elements. */
+}
+
+
+.result-item-code-validation p {
+    margin: 5px 0;
+    color: #ccc;
+}
+.result-item-code-validation strong {
+    color: #fff;
+}
+
+.result-link-code-validation{
+     background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    font-size: 13px;
+    margin-top: 10px; /* Add some top margin. */
+    align-self: flex-start; /* Align to the start (left) */
+}
+
+.result-link-code-validation:hover {
+    background-color: #367c39;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-code-validation {
+        max-width: 95%;
+    }
+}

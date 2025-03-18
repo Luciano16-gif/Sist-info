@@ -309,7 +309,7 @@
   margin-bottom: 20px;
 }
 
-.error-container {
+.auth-error-container {
   width: 100%;
   min-height: 60px;
   display: flex;
@@ -330,7 +330,7 @@
 
 /* Media queries for responsive error handling */
 @media screen and (max-width: 768px) {
-  .error-container {
+  .auth-error-container {
     min-height: 50px;
   }
   
@@ -342,7 +342,7 @@
 }
 
 @media screen and (max-width: 480px) {
-  .error-container {
+  .auth-error-container {
     min-height: 40px;
   }
   
@@ -365,7 +365,7 @@
   margin: 0 auto; /* Center horizontally because if not the mobile version will have some problems */
 }
 
-/* Make sure error stays in proper position on mobile */
+/* Make sure error stays in proper position on mobile (the signup page needed more space) */
 @media screen and (max-width: 768px) {
   .signup-error-container {
     min-height: 60px;

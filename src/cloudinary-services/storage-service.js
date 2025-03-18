@@ -14,11 +14,23 @@ class StorageService {
    */
   async uploadFile(path, file, metadata = {}) {
     try {
+      // Validar que el archivo exista
+      if (!file) {
+        throw new Error("No se ha proporcionado un archivo para subir");
+      }
+
       // Extraer la carpeta del path
       const folder = path.split("/").filter(Boolean).join("/");
+      
+      console.log(`Intentando subir archivo a Cloudinary en carpeta: ${folder}`);
 
       // Subir el archivo a Cloudinary
       const result = await cloudinaryService.uploadFile(file, folder);
+      console.log("Resultado de Cloudinary:", result);
+
+      if (!result || !result.url) {
+        throw new Error("Error al subir el archivo: no se recibió una URL");
+      }
 
       // Devolver un objeto con formato similar al que devolvería Firebase Storage
       return {

@@ -1,0 +1,265 @@
+.experience-card-experiences {
+    display: flex;
+    background-color: #2a3a2a;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0px;
+    width: 100%;
+}
+
+.image-container-experiences {
+    position: relative;
+    flex: 1 0 40%;
+    aspect-ratio: 4/3;
+    max-height: 100%;
+    overflow: hidden;
+    border-radius: 8px 0 0 8px; 
+}
+
+.image-experiences {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px 0 0 8px; /* Only round left corners */
+}
+
+.price-overlay-experiences {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 20px;
+    z-index: 2; /* Ensure overlay is above image */
+}
+
+.experience-info-experiences {
+    flex: 1 1 60%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.rating-box-experiences {
+    margin-bottom: 5px;
+    font-size: 20px;
+    color: #fff;
+}
+.rating-box-experiences span{
+     color: #fff;
+}
+
+.dot-experiences {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #5eff5e;
+    margin-right: 3px;
+}
+
+.dot-gray-experiences {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin-right: 3px;
+}
+
+.subtitle-experiences {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.description-experiences {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: #ccc;
+    /* Limit description lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.data-container-experiences {
+    margin-bottom: 8px;
+    flex-grow: 1;
+}
+
+.data-text-experiences {
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.data-text-experiences .fa-clock {
+    margin-right: 4px;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.data-text-experiences {
+    font-size: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.data-text-experiences img {
+    margin-right: 4px;
+}
+
+
+.camino-icon-experiences,
+.calendar-icon-experiences,
+.participantes-icon-experiences {
+    width: 18px;
+    height: 18px;
+}
+
+.button-experiences {
+    background-color: #5a8146;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.button-experiences:hover {
+    background-color: #4a6b38;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 1024px) {
+    .experience-card-experiences {
+        height: auto;
+    }
+    
+    .image-container-experiences {
+        max-height: 100%;
+    }
+    
+    .data-text-experiences {
+        font-size: 18px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .experience-card-experiences {
+        flex-direction: column;
+        width: 90%;
+        margin: 15px auto;
+        height: auto;
+    }
+
+    .image-container-experiences {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        aspect-ratio: 16/9;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .image-experiences {
+        border-radius: 8px 8px 0 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    .experience-info-experiences {
+        padding: 12px;
+    }
+
+    .subtitle-experiences {
+        font-size: 1.1rem;
+        line-height: 1.2;
+        margin-bottom: 3px;
+    }
+
+    .description-experiences {
+        font-size: 0.85rem;
+        line-height: 1.3;
+        -webkit-line-clamp: 2; /* Limit to 2 lines on mobile */
+        margin-bottom: 5px;
+    }
+
+    .data-container-experiences {
+        margin-bottom: 4px;
+    }
+
+    .data-text-experiences {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+
+    .rating-box-experiences {
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+
+    .price-overlay-experiences {
+        font-size: 0.9rem;
+        padding: 3px 6px;
+    }
+
+    .button-experiences {
+        width: 100%;
+        margin-top: 5px;
+        padding: 5px 8px;
+    }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .experience-card-experiences {
+        width: 95%;
+    }
+
+    .image-container-experiences {
+        height: 150px;
+        max-height: 150px;
+    }
+
+    .experience-info-experiences {
+        padding: 10px;
+    }
+
+    .subtitle-experiences {
+        font-size: 1rem;
+    }
+
+    .description-experiences {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .data-container-experiences {
+        margin-bottom: 2px;
+    }
+
+    .data-text-experiences {
+        font-size: 0.8rem;
+        margin-bottom: 1px;
+    }
+
+    .dot-experiences, .dot-gray-experiences {
+        width: 8px;
+        height: 8px;
+    }
+}

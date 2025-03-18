@@ -51,6 +51,7 @@ class CloudinaryService {
         folder
       });
       
+      // Corregir la URL de la API de Cloudinary - Asegurarse de que el formato es correcto
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
         {

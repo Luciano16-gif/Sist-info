@@ -2,6 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../../firebase-config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase-config';
+import LoadingScreen from '../loading/LoadingScreen';
 
 // Create the AuthContext
 const AuthContext = createContext(null);
@@ -18,19 +21,103 @@ export const useAuth = () => {
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [firestoreUserData, setFirestoreUserData] = useState(null);
   
+  // Function to fetch user data from Firestore
+  const fetchUserData = async (user) => {
+    if (!user) return null;
+    
+    try {
+      const userDocRef = doc(db, "lista-de-usuarios", user.email);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserRole(userData.userType || 'usuario');
+        setFirestoreUserData(userData);
+        
+        // Create an enhanced user object that merges Firebase Auth user with Firestore data
+        const enhancedUser = {
+          ...user,
+          // Override displayName with the name from Firestore if available
+          displayName: userData.name && userData.lastName 
+            ? `${userData.name} ${userData.lastName}`.trim()
+            : user.displayName,
+          // Override photoURL with the one from Firestore if available
+          photoURL: userData['Foto de Perfil'] || user.photoURL || '',
+          // Add additional Firestore fields
+          firestoreData: userData
+        };
+        
+        setCurrentUser(enhancedUser);
+        return userData;
+      } else {
+        setUserRole('usuario');
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setUserRole('usuario');
+      return null;
+    }
+  };
+  
+  // Effect to handle auth state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await fetchUserData(user);
+      } else {
+        setCurrentUser(null);
+        setUserRole(null);
+        setFirestoreUserData(null);
+      }
+      
       setLoading(false);
     });
 
     // Cleanup on unmount
     return () => unsubscribe();
   }, []);
+
+  // Function to update the user profile data
+  const updateUserProfile = async (updatedData = {}) => {
+    if (!currentUser) return;
+    
+    try {
+      // Merge the new data with existing Firestore data
+      const updatedFirestoreData = {
+        ...firestoreUserData,
+        ...updatedData
+      };
+      
+      // Update the Firestore user data state
+      setFirestoreUserData(updatedFirestoreData);
+      
+      // Create an enhanced user object with the updated data
+      const enhancedUser = {
+        ...currentUser,
+        // Update displayName if name or lastName changed
+        displayName: updatedData.name || updatedData.lastName
+          ? `${updatedData.name || firestoreUserData.name || ''} ${updatedData.lastName || firestoreUserData.lastName || ''}`.trim()
+          : currentUser.displayName,
+        // Update photoURL if it changed
+        photoURL: updatedData['Foto de Perfil'] || currentUser.photoURL || '',
+        // Update the Firestore data
+        firestoreData: updatedFirestoreData
+      };
+      
+      // Update the current user
+      setCurrentUser(enhancedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      setError("Error updating user profile. Please try again.");
+    }
+  };
 
   // Define authentication methods using authService
   const login = async (email, password, onError) => {
@@ -122,7 +209,7 @@ export const AuthProvider = ({ children }) => {
       
       return true;
     } catch (error) {
-      // This should rarely happen now, but just in case
+      // This should rarely happen now, but you know the deal
       setError(error.message || 'Ocurrió un error al cerrar sesión.');
       if (onError) onError(error);
       return false;
@@ -132,6 +219,7 @@ export const AuthProvider = ({ children }) => {
   // Context value object
   const value = {
     currentUser,
+    userRole,
     error,
     login,
     signup,
@@ -139,12 +227,14 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     isAuthenticating,
-    setError
+    setError,
+    updateUserProfile,
+    firestoreUserData
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : <div>Loading...</div>}
+      {!loading ? children : <LoadingScreen appName="ÁvilaVenturas" />}
     </AuthContext.Provider>
   );
 };

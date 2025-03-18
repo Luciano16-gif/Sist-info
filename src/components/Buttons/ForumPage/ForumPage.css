@@ -1,11 +1,12 @@
-/* ForumPage.css (No changes needed here, but I'm including it for completeness) */
+/* ForumPage.css (UPDATED) */
+/* ForumPage.css */
 .forum-page-forum {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 40px;
     box-sizing: border-box;
-    background-color: none;
+    background-color: #172819;
     font-family: 'Ysabeau SC', sans-serif;
     width: 100%;
     min-height: 100vh;
@@ -422,6 +423,29 @@
      background-color: #d9f7c8; /* Darker shade on hover */
 }
 
+.publish-report-button{ 
+    width: 220px;
+    height: 45px;
+    background-color: #c04141;
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: "Ysabeau SC";
+    align-self: center;
+    padding: 6px 12px;
+  }
+
+.publish-report-button:hover {
+    background-color: #a30000; /* Darker shade on hover */
+}
+.publish-report-button:active{
+     background-color: #d9f7c8; /* Darker shade on hover */
+}
+
+
 .close-button {
     position: absolute;
     top: 10px;
@@ -436,4 +460,3 @@
 .close-button:hover {
     color: #000;
 }
-

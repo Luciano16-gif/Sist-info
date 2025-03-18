@@ -1,4 +1,3 @@
-// BookingProcessPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -6,9 +5,13 @@ import { db, auth } from '../../firebase-config';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
 import storage from '../../cloudinary-services/storage-service';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
+import ExperienceBookingService from '../../components/services/ExperienceBookingService';
+import html2canvas from 'html2canvas'; // for receipts import html2canvas
+import ReactDOMServer from 'react-dom/server';
+
 
 function BookingProcessPage() {
-    // ... (All other state variables remain the same)
     const location = useLocation();
     const navigate = useNavigate();
     const guideContainerRef = useRef(null);
@@ -17,23 +20,44 @@ function BookingProcessPage() {
     const [error, setError] = useState(null);
     const [selectedTime, setSelectedTime] = useState('');
     const [selectedPeople, setSelectedPeople] = useState('');
-    const [selectedGuide, setSelectedGuide] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDay, setSelectedDay] = useState('');
-    const [guides, setGuides] = useState([]);
+    const [experienceGuides, setExperienceGuides] = useState([]);
     const [availableTimes, setAvailableTimes] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
+    const [experienceCode, setExperienceCode] = useState('');
+    const [paymentDetails, setPaymentDetails] = useState(null);
+    const [availableSlots, setAvailableSlots] = useState(0);
+    const [reservationsForTime, setReservationsForTime] = useState(0);
 
+
+    useEffect(() => {
+        const generateExperienceCode = () => {
+            let code = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            for (let i = 0; i < 6; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return code;
+        };
+        setExperienceCode(generateExperienceCode());
+    }, []);
 
     const savePaymentDetails = async (details) => {
-        // ... (Existing savePaymentDetails code remains mostly the same)
         try {
             const userEmail = auth.currentUser.email;
             if (!userEmail) {
-                throw new Error("User email not found. User might not be logged in.");
+                throw new Error("User email not found.  User might not be logged in.");
             }
+
+            const guidesData = experienceGuides.map(guide => ({
+                id: guide.id,
+                name: guide.name,
+                lastName: guide.lastName,
+                email: guide.email
+            }));
 
             const paymentData = {
                 transactionId: details.id,
@@ -47,12 +71,13 @@ function BookingProcessPage() {
                 userId: currentUser?.id,
                 selectedTime,
                 selectedPeople,
-                selectedGuideId: selectedGuide?.id,
+                guides: guidesData,
                 selectedDate: selectedDate?.toISOString(),
                 selectedDay,
+                experienceCode,
             };
+            setPaymentDetails(paymentData);
 
-            // --- No changes needed here, we keep using the email as doc ID ---
             const userDocRef = doc(db, "payments", userEmail);
             const userDocSnap = await getDoc(userDocRef);
 
@@ -67,77 +92,81 @@ function BookingProcessPage() {
             }
 
             console.log("Payment details saved to Firestore with email as ID");
+
+            await updateExperienceBookings({
+                ...paymentData,
+                guides: guidesData
+            });
+
+            const slotsUpdated = await ExperienceBookingService.updateAvailableSlots(
+                experience.id,
+                selectedPeople
+            );
+
+            if (!slotsUpdated) {
+                console.warn("Failed to update available slots.");
+            }
+
             setIsPaymentSuccessful(true);
-
-            // Update experience bookings
-            await updateExperienceBookings(paymentData);
-
         } catch (error) {
-            console.error("Error saving payment details to Firestore:", error);
+            console.error("Error saving payment details:", error);
             alert("Hubo un error al guardar los detalles del pago.");
         }
     };
 
-    const updateExperienceBookings = async (paymentData) => {
-        // ... (Existing updateExperienceBookings code remains the same)
+     const updateExperienceBookings = async (paymentData) => {
         if (!experience || !experience.id) {
             console.error("Experience ID is missing. Cannot update bookings.");
             return;
         }
 
         const experienceRef = doc(db, "Experiencias", experience.id);
-        const formattedDate = selectedDay; // Use the already formatted date.
+        const formattedDate = selectedDay;
         const timeSlot = selectedTime;
 
         try {
-
-              const bookingData = {
-                people: parseInt(selectedPeople, 10), // Ensure this is a number
+            const bookingData = {
+                people: parseInt(selectedPeople, 10),
                 user: {
                     id: currentUser.id,
                     name: currentUser.name,
                     lastName: currentUser.lastName,
-                    email: auth.currentUser.email // Store user email.
+                    email: auth.currentUser.email
                 },
-                timestamp: new Date(),  // Capture current timestamp
-                transactionId: paymentData.transactionId, // Referencing the payment
-              };
+                guides: paymentData.guides || [],
+                timestamp: new Date(),
+                transactionId: paymentData.transactionId,
+                experienceCode: paymentData.experienceCode,
+            };
 
-
-            // Get the current experience data.
             const expDocSnap = await getDoc(experienceRef);
 
-              if (!expDocSnap.exists()) {
+            if (!expDocSnap.exists()) {
                 console.log("No such document!");
-                 return;
-                }
+                return;
+            }
 
-             const expData = expDocSnap.data();
-             // Initialize 'reservas' if it doesn't exist.
+            const expData = expDocSnap.data();
             const reservas = expData.reservas || {};
 
-            // Initialize the date's array if it doesn't exist
             if (!reservas[formattedDate]) {
                 reservas[formattedDate] = {};
             }
 
-            //Initialize time slot if doesn't exist
-            if(!reservas[formattedDate][timeSlot]){
+            if (!reservas[formattedDate][timeSlot]) {
                 reservas[formattedDate][timeSlot] = [];
             }
 
-             reservas[formattedDate][timeSlot].push(bookingData);
-             //Update experience data in firestore
-             await updateDoc(experienceRef, {reservas});
-             console.log("Experience bookings updated successfully.");
-
+            reservas[formattedDate][timeSlot].push(bookingData);
+            await updateDoc(experienceRef, { reservas });
+            console.log("Experience bookings updated successfully with guide information and experience code.");
 
         } catch (error) {
             console.error("Error updating experience bookings:", error);
         }
     };
 
-    // ... (Rest of the component code, including useEffects, handlers, and JSX)
+
     const handlePaymentSuccess = (details) => {
         console.log("Pago completado:", details);
         alert(`¡Pago exitoso! Gracias, ${details.payer.name.given_name}.`);
@@ -148,6 +177,105 @@ function BookingProcessPage() {
         console.error("Error en el pago:", error);
         alert("El pago falló. Por favor, inténtalo de nuevo.");
         setIsPaymentSuccessful(false);
+    };
+
+    // --- Componente Factura (puedes ponerlo en un archivo separado si quieres) ---
+    function Factura({ paymentDetails, currentUser, experience }) {
+        if (!paymentDetails || !currentUser || !experience) {
+            return <div>No hay datos para la factura.</div>;
+        }
+
+        return (
+            <div id="factura" style={{ fontFamily: 'Arial', fontSize: '14px', padding: '20px', backgroundColor: 'white' }}>
+                <h1 style={{ color: 'blue', textAlign: 'center' }}>Detalles de la Reserva</h1>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Código:</strong> {paymentDetails.experienceCode}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Usuario:</strong> {currentUser.name} {currentUser.lastName}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Email:</strong> {currentUser.id}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Fecha:</strong> {paymentDetails.selectedDay}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Hora:</strong> {paymentDetails.selectedTime}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                    <strong>Cantidad de Personas:</strong> {paymentDetails.selectedPeople}
+                </div>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#eee' }}>
+                            <th style={{ border: '1px solid #ddd', padding: '8px' }}>Campo</th>
+                            <th style={{ border: '1px solid #ddd', padding: '8px' }}>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Ruta</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{experience.name}</td>
+                        </tr>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Guías</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{paymentDetails.guides.map(g => `${g.name} ${g.lastName}`).join(', ')}</td>
+                        </tr>
+                        <tr>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Precio Total</td>
+                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>${paymentDetails.amount} {paymentDetails.currency}</td>
+                        </tr>
+                        <tr>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>ID de Transacción</td>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>{paymentDetails.transactionId}</td>
+                        </tr>
+                        <tr>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>Estado del Pago</td>
+                            <td style={{border: '1px solid #ddd', padding: '8px'}}>{paymentDetails.status}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    // --- Función para descargar la imagen ---
+    const downloadBookingDetails = async () => {
+        if (!paymentDetails || !currentUser || !experience) {
+            console.error("Faltan datos para generar la imagen.");
+            return;
+        }
+
+        const facturaContainer = document.createElement('div');
+        facturaContainer.style.position = 'absolute';
+        facturaContainer.style.left = '-9999px';
+        document.body.appendChild(facturaContainer);
+
+        const facturaElement = (
+            <Factura
+                paymentDetails={paymentDetails}
+                currentUser={currentUser}
+                experience={experience}
+            />
+        );
+
+        const facturaHTML = ReactDOMServer.renderToString(facturaElement);
+        facturaContainer.innerHTML = facturaHTML;
+
+
+        const canvas = await html2canvas(facturaContainer);
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = `reserva_${paymentDetails.experienceCode}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        document.body.removeChild(facturaContainer);
     };
 
 
@@ -198,10 +326,10 @@ function BookingProcessPage() {
                                 imageUrl = await storage.getDownloadURL(data.imageUrl);
                             } catch (imageError) {
                                 console.error("Error fetching experience image URL:", imageError);
-                                imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                imageUrl = '/public/profile_managemente/profile_picture_1.png';
                             }
                         } else {
-                            imageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                            imageUrl = '/public/profile_managemente/profile_picture_1.png';
                         }
 
                         const experienceData = {
@@ -218,14 +346,12 @@ function BookingProcessPage() {
                             minPeople: data.minimoUsuarios,
                             availableSlots: data.cuposDisponibles,
                             imageUrl,
-                            rating: data.puntuacion,
                             registeredUsers: data.usuariosInscritos,
                             incluidos: data.incluidosExperiencia,
                             puntoDeSalida: data.puntoSalida,
                         };
                         setExperience(experienceData);
 
-                         // Pre-fill selectedDate, selectedTime, and selectedDay from location.state
                         if (location.state?.selectedDate) {
                             const date = new Date(location.state.selectedDate);
                             setSelectedDate(date);
@@ -234,7 +360,6 @@ function BookingProcessPage() {
                         if (location.state?.selectedTime) {
                             setSelectedTime(location.state.selectedTime);
                         }
-
 
                         if (data.guias && Array.isArray(data.guias)) {
                             const fetchedGuides = [];
@@ -252,22 +377,22 @@ function BookingProcessPage() {
                                                 guideImageUrl = await storage.getDownloadURL(guideData["Foto de Perfil"]);
                                             } catch (guideImageError) {
                                                 console.error("Error fetching guide image URL:", guideImageError);
-                                                guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                                guideImageUrl = '/public/profile_managemente/profile_picture_1.png';
                                             }
                                         } else {
-                                            guideImageUrl = '/src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
+                                            guideImageUrl = '/public/profile_managemente/profile_picture_1.png';
                                         }
                                         fetchedGuides.push({
                                             id: guideDoc.id,
                                             name: guideData.name,
                                             lastName: guideData.lastName,
-                                            rating: guideData.puntuacion || 0,
                                             image: guideImageUrl,
+                                            email: guideRef.email,
                                         });
                                     }
                                 }
                             }
-                            setGuides(fetchedGuides);
+                            setExperienceGuides(fetchedGuides);
                         }
                     } else {
                         setError("Experiencia no encontrada.");
@@ -282,8 +407,7 @@ function BookingProcessPage() {
             return () => unsubscribe && unsubscribe();
         };
         fetchData();
-    }, [location.state, navigate]);
-
+    }, [location.state?.experience?.id, location.state?.selectedDate, location.state?.selectedTime, navigate]);
 
     useEffect(() => {
         if (experience) {
@@ -302,7 +426,7 @@ function BookingProcessPage() {
                     currentHour += Math.floor(currentMinute / 60);
                     currentMinute %= 60;
                 }
-                 if (slots.length > 0) {
+                if (slots.length > 0) {
                     const lastSlot = slots[slots.length - 1];
                     if (lastSlot === endTime) {
                         slots.pop();
@@ -316,7 +440,6 @@ function BookingProcessPage() {
         }
     }, [experience]);
 
-
     useEffect(() => {
         if (experience && selectedPeople) {
             setTotalPrice(experience.price * parseInt(selectedPeople));
@@ -325,18 +448,85 @@ function BookingProcessPage() {
         }
     }, [experience, selectedPeople]);
 
+    // Fetch reservations and calculate available slots
+    useEffect(() => {
+
+
+        const fetchReservations = async () => {
+            if (!experience || !selectedTime || !selectedDay) {
+                return;
+            }
+            
+            try {
+                // Get the experience document to check current available slots
+                const experienceRef = doc(db, "Experiencias", experience.id);
+                const expSnapshot = await getDoc(experienceRef);
+                
+                if (!expSnapshot.exists()) {
+                    console.error("Experience not found");
+                    return;
+                }
+                
+                const expData = expSnapshot.data();
+                const maxCapacity = expData.maximoUsuarios || experience.maxPeople || 0;
+                const currentAvailableSlots = expData.cuposDisponibles || 0;
+                
+                // Check reservations for this specific date and time
+                const paymentsRef = collection(db, "payments");
+                const q = query(
+                    paymentsRef,
+                    where("experienceId", "==", experience.id),
+                    where("selectedDay", "==", selectedDay),
+                    where("selectedTime", "==", selectedTime),
+                    where("status", "==", "COMPLETED")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                let reservedSlots = 0;
+                querySnapshot.forEach((doc) => {
+                    // Sum up all selected people for this time slot
+                    const bookings = doc.data().bookings || [];
+                    bookings.forEach(booking => {
+                        if (booking.selectedTime === selectedTime && 
+                            booking.selectedDay === selectedDay &&
+                            booking.experienceId === experience.id) {
+                            reservedSlots += parseInt(booking.selectedPeople, 10) || 0;
+                        }
+                    });
+                });
+                
+                setReservationsForTime(reservedSlots);
+                
+                // Calculate actual available slots based on reservations
+                const actualAvailableSlots = Math.max(0, currentAvailableSlots - reservedSlots);
+                setAvailableSlots(actualAvailableSlots);
+                
+                // Reset selected people if exceeds available slots
+                if (parseInt(selectedPeople, 10) > actualAvailableSlots) {
+                    setSelectedPeople('');
+                }
+                
+            } catch (error) {
+                console.error("Error fetching reservations:", error);
+            }
+        };
+
+        fetchReservations();
+        
+        console.log("selectedTime:", selectedTime);
+        console.log("selectedPeople:", selectedPeople);
+        console.log("selectedDate:", selectedDate);
+        console.log("selectedDay", selectedDay);
+        console.log("totalPrice", totalPrice);
+        console.log("experienceGuides:", experienceGuides);
+        console.log("availableSlots:", availableSlots);
+        console.log("Experience Code:", experienceCode);
+    }, [selectedTime, selectedPeople, selectedDate, selectedDay, totalPrice, experienceGuides, experience]);
+
+
     const handleGoBack = () => {
         navigate(-1);
-    };
-
-    const renderRatingDots = (rating) => {
-        const dots = [];
-        for (let i = 0; i < 5; i++) {
-            dots.push(
-                <span key={i} className={`dot-booking-process ${i < rating ? 'yellow-dot-booking-process' : 'white-dot-booking-process'}`}></span>
-            );
-        }
-        return dots;
     };
 
     const handleScroll = (direction) => {
@@ -349,24 +539,21 @@ function BookingProcessPage() {
 
     const handleTimeSelection = (time) => {
         setSelectedTime(time);
+        // Reset selected people when changing time
+        setSelectedPeople('');
     };
 
     const handlePeopleSelection = (people) => {
-        setSelectedPeople(people);
+        const peopleCount = parseInt(people, 10);
+        
+        // Ensure the selected number doesn't exceed available slots
+        if (peopleCount <= availableSlots) {
+            setSelectedPeople(people);
+        } else {
+            // Optional: Show an alert or message
+            alert(`Solo hay ${availableSlots} cupos disponibles para este horario.`);
+        }
     };
-
-    const handleGuideSelection = (guide) => {
-        setSelectedGuide(guide);
-    };
-
-    useEffect(() => {
-        console.log("selectedTime:", selectedTime);
-        console.log("selectedPeople:", selectedPeople);
-        console.log("selectedGuide:", selectedGuide);
-        console.log("selectedDate:", selectedDate);
-        console.log("selectedDay", selectedDay);
-        console.log("totalPrice", totalPrice);
-    }, [selectedTime, selectedPeople, selectedGuide, selectedDate, selectedDay, totalPrice]);
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -377,7 +564,6 @@ function BookingProcessPage() {
     if (!experience) {
         return <div>No se encontraron datos de la experiencia.</div>;
     }
-    const formattedDate = selectedDay || "XX / XX / XXXX";
 
 
     return (
@@ -387,7 +573,7 @@ function BookingProcessPage() {
             )}
             <div className="container-booking-process">
                 <button className="back-button-booking-process" onClick={handleGoBack}> VOLVER AL MENÚ DE RUTAS </button>
-                <img src="../../src/assets/images/ExperiencesPage/paisajeReserva.png" alt="Background" className="background-image-booking-process" />
+                <img src={backgroundImage} alt="Background" className="background-image-booking-process" />
                 <div className="content-booking-process">
                     <div className="left-side-booking-process">
                         <div className='pasarela-de-pago-title-container-booking-process'>
@@ -412,31 +598,68 @@ function BookingProcessPage() {
                         <div className="selection-box-booking-process">
                             <label>CANTIDAD DE PERSONAS</label>
                             <div className="quantity-buttons-booking-process">
-                                <button onClick={() => handlePeopleSelection('1')} className={selectedPeople === '1' ? 'selected' : ''}>1 PERSONA</button>
-                                <button onClick={() => handlePeopleSelection('2')} className={selectedPeople === '2' ? 'selected' : ''}>2 PERSONAS</button>
-                                <button onClick={() => handlePeopleSelection('3')} className={selectedPeople === '3' ? 'selected' : ''}>3 PERSONAS</button>
-                                <button onClick={() => handlePeopleSelection('4')} className={selectedPeople === '4' ? 'selected' : ''}>4 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('1')} 
+                                    className={selectedPeople === '1' ? 'selected' : ''}
+                                    disabled={availableSlots < 1}
+                                    title={availableSlots < 1 ? 'No hay cupos disponibles' : ''}
+                                >1 PERSONA</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('2')} 
+                                    className={selectedPeople === '2' ? 'selected' : ''}
+                                    disabled={availableSlots < 2}
+                                    title={availableSlots < 2 ? 'No hay suficientes cupos disponibles' : ''}
+                                >2 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('3')} 
+                                    className={selectedPeople === '3' ? 'selected' : ''}
+                                    disabled={availableSlots < 3}
+                                    title={availableSlots < 3 ? 'No hay suficientes cupos disponibles' : ''}
+                                >3 PERSONAS</button>
+                                <button 
+                                    onClick={() => handlePeopleSelection('4')} 
+                                    className={selectedPeople === '4' ? 'selected' : ''}
+                                    disabled={availableSlots < 4}
+                                    title={availableSlots < 4 ? 'No hay suficientes cupos disponibles' : ''}
+                                >4 PERSONAS</button>
                             </div>
+                            {availableSlots === 0 && (
+                                <p className="no-slots-message">
+                                    No hay cupos disponibles para este horario.
+                                </p>
+                            )}
+                            {availableSlots > 0 && (
+                                <p className="available-slots-message">
+                                    Cupos disponibles: {availableSlots}
+                                </p>
+                            )}
                         </div>
+                        {/* Guide Display Section (replaces Guide Selection) */}
                         <div className="selection-box-booking-process">
-                            <label>SELECCIONA UN GUÍA</label>
+                            <label>GUÍAS ASIGNADOS</label>
                             <div className="guide-selection-wrapper-booking-process">
-                                <button className="scroll-button-booking-process left-scroll-booking-process" onClick={() => handleScroll('left')}></button>
+                                {experienceGuides.length > 3 && (
+                                    <button className="scroll-button-booking-process left-scroll-booking-process" onClick={() => handleScroll('left')}></button>
+                                )}
                                 <div className="guide-selection-booking-process" ref={guideContainerRef}>
-                                    {guides.map(guide => (
-                                        <div key={guide.id} className={`guide-card-booking-process ${selectedGuide?.id === guide.id ? 'selected' : ''}`} onClick={() => handleGuideSelection(guide)}>
+                                    {experienceGuides.map(guide => (
+                                        <div key={guide.id} className="guide-card-booking-process">
                                             <img src={guide.image} alt={guide.name} />
                                             <div className="guide-info-booking-process">
                                                 <p>{guide.name}</p>
                                                 <p>{guide.lastName}</p>
-                                                <div className="rating-dots-booking-process">
-                                                    {renderRatingDots(guide.rating)}
-                                                </div>
                                             </div>
                                         </div>
                                     ))}
+                                    {experienceGuides.length === 0 && (
+                                        <div className="no-guides-message" style={{ color: 'white', textAlign: 'center', width: '100%' }}>
+                                            No hay guías asignados para esta experiencia.
+                                        </div>
+                                    )}
                                 </div>
-                                <button className="scroll-button-booking-process right-scroll-booking-process" onClick={() => handleScroll('right')}></button>
+                                {experienceGuides.length > 3 && (
+                                    <button className="scroll-button-booking-process right-scroll-booking-process" onClick={() => handleScroll('right')}></button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -445,25 +668,34 @@ function BookingProcessPage() {
                             <h2 className="details-title-booking-process">DETALLES</h2>
                         </div>
                         <p className='details-booking-process-p'>CÓDIGO DE PARTICIPACIÓN</p>
-                        <h2 className='codigo-participacion-booking-process'>S912AP</h2>
+                        <h2 className='codigo-participacion-booking-process'>{experienceCode}</h2>
                         <div className='user-details-container-booking-process'>
                             <p className='details-booking-process-p'>USUARIO: {currentUser?.name} {currentUser?.lastName}</p>
                             <p className='details-booking-process-p'>CANTIDAD DE PERSONAS : {selectedPeople}</p>
                             <p className='details-booking-process-p'>RUTA: {experience.name}</p>
-                            <p className='details-booking-process-p date-container-booking-process'>FECHA: {formattedDate}</p>
+                            <p className='details-booking-process-p date-container-booking-process'>FECHA: {selectedDay}</p>
                             <p className='details-booking-process-p'>HORARIO: {selectedTime}</p>
-                            <p className='details-booking-process-p'>GUÍA: {selectedGuide?.name} {selectedGuide?.lastName}</p>
+                            <p className='details-booking-process-p'>
+                                GUÍAS: {experienceGuides.length > 0
+                                    ? experienceGuides.map(g => `${g.name} ${g.lastName}`).join(', ')
+                                    : 'No asignados'}
+                            </p>
                             <p className='details-booking-process-p'>PRECIO TOTAL: ${totalPrice}.00</p>
                         </div>
                         <div className='realizar-pago-button-container-booking-process'>
                             {isPaymentSuccessful ? (
-                                <p>Pago exitoso!</p>
+                                <>
+                                    <p>Pago exitoso!</p>
+                                    <button onClick={downloadBookingDetails} className="payment-button-booking-process">
+                                        Descargar Detalles de la Reserva
+                                    </button>
+                                </>
                             ) : (
                                 <PayPalButtons
                                     style={{ layout: "horizontal" }}
-                                    disabled={!selectedTime || !selectedPeople || !selectedGuide || !selectedDate}
+                                    disabled={!selectedTime || !selectedPeople || !selectedDate || experienceGuides.length === 0}
                                     createOrder={(data, actions) => {
-                                         if (!totalPrice || totalPrice <= 0) {
+                                        if (!totalPrice || totalPrice <= 0) {
                                             alert("El precio total debe ser mayor a 0.");
                                             return;
                                         }
@@ -474,7 +706,7 @@ function BookingProcessPage() {
                                                         currency_code: "USD",
                                                         value: totalPrice.toFixed(2),
                                                     },
-                                                 description: `Reserva para ${experience.name} el ${formattedDate} a las ${selectedTime} con ${selectedGuide?.name}`,
+                                                    description: `Reserva para ${experience.name} el ${selectedDay} a las ${selectedTime}`,
                                                 },
                                             ],
                                         });

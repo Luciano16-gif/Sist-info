@@ -1,0 +1,215 @@
+.guide-request-container-guide-request {
+    background-color: #1a2a1a;
+    color: #fff;
+    padding: 20px;
+    font-family: "Ysabeau SC", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(150vh - 94px); /*  Adjust for menu height if needed */
+}
+
+.guide-request-title-guide-request {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.guide-request-subtitle-guide-request {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center; /* Center the subtitle */
+}
+
+.guide-request-form-guide-request {
+    width: 100%;
+    max-width: 800px; /*  Wider form */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;      /*  More spacing between sections */
+}
+
+.form-section-guide-request {
+    background-color: #2a3a2a; /* Darker section background */
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    margin-bottom: 10px; /*  Space between sections */
+}
+
+.form-section-title-guide-request {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #444; /* Underline section titles */
+    padding-bottom: 5px;
+}
+
+
+.form-row-guide-request {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap; /*  Allow wrapping on smaller screens */
+}
+
+.form-field-guide-request {
+    display: flex;
+    flex-direction: column;
+    flex: 1;      /*  Distribute space evenly */
+    min-width: 250px; /*  Minimum width for fields */
+}
+.form-field-address-guide-request{
+    display: flex;
+    flex-direction: column;
+    flex: 1;      /*  Distribute space evenly */
+    min-width: 100%; /*  Minimum width for fields */
+}
+
+.form-field-guide-request label, .form-field-address-guide-request label{
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.form-field-guide-request input[type="text"],
+.form-field-guide-request input[type="email"],
+.form-field-guide-request input[type="tel"],
+.form-field-guide-request input[type="number"],
+.form-field-guide-request select,
+.form-field-guide-request textarea,
+.form-field-address-guide-request input[type="text"],
+.form-field-address-guide-request textarea,
+.date-input-guide-request
+ {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #3a4a3a;
+    color: white;
+}
+
+.form-field-guide-request textarea, .form-field-address-guide-request textarea {
+    resize: vertical;
+    min-height: 80px; /*  Taller text areas */
+}
+
+.form-field-guide-request input[type="text"]:focus,
+.form-field-guide-request input[type="email"]:focus,
+.form-field-guide-request input[type="tel"]:focus,
+.form-field-guide-request input[type="number"]:focus,
+.form-field-guide-request select:focus,
+.form-field-guide-request textarea:focus,
+.form-field-address-guide-request input[type="text"]:focus,
+.form-field-address-guide-request textarea:focus,
+.date-input-guide-request:focus
+{
+    border-color: #9cff9c; /*  Highlight on focus */
+    outline: none;          /*  Remove default focus outline */
+}
+
+
+/* Error Styles */
+.form-field-guide-request.error input,
+.form-field-guide-request.error select,
+.form-field-guide-request.error textarea,
+.form-field-address-guide-request.error input,
+.form-field-address-guide-request.error textarea,
+.form-field-guide-request.error .date-input-guide-request {
+    border-color: #ff5555;
+    background-color: rgba(255, 85, 85, 0.1);
+}
+
+.form-error-guide-request {
+    color: #ff5555;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.image-upload-container-guide-request {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the image and button */
+    margin-bottom: 15px;
+}
+
+.image-preview-guide-request {
+    width: 150px; /*  Fixed size for preview */
+    height: 150px;
+    border-radius: 50%; /*  Circular preview */
+    object-fit: cover; /*  Ensure image fills the circle */
+    border: 3px solid white;
+    margin-bottom: 10px;
+}
+
+.image-upload-button-guide-request {
+    background-color: #fff;
+    color: #1a2a1a;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+.image-upload-button-guide-request:hover{
+    background-color: #fcff54;
+}
+
+.submit-button-guide-request {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    align-self: center; /* Center the button */
+    margin-top: 20px;  /*  Space from the last section */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.submit-button-guide-request:hover {
+    background-color: #45a049;
+}
+
+.submit-button-guide-request:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+}
+.success-message-guide-request {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+.error-message-guide-request {
+    background-color: rgba(255, 85, 85, 0.2);
+    color: #ff5555;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+.loading-message-guide-request{
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
