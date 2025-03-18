@@ -48,6 +48,7 @@ import AdminMensajes from './pages/Admin-pages/Admin-mensajes/AdminMensajes';
 import AdminResenas from './pages/Admin-pages/Admin-resenas/AdminResenas';
 import AdminRutas from './pages/Admin-pages/Admin-rutas/AdminRutas';
 import AdminTips from './pages/Admin-pages/Admin-tips/AdminTips';
+import CodeValidation from './pages/CodeValidation/CodeValidation';
 
 //test
 // import PayPalTest from './pages/BookingProcessPage/PalPayTest';
@@ -90,6 +91,7 @@ root.render(
             <Route path="/guide-request" element={<GuideRequest />} />
             <Route path="/search-test" element={<SearchTest />} />
             <Route path="/user-requests" element={<UserRequestsPage />} />
+            <Route path="/code-validation" element={<CodeValidation />} />
           </Route>
 
           {/* Routes with LayoutAdmin */}
