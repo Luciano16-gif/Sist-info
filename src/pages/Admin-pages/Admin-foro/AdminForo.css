@@ -1,21 +1,52 @@
-/* AdminForo.css */
 .forum-item {
-    overflow: hidden;
-    width: 100%; /* Ensure it takes full width of its parent */
+  overflow: hidden;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.forum-title, .comment-description {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.forum-info, .comment-info {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.comment-item {
+  overflow: hidden;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Add responsive breakpoints */
+@media (max-width: 768px) {
+  .forum-item, .comment-item {
+    padding: 0.75rem;
   }
-  
-  .forum-title, .comment-description {
-      word-wrap: break-word;    /* or overflow-wrap: anywhere; */
-      white-space: pre-wrap;
-      width: 100%; /* Add this to make sure it respects the container width */
+}
+
+@media (max-width: 640px) {
+  .forum-item, .comment-item {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .forum-title {
+    font-size: 1rem;
   }
   
   .forum-info, .comment-info {
-      word-wrap: break-word;  /* or overflow-wrap: anywhere; */
-      white-space: pre-wrap;
-      width: 100%;
+    font-size: 0.75rem;
   }
-  .comment-item{
-      overflow: hidden;
-      width: 100%;
+  
+  .comment-description {
+    font-size: 0.875rem;
   }
+}

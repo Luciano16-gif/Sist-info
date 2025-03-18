@@ -11,6 +11,7 @@ import PasswordStrength from './AuthComponents/PasswordStrength';
 import { useFormValidation } from '../hooks/auth-hooks/useFormValidation';
 import { useGoogleAuth } from '../hooks/auth-hooks/useGoogleAuth';
 import './Auth.css';
+import AuthRedirectMessage from '../routes/AuthRedirectMessage';
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -76,6 +77,7 @@ function SignUpPage() {
 
   return (
     <div className="auth-page signup-page overflow-hidden">
+      <AuthRedirectMessage />
       <div className="auth-container">
         <h2 className="auth-title signup-title">Registrarse</h2>
         

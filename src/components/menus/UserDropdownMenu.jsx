@@ -51,8 +51,6 @@ const UserDropdownMenu = ({
       admin: [
         { to: "/crear-experiencia", label: "Crear Experiencia" },
         { to: "/homeAdmin", label: "Panel Admin" },
-        { to: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" },
-        { to: "/admin-guias-pendientes", label: "Guías Pendientes" },
         { to: "/", label: "Ver Sitio Web" }
       ]
     };

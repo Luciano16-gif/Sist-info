@@ -159,11 +159,34 @@ const experienceFormService = {
   
   /**
    * Submit a new experience
-   * @param {Object} experienceData - Experience data to submit
+   * @param {Object} formData - Experience data to submit
    * @returns {Promise<Object>} Created experience
    */
   async submitExperience(formData) {
     try {
+      console.log("submitExperience called with formData:", JSON.stringify(formData, null, 2));
+      
+      // Enhanced createdBy validation
+      let createdBy = formData.createdBy;
+      
+      // If createdBy is missing, try to recover it
+      if (!createdBy) {
+        console.warn("Missing createdBy in form submission - attempting recovery");
+        
+        // Try to get from localStorage as last resort
+        try {
+          createdBy = localStorage.getItem('tempUserEmail');
+          console.log("Recovered createdBy from localStorage:", createdBy);
+        } catch (e) {
+          console.error("Failed to retrieve from localStorage:", e);
+        }
+        
+        // If still missing, throw an error
+        if (!createdBy) {
+          throw new Error("No se pudo identificar al creador de la experiencia. Por favor, inténtelo de nuevo.");
+        }
+      }
+      
       // Check for duplicate experience name
       const nameExists = await this.checkExperienceNameExists(formData.nombre);
       if (nameExists) {
@@ -177,7 +200,6 @@ const experienceFormService = {
       if (formData.imageFile) {
         try {
           console.log("Iniciando subida de imagen a Cloudinary...");
-          // Usar directamente cloudinaryService en lugar de storageService
           const uploadResult = await cloudinaryService.uploadFile(formData.imageFile, `experiences`);
           
           console.log("Resultado de subida:", uploadResult);
@@ -199,7 +221,7 @@ const experienceFormService = {
       // Set default status if not provided
       const status = formData.status || 'pending';
       
-      // Prepare data object
+      // Prepare data object with guaranteed createdBy
       const experienciaData = {
         nombre: formData.nombre,
         precio: parseFloat(formData.precio),
@@ -219,14 +241,18 @@ const experienceFormService = {
         imageUrl,
         publicId,
         dificultad: formData.dificultad,
-        status: status, // Set status (pending for guides, accepted for admins)
-        createdBy: formData.createdBy || null, // Store who created the experience
-        // Add creation timestamp and initial values
+        status: status,
+        createdBy: createdBy, // Use the validated/recovered email
         fechaCreacion: new Date().toISOString(),
         puntuacion: 0,
         usuariosInscritos: 0,
         cuposDisponibles: parseInt(formData.maximoUsuarios)
       };
+      
+      console.log("Final experiencia data to be saved:", {
+        ...experienciaData,
+        imageFile: formData.imageFile ? "Image file present" : "No image file" 
+      });
       
       // Save to Firestore
       const docRef = doc(db, "Experiencias", formData.nombre);
