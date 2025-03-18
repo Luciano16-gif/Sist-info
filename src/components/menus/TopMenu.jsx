@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useScrollDetection from "./useScrollDetection";
 import { useAuth } from "../contexts/AuthContext";
 import UserDropdown from "./UserDropdownMenu";
@@ -9,23 +9,7 @@ const TopMenu = () => {
   const scrolled = useScrollDetection();
   const { currentUser, logout, userRole } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isIpadPro, setIsIpadPro] = useState(false);
   
-  // Check if the device is iPad Pro based on screen width
-  useEffect(() => {
-    const checkIpadPro = () => {
-      if (userRole === 'usuario') return;
-      // iPad Pro typically has 1024px width
-      const isIpadProSize = window.innerWidth >= 1020 && window.innerWidth <= 1030;
-      setIsIpadPro(isIpadProSize);
-    };
-    
-    checkIpadPro();
-    window.addEventListener('resize', checkIpadPro);
-    
-    return () => window.removeEventListener('resize', checkIpadPro);
-  }, [userRole]);
-
   // Define base menu items - SIMPLIFIED for top navigation
   const baseMenuItems = [
     { href: "/experiencias", label: "Experiencias" },
@@ -92,7 +76,7 @@ const TopMenu = () => {
         ${scrolled ? 'bg-opacity-95' : 'bg-opacity-95'}
         transition-all
         duration-300
-        ${isIpadPro ? 'min-h-32' : 'min-h-16'}
+        min-h-16 lg:min-h-20 xl:min-h-20
         z-50
       `}
       style={{ zIndex: 9999 }}
@@ -110,18 +94,18 @@ const TopMenu = () => {
           </Link>
           {currentUser ? (
             <div className="ml-4 flex items-center">
-              <span className="uppercase font-ysabeau text-white text-xs md:text-xs lg:text-sm">
+              <span className="uppercase font-ysabeau text-white text-xs md:text-xs lg:text-sm xl:text-base">
                 {currentUser.displayName || currentUser.email.split('@')[0]}
               </span>
             </div>
           ) : (
-            <p className="uppercase font-ysabeau text-gray-400 text-xs ml-4 md:text-xs lg:text-sm">Visitante</p>
+            <p className="uppercase font-ysabeau text-gray-400 text-xs ml-4 md:text-xs lg:text-sm xl:text-base">Visitante</p>
           )}
         </div>
         
         {/* Center section - Main navigation */}
         <div className="flex justify-center">
-          <ul className="flex flex-wrap justify-center uppercase font-ysabeau underline text-xs lg:text-sm gap-3 md:gap-4 lg:gap-6">
+          <ul className="flex flex-wrap justify-center uppercase font-ysabeau underline text-xs lg:text-sm xl:text-base gap-3 md:gap-4 lg:gap-6">
             {menuItems.map((item) => (
               <li key={item.href} className="hover:scale-110 transform transition-all duration-300 whitespace-nowrap">
                 <Link to={item.href} className="text-center">{item.label}</Link>
@@ -146,7 +130,7 @@ const TopMenu = () => {
             />
           ) : (
             // User is not logged in - show login/signup buttons
-            <ul className="flex flex-row uppercase font-ysabeau text-xs lg:text-sm space-x-1 md:space-x-2">
+            <ul className="flex flex-row uppercase font-ysabeau text-xs lg:text-sm xl:text-base space-x-1 md:space-x-2">
               {sesionItems.map((item) => (
                 <li key={item.href} className="bg-gray-800 box-border px-2 md:px-3 lg:px-4 py-1 md:py-1.5 border-gray-200 border rounded-full hover:scale-110 transform transition-all duration-300">
                   <Link to={item.href} className="text-center whitespace-nowrap">{item.label}</Link>

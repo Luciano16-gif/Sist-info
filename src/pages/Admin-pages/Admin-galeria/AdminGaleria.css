@@ -1,4 +1,3 @@
-/* AdminGaleria.css */
 .admin-gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -33,7 +32,7 @@
 }
 
 /* Modal styles */
-.modal-overlay-gallery {
+.modal-admin-overlay-gallery {
     position: fixed;
     top: 0; /* Start at the top */
     left: 0;

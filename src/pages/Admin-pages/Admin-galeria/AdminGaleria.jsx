@@ -153,7 +153,7 @@ const AdminGaleria = () => {
             </div>
 
             {selectedImage && (
-                <div className="modal-overlay-gallery" onWheel={handleWheel}>
+                <div className="modal-admin-overlay-gallery" onWheel={handleWheel}>
                     <div
                         className="modal-content-container-gallery"
                         onMouseDown={handleMouseDown}
@@ -194,8 +194,6 @@ const AdminGaleria = () => {
                     </div>
                 </div>
             )}
-
-            <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
         </div>
     );
 };

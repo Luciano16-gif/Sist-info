@@ -5,37 +5,103 @@
     justify-content: center;
     min-height: 100vh;
     background-color: #223A26;
-    padding: 40px;
     box-sizing: border-box;
     overflow: hidden;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .galeria-page-gallery {
+        padding-top: calc(64px + 2rem); /* Medium screens */
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .galeria-page-gallery {
+        padding-top: calc(80px + 2rem); /* Large screens */
+    }
+}
+
+@media (min-width: 1280px) {
+    .galeria-page-gallery {
+        padding-top: calc(96px + 2rem); /* Extra large screens */
+    }
 }
 
 .title-gallery {
     color: #FFF;
-    font-size: 90px;
+    font-size: 36px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
     text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: 25px;
+}
+
+@media (min-width: 768px) {
+    .title-gallery {
+        font-size: 48px;
+        margin-bottom: 30px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .title-gallery {
+        font-size: 70px;
+        margin-bottom: 35px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .title-gallery {
+        font-size: 90px;
+    }
 }
 
 .gallery-content-gallery {
     display: flex;
     align-items: center;
     width: 100%;
-    justify-content: space-between;
-    margin-bottom: 60px;
+    justify-content: center; /* Changed to center */
+    margin-bottom: 30px;
+    /* Removed padding-right */
+}
+
+@media (min-width: 768px) {
+    .gallery-content-gallery {
+        margin-bottom: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .gallery-content-gallery {
+        margin-bottom: 60px;
+    }
 }
 
 .image-container-gallery {
     display: flex;
     overflow-x: auto;
-    gap: 40px;
-    padding: 10px;
-    width: calc(100% - 100px);
+    gap: 20px;
+    padding: 10px 0; /* Changed padding to vertical only */
+    width: calc(100% - 80px);
     scroll-snap-type: x mandatory;
     flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    .image-container-gallery {
+        gap: 30px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .image-container-gallery {
+        gap: 40px;
+        width: calc(100% - 100px);
+    }
 }
 
 /* Hide scrollbar (optional) */
@@ -59,16 +125,33 @@
     scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1);
 }
 
-
 .gallery-image-gallery {
-    width: 400px;
-    height: 258px;
+    width: 260px;
+    height: 170px;
     object-fit: cover;
     border-radius: 10px;
     scroll-snap-align: center;
     flex-shrink: 0;
     cursor: pointer;
-    transition: border 0.2s ease; /* Add transition for smooth border change */
+    transition: transform 0.3s ease, border 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    .gallery-image-gallery {
+        width: 320px;
+        height: 210px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .gallery-image-gallery {
+        width: 400px;
+        height: 258px;
+    }
+}
+
+.gallery-image-gallery:hover {
+    transform: scale(1.03);
 }
 
 /* Style for the selected image in delete mode */
@@ -76,28 +159,60 @@
     border: 4px solid #00a3a1; /* Highlight color - adjust as needed */
 }
 
-
 .button-container-gallery{
     display: flex;
-    gap: 61px;
+    gap: 20px;
     flex-wrap: wrap; /* allows buttons to wrap on smaller screens*/
     justify-content: center; /*centers the buttons*/
 }
 
+@media (min-width: 768px) {
+    .button-container-gallery {
+        gap: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .button-container-gallery {
+        gap: 61px;
+    }
+}
+
 .mount-archive-button-gallery,
 .delete-archive-button-gallery {
-    width: 270px;
-    height: 52px;
+    width: 180px;
+    height: 45px;
     background-color: #bdbdbdde;
     border: none;
     border-radius: 20px;
     color: #FFF;
-    font-size: 27px;
+    font-size: 18px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
     cursor: pointer;
-    margin-bottom: 70px;
+    margin-bottom: 30px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+@media (min-width: 768px) {
+    .mount-archive-button-gallery,
+    .delete-archive-button-gallery {
+        width: 220px;
+        height: 48px;
+        font-size: 22px;
+        margin-bottom: 50px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .mount-archive-button-gallery,
+    .delete-archive-button-gallery {
+        width: 270px;
+        height: 52px;
+        font-size: 27px;
+        margin-bottom: 70px;
+    }
 }
 
 .mount-archive-button-gallery:hover {
@@ -126,13 +241,23 @@
     padding: 10px;
     z-index: 2;
     position: relative;
+    transition: transform 0.2s ease;
+    width: 40px; /* Fixed width for symmetry */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.left-gallery{
-    margin-right: 10px;
 
+.scroll-button-gallery:hover {
+    transform: scale(1.2);
 }
-.right-gallery{
-    margin-left: 10px;
+
+.left-gallery {
+    margin-right: 0; /* Removed margin */
+}
+
+.right-gallery {
+    margin-left: 0; /* Removed margin */
 }
 
 /* Modal styles */
@@ -146,8 +271,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;  /* Ensure it's on top, but below report modal */
-    overflow: auto; /* Allow scrolling within modal if needed */
+    z-index: 1000;  
+    overflow: auto; 
+    padding-top: 40px;
 }
 
 /* Container for image and zoom controls */
@@ -155,20 +281,30 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative; /*  For close button positioning */
-    max-width: 90%;  /* Limit width - good for responsiveness */
-    max-height: 90vh; /* Limit height - good for responsiveness */
-    padding: 40px 20px 20px 20px; /* Increased top padding */
-    box-sizing: border-box; /* Include padding in width/height */
-    margin-top: 50px; /* Add top margin */
-    background-color: #223A26; /* Add a background */
+    position: relative; 
+    max-width: 90%; 
+    max-height: 90vh; 
+    padding: 40px 20px 20px 20px; 
+    box-sizing: border-box; 
+    background-color: #223A26; 
     border-radius: 10px;
+}
 
+@media (min-width: 768px) {
+    .modal-content-container-gallery {
+        margin-top: 100px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .modal-content-container-gallery {
+        margin-top: 120px;
+    }
 }
 
 .modal-image-gallery {
     max-width: 100%;  /* Use 100% of container width */
-    max-height: 70vh; /* Reduce max-height to make room for buttons */
+    max-height: 60vh; /* Reduce max-height to make room for buttons */
     object-fit: contain;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -176,18 +312,38 @@
     margin-bottom: 20px;
 }
 
+@media (min-width: 768px) {
+    .modal-image-gallery {
+        max-height: 65vh;
+    }
+}
+
+@media (min-width: 1024px) {
+    .modal-image-gallery {
+        max-height: 70vh;
+    }
+}
+
 /* Image info styles */
 .image-info-gallery {
-  text-align: center;
-  color: white;
-  margin-bottom: 10px; /* Space between info and zoom controls */
-  font-size: 0.9rem;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px; /* Space between info and zoom controls */
+    font-size: 0.9rem;
+    width: 100%;
+    padding: 0 10px;
+}
+
+@media (min-width: 768px) {
+    .image-info-gallery {
+        font-size: 1rem;
+    }
 }
 
 .image-info-gallery p {
     margin: 0.2rem 0; /* Reduce margin between lines */
+    word-wrap: break-word; /* Ensure long words don't overflow */
 }
-
 
 .zoom-controls-gallery {
     display: flex;
@@ -206,130 +362,143 @@
     color: black;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .zoom-controls-gallery button:hover {
     background-color: rgba(255, 255, 255, 1);
 }
-.zoom-controls-gallery button:active{
+
+.zoom-controls-gallery button:active {
     transform: translateY(2px);
 }
 
-/* Close button styles (Adaptive) */
+/* Improved Close button styles */
 .close-button-gallery {
-  position: absolute;
-  top: 10px; /* Adjusted top position */
-  right: 10px;
-  background: rgba(128, 128, 128, 0.7);
-  border: none;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 1002; /* Above image and zoom, below report modal */
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  min-width: 30px;
-  min-height: 30px;
-
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(220, 53, 69, 0.9); /* Red background */
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-
 .close-button-gallery:hover {
-    color: #ffffff;
-    background-color: #e80000;
+    background-color: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
 }
 
 .close-button-gallery:active {
-  transform: translateY(2px);
+    transform: scale(0.95);
 }
 
-
-/* Report button styles (Adaptive) */
+/* Improved Report button styles */
 .report-button-gallery {
     position: absolute;
-    top: 10px; /* Adjusted top position */
+    top: 10px;
     left: 10px;
-    background: rgba(128, 128, 128, 0.7);
+    background: rgba(255, 193, 7, 0.9); /* Warning yellow */
     border: none;
-    color: white;
-    font-size: 16px;
+    color: #333; /* Dark text for contrast */
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 1002; /* Above image and zoom */
+    z-index: 1002;
     padding: 8px 12px;
     border-radius: 20px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
+@media (min-width: 768px) {
+    .report-button-gallery {
+        font-size: 16px;
+        padding: 10px 15px;
+    }
+}
 
 .report-button-gallery:hover {
-    color: #ffffff;
-    background-color: #e80000;
+    background-color: rgba(255, 193, 7, 1);
+    transform: scale(1.05);
 }
 
 .report-button-gallery:active {
-    transform: translateY(2px);
+    transform: scale(0.95);
 }
 
 .upload-progress-bar-container-gallery {
-  width: 100%;
-  height: 10px;
-  background-color: #ddd;
-  margin-bottom: 10px;
-  border-radius: 5px;
+    width: 100%;
+    height: 10px;
+    background-color: #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
 }
 
 .upload-progress-bar-gallery {
-  height: 100%;
-  background-color: #4CAF50;
-  text-align: center;
-  line-height: 30px;
-  color: white;
-  border-radius: 5px;
+    height: 100%;
+    background-color: #4CAF50;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+    border-radius: 5px;
 }
 
 /* Search Filter Styles */
 .search-filters-gallery {
     display: flex;
-    flex-wrap: wrap; /* Wrap to next line on smaller screens */
+    flex-direction: column;
     gap: 10px;
-    align-items: center; /* Vertically align items */
+    align-items: center;
     margin-bottom: 20px;
-    width: 100%; /* Take full width */
-    justify-content: center; /* Center the filter elements */
+    width: 100%;
+    max-width: 500px;
 }
 
-
+@media (min-width: 768px) {
+    .search-filters-gallery {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+    }
+}
 
 .search-filters-gallery input[type="text"],
 .search-filters-gallery input[type="date"] {
     padding: 10px 15px;
-    border-radius: 20px; /* Rounded corners like buttons */
+    border-radius: 20px;
     border: 1px solid #ccc;
     font-size: 16px;
     background-color: #294129;
-    color: #333; /* Original text color - this will be overridden by the more specific rule below */
-    width: 250px; /* Specify a width */
-    box-sizing: border-box; /* Include padding and border in width */
+    color: #fff;
+    width: 100%;
+    max-width: 250px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.search-filters-gallery:hover input[type="text"]{
-    background-color: #0d190f;
-}
-
-
-/*  Change the text color when writing in the input */
 .search-filters-gallery input[type="text"]::placeholder,
 .search-filters-gallery input[type="date"]::placeholder {
-     color: #999999; /* Lighter placeholder text */
+    color: #999999;
+}
+
+.search-filters-gallery input[type="text"]:hover,
+.search-filters-gallery input[type="date"]:hover {
+    background-color: #0d190f;
 }
 
 .search-filters-gallery input[type="text"]:focus,
@@ -339,23 +508,23 @@
     box-shadow: 0 0 5px rgba(0, 163, 161, 0.5);
 }
 
-/*  Most specific rule to set the text color while typing */
-.search-filters-gallery input[type="text"],
-.search-filters-gallery input[type="date"]
- {
-    color: #fff; /*  Set the text color to white */
-}
-
-
 .search-filters-gallery button {
     padding: 10px 20px;
-    border-radius: 20px; /* Rounded corners */
+    border-radius: 20px;
     border: none;
     background-color: #bdbdbdde;
     color: white;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    max-width: 250px;
+}
+
+@media (min-width: 768px) {
+    .search-filters-gallery button {
+        width: auto;
+    }
 }
 
 .search-filters-gallery button:hover {
@@ -363,82 +532,111 @@
 }
 
 .search-filters-gallery button:active {
-     transform: translateY(2px);
+    transform: translateY(2px);
 }
 
 /* Styles for the Report Image Modal */
-.modal-overlay-gallery[style*="z-index: 1001"] { /* Select by inline style */
-    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+.modal-overlay-gallery[style*="z-index: 1001"] {
+    background-color: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1001;
 }
 
-
 .modal-overlay-gallery[style*="z-index: 1001"] .modal-content-container-gallery {
-	background-color: #223A26; /* CHANGED: Green background */
-	padding: 20px;
-	border-radius: 5px;
-	box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-	max-width: 500px;
-	width: 80%;
-	text-align: center;
-    position: relative; /* Make sure the close button is positioned relative to this */
+    background-color: #223A26;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    position: relative;
     z-index: 1003;
+    margin-top: 80px;
+}
 
+@media (min-width: 768px) {
+    .modal-overlay-gallery[style*="z-index: 1001"] .modal-content-container-gallery {
+        margin-top: 100px;
+        padding: 30px;
+    }
 }
 
 .modal-overlay-gallery[style*="z-index: 1001"] h2 {
-	color: #ffffff; /* CHANGED TO WHITE */
-	margin-bottom: 15px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
 
+@media (min-width: 768px) {
+    .modal-overlay-gallery[style*="z-index: 1001"] h2 {
+        font-size: 24px;
+    }
 }
 
 .modal-overlay-gallery[style*="z-index: 1001"] p {
-	color: #ffffff; /* CHANGED TO WHITE */
-	margin-bottom: 10px;
-
+    color: #ffffff;
+    margin-bottom: 15px;
 }
 
 .modal-overlay-gallery[style*="z-index: 1001"] textarea {
-	width: calc(100% - 20px); /*  Full width minus padding */
-	padding: 10px;
-	margin-bottom: 10px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-	box-sizing: border-box; /*  Include padding and border in width */
-	resize: vertical; /*  Allow vertical resizing */
-    color: black; /* Text color inside textarea */
-
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    resize: vertical;
+    color: black;
+    min-height: 120px;
+    font-size: 15px;
 }
 
 .modal-overlay-gallery[style*="z-index: 1001"] button {
-    background-color: #e80000; /* CHANGED: Red button */
+    background-color: #e80000;
     color: white;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .modal-overlay-gallery[style*="z-index: 1001"] button:hover {
-	background-color: #a80000; /* CHANGED: Darker red on hover */
-
+    background-color: #a80000;
+    transform: scale(1.05);
 }
 
-.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]{
+.modal-overlay-gallery[style*="z-index: 1001"] button:active {
+    transform: scale(0.95);
+}
+
+.modal-overlay-gallery .close-button-gallery[style*="position: absolute"] {
     top: 10px;
     right: 10px;
-    background: none;
-    font-size: 24px;
+    background: rgba(220, 53, 69, 0.9);
+    font-size: 20px;
     font-weight: bold;
-    color: #aaa;
-    border: none;
-
-}
-.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]:hover{
     color: white;
-    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.1);
+}
+
+.modal-overlay-gallery .close-button-gallery[style*="position: absolute"]:active {
+    transform: scale(0.95);
 }
