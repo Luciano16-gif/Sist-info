@@ -1,21 +1,3 @@
-.selected-yellow-reviews {
-    background-color: rgb(98, 226, 38) !important;
-}
-.difficulty-circle-reviews{
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: #999999;
-    transition: background-color 0.2s ease;
-}
-
-.difficulty-container-reviews {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-    justify-content: center;
-}
-
 .container-reviews {
     display: flex;
     flex-direction: column;
@@ -77,11 +59,8 @@
     pointer-events: none;
 }
 
-.scroll-button-reviews{
-    pointer-events: all;
-}
-
 .scroll-button-reviews {
+    pointer-events: all;
     background-color: #0056b3;
     border: 2px solid #0056b3;
     border-radius: 8px;
@@ -181,29 +160,6 @@
     justify-content: center;
     gap: 10px;
 }
-.report-button {
-    background-color: #7a1b1b;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 220px;
-    display: block;
-    margin-top: 15px
-}
-
-.report-button:hover {
-    background-color: #531010;
-}
-.errorReport{
-    color: red;
-    font-size: 16px;
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
 
 .make-review-button {
     background-color: #5a8146;
@@ -234,10 +190,10 @@
 }
 
 .comment-popup {
-    background-color: #d9d9d9;
+    background-color: #243c26;
     padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     width: 80%;
     max-width: 600px;
     position: relative;
@@ -246,9 +202,9 @@
 }
 
 .replying-to-popup {
-    color: #3f3f3f;
+    color: #fff;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 600;
     margin-bottom: 10px;
     font-family: "Ysabeau SC";
     text-align: center;
@@ -259,15 +215,24 @@
     height: 150px;
     margin-bottom: 28px;
     padding: 25px;
-    border: 1px solid #ccc;
+    border: 1px solid #3a5a3c;
+    background-color: #1c351f;
     border-radius: 16px;
     resize: none;
     font-size: 20px;
     font-family: "Ysabeau SC";
+    color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .comment-input::placeholder {
-    color: #8f8f3f;
+    color: #b0b0b0;
+}
+
+.comment-input:focus {
+    border-color: #5a8146;
+    box-shadow: 0 0 5px rgba(98, 226, 38, 0.3);
+    outline: none;
 }
 
 .publish-button {
@@ -283,10 +248,13 @@
     font-family: "Ysabeau SC";
     align-self: center;
     padding: 6px 12px;
+    transition: all 0.2s ease;
 }
 
 .publish-button:hover {
     background-color: #4a6b38;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .publish-button:active {
@@ -312,17 +280,27 @@
 .difficulty-container {
     display: flex;
     gap: 5px;
-    margin-bottom: 10px;
+    margin: 15px 0;
     justify-content: center;
 }
 
 .difficulty-circle {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
-    background-color: #999999;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    background-color: #3a5a3c;
+}
+
+.difficulty-circle:hover {
+    transform: scale(1.1);
+    background-color: rgba(98, 226, 38, 0.5);
+}
+
+.difficulty-circle.selected {
+    background-color: rgb(98, 226, 38);
+    box-shadow: 0 0 8px rgba(98, 226, 38, 0.6);
 }
 
 /* Review Item Styling */
@@ -330,63 +308,128 @@
     width: 100%;
 }
 
+/* Review Item Container */
 .review-item-container {
-    background-color: #4c8151;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
+    background-color: #1c351f;
+    border-left: 4px solid #5a8146;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.review-item-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Review Header */
 .review-header {
     display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    position: relative;
 }
 
+/* Profile Image */
 .review-profile-image {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    margin-right: 10px;
+    border: 3px solid #2d4d30;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-right: 15px;
     object-fit: cover;
 }
 
+/* User Info */
 .user-info {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    width: 100%;
-}
-.user-info > div{
-    width: fit-content;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
 }
 
 .review-user-name {
-    font-weight: bold;
-    color: #000;
+    font-weight: 600;
+    color: #fff;
     margin: 0;
     font-size: 1.1em;
+    line-height: 1.2;
 }
 
 .review-date {
-    color: #333;
+    color: #b0b0b0;
     margin: 0;
     font-size: 0.9em;
+    font-style: italic;
 }
 
-.review-text-content {
-    color: #000;
-    margin: 0;
-    line-height: 1.4;
-    word-wrap: break-word;
-}
-
-.review-error {
-    color: red;
+/* Rating Circles */
+.difficulty-container-reviews {
+    display: flex;
+    gap: 3px;
     margin-top: 5px;
-    margin-bottom: 10px;
+}
+
+.difficulty-circle-reviews {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #3a5a3c;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.selected-yellow-reviews {
+    background-color: rgb(98, 226, 38) !important;
+    box-shadow: 0 0 5px rgba(98, 226, 38, 0.5);
+}
+
+/* Review Text Content */
+.review-text-content {
+    color: #e0e0e0;
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+    word-wrap: break-word;
+    font-size: 1.05em;
+    padding: 0 5px 0 15px;
+    position: relative;
+    border-left: 3px solid rgba(98, 226, 38, 0.3);
+    margin-left: 5px;
+}
+
+/* Report Button */
+.report-button {
+    background-color: #2d4d30;
+    color: #e0e0e0;
+    border: 1px solid #3a5a3c;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    display: block;
+    width: auto;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.report-button:hover {
+    background-color: #7a1b1b;
+    color: #fff;
+    border-color: #7a1b1b;
+}
+
+.errorReport, .review-error {
+    color: #f8d7da;
+    background-color: rgba(122, 27, 27, 0.7);
+    border: 1px solid #7a1b1b;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 0.9em;
     text-align: center;
 }
 
@@ -504,21 +547,21 @@
     }
     
     .review-item-container {
-        padding: 12px;
+        padding: 15px;
     }
     
     .review-profile-image {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
     }
     
-    .user-info {
-        flex-direction: column;
-        gap: 5px;
+    .difficulty-circle-reviews {
+        width: 14px;
+        height: 14px;
     }
     
-    .difficulty-container-reviews {
-        margin-bottom: 5px;
+    .review-text-content {
+        font-size: 1em;
     }
 }
 
@@ -580,19 +623,18 @@
         border-radius: 12px;
     }
     
-    /* Fix for review ratings display on mobile */
     .review-header {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .review-profile-image {
+        width: 40px;
+        height: 40px;
     }
     
     .user-info {
-        margin-top: 10px;
-        width: 100%;
-    }
-    
-    .difficulty-container-reviews {
-        margin-top: 5px;
+        flex: 1;
     }
     
     .review-user-name {
@@ -609,7 +651,74 @@
     }
     
     .difficulty-circle-reviews {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
     }
+    
+    .report-button {
+        width: 100%;
+        margin-top: 15px;
+    }
+}
+
+.reviews-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 200px;
+    padding: 30px;
+    background-color: rgba(28, 53, 31, 0.5);
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.reviews-loading-text {
+    color: #FFF;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.reviews-loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #FFF;
+    animation: spin-reviews 1s ease-in-out infinite;
+}
+
+@keyframes spin-reviews {
+    to { transform: rotate(360deg); }
+}
+
+/* empty reviews message */
+.empty-reviews-message {
+    background-color: rgba(28, 53, 31, 0.8);
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    margin: 20px 0;
+    border-left: 4px solid #5a8146;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.empty-reviews-message p {
+    color: #fff;
+    font-family: "Ysabeau SC", sans-serif;
+    margin: 8px 0;
+}
+
+.empty-reviews-message p:first-child {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.empty-reviews-message p:last-child {
+    font-size: 16px;
+    color: #b0b0b0;
+    font-style: italic;
 }

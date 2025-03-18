@@ -13,6 +13,7 @@
     aspect-ratio: 4/3;
     max-height: 100%;
     overflow: hidden;
+    border-radius: 8px 0 0 8px; 
 }
 
 .image-experiences {
@@ -103,9 +104,9 @@
 }
 
 .data-text-experiences .fa-clock {
-  margin-right: 4px;
-  margin-bottom: 0;
-  vertical-align: middle;
+    margin-right: 4px;
+    margin-bottom: 0;
+    vertical-align: middle;
 }
 
 .data-text-experiences {
@@ -116,16 +117,16 @@
     margin-bottom: 5px;
 }
 
-.data-text-experiences img{
-  margin-right: 4px;
+.data-text-experiences img {
+    margin-right: 4px;
 }
+
 
 .camino-icon-experiences,
 .calendar-icon-experiences,
 .participantes-icon-experiences {
     width: 18px;
     height: 18px;
-    margin-right: 4px;
 }
 
 .button-experiences {
@@ -172,6 +173,7 @@
         height: 100%;
         max-height: 100%;
         aspect-ratio: 16/9;
+        border-radius: 8px 8px 0 0;
     }
 
     .image-experiences {

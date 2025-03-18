@@ -7,16 +7,7 @@ import { useExperiences } from '../../components/hooks/experiences-hooks/useExpe
 
 // Components
 import ExperienceCard from '../../components/experiences/ExperienceCard';
-
-/**
- * LoadingState component for displaying during data loading
- */
-const LoadingState = () => (
-  <div className="loading-container min-h-screen">
-    <p>Cargando experiencias...</p>
-    <div className="loading-spinner"></div>
-  </div>
-);
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 /**
  * ErrorState component for displaying error messages
@@ -97,7 +88,7 @@ function ExperiencesPage() {
   // Render content based on state
   const renderContent = () => {
     if (loading) {
-      return <LoadingState />;
+      return <LoadingState text="Cargando experiencias..." />;
     }
 
     if (error) {

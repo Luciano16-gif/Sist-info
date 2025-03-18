@@ -9,6 +9,8 @@ import { useAuth } from '../../components/contexts/AuthContext';
 import { db } from '../../firebase-config';
 import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
+import LoadingState from '../../components/common/LoadingState/LoadingState';
+
 /**
  * AdminGuideRequests component - Allows admins to review, approve, or reject
  * guide applications submitted by users
@@ -224,9 +226,7 @@ const AdminGuideRequests = () => {
       
       {/* Loading state */}
       {loading && (
-        <div className="loading-container min-h-screen">
-          <p>Cargando solicitudes...</p>
-        </div>
+        <LoadingState text="Cargando solicitudes..." className="min-h-screen" />
       )}
       
       {/* Error state */}
