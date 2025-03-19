@@ -169,12 +169,12 @@ const AdminResenas = () => {
     }
 
     return (
-        <div className={`inset-0 mx-32 my-8 flex flex-col justify-start items-start px-8 md:px-16 ${adminBaseStyles}`}>
-            <h1 className="text-white text-4xl md:text-5xl font-bold">Reseñas</h1>
-            <h1 className="text-white text-lg md:text-lg">Nuestros usuarios nos dejan su puntuación...</h1>
-            <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
-            <h1 className="text-white text-3xl md:text-3xl font-bold">Informacion Relevante</h1>
-            <div className="flex justify-start space-x-10">
+        <div className={`inset-0 mx-4 md:mx-8 lg:mx-32 my-8 flex flex-col justify-start items-start px-4 md:px-8 lg:px-16 ${adminBaseStyles}`}>
+            <h1 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold">Reseñas</h1>
+            <h1 className="text-white text-base md:text-lg">Nuestros usuarios nos dejan su puntuación...</h1>
+            <hr className="border-1 border-white-600 w-full md:w-96" />
+            <h1 className="text-white text-2xl md:text-3xl font-bold">Informacion Relevante</h1>
+            <div className="flex flex-wrap justify-start gap-4 md:gap-6 lg:gap-10 my-4">
                 <RelevantInfoS number={totalReviews} description="Reseñas Recibidas" />
                 <RelevantInfoS number={reviews5e} description="Reseñas con 5 estrellas" />
                 <RelevantInfoS number={reviews4e} description="Reseñas con 4 estrellas" />
@@ -182,9 +182,9 @@ const AdminResenas = () => {
                 <RelevantInfoS number={reviews2e} description="Reseñas con 2 estrellas" />
                 <RelevantInfoS number={reviews1e} description="Reseñas con 1 estrella" />
             </div>
-            <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+            <hr className="border-1 border-white-600 w-full md:w-96" />
 
-            <h2 className="text-2xl font-bold text-white mt-8">Todas las Reseñas</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-white mt-8">Todas las Reseñas</h2>
             <div className="admin-reviews-grid">
                 {allReviews.map((review) => (
                     <AdminReviewCard key={review.id} review={review} onDelete={handleDeleteReview} />
