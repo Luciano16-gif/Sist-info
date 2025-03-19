@@ -1,4 +1,3 @@
-// BookingPage.jsx
 import React, { useState, useEffect } from 'react';
 import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -6,6 +5,8 @@ import EventCalendar from '../../components/calendar/EventCalendar';
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 import BookingService from '../../components/services/BookingService';
 import ExperienceService from '../../components/services/ExperienceService';
+import LazyImage from '../../components/common/LazyImage/LazyImage';
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -130,7 +131,7 @@ function BookingPage() {
     }, [selectedDate, selectedTime, experience]);
 
     if (loading) {
-        return <div className="loading-container">Cargando...</div>;
+        return <LoadingState text='Cargando experiencia...'/>;
     }
 
     if (!experience) {
@@ -304,22 +305,11 @@ function BookingPage() {
                             <BookingDetail
                                 title="Personas Inscritas"
                                 value={
-                                  selectedTime
-                                    ? `${reservationsForSelectedTime} / ${experience.maxPeople} (Total para ${selectedTime}: ${reservationsForSelectedTime})`
-                                    : `${reservationsForSelectedDate} / ${experience.maxPeople} (Total para la fecha: ${reservationsForSelectedDate})`
+                                    selectedTime
+                                        ? `${availableSlots} / ${experience.maxPeople}`
+                                        : `? / ${experience.maxPeople}`
                                 }
                             />
-                            {/* New field showing available slots */}
-                            {selectedTime && (
-                                <BookingDetail 
-                                    title="Cupos Disponibles" 
-                                    value={
-                                        availableSlots > 0 
-                                            ? `${availableSlots} cupos` 
-                                            : "No hay cupos disponibles"
-                                    } 
-                                />
-                            )}
                         </div>
                         <div className='details-column-booking'>
                             <BookingDetail title="Precio P/P" value={`${experience.price}$`} />

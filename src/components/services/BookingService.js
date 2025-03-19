@@ -14,20 +14,21 @@ import {
 } from 'firebase/firestore';
 
 class BookingService {
-  /**
-   * Check if a date is within the allowed booking window (2 weeks)
-   * @param {Date} date - The date to check
-   * @returns {boolean} - Whether the date is within the allowed window
-   */
-  isWithinBookingWindow(date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
-    
-    const twoWeeksLater = new Date(today);
-    twoWeeksLater.setDate(today.getDate() + 14); // Add 14 days
-    
-    return date >= today && date <= twoWeeksLater;
-  }
+    /**
+     * Check if a date is within the allowed booking window (2 weeks)
+     * @param {Date} date - The date to check
+     * @returns {boolean} - Whether the date is within the allowed window
+     */
+    isWithinBookingWindow(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to start of day
+        
+        const twoWeeksLater = new Date(today);
+        twoWeeksLater.setDate(today.getDate() + 14); // Add 14 days
+        twoWeeksLater.setHours(23, 59, 59, 999); // Set to end of day
+        
+        return date > today && date < twoWeeksLater;
+    } 
 
   /**
    * Format a date object to DD/MM/YYYY string

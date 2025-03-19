@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './BookingProcessPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { db, auth } from '../../firebase-config';
+import { auth } from '../../firebase-config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase-config';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 import BookingService from '../../components/services/BookingService';
-import ExperienceService from '../../components/services/ExperienceService';
 import html2canvas from 'html2canvas';
 import ReactDOMServer from 'react-dom/server';
+import LazyImage from '../../components/common/LazyImage/LazyImage';
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 function BookingProcessPage() {
     const location = useLocation();
@@ -22,7 +24,6 @@ function BookingProcessPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDay, setSelectedDay] = useState('');
     const [experienceGuides, setExperienceGuides] = useState([]);
-    const [availableTimes, setAvailableTimes] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
     const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
@@ -229,8 +230,8 @@ function BookingProcessPage() {
             const locationSelectedDay = location.state?.selectedDay;
             const locationAvailableSlots = location.state?.availableSlots;
 
-            // Redirect if no experience data
-            if (!experienceData) {
+            // Redirect if no experience data or time selection
+            if (!experienceData || !locationSelectedTime) {
                 navigate('/');
                 return;
             }
@@ -269,7 +270,7 @@ function BookingProcessPage() {
                 // Set experience data
                 setExperience(experienceData);
 
-                // Set selected date/time from URL state
+                // Set selected date/time from URL state (these must be present - no fallback)
                 if (locationSelectedDate) {
                     const date = new Date(locationSelectedDate);
                     setSelectedDate(date);
@@ -279,28 +280,40 @@ function BookingProcessPage() {
                         setError("Solo se permiten reservas hasta 2 semanas en el futuro.");
                         setBookingWindowMessage("Solo se permiten reservas hasta 2 semanas en el futuro.");
                     }
+                } else {
+                    // If date is missing, redirect to experiences
+                    navigate('/experiencias');
+                    return;
                 }
                 
+                // Time must be provided from previous page
                 if (locationSelectedTime) {
                     setSelectedTime(locationSelectedTime);
+                } else {
+                    // If time is missing, redirect to experiences
+                    navigate('/experiencias');
+                    return;
                 }
                 
                 if (locationSelectedDay) {
                     setSelectedDay(locationSelectedDay);
+                } else {
+                    // Format the date ourselves if needed
+                    const date = new Date(locationSelectedDate);
+                    setSelectedDay(BookingService.formatDate(date));
                 }
                 
-                if (locationAvailableSlots) {
+                if (locationAvailableSlots !== undefined) {
                     setAvailableSlots(locationAvailableSlots);
+                } else {
+                    // If slots info is missing, default to a safe value
+                    setAvailableSlots(0);
                 }
 
                 // Get guides for this experience
                 if (experienceData.guides && Array.isArray(experienceData.guides)) {
                     setExperienceGuides(experienceData.guides);
                 }
-
-                // Get available time slots
-                const timeSlots = ExperienceService.calculateTimeSlots(experienceData);
-                setAvailableTimes(timeSlots);
 
                 setLoading(false);
                 
@@ -325,7 +338,7 @@ function BookingProcessPage() {
         }
     }, [experience, selectedPeople]);
 
-    // Check availability when selection changes
+    // Check availability when component mounts
     useEffect(() => {
         const checkAvailability = async () => {
             if (!experience || !selectedTime || !selectedDate) {
@@ -341,26 +354,6 @@ function BookingProcessPage() {
                     setAvailableSlots(0);
                     return;
                 }
-
-                // Get availability for this date and time
-                const availability = await BookingService.getAvailableSlots(
-                    experience.id,
-                    selectedDate,
-                    selectedTime
-                );
-
-                if (availability.error) {
-                    setError(availability.error);
-                    setAvailableSlots(0);
-                    return;
-                }
-
-                setAvailableSlots(availability.availableSlots);
-                
-                // Reset selected people if it exceeds available slots
-                if (parseInt(selectedPeople, 10) > availability.availableSlots) {
-                    setSelectedPeople('');
-                }
             } catch (error) {
                 console.error("Error checking availability:", error);
                 setError("Error al verificar disponibilidad");
@@ -369,7 +362,7 @@ function BookingProcessPage() {
         };
 
         checkAvailability();
-    }, [selectedTime, selectedDate, experience]);
+    }, [experience, selectedDate, selectedTime]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -381,12 +374,6 @@ function BookingProcessPage() {
             const scrollAmount = direction === 'left' ? -200 : 200;
             container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
-    };
-
-    const handleTimeSelection = (time) => {
-        setSelectedTime(time);
-        // Reset selected people when changing time
-        setSelectedPeople('');
     };
 
     const handlePeopleSelection = (people) => {
@@ -401,7 +388,7 @@ function BookingProcessPage() {
     };
 
     if (loading) {
-        return <div>Cargando...</div>;
+        return <LoadingState text="Cargando datos de la reserva..." />;
     }
     
     if (error) {
@@ -426,7 +413,7 @@ function BookingProcessPage() {
     }
     
     if (!experience) {
-        return <div>No se encontraron datos de la experiencia.</div>;
+        return <LoadingState text="No se encontraron datos de la experiencia." />;
     }
 
     return (
@@ -444,32 +431,17 @@ function BookingProcessPage() {
                             
                             {/* Booking Window Message */}
                             {bookingWindowMessage && (
-                                <div className="booking-window-message" style={{
-                                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                                    padding: '10px',
-                                    borderRadius: '5px',
-                                    marginBottom: '15px',
-                                    textAlign: 'center',
-                                    color: '#fff'
-                                }}>
+                                <div className="booking-window-message">
                                     <p>{bookingWindowMessage}</p>
                                 </div>
                             )}
                         </div>
                         
-                        {/* Time Selection */}
+                        {/* Selected Time Display (read-only) */}
                         <div className="selection-box-booking-process">
-                            <label>SELECCIONA UN HORARIO</label>
-                            <div className="time-buttons-booking-process">
-                                {availableTimes.map((time) => (
-                                    <button
-                                        key={time}
-                                        onClick={() => handleTimeSelection(time)}
-                                        className={selectedTime === time ? 'selected' : ''}
-                                    >
-                                        {time}
-                                    </button>
-                                ))}
+                            <label>HORARIO SELECCIONADO</label>
+                            <div className="selected-time-display">
+                                {selectedTime}
                             </div>
                         </div>
                         
@@ -525,7 +497,12 @@ function BookingProcessPage() {
                                 <div className="guide-selection-booking-process" ref={guideContainerRef}>
                                     {experienceGuides.map(guide => (
                                         <div key={guide.id} className="guide-card-booking-process">
-                                            <img src={guide.image} alt={guide.name} />
+                                            <LazyImage 
+                                                src={guide.image} 
+                                                alt={guide.name}
+                                                style={{ width: '70px', height: '70px', borderRadius: '50%', marginBottom: '8px' }}
+                                                fallbackSrc="../../src/assets/images/AdminLandingPage/profile_blank.webp"
+                                            />
                                             <div className="guide-info-booking-process">
                                                 <p>{guide.name}</p>
                                                 <p>{guide.lastName}</p>
@@ -575,7 +552,7 @@ function BookingProcessPage() {
                             ) : (
                                 <PayPalButtons
                                     style={{ layout: "horizontal" }}
-                                    disabled={!selectedTime || !selectedPeople || !selectedDate || experienceGuides.length === 0 || availableSlots <= 0}
+                                    disabled={!selectedPeople || experienceGuides.length === 0 || availableSlots <= 0}
                                     createOrder={(data, actions) => {
                                         if (!totalPrice || totalPrice <= 0) {
                                             alert("El precio total debe ser mayor a 0.");
