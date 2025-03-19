@@ -15,10 +15,10 @@ import {
     runTransaction,
     increment 
 } from "firebase/firestore";
-import { db } from './../../firebase-config';
-import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
-import { useAuth } from '../../components/contexts/AuthContext';
-import LoadingState from '../../components/common/LoadingState/LoadingState';
+import { db } from "/src/firebase-config";
+import profileFallbackImage from "/src/assets/images/landing-page/profile_managemente/profile_picture_1.webp";
+import { useAuth } from "../../components/contexts/AuthContext";
+import LoadingState from "../../components/common/LoadingState/LoadingState";
 
 const ErrorState = ({ message }) => (
     <div className="error-container">
