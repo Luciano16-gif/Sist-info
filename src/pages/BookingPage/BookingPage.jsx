@@ -128,7 +128,7 @@ function BookingPage() {
                 // Check if date is within the booking window
                 const isWithinWindow = BookingService.isWithinBookingWindow(selectedDate);
                 if (!isWithinWindow) {
-                    setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+                    setDateError("Solo se permiten reservas hasta 1 mes en el futuro.");
                     setAvailableSlots(0);
                     return;
                 }
