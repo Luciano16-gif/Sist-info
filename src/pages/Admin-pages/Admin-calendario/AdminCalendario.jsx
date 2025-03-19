@@ -12,6 +12,7 @@ const AdminCalendario = () => {
   const [experienceToDelete, setExperienceToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [rejectFeedback, setRejectFeedback] = useState('');
   
   // Use the experiences hook to get all experiences - this is the same data source used by EventCalendar
   const { experiences, loading, error } = useExperiences();
@@ -66,42 +67,56 @@ const AdminCalendario = () => {
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false);
     setExperienceToDelete(null);
+    setRejectFeedback('');
   };
   
   // Function to delete an experience
   const handleConfirmDelete = async () => {
     if (!experienceToDelete) return;
     
+    if (!rejectFeedback.trim()) {
+      alert('Por favor proporcione retroalimentación para el guía antes de eliminar la experiencia.');
+      return;
+    }
+    
     setIsDeleting(true);
     
     try {
-      // Update experience status to "rejected"
+      // Update experience status to "rejected" with feedback
       await experienceFormService.updateExperienceStatus(
         experienceToDelete.id,
         'rejected',
-        'Deleted by admin'
+        rejectFeedback
       );
       
       console.log(`Experience ${experienceToDelete.name} deleted successfully`);
       
-      // Immediately remove from local state
-      const updatedEvents = eventsForSelectedDate.filter(
-        event => event.experienceData.id !== experienceToDelete.id
-      );
-      setEventsForSelectedDate(updatedEvents);
-      
-      // Trigger a refresh of experiences
-      setRefreshTrigger(prev => prev + 1);
-      
       // Close the modal
       handleCloseDeleteModal();
+      
+      // Refresh the page to ensure all data is updated
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting experience:", error);
       alert(`Error al eliminar la experiencia: ${error.message}`);
-    } finally {
       setIsDeleting(false);
     }
   };
+  
+  // Add a useEffect to properly update the events for selected date when refreshTrigger changes
+  useEffect(() => {
+    if (selectedDate) {
+      // Force re-fetch of events for the currently selected date
+      // by temporarily clearing and then re-setting the selectedDate
+      const currentDate = new Date(selectedDate);
+      setSelectedDate(null);
+      
+      // Small delay to ensure state update completes
+      setTimeout(() => {
+        setSelectedDate(currentDate);
+      }, 50);
+    }
+  }, [refreshTrigger]);
   
   return (
     <div className={`inset-0 mx-2 sm:mx-4 md:mx-8 lg:mx-16 xl:mx-24 my-6 flex flex-col justify-start items-start px-4 md:px-8 ${adminBaseStyles}`}>
@@ -189,9 +204,21 @@ const AdminCalendario = () => {
             <p className="mb-4">
               ¿Estás seguro que deseas eliminar la experiencia "{experienceToDelete.name}"?
             </p>
-            <p className="text-red-300 mb-6 text-sm">
+            <p className="text-red-300 mb-4 text-sm">
               Esta acción cambiará el estado de la experiencia a "rechazada" y no será visible para los usuarios.
             </p>
+            
+            <div className="mb-4">
+              <label className="block text-white mb-2">
+                Por favor, proporcione retroalimentación para el guía:
+              </label>
+              <textarea
+                className="w-full bg-[#4A5D3E] text-white rounded-lg p-3 min-h-[100px]"
+                value={rejectFeedback}
+                onChange={(e) => setRejectFeedback(e.target.value)}
+                placeholder="Explique por qué esta experiencia está siendo eliminada..."
+              />
+            </div>
             
             <div className="flex justify-end space-x-4">
               <button
@@ -204,7 +231,7 @@ const AdminCalendario = () => {
               <button
                 onClick={handleConfirmDelete}
                 className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
-                disabled={isDeleting}
+                disabled={isDeleting || !rejectFeedback.trim()}
               >
                 {isDeleting ? 'Eliminando...' : 'Eliminar'}
               </button>

@@ -352,24 +352,32 @@ function ForumPage() {
     };
 
     const handleAddComment = (forumId) => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para comentar.");
-            return;
-        }
-        // Navigate to the forum page and *then* show the popup
-        navigate(`/foro/${forumId}`, { state: { showPopup: true } }); // Pass showPopup in state
+        getCurrentUser().then(user => {
+            if (!user) {
+                // Redireccionar a SignUpPage con mensaje
+                navigate('/signup', {
+                    state: { message: "Debes iniciar sesión para comentar en el foro." }
+                });
+                return;
+            }
+            // Navigate to the forum page and *then* show the popup
+            navigate(`/foro/${forumId}`, { state: { showPopup: true } });
+        });
     };
 
     const handleAddCommentToComment = (forumId, commentId, replyingToUser) => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para comentar.");
-            return;
-        }
-        setReplyingTo(commentId);
-        setReplyingToUserName(replyingToUser);
-        navigate(`/foro/${forumId}`, { state: { showPopup: true } });
+        getCurrentUser().then(user => {
+            if (!user) {
+                // Redireccionar a SignUpPage con mensaje
+                navigate('/signup', {
+                    state: { message: "Debes iniciar sesión para responder a comentarios en el foro." }
+                });
+                return;
+            }
+            setReplyingTo(commentId);
+            setReplyingToUserName(replyingToUser);
+            navigate(`/foro/${forumId}`, { state: { showPopup: true } });
+        });
     };
 
     const handleCloseCommentPopup = () => {
@@ -391,7 +399,10 @@ function ForumPage() {
     const handlePublishComment = async () => {
         const user = await getCurrentUser();
         if (!user) {
-            setError("Debes iniciar sesión para publicar un comentario.");
+            // Redireccionar a SignUpPage con mensaje
+            navigate('/signup', {
+                state: { message: "Debes iniciar sesión para publicar un comentario en el foro." }
+            });
             return;
         }
         if (!newComment.trim()) {
@@ -458,12 +469,16 @@ function ForumPage() {
     };
 
     const handleCreateTopic = () => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para crear un tema.");
-            return;
-        }
-        setShowCreateForumPopup(true);
+        getCurrentUser().then(user => {
+            if (!user) {
+                // Redireccionar a SignUpPage con mensaje
+                navigate('/signup', {
+                    state: { message: "Debes iniciar sesión para crear un tema en el foro." }
+                });
+                return;
+            }
+            setShowCreateForumPopup(true);
+        });
     };
 
     const handleCloseCreateForumPopup = () => {
@@ -548,7 +563,10 @@ function ForumPage() {
 
         const user = await getCurrentUser();
         if (!user) {
-            setReportError("Debes iniciar sesión para reportar contenido.");
+            // Redireccionar a SignUpPage con mensaje
+            navigate('/signup', {
+                state: { message: "Debes iniciar sesión para reportar contenido en el foro." }
+            });
             return;
         }
 
