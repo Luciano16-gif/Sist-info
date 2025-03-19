@@ -640,3 +640,9 @@
 .modal-overlay-gallery .close-button-gallery[style*="position: absolute"]:active {
     transform: scale(0.95);
 }
+
+.upload-modal-title {
+    color: #8AFFB9;
+    font-size: 26px;
+    margin-bottom: 18px;
+}   

@@ -61,14 +61,14 @@ function LoginPage() {
   return (
     <div className="auth-page login-page">
       <div className="auth-container">
-        <h2 className="auth-title login-title">Iniciar Sesión</h2>
+        <h2 className="auth-title login-title" style={{ marginBottom: '1rem' }}>Iniciar Sesión</h2>
         
         {/* Error container that flexibly handles the error message */}
-        <div className="auth-error-container">
+        <div className="auth-error-container" style={{ marginBottom: '0.75rem' }}>
           {errorMessage && <ErrorMessage message={errorMessage} />}
         </div>
         
-        <div className="input-container w-full max-w-sm mx-auto">
+        <div className="input-container w-full max-w-sm mx-auto" style={{ marginTop: '0.5rem' }}>
           <FormField
             type="email"
             value={formData.email}
