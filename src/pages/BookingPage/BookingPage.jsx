@@ -388,7 +388,7 @@ function BookingPage() {
                             <BookingDetail title="Horario" value={experience.time} />
                             <BookingDetail title="Duración Aprox." value={`${experience.duracion} minutos`} />
                             <BookingDetail
-                                title="Personas Inscritas"
+                                title="Cupos Disponibles"
                                 value={
                                     selectedTime
                                         ? `${availableSlots} / ${experience.maxPeople}`

@@ -213,47 +213,82 @@ const AdminEstadisticas = () => {
         const fetchPaymentData = async () => {
             try {
                 const paymentsCollection = collection(db, 'payments');
-                const usersSnapshot = await getDocs(paymentsCollection);
-
+                const paymentsSnapshot = await getDocs(paymentsCollection);
+                
+                console.log(`Found ${paymentsSnapshot.size} payment documents`);
+                
                 const paymentsPerDayMap = {};
                 const revenuePerDayMap = {};
 
-                for (const userDoc of usersSnapshot.docs) {
-                    const userData = userDoc.data();
-
-                    if (userData.bookings && typeof userData.bookings === 'object') {
-                        for (const bookingId in userData.bookings) {
-                            const bookingData = userData.bookings[bookingId];
-
-                            if (bookingData.status === 'COMPLETED' && bookingData.selectedDate) {
-                                const dateStr = bookingData.selectedDate.split('T')[0];
-                                paymentsPerDayMap[dateStr] = (paymentsPerDayMap[dateStr] || 0) + 1;
-
-                                const amount = Number(bookingData.amount.replace(/[^0-9.-]+/g, ""));
-                                if (!isNaN(amount)) {
-                                    revenuePerDayMap[dateStr] = (revenuePerDayMap[dateStr] || 0) + amount;
+                paymentsSnapshot.forEach((doc) => {
+                    try {
+                        const userData = doc.data();
+                        console.log(`Processing user document:`, doc.id);
+                        
+                        // Check if this document has bookings
+                        if (userData.bookings && typeof userData.bookings === 'object') {
+                            // Loop through all bookings in this document
+                            Object.entries(userData.bookings).forEach(([bookingId, bookingData]) => {
+                                console.log(`Processing booking:`, bookingId, bookingData);
+                                
+                                // Check if the booking is completed and has a timestamp
+                                if (bookingData.status === 'COMPLETED' && bookingData.timestamp) {
+                                    // Extract date from timestamp (format: "2025-03-19T03:47:53.941Z")
+                                    const timestampStr = bookingData.timestamp;
+                                    const paymentDate = timestampStr.split('T')[0]; // Get YYYY-MM-DD part
+                                    
+                                    console.log(`Payment date from timestamp: ${paymentDate}`);
+                                    
+                                    // Extract amount
+                                    let amount = 0;
+                                    if (bookingData.amount) {
+                                        // Clean amount string if needed (remove currency symbols, etc.)
+                                        let amountStr = bookingData.amount.toString().replace(/[^0-9.]/g, '');
+                                        amount = parseFloat(amountStr);
+                                    } else if (bookingData.paymentDetails && bookingData.paymentDetails.amount) {
+                                        let amountStr = bookingData.paymentDetails.amount.toString().replace(/[^0-9.]/g, '');
+                                        amount = parseFloat(amountStr);
+                                    }
+                                    
+                                    console.log(`Amount for this booking: ${amount}`);
+                                    
+                                    // Add to maps using the payment date (from timestamp)
+                                    paymentsPerDayMap[paymentDate] = (paymentsPerDayMap[paymentDate] || 0) + 1;
+                                    
+                                    if (!isNaN(amount)) {
+                                        revenuePerDayMap[paymentDate] = (revenuePerDayMap[paymentDate] || 0) + amount;
+                                    }
                                 } else {
-                                    console.warn(`Invalid amount for booking ${bookingId}:`, bookingData.amount);
+                                    console.log(`Skipping booking - Not completed or no timestamp: status=${bookingData.status}, timestamp=${bookingData.timestamp}`);
                                 }
-                            }
+                            });
+                        } else {
+                            console.log(`Document ${doc.id} has no bookings property or it's not an object`);
                         }
+                    } catch (err) {
+                        console.error(`Error processing document ${doc.id}:`, err);
                     }
-                }
-
+                });
+                
+                console.log('Payments per day map:', paymentsPerDayMap);
+                console.log('Revenue per day map:', revenuePerDayMap);
+                
                 const paymentsPerDayData = Object.entries(paymentsPerDayMap)
                     .map(([date, count]) => ({ date, count }))
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
-
+                    
                 const revenuePerDayData = Object.entries(revenuePerDayMap)
                     .map(([date, total]) => ({ date, total }))
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
-
+                    
+                console.log('Final payments data:', paymentsPerDayData);
+                console.log('Final revenue data:', revenuePerDayData);
+                
                 setPaymentsPerDay(paymentsPerDayData);
                 setRevenuePerDay(revenuePerDayData);
-
             } catch (err) {
                 console.error("Error fetching payment data:", err);
-                setError("Failed to load payment statistics.");
+                setError("Failed to load payment statistics. Check console for details.");
             }
         };
 
