@@ -109,8 +109,6 @@ ExperienceStats.propTypes = {
 /**
  * ExperienceImage component with improved image handling
  */
-// Update the ExperienceImage component in ExperienceCard.jsx
-
 export const ExperienceImage = ({ imageUrl, price, alt }) => {
   const [imageFailed, setImageFailed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -205,6 +203,8 @@ const formatReviewDate = (date) => {
 
 /**
  * Calculates the average rating for an experience.
+ * This function remains for backward compatibility but is no longer used
+ * in the main component - we now get the rating directly from Firestore to avoid unnecesary calculations, I love optimzation.
  */
 export const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) {
@@ -220,7 +220,8 @@ export const calculateAverageRating = (reviews) => {
         }
     }
 
-    return Math.round(totalRating / reviews.length);
+    // Round to two decimal places
+    return Math.round((totalRating / reviews.length) * 100) / 100;
 };
 
 /**
@@ -243,8 +244,9 @@ const ExperienceCard = ({ experience, onViewMore, forwardedRef, isReviewsPage = 
     };
   }, []);
 
-  // Calculate average rating ONLY IF reviews exist.
-  const averageRating = experience.reviews ? calculateAverageRating(experience.reviews) : 0;
+  // Use the rating directly from Firestore
+  // This allows real-time updates when ratings change
+  const averageRating = experience.rating || 0;
 
   return (
     <div className={`experience-card-experiences ${isReviewsPage ? 'review-card' : ''}`} ref={forwardedRef}>
