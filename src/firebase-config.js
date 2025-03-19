@@ -1,7 +1,15 @@
-// firebase-config.js - Unified configuration manager
+// firebase-config.js - Unified configuration manager with improved persistence handling
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, connectFirestoreEmulator, enableIndexedDbPersistence } from "firebase/firestore";
+import { 
+  getFirestore, 
+  connectFirestoreEmulator, 
+  enableIndexedDbPersistence,
+  CACHE_SIZE_UNLIMITED,
+  initializeFirestore, 
+  persistentLocalCache,
+  persistentMultipleTabManager 
+} from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
@@ -47,86 +55,117 @@ let authError = null;
 let functions;
 let functionsError = null;
 
-// Use emulators if the environment variable is set to true
-if (import.meta.env.VITE_USE_EMULATORS === "true") {
+// Initialize the Firebase app
+try {
   app = initializeApp(firebaseConfig);
   console.log("Firebase initialized");
+} catch (error) {
+  console.error("Error initializing Firebase app:", error);
+  firebaseError = error;
+}
+
+// Use emulators if the environment variable is set to true
+if (import.meta.env.VITE_USE_EMULATORS === "true") {
   try {
     db = getFirestore(app);
     console.log("Firestore initialized");
     connectFirestoreEmulator(db, "localhost", 8080);
   } catch (error) {
-    console.log("Error initializing Firestore", error);
+    console.error("Error initializing Firestore with emulator:", error);
     firestoreError = error;
   }
+  
   try {
     functions = getFunctions(app);
     console.log("Functions initialized");
     connectFunctionsEmulator(functions, "localhost", 5001);
   } catch (error) {
-    console.log("Error initializing Functions", error);
+    console.error("Error initializing Functions with emulator:", error);
     functionsError = error;
   }
+  
   try {
     auth = getAuth(app);
     console.log("Auth initialized");
     connectAuthEmulator(auth, "http://localhost:9099");
   } catch (error) {
-    console.log("Error initializing Auth", error);
+    console.error("Error initializing Auth with emulator:", error);
     authError = error;
   }
+  
   console.log("Using Firebase Emulators");
 } else {
-  app = initializeApp(firebaseConfig);
-  console.log("Firebase initialized");
+  // Initialize services for production
   try {
     analytics = getAnalytics(app);
     console.log("Analytics initialized");
   } catch (error) {
-    console.log("Error initializing Analytics", error);
+    console.warn("Error initializing Analytics - this is common in dev environments:", error);
     analyticsError = error;
   }
+
+  // Initialize Firestore with better persistence settings
   try {
-    db = getFirestore(app);
-    console.log("Firestore initialized");
+    // Use the new method that supports multi-tab usage
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+        cacheSizeBytes: CACHE_SIZE_UNLIMITED
+      })
+    });
+    console.log("Firestore initialized with robust persistence settings");
+  } catch (initError) {
+    console.error("Error initializing Firestore with modern settings:", initError);
     
-    // Enable offline persistence for Firestore
-    if (db) {
-      (async () => {
-        try {
-          await enableIndexedDbPersistence(db);
-          console.log("Firestore persistence has been enabled.");
-        } catch (err) {
-          if (err.code === 'failed-precondition') {
-            // Multiple tabs open, persistence can only be enabled in one tab at a time
-            console.log("Persistence failed: Multiple tabs open");
-          } else if (err.code === 'unimplemented') {
-            // The current browser does not support all of the features required for persistence
-            console.log("Persistence not supported by this browser");
-          } else {
-            console.error("Unexpected error when enabling persistence:", err);
+    // Fallback to traditional method if newer approach fails
+    try {
+      db = getFirestore(app);
+      console.log("Firestore initialized with legacy method");
+      
+      // Only try to enable persistence if not already enabled
+      if (typeof window !== 'undefined' && window.navigator.onLine) {
+        (async () => {
+          try {
+            await enableIndexedDbPersistence(db);
+            console.log("Firestore persistence has been enabled");
+          } catch (err) {
+            if (err.code === 'failed-precondition') {
+              // Multiple tabs open, persistence can only be enabled in one tab at a time
+              console.warn("Persistence not enabled: Multiple tabs open");
+            } else if (err.code === 'unimplemented') {
+              // Browser doesn't support persistence
+              console.warn("Persistence not supported by this browser");
+            } else {
+              console.error("Unexpected error when enabling persistence:", err);
+            }
+            // Continue without persistence - app will still work
           }
-        }
-      })();
+        })();
+      } else {
+        console.log("Skipping persistence - offline or not in browser environment");
+      }
+    } catch (fallbackError) {
+      console.error("Error initializing Firestore with fallback method:", fallbackError);
+      firestoreError = fallbackError;
     }
-  } catch (error) {
-    console.log("Error initializing Firestore", error);
-    firestoreError = error;
   }
+  
   try {
     auth = getAuth(app);
     console.log("Auth initialized");
   } catch (error) {
-    console.log("Error initializing Auth", error);
+    console.error("Error initializing Auth:", error);
     authError = error;
   }
+  
   try {
     functions = getFunctions(app);
     console.log("Functions initialized");
   } catch (error) {
-    console.log("Error initializing Functions", error);
+    console.error("Error initializing Functions:", error);
     functionsError = error;
   }
+  
   console.log("Using Firebase Real Services");
 }
 
