@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useExperiences } from '../hooks/experiences-hooks/useExperiences';
 import { experiencesToCalendarEvents, getEventsForDay } from '../utils/calendarUtils';
 import LoadingOverlay from '../common/LoadingOverlay';
+import BookingService from '../../components/services/BookingService';
 
 const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -98,12 +99,23 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
     return currentYear < today.year || (currentYear === today.year && currentMonth < today.month);
   };
 
-  // Check if a date is a valid day based on validDays prop
+  // Check if a date is within the booking window (today to 2 weeks from now)
+  const isWithinBookingWindow = (day) => {
+    if (!day) return false;
+    
+    const date = new Date(currentYear, currentMonth, day);
+    return BookingService.isWithinBookingWindow(date);
+  };
+
+  // Check if a date is a valid day based on validDays prop and booking window
   const isValidDay = (day) => {
     // First check if the date is in the past
     if (isPastDate(day)) return false;
     
-    // If no validDays specified, any future or today date is valid
+    // Check if the date is within the booking window (2 weeks)
+    if (!isWithinBookingWindow(day)) return false;
+    
+    // If no validDays specified, any future or today date within window is valid
     if (!day || validDays.length === 0) return true; 
     
     const date = new Date(currentYear, currentMonth, day);
@@ -265,6 +277,12 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
     // Don't allow selection of past dates
     if (isPastDate(day)) return;
     
+    // Don't allow selection of dates outside the booking window
+    if (!isWithinBookingWindow(day)) {
+      alert("Solo se permiten reservas hasta 2 semanas en el futuro.");
+      return;
+    }
+    
     // Only allow selection if day is valid (when validDays is provided)
     if (validDays.length > 0 && !isValidDay(day)) {
       return; // Don't select invalid days
@@ -276,6 +294,13 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
   const handleConfirmDate = () => {
     if (selectedDate) {
       const fullDate = new Date(currentYear, currentMonth, selectedDate);
+      
+      // Confirm the date is within booking window before passing it up
+      if (!BookingService.isWithinBookingWindow(fullDate)) {
+        alert("Solo se permiten reservas hasta 2 semanas en el futuro.");
+        return;
+      }
+      
       onDateSelect(fullDate);
     }
   };
@@ -290,6 +315,18 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
   useEffect(() => {
     dayRefs.current = {};
   }, [daysInMonth]);
+
+  // Get the date 2 weeks from today for display
+  const twoWeeksFromNow = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 14);
+    return date;
+  }, []);
+
+  // Format date for display (DD/MM/YYYY)
+  const formatDateForDisplay = (date) => {
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+  };
 
   return (
     <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
@@ -307,6 +344,12 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
           <p>{error}</p>
         </div>
       )}
+      
+      {/* Booking Window Notice */}
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 mb-4 rounded" role="alert">
+        <p className="font-medium">Información de reservas</p>
+        <p className="text-sm">Solo se permiten reservas hasta 2 semanas en el futuro (hasta el {formatDateForDisplay(twoWeeksFromNow)}).</p>
+      </div>
       
       {/* Valid Days Instructions - shown when validDays is provided */}
       {validDays && validDays.length > 0 && (
@@ -367,6 +410,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                   const cellId = `${weekIndex}-${dayIndex}`;
                   const validDay = day && isValidDay(day);
                   const pastDay = day && isPastDate(day);
+                  const withinWindow = day && isWithinBookingWindow(day);
 
                   return (
                     <div
@@ -376,15 +420,24 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                       tabIndex={day && validDay ? 0 : -1}
                       aria-selected={isSelected}
                       aria-label={day ? `${day} de ${months[currentMonth]} de ${currentYear}${dayEvents.length > 0 ? `, ${dayEvents.length} experiencias` : ''}` : undefined}
+                      title={
+                        !day ? "" : 
+                        pastDay ? "No se pueden seleccionar fechas pasadas" :
+                        !withinWindow ? "Solo se permiten reservas hasta 2 semanas en el futuro" :
+                        validDays.length > 0 && !validDay ? `Esta experiencia no ocurre este día. Por favor, selecciona un ${validDays.join(' o ')}` :
+                        ""
+                      }
                       className={`relative rounded-md sm:rounded-lg min-h-[38px] sm:min-h-[50px] p-1 sm:p-2 transition-colors ${
                         isToday ? 'bg-green-500' :
                         isSelected ? 'bg-blue-500' :
                         pastDay ? 'bg-gray-400 opacity-40' :
+                        !withinWindow ? 'bg-gray-400 opacity-40' :
                         day && validDay ? 'hover:bg-gray-700' : 
                         ''
                       } ${
                         day ? 
                           pastDay ? 'cursor-not-allowed opacity-40' :
+                          !withinWindow ? 'cursor-not-allowed opacity-40' :
                           validDay ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                         : ''
                       }`}
@@ -411,6 +464,9 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                               )}
                             </div>
                           )}
+                          {!withinWindow && !pastDay && (
+                            <div className="absolute top-0 right-0 w-0 h-0 border-t-8 border-r-8 border-yellow-500 border-solid rounded-bl-lg" title="Fuera del período de reserva" />
+                          )}
                         </>
                       )}
                     </div>
@@ -432,6 +488,13 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
               <h3 className="text-lg sm:text-xl text-white font-semibold mb-2">
                 Experiencias para el {selectedDate}/{currentMonth + 1}/{currentYear}
               </h3>
+              
+              {/* Outside booking window message */}
+              {selectedDate && !isWithinBookingWindow(selectedDate) && (
+                <div className="bg-yellow-100 border-left-4 border-yellow-500 text-yellow-800 p-3 mb-3 rounded">
+                  <p className="font-medium">Esta fecha está fuera del período de reserva de 2 semanas.</p>
+                </div>
+              )}
               
               {/* Scrollable container for events */}
               <div className="overflow-y-auto max-h-[250px] sm:max-h-[300px] md:max-h-[350px] pr-2 space-y-3">
@@ -483,7 +546,11 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleConfirmDate}
-                disabled={!selectedDate || (validDays.length > 0 && !isValidDay(selectedDate))}
+                disabled={
+                  !selectedDate || 
+                  (validDays.length > 0 && !isValidDay(selectedDate)) ||
+                  !isWithinBookingWindow(selectedDate)
+                }
               >
                 Seleccionar Fecha
               </button>

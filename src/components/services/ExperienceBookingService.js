@@ -1,4 +1,3 @@
-// src/components/services/ExperienceBookingService.js
 import { db } from '../../firebase-config';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 
