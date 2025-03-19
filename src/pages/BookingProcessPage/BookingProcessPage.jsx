@@ -43,7 +43,7 @@ function BookingProcessPage() {
             if (!auth.currentUser) {
                 throw new Error("Usuario no autenticado");
             }
-
+    
             const bookingData = {
                 experienceId: experience.id,
                 userId: currentUser.id,
@@ -68,14 +68,14 @@ function BookingProcessPage() {
                     payerEmail: details.payer.email_address,
                 }
             };
-
+    
             // Create the booking using the service
             const result = await BookingService.createBooking(bookingData);
-
+    
             if (!result.success) {
                 throw new Error(result.error || "Error al crear la reserva");
             }
-
+    
             // Store payment details for receipt
             setPaymentDetails({
                 transactionId: details.id,
@@ -84,7 +84,7 @@ function BookingProcessPage() {
                 amount: details.purchase_units[0].amount.value,
                 currency: details.purchase_units[0].amount.currency_code,
                 status: details.status,
-                timestamp: new Date(),
+                timestamp: new Date().toISOString(), // Use ISO string instead of a Date object
                 experienceId: experience.id,
                 userId: currentUser.id,
                 selectedTime,
@@ -99,11 +99,11 @@ function BookingProcessPage() {
                 selectedDay,
                 experienceCode: result.experienceCode || experienceCode,
             });
-
+    
             setIsPaymentSuccessful(true);
         } catch (error) {
             console.error("Error saving payment details:", error);
-            alert("Hubo un error al guardar los detalles del pago.");
+            alert("Hubo un error al guardar los detalles del pago: " + (error.message || "Error desconocido"));
         }
     };
 

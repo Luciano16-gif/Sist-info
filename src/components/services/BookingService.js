@@ -134,15 +134,15 @@ class BookingService {
         guides,
         paymentDetails
       } = bookingData;
-
+  
       // Validate date is within booking window
-      if (!this.isWithinBookingWindow(selectedDate)) {
+      if (!(await this.isWithinBookingWindow(selectedDate, experienceId))) {
         return {
           success: false,
-          error: "Las reservas solo están disponibles hasta 2 semanas en el futuro"
+          error: "Esta fecha está fuera del período de reserva permitido"
         };
       }
-
+  
       // Format date for storing in Firestore
       const formattedDate = this.formatDate(selectedDate);
       
@@ -163,9 +163,12 @@ class BookingService {
           error: `No hay suficientes cupos disponibles. Solo quedan ${availability.availableSlots} cupos.` 
         };
       }
-
+  
       // Generate a unique code for this booking
       const experienceCode = this.generateExperienceCode();
+      
+      // Use a regular Date object instead of serverTimestamp() for arrays
+      const currentTimestamp = new Date().toISOString();
       
       // Create the booking object
       const bookingRecord = {
@@ -175,7 +178,7 @@ class BookingService {
         selectedPeople,
         people: parseInt(selectedPeople, 10),
         status: "COMPLETED",
-        timestamp: serverTimestamp(),
+        timestamp: currentTimestamp, // Using ISO string instead of serverTimestamp
         experienceCode,
         user: {
           id: userId,
@@ -187,7 +190,7 @@ class BookingService {
         transactionId: paymentDetails?.id || null,
         paymentDetails: paymentDetails || null
       };
-
+  
       // 1. Update the experience reservations
       const experienceRef = doc(db, "Experiencias", experienceId);
       const expSnapshot = await getDoc(experienceRef);
@@ -215,7 +218,7 @@ class BookingService {
       } else {
         return { success: false, error: "Experiencia no encontrada" };
       }
-
+  
       // 2. Add to user's payment/bookings collection
       if (userEmail) {
         const userPaymentsRef = doc(db, "payments", userEmail);
@@ -231,7 +234,7 @@ class BookingService {
           });
         }
       }
-
+  
       return {
         success: true,
         bookingRecord,
