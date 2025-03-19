@@ -6,10 +6,7 @@ import groupIcon from "../../assets/images/landing-page-admin/group.webp";
 import applicationIcon from "../../assets/images/landing-page-admin/application.webp";
 import wayIcon from "../../assets/images/landing-page-admin/way.webp";
 import calendarIcon from "../../assets/images/landing-page-admin/calendar.webp";
-import puzzleIcon from "../../assets/images/landing-page-admin/puzzle.webp";
-import messagesIcon from "../../assets/images/landing-page-admin/message.webp";
 import diagramIcon from "../../assets/images/landing-page-admin/diagram.webp";
-import ideaIcon from "../../assets/images/landing-page-admin/idea.webp";
 import discussionIcon from "../../assets/images/landing-page-admin/discussion.webp";
 import reviewIcon from "../../assets/images/landing-page-admin/review.webp";
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
@@ -21,10 +18,7 @@ const SIDEBAR_ITEMS = [
   { href: "/admin-galeria", label: "Galería", icon: applicationIcon },
   { href: "/admin-rutas", label: "Gestión Rutas", icon: wayIcon },
   { href: "/admin-calendario", label: "Calendario", icon: calendarIcon },
-  { href: "/admin-actividades", label: "Actividades", icon: puzzleIcon },
-  { href: "/admin-mensajes", label: "Mensajes", icon: messagesIcon },
   { href: "/admin-estadisticas", label: "Estadísticas", icon: diagramIcon },
-  { href: "/admin-tips", label: "Tips", icon: ideaIcon },
   { href: "/admin-foro", label: "Foro", icon: discussionIcon },
   { href: "/admin-resena", label: "Reseña", icon: reviewIcon },
 ];
