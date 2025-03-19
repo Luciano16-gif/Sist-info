@@ -144,11 +144,12 @@
     font-weight: 500;
 }
 
+/* Improved text handling */
 .forum-text-forum {
     font-size: 16px;
     font-weight: 400;
     color: #333;
-    white-space: pre-line;
+    white-space: normal; /* Changed from pre-line for better wrapping */
     margin: 16px 0;
     overflow: hidden;
     max-height: 180px;
@@ -156,12 +157,21 @@
     line-height: 1.5;
     mask-image: linear-gradient(to bottom, black, black 80%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black, black 80%, transparent 100%);
+    word-wrap: break-word; /* Break words to prevent overflow */
+    overflow-wrap: break-word; /* Modern version of word-wrap */
+    hyphens: auto; /* Add hyphens if possible */
+    text-overflow: ellipsis; /* Add ellipsis for overflow */
 }
 
 .forum-text-no-fade-forum {
     max-height: none;
     mask-image: none;
     -webkit-mask-image: none;
+    margin: 20px 0;
+    padding: 10px 0;
+    display: block;
+    clear: both;
+    width: 100%;
 }
 
 .forum-buttons-forum {
@@ -344,6 +354,19 @@
     position: relative;
 }
 
+/* Add spacing for individual forum post content */
+.original-post-forum .forum-content-forum {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+    position: relative;
+}
+
+.original-post-forum .forum-text-forum {
+    margin: 25px 0;
+    flex-grow: 1;
+}
+
 .comments-container-forum {
     width: 100%;
     display: flex;
@@ -382,10 +405,14 @@
     color: rgba(255, 255, 255, 0.85);
 }
 
+/* Improved comment text handling */
 .comment-text-forum {
-    white-space: pre-line;
+    white-space: normal; /* Changed from pre-line for better wrapping */
     line-height: 1.5;
     font-size: 16px;
+    word-wrap: break-word; /* Break words to prevent overflow */
+    overflow-wrap: break-word; /* Modern version of word-wrap */
+    hyphens: auto; /* Add hyphens if possible */
 }
 
 .comment-content-forum {
@@ -457,6 +484,24 @@
     text-align: center;
 }
 
+/* Textarea container with character counter */
+.textarea-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.character-counter {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 14px;
+    color: #666;
+    background-color: rgba(245, 245, 245, 0.8);
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
 .comment-input {
     width: 95%;
     height: 160px;
@@ -468,6 +513,8 @@
     font-size: 18px;
     font-family: "Ysabeau SC";
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    word-wrap: break-word; /* Ensure text wraps properly */
+    overflow-wrap: break-word;
 }
 
 .comment-input:focus {

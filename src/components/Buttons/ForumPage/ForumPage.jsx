@@ -8,6 +8,8 @@ import LazyImage from '../../common/LazyImage/LazyImage';
 import LoadingState from '../../common/LoadingState/LoadingState';
 import ErrorBoundary from '../../common/errorBoundary/ErrorBoundary';
 
+const MAX_DESCRIPTION_LENGTH = 200; // Define maximum character length for descriptions
+
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
         const auth = getAuth();
@@ -352,32 +354,24 @@ function ForumPage() {
     };
 
     const handleAddComment = (forumId) => {
-        getCurrentUser().then(user => {
-            if (!user) {
-                // Redireccionar a SignUpPage con mensaje
-                navigate('/signup', {
-                    state: { message: "Debes iniciar sesión para comentar en el foro." }
-                });
-                return;
-            }
-            // Navigate to the forum page and *then* show the popup
-            navigate(`/foro/${forumId}`, { state: { showPopup: true } });
-        });
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para comentar.");
+            return;
+        }
+        // Navigate to the forum page and *then* show the popup
+        navigate(`/foro/${forumId}`, { state: { showPopup: true } }); // Pass showPopup in state
     };
 
     const handleAddCommentToComment = (forumId, commentId, replyingToUser) => {
-        getCurrentUser().then(user => {
-            if (!user) {
-                // Redireccionar a SignUpPage con mensaje
-                navigate('/signup', {
-                    state: { message: "Debes iniciar sesión para responder a comentarios en el foro." }
-                });
-                return;
-            }
-            setReplyingTo(commentId);
-            setReplyingToUserName(replyingToUser);
-            navigate(`/foro/${forumId}`, { state: { showPopup: true } });
-        });
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para comentar.");
+            return;
+        }
+        setReplyingTo(commentId);
+        setReplyingToUserName(replyingToUser);
+        navigate(`/foro/${forumId}`, { state: { showPopup: true } });
     };
 
     const handleCloseCommentPopup = () => {
@@ -399,10 +393,7 @@ function ForumPage() {
     const handlePublishComment = async () => {
         const user = await getCurrentUser();
         if (!user) {
-            // Redireccionar a SignUpPage con mensaje
-            navigate('/signup', {
-                state: { message: "Debes iniciar sesión para publicar un comentario en el foro." }
-            });
+            setError("Debes iniciar sesión para publicar un comentario.");
             return;
         }
         if (!newComment.trim()) {
@@ -469,16 +460,12 @@ function ForumPage() {
     };
 
     const handleCreateTopic = () => {
-        getCurrentUser().then(user => {
-            if (!user) {
-                // Redireccionar a SignUpPage con mensaje
-                navigate('/signup', {
-                    state: { message: "Debes iniciar sesión para crear un tema en el foro." }
-                });
-                return;
-            }
-            setShowCreateForumPopup(true);
-        });
+        const user = getCurrentUser();
+        if (!user) {
+            setError("Debes iniciar sesión para crear un tema.");
+            return;
+        }
+        setShowCreateForumPopup(true);
     };
 
     const handleCloseCreateForumPopup = () => {
@@ -491,8 +478,13 @@ function ForumPage() {
         setNewForumTitle(event.target.value);
     };
 
+    // Modified to enforce character limit
     const handleForumDescriptionChange = (event) => {
-        setNewForumDescription(event.target.value);
+        const text = event.target.value;
+        // Only update if under character limit
+        if (text.length <= MAX_DESCRIPTION_LENGTH) {
+            setNewForumDescription(text);
+        }
     };
 
     const handlePublishForum = async () => {
@@ -503,6 +495,10 @@ function ForumPage() {
         }
         if (!newForumTitle.trim() || !newForumDescription.trim()) {
             setError("El título y la descripción no pueden estar vacíos.");
+            return;
+        }
+        if (newForumDescription.length > MAX_DESCRIPTION_LENGTH) {
+            setError(`La descripción no puede exceder ${MAX_DESCRIPTION_LENGTH} caracteres.`);
             return;
         }
         try {
@@ -563,10 +559,7 @@ function ForumPage() {
 
         const user = await getCurrentUser();
         if (!user) {
-            // Redireccionar a SignUpPage con mensaje
-            navigate('/signup', {
-                state: { message: "Debes iniciar sesión para reportar contenido en el foro." }
-            });
+            setReportError("Debes iniciar sesión para reportar contenido.");
             return;
         }
 
@@ -812,12 +805,18 @@ function ForumPage() {
                                             onChange={handleForumTitleChange}
                                             style={{ height: "50px" }}
                                         />
-                                        <textarea
-                                            className="comment-input"
-                                            placeholder="Descripción del foro"
-                                            value={newForumDescription}
-                                            onChange={handleForumDescriptionChange}
-                                        />
+                                        <div className="textarea-container">
+                                            <textarea
+                                                className="comment-input"
+                                                placeholder="Descripción del foro"
+                                                value={newForumDescription}
+                                                onChange={handleForumDescriptionChange}
+                                                maxLength={MAX_DESCRIPTION_LENGTH}
+                                            />
+                                            <div className="character-counter">
+                                                {newForumDescription.length}/{MAX_DESCRIPTION_LENGTH}
+                                            </div>
+                                        </div>
                                         <button className="publish-button" onClick={handlePublishForum}>
                                             Publicar Foro
                                         </button>

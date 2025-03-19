@@ -65,6 +65,30 @@ class ExperienceService {
           }
         }
 
+        // Process dates - either specific dates or days of week
+        let days = '';
+        if (data.fechas) {
+          if (Array.isArray(data.fechas)) {
+            if (data.fechas.length > 0 && typeof data.fechas[0] === 'string' && data.fechas[0].includes('-')) {
+              // These are specific dates in ISO format - convert to day names for display
+              // But keep the actual dates for validation
+              const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+              
+              // Get unique day names represented in the dates
+              const daysSet = new Set();
+              data.fechas.forEach(dateStr => {
+                const date = new Date(dateStr);
+                daysSet.add(dayNames[date.getDay()]);
+              });
+              
+              days = Array.from(daysSet).join(', ');
+            } else {
+              // Legacy: These are day names
+              days = data.fechas.join(', ');
+            }
+          }
+        }
+
         // Format the experience data
         const experience = {
           id: docSnapshot.id,
@@ -75,7 +99,7 @@ class ExperienceService {
           distance: `${data.longitudRecorrido || 0} km`,
           duracion: data.duracionRecorrido || 0,
           time: `${data.horarioInicio || '--:--'} - ${data.horarioFin || '--:--'}`,
-          days: Array.isArray(data.fechas) ? data.fechas.join(', ') : '',
+          days: days,
           maxPeople: data.maximoUsuarios || 0,
           minPeople: data.minimoUsuarios || 0,
           availableSlots: data.cuposDisponibles || 0,
@@ -145,6 +169,30 @@ class ExperienceService {
         }
       }
       
+      // Process dates - either specific dates or days of week
+      let days = '';
+      if (data.fechas) {
+        if (Array.isArray(data.fechas)) {
+          if (data.fechas.length > 0 && typeof data.fechas[0] === 'string' && data.fechas[0].includes('-')) {
+            // These are specific dates in ISO format - convert to day names for display
+            // But keep the actual dates for validation
+            const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            
+            // Get unique day names represented in the dates
+            const daysSet = new Set();
+            data.fechas.forEach(dateStr => {
+              const date = new Date(dateStr);
+              daysSet.add(dayNames[date.getDay()]);
+            });
+            
+            days = Array.from(daysSet).join(', ');
+          } else {
+            // Legacy: These are day names
+            days = data.fechas.join(', ');
+          }
+        }
+      }
+      
       // Get guides data
       const guides = [];
       if (data.guias && Array.isArray(data.guias)) {
@@ -196,7 +244,7 @@ class ExperienceService {
         distance: `${data.longitudRecorrido || 0} km`,
         duracion: data.duracionRecorrido || 0,
         time: `${data.horarioInicio || '--:--'} - ${data.horarioFin || '--:--'}`,
-        days: Array.isArray(data.fechas) ? data.fechas.join(', ') : '',
+        days: days,
         maxPeople: data.maximoUsuarios || 0,
         minPeople: data.minimoUsuarios || 0,
         availableSlots: data.cuposDisponibles || 0,
@@ -285,24 +333,50 @@ class ExperienceService {
   }
 
   /**
-   * Check if a day of the week is available for an experience
+   * Check if a specific date is available for an experience
    * @param {Object} experience - Experience data
-   * @param {string} dayName - Day name (e.g., "Lunes")
-   * @returns {boolean} - Whether the day is available
+   * @param {Date} date - Date to check
+   * @returns {boolean} - Whether the date is available
    */
-  isDayAvailable(experience, dayName) {
-    if (!experience || !dayName || !experience.days) return false;
+  isDateAvailable(experience, date) {
+    if (!experience || !date) return false;
     
-    const days = Array.isArray(experience.days) 
-      ? experience.days 
-      : experience.days.split(', ');
+    // Check if experience has specific dates in the new format
+    if (experience.rawData && experience.rawData.fechas && 
+        Array.isArray(experience.rawData.fechas) &&
+        experience.rawData.fechas.length > 0 && 
+        typeof experience.rawData.fechas[0] === 'string' && 
+        experience.rawData.fechas[0].includes('-')) {
+        
+      // Convert to date objects for proper comparison
+      return experience.rawData.fechas.some(dateStr => {
+        const expDate = new Date(dateStr);
+        return (
+          expDate.getFullYear() === date.getFullYear() &&
+          expDate.getMonth() === date.getMonth() &&
+          expDate.getDate() === date.getDate()
+        );
+      });
+    }
+    
+    // Legacy support: Check if the day of week is available
+    if (experience.days) {
+      const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const dayName = dayNames[date.getDay()];
       
-    const lowercaseDayName = dayName.toLowerCase();
+      const days = Array.isArray(experience.days) 
+        ? experience.days 
+        : experience.days.split(', ');
+      
+      const lowercaseDayName = dayName.toLowerCase();
+      
+      return days.some(day => 
+        day.toLowerCase() === lowercaseDayName || 
+        day.toLowerCase().startsWith(lowercaseDayName.substring(0, 3))
+      );
+    }
     
-    return days.some(day => 
-      day.toLowerCase() === lowercaseDayName || 
-      day.toLowerCase().startsWith(lowercaseDayName.substring(0, 3))
-    );
+    return false;
   }
   
   /**
