@@ -72,7 +72,6 @@
 
 .title-booking-process {
     color: #FFF;
-    font-family: "Ysabeau SC", sans-serif;
     font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 800;
     line-height: 1.2;
@@ -94,7 +93,6 @@
 
 .selection-box-booking-process label {
     color: #FFF;
-    font-family: "Ysabeau SC", sans-serif;
     font-size: clamp(1rem, 1.5vw, 1.2rem);
     font-weight: 700;
     line-height: 1.2;
@@ -286,7 +284,6 @@
 
 .details-title-booking-process {
     color: #FFF;
-    font-family: "Ysabeau SC", sans-serif;
     font-size: clamp(1.3rem, 2.5vw, 1.8rem);
     font-weight: 700;
     line-height: 1.2;
@@ -295,7 +292,6 @@
 
 .details-booking-process-p {
     color: #FFF;
-    font-family: "Ysabeau SC", sans-serif;
     font-size: clamp(0.8rem, 1.2vw, 1rem);
     margin-bottom: 5px;
 }
@@ -305,7 +301,6 @@
     color: white;
     margin: 5px 0 15px;
     font-weight: bold;
-    font-family: "Ysabeau SC", sans-serif;
     letter-spacing: 2px;
 }
 
@@ -439,7 +434,6 @@
     margin-top: 10px;
     font-size: 0.9rem;
     text-align: center;
-    font-family: "Ysabeau SC", sans-serif;
 }
 
 .no-slots-message {
@@ -447,5 +441,20 @@
     margin-top: 10px;
     font-size: 0.9rem;
     text-align: center;
-    font-family: "Ysabeau SC", sans-serif;
+}
+
+
+.selected-time-display {
+    background-color: rgb(255, 206, 102, 0.1);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+
+/* Add a subtle highlight effect for the selected time */
+.selected-time-display {
+    border-left: 3px solid #ffce66;
 }

@@ -434,3 +434,16 @@
         line-height: 14px;
     }
 }
+
+.booking-window-message {
+    background-color: rgba(240, 225, 180, 0.3);
+    backdrop-filter: blur(4px);
+    border-left: 3px solid #f0c64a;
+    color: #fff;
+    padding: 10px 12px;
+    margin-top: 10px;
+    border-radius: 4px;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
