@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExperiences } from '../hooks/experiences-hooks/useExperiences';
-import { experiencesToCalendarEvents, getEventsForDay } from '../utils/calendarUtils';
+import { experiencesToCalendarEvents, getEventsForDay, formatDateString } from '../utils/calendarUtils';
 import LoadingOverlay from '../common/LoadingOverlay';
 import BookingService from '../../components/services/BookingService';
 
-const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
+const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear()); // Use current year
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(null);
   const [focusedCell, setFocusedCell] = useState(null);
   const [isChangingMonth, setIsChangingMonth] = useState(false);
@@ -107,7 +107,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
     return BookingService.isWithinBookingWindow(date);
   };
 
-  // Check if a date is a valid day based on validDays prop and booking window
+  // Check if a date is a valid day based on validDates prop and booking window
   const isValidDay = (day) => {
     // First check if the date is in the past
     if (isPastDate(day)) return false;
@@ -115,22 +115,22 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
     // Check if the date is within the booking window (2 weeks)
     if (!isWithinBookingWindow(day)) return false;
     
-    // If no validDays specified, any future or today date within window is valid
-    if (!day || validDays.length === 0) return true; 
+    // If no validDates specified, any future or today date within window is valid
+    if (!day || validDates.length === 0) return true;
     
-    const date = new Date(currentYear, currentMonth, day);
-    const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const shortDayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    const dayName = dayNames[date.getDay()];
-    const shortDayName = shortDayNames[date.getDay()];
+    // For the new system, validDates contains specific dates in ISO string format
+    const dateToCheck = new Date(currentYear, currentMonth, day);
+    const dateString = formatDateString(dateToCheck);
     
-    // Check if this day is in valid days (accounting for different formats)
-    return validDays.some(validDay => {
-      const dayStr = validDay.trim();
-      return dayStr.toLowerCase() === dayName.toLowerCase() || 
-             dayStr.toLowerCase() === shortDayName.toLowerCase() ||
-             dayName.toLowerCase().startsWith(dayStr.toLowerCase()) ||
-             shortDayName.toLowerCase().startsWith(dayStr.toLowerCase());
+    // Check if this specific date is in the validDates array
+    return validDates.some(validDate => {
+      // Convert to date objects for proper comparison
+      const validDateObj = new Date(validDate);
+      return (
+        validDateObj.getFullYear() === dateToCheck.getFullYear() &&
+        validDateObj.getMonth() === dateToCheck.getMonth() &&
+        validDateObj.getDate() === dateToCheck.getDate()
+      );
     });
   };
 
@@ -283,8 +283,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
       return;
     }
     
-    // Only allow selection if day is valid (when validDays is provided)
-    if (validDays.length > 0 && !isValidDay(day)) {
+    // Only allow selection if day is valid (when validDates is provided)
+    if (validDates.length > 0 && !isValidDay(day)) {
       return; // Don't select invalid days
     }
     
@@ -328,6 +328,32 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
     return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
 
+  // Build message for valid dates display
+  const getValidDatesMessage = () => {
+    if (!validDates || validDates.length === 0) return '';
+    
+    // Get only dates within the next 2 weeks for display
+    const today = new Date();
+    const twoWeeksFromNow = new Date();
+    twoWeeksFromNow.setDate(today.getDate() + 14);
+    
+    const upcomingDates = validDates
+      .map(d => new Date(d))
+      .filter(d => d >= today && d <= twoWeeksFromNow)
+      .sort((a, b) => a - b)
+      .slice(0, 5); // Show at most 5 dates to keep it readable
+    
+    if (upcomingDates.length === 0) {
+      return 'Esta experiencia solo está disponible en fechas específicas.';
+    }
+    
+    const formattedDates = upcomingDates.map(d => 
+      `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`
+    ).join(', ');
+    
+    return `Esta experiencia está disponible en las siguientes fechas: ${formattedDates}${upcomingDates.length < validDates.length ? ", entre otras." : "."}`;
+  };
+
   return (
     <div className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
       {/* Loading Overlay for initial loading and month changes */}
@@ -351,11 +377,11 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
         <p className="text-sm">Solo se permiten reservas hasta 2 semanas en el futuro (hasta el {formatDateForDisplay(twoWeeksFromNow)}).</p>
       </div>
       
-      {/* Valid Days Instructions - shown when validDays is provided */}
-      {validDays && validDays.length > 0 && (
+      {/* Valid Dates Instructions - shown when validDates is provided */}
+      {validDates && validDates.length > 0 && (
         <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 mb-4 rounded" role="alert">
-          <p className="font-medium">Esta experiencia solo ocurre los días: {validDays.join(', ')}</p>
-          <p className="text-sm">Solo puedes seleccionar esos días en el calendario.</p>
+          <p className="font-medium">{getValidDatesMessage()}</p>
+          <p className="text-sm">Solo puedes seleccionar esas fechas en el calendario.</p>
         </div>
       )}
       
@@ -424,7 +450,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                         !day ? "" : 
                         pastDay ? "No se pueden seleccionar fechas pasadas" :
                         !withinWindow ? "Solo se permiten reservas hasta 2 semanas en el futuro" :
-                        validDays.length > 0 && !validDay ? `Esta experiencia no ocurre este día. Por favor, selecciona un ${validDays.join(' o ')}` :
+                        validDates.length > 0 && !validDay ? `Esta experiencia no está disponible en esta fecha.` :
                         ""
                       }
                       className={`relative rounded-md sm:rounded-lg min-h-[38px] sm:min-h-[50px] p-1 sm:p-2 transition-colors ${
@@ -548,7 +574,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDays = [] }) => {
                 onClick={handleConfirmDate}
                 disabled={
                   !selectedDate || 
-                  (validDays.length > 0 && !isValidDay(selectedDate)) ||
+                  (validDates.length > 0 && !isValidDay(selectedDate)) ||
                   !isWithinBookingWindow(selectedDate)
                 }
               >

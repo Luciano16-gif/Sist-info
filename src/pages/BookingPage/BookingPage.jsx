@@ -20,7 +20,7 @@ function BookingPage() {
     const [selectedTime, setSelectedTime] = useState('');
     const [reservationsForSelectedTime, setReservationsForSelectedTime] = useState(0);
     const [reservationsForSelectedDate, setReservationsForSelectedDate] = useState(0);
-    const [availableDays, setAvailableDays] = useState([]);
+    const [availableDates, setAvailableDates] = useState([]);
     const [dateError, setDateError] = useState("");
     const [guides, setGuides] = useState([]);
     const [availableSlots, setAvailableSlots] = useState(0);
@@ -44,11 +44,26 @@ function BookingPage() {
                     setExperience(experienceDetails);
                     setGuides(experienceDetails.guides || []);
                     
-                    // Parse available days
-                    const days = Array.isArray(experienceDetails.days) 
-                        ? experienceDetails.days 
-                        : experienceDetails.days.split(', ');
-                    setAvailableDays(days);
+                    // Get available dates (either from specific dates or legacy day-of-week)
+                    let availableDates = [];
+                    
+                    // Check if we have specific dates in the new format
+                    if (experienceDetails.rawData && experienceDetails.rawData.fechas && 
+                        Array.isArray(experienceDetails.rawData.fechas)) {
+                        // Use specific dates from the experience
+                        availableDates = experienceDetails.rawData.fechas.map(dateStr => dateStr);
+                    } 
+                    // Legacy support for day-of-week format
+                    else if (experienceDetails.days) {
+                        const dayNames = experienceDetails.days.split(', ');
+                        // We'll just record these as day names to be displayed in the UI
+                        setAvailableDates(dayNames);
+                    }
+                    
+                    // Set available dates for the calendar
+                    if (availableDates.length > 0) {
+                        setAvailableDates(availableDates);
+                    }
                     
                     // Calculate available time slots
                     const timeSlots = ExperienceService.calculateTimeSlots(experienceDetails);
@@ -60,11 +75,26 @@ function BookingPage() {
                     setExperience(experienceDetails);
                     setGuides(experienceDetails.guides || []);
                     
-                    // Parse available days
-                    const days = Array.isArray(experienceDetails.days) 
-                        ? experienceDetails.days 
-                        : experienceDetails.days.split(', ');
-                    setAvailableDays(days);
+                    // Get available dates (either from specific dates or legacy day-of-week)
+                    let availableDates = [];
+                    
+                    // Check if we have specific dates in the new format
+                    if (experienceDetails.rawData && experienceDetails.rawData.fechas && 
+                        Array.isArray(experienceDetails.rawData.fechas)) {
+                        // Use specific dates from the experience
+                        availableDates = experienceDetails.rawData.fechas.map(dateStr => dateStr);
+                    } 
+                    // Legacy support for day-of-week format
+                    else if (experienceDetails.days) {
+                        const dayNames = experienceDetails.days.split(', ');
+                        // We'll just record these as day names to be displayed in the UI
+                        setAvailableDates(dayNames);
+                    }
+                    
+                    // Set available dates for the calendar
+                    if (availableDates.length > 0) {
+                        setAvailableDates(availableDates);
+                    }
                     
                     // Calculate available time slots
                     const timeSlots = ExperienceService.calculateTimeSlots(experienceDetails);
@@ -99,6 +129,14 @@ function BookingPage() {
                 const isWithinWindow = BookingService.isWithinBookingWindow(selectedDate);
                 if (!isWithinWindow) {
                     setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+                    setAvailableSlots(0);
+                    return;
+                }
+                
+                // Check if the date is available for this experience
+                const isAvailable = await BookingService.isDateAvailable(experience.id, selectedDate);
+                if (!isAvailable) {
+                    setDateError("Esta fecha no está disponible para esta experiencia.");
                     setAvailableSlots(0);
                     return;
                 }
@@ -196,19 +234,32 @@ function BookingPage() {
             setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
             return;
         }
+        
+        // Check if the date is available for this experience
+        BookingService.isDateAvailable(experience.id, selectedDate)
+            .then(isAvailable => {
+                if (!isAvailable) {
+                    setDateError("Esta fecha no está disponible para esta experiencia.");
+                    return;
+                }
+                
+                // Format date for passing to next page
+                const formattedDate = BookingService.formatDate(selectedDate);
 
-        // Format date for passing to next page
-        const formattedDate = BookingService.formatDate(selectedDate);
-
-        navigate('/booking-process', { 
-            state: { 
-                experience, 
-                selectedDate, 
-                selectedTime,
-                selectedDay: formattedDate,
-                availableSlots
-            } 
-        });
+                navigate('/booking-process', { 
+                    state: { 
+                        experience, 
+                        selectedDate, 
+                        selectedTime,
+                        selectedDay: formattedDate,
+                        availableSlots
+                    } 
+                });
+            })
+            .catch(error => {
+                console.error("Error checking date availability:", error);
+                setDateError("Error al verificar disponibilidad. Por favor, intente de nuevo.");
+            });
     };
 
     const handleShowCalendar = () => {
@@ -228,10 +279,27 @@ function BookingPage() {
             return;
         }
         
-        setSelectedDate(date);
-        setDateError(""); // Clear any existing error
-        handleCloseCalendar();
-        setSelectedTime(''); // Clear time on date change
+        // Check if the date is available for this experience
+        BookingService.isDateAvailable(experience.id, date)
+            .then(isAvailable => {
+                if (!isAvailable) {
+                    setDateError("Esta fecha no está disponible para esta experiencia.");
+                    setSelectedDate(null);
+                    handleCloseCalendar();
+                    return;
+                }
+                
+                setSelectedDate(date);
+                setDateError(""); // Clear any existing error
+                handleCloseCalendar();
+                setSelectedTime(''); // Clear time on date change
+            })
+            .catch(error => {
+                console.error("Error checking date availability:", error);
+                setDateError("Error al verificar disponibilidad. Por favor, intente de nuevo.");
+                setSelectedDate(null);
+                handleCloseCalendar();
+            });
     };
 
     const handleTimeSelection = (time) => {
@@ -254,19 +322,36 @@ function BookingPage() {
         return `${dayName}, ${day}/${month}/${year}`;
     };
 
-    // Check if a date is valid based on available days
-    const isValidDate = (date) => {
-        if (!date || !availableDays || availableDays.length === 0) return false;
+    // Display string for available dates
+    const getAvailableDatesText = () => {
+        // If we have ISO date strings, format them for display
+        if (availableDates.length > 0 && typeof availableDates[0] === 'string' && availableDates[0].includes('-')) {
+            const now = new Date();
+            const twoWeeksLater = new Date(now);
+            twoWeeksLater.setDate(now.getDate() + 14);
+            
+            // Filter and sort upcoming dates within booking window
+            const upcomingDates = availableDates
+                .map(dateStr => new Date(dateStr))
+                .filter(date => date >= now && date <= twoWeeksLater)
+                .sort((a, b) => a - b)
+                .slice(0, 5); // Show just the next 5 dates
+                
+            if (upcomingDates.length === 0) {
+                return "Fechas específicas disponibles";
+            }
+            
+            const formattedDates = upcomingDates.map(date => {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                return `${day}/${month}`;
+            }).join(', ');
+            
+            return `Próximas fechas: ${formattedDates}${upcomingDates.length < availableDates.length ? '...' : ''}`;
+        }
         
-        // Get the day name for the selected date
-        const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const dayName = dayNames[date.getDay()];
-        
-        // Check if this day is in the available days
-        return availableDays.some(day => 
-            day.toLowerCase() === dayName.toLowerCase() || 
-            day.toLowerCase().startsWith(dayName.toLowerCase().substring(0, 3))
-        );
+        // Legacy support for day names
+        return Array.isArray(availableDates) ? availableDates.join(', ') : '';
     };
 
     return (
@@ -299,7 +384,7 @@ function BookingPage() {
                     <div className='details-grid-booking'>
                         <div className='details-column-booking'>
                             <BookingDetail title="Punto de Salida" value={experience.puntoDeSalida} />
-                            <BookingDetail title="Días Disponibles" value={experience.days} />
+                            <BookingDetail title="Fechas Disponibles" value={getAvailableDatesText()} />
                             <BookingDetail title="Horario" value={experience.time} />
                             <BookingDetail title="Duración Aprox." value={`${experience.duracion} minutos`} />
                             <BookingDetail
@@ -323,19 +408,14 @@ function BookingPage() {
                     {selectedDate && (
                         <div className="selection-box-booking">
                             <label>FECHA SELECCIONADA</label>
-                            <div className={`selected-date ${isValidDate(selectedDate) ? 'valid-date' : 'invalid-date'}`}>
+                            <div className="selected-date valid-date">
                                 {formatDate(selectedDate)}
-                                {!isValidDate(selectedDate) && (
-                                    <div className="date-warning">
-                                        ⚠️ Esta experiencia no ocurre este día. Por favor, selecciona un {experience.days}.
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
 
                     {/* Time Selection UI - Only show if valid date selected */}
-                    {selectedDate && isValidDate(selectedDate) && (
+                    {selectedDate && (
                         <div className="selection-box-booking">
                             <label>SELECCIONA UN HORARIO</label>
                             <div className="time-buttons-booking">
@@ -381,7 +461,7 @@ function BookingPage() {
                         <EventCalendar 
                             onDateSelect={handleDateSelect} 
                             showSelectButton={true} 
-                            validDays={availableDays}
+                            validDates={availableDates}
                         />
                         <button className="close-button-calendar" onClick={handleCloseCalendar}>
                             Cerrar Calendario
