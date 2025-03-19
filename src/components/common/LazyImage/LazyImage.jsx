@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * LazyImage component that loads images only when they are in or near the viewport
- * Enhanced to prevent fallback image from affecting layout
+ * LazyImage component with performance improvements
  */
 const LazyImage = ({
   src,
@@ -13,9 +12,10 @@ const LazyImage = ({
   fallbackSrc = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png',
   threshold = 0.1,
   placeholderColor = '#3a4a3a',
+  priority = false,
   ...props
 }) => {
-  const [imageSrc, setImageSrc] = useState(null);
+  const [imageSrc, setImageSrc] = useState(priority ? src : null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const imgRef = useRef(null);
@@ -37,6 +37,20 @@ const LazyImage = ({
 
   // Setup Intersection Observer for lazy loading
   useEffect(() => {
+    // If this is a priority image, don't use lazy loading
+    if (priority) {
+      setImageSrc(src);
+      return;
+    }
+
+    // Use native lazy loading if supported and not a priority image
+    if ('loading' in HTMLImageElement.prototype && imgRef.current) {
+      imgRef.current.loading = 'lazy';
+      setImageSrc(src);
+      return;
+    }
+
+    // Fallback to IntersectionObserver
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -47,7 +61,7 @@ const LazyImage = ({
           }
         }
       },
-      { threshold }
+      { threshold, rootMargin: '200px' } // Load images 200px before they come into view
     );
 
     if (containerRef.current) {
@@ -59,7 +73,7 @@ const LazyImage = ({
         observerRef.current.disconnect();
       }
     };
-  }, [src, threshold]);
+  }, [src, threshold, priority]);
 
   // Maintain the placeholder color until the actual image is loaded
   const containerStyle = {
@@ -95,6 +109,7 @@ const LazyImage = ({
           style={imageStyle}
           onLoad={handleLoad}
           onError={handleError}
+          fetchpriority={priority ? 'high' : 'auto'}
           {...props}
         />
       )}
@@ -110,6 +125,7 @@ LazyImage.propTypes = {
   fallbackSrc: PropTypes.string,
   threshold: PropTypes.number,
   placeholderColor: PropTypes.string,
+  priority: PropTypes.bool,
   onLoad: PropTypes.func,
   onError: PropTypes.func
 };

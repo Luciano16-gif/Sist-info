@@ -15,7 +15,7 @@ import {
 
 class BookingService {
     /**
-     * Check if a date is within the allowed booking window (2 weeks)
+     * Check if a date is within the allowed booking window (1 month)
      * @param {Date} date - The date to check
      * @returns {boolean} - Whether the date is within the allowed window
      */

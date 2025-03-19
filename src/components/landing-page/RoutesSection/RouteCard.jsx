@@ -6,11 +6,11 @@ export const RouteCard = ({ image, index, difficulty, length, rating, time, spot
   return (
     <div className="flex flex-col h-full">
       {/* Card image with fixed height */}
-      <img src={image} alt={`Ruta ${index}`} className="w-full h-40 object-cover rounded-t-2xl" />
+      <img src={image} alt={`${index}`} className="w-full h-40 object-cover rounded-t-2xl" />
 
       {/* Card content with fixed height and better spacing */}
       <div className="bg-[rgba(45,55,41,255)] p-4 rounded-b-2xl flex-grow flex flex-col h-[330px]"> 
-        <h3 className="text-xl md:text-2xl font-bold text-center mb-4">Ruta {index}</h3>
+        <h3 className="text-xl md:text-2xl font-bold text-center mb-4">{index}</h3>
 
         {/* Route details - fixed spacing between items */}
         <div className="space-y-4 flex-grow">

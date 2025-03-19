@@ -1,19 +1,30 @@
 import { HERO_IMAGE_NO_SESSION, HERO_IMAGE_SESSION } from '../../constants/LandingData'; 
 import HeroText from './HeroText';
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect, useState } from 'react';
 
 const HeroSection = () => {
     const { currentUser } = useAuth();
     const HERO_IMAGE = currentUser ? HERO_IMAGE_SESSION : HERO_IMAGE_NO_SESSION;
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+    // Preload the hero image as soon as component mounts
+    useEffect(() => {
+      const img = new Image();
+      img.src = HERO_IMAGE;
+      img.onload = () => setIsImageLoaded(true);
+    }, [HERO_IMAGE]);
+
     return (
       <div className="min-h-screen bg-[rgba(13,24,6,1)] text-white relative">
         {/* Hero Section */}
         <div 
-          className="relative h-screen bg-cover bg-center"
+          className="relative h-screen bg-cover bg-center transition-opacity duration-500"
           style={{
             backgroundImage: `url(${HERO_IMAGE})`,
             backgroundBlendMode: 'overlay',
-            backgroundColor: 'rgba(13,24,6,0.3)'
+            backgroundColor: 'rgba(13,24,6,0.3)',
+            opacity: isImageLoaded ? 1 : 0.3
           }}
         >
           <HeroText />

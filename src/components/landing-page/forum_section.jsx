@@ -1,12 +1,6 @@
 import { forum_background } from "../../constants/LandingData";
-import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 const ForumSection = () => {
-  const navigate = useNavigate();
-
-  const handleSeeForums = () => {
-    navigate('/foro'); // Navigate to the foros
-  };
 
   return (
     <div className="relative w-full min-h-[500px]">
@@ -50,12 +44,10 @@ const ForumSection = () => {
             </p>
             
             {/* Button */}
-            <a  onClick={handleSeeForums}
-              href="#" 
-              className="inline-block px-8 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-bold rounded-full border-2 border-white border-opacity-50 transition-all duration-300 text-xl"
-            >
+            <Link to='/foro' className="inline-block px-8 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-bold rounded-full border-2 border-white 
+            border-opacity-50 transition-all duration-300 text-xl">
               Ver foro
-            </a>
+            </Link> 
           </div>
           
           {/* Footer copyright */}

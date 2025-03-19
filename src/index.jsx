@@ -1,6 +1,8 @@
 // ========== Core React Imports ==========
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+// Import for PWA registration
+import { registerSW } from 'virtual:pwa-register';
 
 // ========== Routing Imports ==========
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -57,6 +59,21 @@ import CodeValidation from './pages/CodeValidation/CodeValidation';
 
 // ========== Styles ==========
 import './index.css';
+
+// ========== PWA Registration ==========
+if ('serviceWorker' in navigator) {
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      // This function is called when new content is available
+      if (confirm('Nuevo contenido disponible. ¿Recargar?')) {
+        updateSW(true);
+      }
+    },
+    onOfflineReady() {
+      console.log('App ready to work offline');
+    },
+  });
+}
 
 // ========== Application Render ==========
 const root = ReactDOM.createRoot(document.getElementById('root'));

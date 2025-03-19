@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Ysabeau+SC:wght@500&display=swap');
+@import './assets/fonts.css';
 
 @tailwind base;
 @tailwind components;
@@ -8,3 +8,11 @@ html, body {
   @apply font-ysabeau;
 }
 
+.hero-section {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
