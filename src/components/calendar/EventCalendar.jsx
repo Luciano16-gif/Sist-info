@@ -12,6 +12,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [], isAdmi
   const [focusedCell, setFocusedCell] = useState(null);
   const [isChangingMonth, setIsChangingMonth] = useState(false);
   const [acceptedExperiences, setAcceptedExperiences] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState({});
   
   const navigate = useNavigate();
   const dayRefs = useRef([]);
@@ -83,6 +84,41 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [], isAdmi
     if (!day) return [];
     return getEventsForDay(calendarEvents, day, currentMonth, currentYear);
   };
+
+  // Check available slots for events when selected date changes
+  useEffect(() => {
+    if (!selectedDate) return;
+    
+    const checkAvailability = async () => {
+      const events = getEventsForSpecificDay(selectedDate);
+      const fullDate = new Date(currentYear, currentMonth, selectedDate);
+      const slotsData = {};
+      
+      for (const event of events) {
+        try {
+          const availability = await BookingService.getAvailableSlots(
+            event.experienceData.id, 
+            fullDate
+          );
+          
+          slotsData[event.experienceData.id] = {
+            availableSlots: availability.availableSlots || 0,
+            maxCapacity: availability.maxCapacity || event.experienceData.maxPeople || 0
+          };
+        } catch (error) {
+          console.error(`Error checking availability for event ${event.experienceData.id}:`, error);
+          slotsData[event.experienceData.id] = { 
+            availableSlots: 0, 
+            maxCapacity: event.experienceData.maxPeople || 0 
+          };
+        }
+      }
+      
+      setAvailableSlots(slotsData);
+    };
+    
+    checkAvailability();
+  }, [selectedDate, currentMonth, currentYear]);
 
   // Check if a date is in the past
   const isPastDate = (day) => {
@@ -546,35 +582,55 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [], isAdmi
               
               {/* Scrollable container for events */}
               <div className="overflow-y-auto max-h-[250px] sm:max-h-[300px] md:max-h-[350px] pr-2 space-y-3">
-                {getEventsForSpecificDay(selectedDate).map((event, index) => (
-                  <div
-                    key={`${event.id}-${index}`}
-                    className="bg-[rgba(25,39,15,0.8)] p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-[rgba(35,59,25,0.8)] transition-colors"
-                    onClick={() => handleViewBooking(event)}
-                  >
-                    <h4 className="text-base sm:text-lg text-white font-semibold mb-1 sm:mb-2">
-                      {event.title}
-                    </h4>
-                    <p className="text-gray-300 mb-2 text-xs sm:text-sm line-clamp-2">
-                      {event.description}
-                    </p>
-                    <div className="flex justify-between text-gray-300 text-xs">
-                      <span>Horario: {event.time}</span>
-                      <span>Precio: ${event.price}</span>
+                {getEventsForSpecificDay(selectedDate).map((event, index) => {
+                  // Get available slots info
+                  const slotsInfo = availableSlots[event.experienceData.id] || { 
+                    availableSlots: 0, 
+                    maxCapacity: event.experienceData.maxPeople || 0 
+                  };
+                  
+                  return (
+                    <div
+                      key={`${event.id}-${index}`}
+                      className="bg-[rgba(25,39,15,0.8)] p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-[rgba(35,59,25,0.8)] transition-colors"
+                      onClick={() => handleViewBooking(event)}
+                    >
+                      <h4 className="text-base sm:text-lg text-white font-semibold mb-1 sm:mb-2">
+                        {event.title}
+                      </h4>
+                      <p className="text-gray-300 mb-2 text-xs sm:text-sm line-clamp-2">
+                        {event.description}
+                      </p>
+                      <div className="flex justify-between text-gray-300 text-xs">
+                        <span>Horario: {event.time}</span>
+                        <span>Precio: ${event.price}</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-2">
+                        <div className="text-xs text-gray-300">
+                          { slotsInfo.availableSlots ? (
+                            <span className={slotsInfo.availableSlots > 0 ? 'text-green-300' : 'text-red-300'}>
+                              Cupos disponibles: {slotsInfo.availableSlots} / {slotsInfo.maxCapacity}
+                            </span>
+                          ) : (
+                            <span>
+                              Cupos disponibles: ? / {slotsInfo.maxCapacity}
+                            </span>
+                          )}
+                          
+                        </div>
+                        <button 
+                          className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 sm:px-3 rounded text-xs sm:text-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewBooking(event);
+                          }}
+                        >
+                          {isAdmin || isWithinBookingWindow(selectedDate) ? 'Ver más' : 'Ver detalles'}
+                        </button>
+                      </div>
                     </div>
-                    <div className="mt-2 flex justify-end">
-                      <button 
-                        className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 sm:px-3 rounded text-xs sm:text-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewBooking(event);
-                        }}
-                      >
-                        {isAdmin || isWithinBookingWindow(selectedDate) ? 'Ver más' : 'Ver detalles'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {getEventsForSpecificDay(selectedDate).length === 0 && (
                   <p className="text-gray-300 text-center py-4">No hay experiencias para esta fecha</p>
                 )}

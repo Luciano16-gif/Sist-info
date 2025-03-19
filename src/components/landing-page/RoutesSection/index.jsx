@@ -174,7 +174,7 @@ const RoutesSection = () => {
                         <RouteCard
                           image={experience.imageUrl}
                           index={experience.name}
-                          difficulty={experience.difficulty || 0}
+                          difficulty={experience.difficulty|| 0}
                           length={experience.distance ? parseInt(experience.distance) : 0}
                           rating={experience.rating || 0}
                           time={experience.time || ''}
