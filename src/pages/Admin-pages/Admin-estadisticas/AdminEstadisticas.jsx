@@ -8,24 +8,26 @@ import {
     PieChart, Pie, Cell,
     BarChart, Bar
 } from 'recharts';
-import '../../../components/firebase-test/Statistics/Statistics.css'; // Import the CSS file.  Make sure this path is correct.
+import '../../../components/firebase-test/Statistics/Statistics.css';
 
 const AdminEstadisticas = () => {
 
-    // State variables from Statistics.jsx, adapted for AdminEstadisticas.jsx
+    // State variables
     const [userTypeDistribution, setUserTypeDistribution] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [imagesPerDay, setImagesPerDay] = useState([]);
-    const [experiencesPerDay, setExperiencesPerDay] = useState([]);
+    // const [experiencesPerDay, setExperiencesPerDay] = useState([]); // Removed experiencesPerDay
     const [incluidosUsage, setIncluidosUsage] = useState([]);
     const [activityTypeUsage, setActivityTypeUsage] = useState([]);
     const [forumAndCommentData, setForumAndCommentData] = useState([]);
-    const [hashtagUsage, setHashtagUsage] = useState([]); // New state
+    const [hashtagUsage, setHashtagUsage] = useState([]);
+    const [paymentsPerDay, setPaymentsPerDay] = useState([]);
+    const [revenuePerDay, setRevenuePerDay] = useState([]);
+
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
-    // Re-use the useEffect hook from Statistics.jsx, *inside* AdminEstadisticas
     useEffect(() => {
         const fetchUserTypeData = async () => {
             try {
@@ -70,7 +72,7 @@ const AdminEstadisticas = () => {
                 });
 
                 const imagesPerDayData = Object.entries(imagesPerDayMap).map(([date, count]) => ({ date, count }))
-                    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-'))); // ASCENDING order
+                    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-')));
                 setImagesPerDay(imagesPerDayData);
             } catch (err) {
                 console.error("Error fetching image upload data:", err);
@@ -79,24 +81,18 @@ const AdminEstadisticas = () => {
                 setLoading(false);
             }
         };
+
+        // Removed fetchExperienceData
         const fetchExperienceData = async () => {
             try {
                 const experiencesCollection = collection(db, 'Experiencias');
                 const querySnapshot = await getDocs(experiencesCollection);
 
-                const experiencesPerDayMap = {};
                 const incluidosCount = {};
                 const activityTypeCount = {};
 
                 querySnapshot.forEach((doc) => {
                     const experienceData = doc.data();
-                    const creationTimestamp = doc.metadata.creationTime;
-
-                    if (creationTimestamp) {
-                        const creationDate = new Date(creationTimestamp);
-                        const dateStr = `${String(creationDate.getDate()).padStart(2, '0')}/${String(creationDate.getMonth() + 1).padStart(2, '0')}/${creationDate.getFullYear()}`;
-                        experiencesPerDayMap[dateStr] = (experiencesPerDayMap[dateStr] || 0) + 1;
-                    }
 
                     if (Array.isArray(experienceData.incluidosExperiencia)) {
                         experienceData.incluidosExperiencia.forEach(incluido => {
@@ -109,8 +105,6 @@ const AdminEstadisticas = () => {
                     }
                 });
 
-                const experiencesPerDayData = Object.entries(experiencesPerDayMap).map(([date, count]) => ({ date, count }))
-                    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-'))); //ASCENDING Order
 
                 const incluidosUsageData = Object.entries(incluidosCount).map(([name, value]) => ({ name, value }))
                     .sort((a, b) => b.value - a.value);
@@ -118,7 +112,6 @@ const AdminEstadisticas = () => {
                 const activityTypeUsageData = Object.entries(activityTypeCount).map(([name, value]) => ({ name, value }))
                     .sort((a, b) => b.value - a.value);
 
-                setExperiencesPerDay(experiencesPerDayData);
                 setIncluidosUsage(incluidosUsageData);
                 setActivityTypeUsage(activityTypeUsageData);
 
@@ -129,6 +122,7 @@ const AdminEstadisticas = () => {
                 setLoading(false);
             }
         };
+
 
         const fetchForumAndCommentData = async () => {
             try {
@@ -173,7 +167,7 @@ const AdminEstadisticas = () => {
                 }
 
                 const combinedData = Object.values(combinedDataMap)
-                    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-'))); //ASCENDING Order
+                    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')) - new Date(b.date.split('/').reverse().join('-')));
                 setForumAndCommentData(combinedData);
 
             } catch (error) {
@@ -196,7 +190,6 @@ const AdminEstadisticas = () => {
                         data.images.forEach(image => {
                             if (image.hashtags && Array.isArray(image.hashtags)) {
                                 image.hashtags.forEach(hashtag => {
-                                    // Normalize the hashtag (e.g., lowercase) to avoid duplicates
                                     const normalizedHashtag = hashtag.toLowerCase();
                                     hashtagCounts[normalizedHashtag] = (hashtagCounts[normalizedHashtag] || 0) + 1;
                                 });
@@ -207,23 +200,73 @@ const AdminEstadisticas = () => {
 
                 const hashtagData = Object.entries(hashtagCounts)
                     .map(([hashtag, count]) => ({ hashtag, count }))
-                    .sort((a, b) => b.count - a.count); // Sort by count (descending)
+                    .sort((a, b) => b.count - a.count);
 
-                setHashtagUsage(hashtagData);  // Update state with the processed data
+                setHashtagUsage(hashtagData);
 
             } catch (err) {
                 console.error("Error fetching hashtag data:", err);
                 setError("Failed to load hashtag statistics.");
-            } finally {
-                // setLoading(false);  // Only if you have separate loading.
             }
         };
 
+        const fetchPaymentData = async () => {
+            try {
+                const paymentsCollection = collection(db, 'payments');
+                const usersSnapshot = await getDocs(paymentsCollection);
+
+                const paymentsPerDayMap = {};
+                const revenuePerDayMap = {};
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const userData = userDoc.data();
+
+                    if (userData.bookings && typeof userData.bookings === 'object') {
+                        for (const bookingId in userData.bookings) {
+                            const bookingData = userData.bookings[bookingId];
+
+                            if (bookingData.status === 'COMPLETED' && bookingData.selectedDate) {
+                                const dateStr = bookingData.selectedDate.split('T')[0];
+                                paymentsPerDayMap[dateStr] = (paymentsPerDayMap[dateStr] || 0) + 1;
+
+                                const amount = Number(bookingData.amount.replace(/[^0-9.-]+/g, ""));
+                                if (!isNaN(amount)) {
+                                    revenuePerDayMap[dateStr] = (revenuePerDayMap[dateStr] || 0) + amount;
+                                } else {
+                                    console.warn(`Invalid amount for booking ${bookingId}:`, bookingData.amount);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const paymentsPerDayData = Object.entries(paymentsPerDayMap)
+                    .map(([date, count]) => ({ date, count }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                const revenuePerDayData = Object.entries(revenuePerDayMap)
+                    .map(([date, total]) => ({ date, total }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                setPaymentsPerDay(paymentsPerDayData);
+                setRevenuePerDay(revenuePerDayData);
+
+            } catch (err) {
+                console.error("Error fetching payment data:", err);
+                setError("Failed to load payment statistics.");
+            }
+        };
+
+
+
         fetchUserTypeData();
         fetchImageUploadData();
-        fetchExperienceData();
+        // fetchExperienceData(); // Removed call
+        fetchExperienceData(); // Call fetchExperienceData to load Incluidos and Activity Type.
         fetchForumAndCommentData();
-        fetchHashtagData(); // Add the call here
+        fetchHashtagData();
+        fetchPaymentData();
+
     }, []);
 
     if (loading) {
@@ -255,19 +298,16 @@ const AdminEstadisticas = () => {
             <h1 className=" text-white text-lg md:text-lg">
                 Control de todas las estadísticas generadas.
             </h1>
-            <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+            <hr className="border-1 border-white-600 sm:w-10 md:w-96 mb-4" />
             <h1 className=" text-white text-3xl md:text-3xl font-bold">
                 Informacion Relevante
             </h1>
-            {/* ... (Your RelevantInfoS components here, if needed) ... */}
-            <hr className="border-1 border-white-600 sm:w-10 md:w-96" />
+            <hr className="border-1 border-white-600 sm:w-10 md:w-96 mb-4" />
 
             <div className="container-statistics mx-auto-statistics px-4-statistics py-8-statistics">
-                {/* <h1 className="text-3xl-statistics font-bold-statistics text-center-statistics mb-8-statistics text-light-green-statistics">Estadísticas</h1> */}
-
                 {/* Row 1: User Types and Images */}
                 <div className="flex-statistics flex-wrap-statistics">
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
+                    <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
                         <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                             <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Tipos de Usuarios Registrados</h2>
                             <ResponsiveContainer width="95%" height={300}>
@@ -294,55 +334,36 @@ const AdminEstadisticas = () => {
                         </div>
                     </div>
 
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
+                    <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
                         <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                             <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Imágenes subidas por día</h2>
                             <ResponsiveContainer width="95%" height={300}>
                                 <BarChart data={imagesPerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
                                     <XAxis dataKey="date" className="chart-axis-text-statistics" />
-                                    {/* YAxis with light green text */}
                                     <YAxis className="chart-axis-text-statistics" />
                                     <Tooltip className="chart-tooltip-statistics" />
                                     <Legend className="chart-legend-text-statistics" />
-                                    <Bar dataKey="count" fill="#8884d8" name="Images Uploaded" />
+                                    <Bar dataKey="count" fill="#8884d8" name="Imágenes publicadas" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
                 </div>
 
-                {/* Row 2: Experiences and Incluidos */}
+                {/* Row 2:  Incluidos  -- Removed Experiences Chart, kept Incluidos */}
                 <div className="flex-statistics flex-wrap-statistics">
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
-                        <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
-                            <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Experiencias creadas </h2>
-                            <ResponsiveContainer width="95%" height={300}>
-                                <LineChart data={experiencesPerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
-                                    <XAxis dataKey="date" className="chart-axis-text-statistics" />
-                                    {/* YAxis with light green text */}
-                                    <YAxis className="chart-axis-text-statistics" />
-                                    <Tooltip className="chart-tooltip-statistics" />
-                                    <Legend className="chart-legend-text-statistics" />
-                                    <Line type="monotone" dataKey="count" stroke="#82ca9d" name="Experiences Created" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
+                    <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
                         <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                             <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Tipos de "Incluidos en la Experiencia"</h2>
                             <ResponsiveContainer width="95%" height={300}>
                                 <BarChart data={incluidosUsage} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
                                     <XAxis dataKey="name" className="chart-axis-text-statistics" />
-                                    {/* YAxis with light green text */}
                                     <YAxis className="chart-axis-text-statistics" />
                                     <Tooltip className="chart-tooltip-statistics" />
                                     <Legend className="chart-legend-text-statistics" />
-                                    <Bar dataKey="value" fill="#FFBB28" name="Times Used" />
+                                    <Bar dataKey="value" fill="#FFBB28" name="Veces usadas" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -351,43 +372,41 @@ const AdminEstadisticas = () => {
 
                 {/* Row 3: Activity Type and Forums/Comments */}
                 <div className="flex-statistics flex-wrap-statistics">
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
+                    <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
                         <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                             <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Tipos de actividad usadas</h2>
                             <ResponsiveContainer width="95%" height={300}>
                                 <BarChart data={activityTypeUsage} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
                                     <XAxis dataKey="name" className="chart-axis-text-statistics" />
-                                    {/* YAxis with light green text */}
                                     <YAxis className="chart-axis-text-statistics" />
                                     <Tooltip className="chart-tooltip-statistics" />
                                     <Legend className="chart-legend-text-statistics" />
-                                    <Bar dataKey="value" fill="#00C49F" name="Times Chosen" />
+                                    <Bar dataKey="value" fill="#00C49F" name="Veces escogidas" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
-                    <div className="w-full-statistics md:w-1/2-statistics p-4-statistics">
+                    <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
                         <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                             <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Foros y Comentarios por día</h2>
                             <ResponsiveContainer width="95%" height={300}>
                                 <LineChart data={forumAndCommentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
                                     <XAxis dataKey="date" className="chart-axis-text-statistics" />
-                                    {/* YAxis with light green text */}
                                     <YAxis className="chart-axis-text-statistics" />
                                     <Tooltip className="chart-tooltip-statistics" />
                                     <Legend className="chart-legend-text-statistics" />
-                                    <Line type="monotone" dataKey="forums" stroke="#8884d8" name="Forums" />
-                                    <Line type="monotone" dataKey="comments" stroke="#FF8042" name="Comments" />
+                                    <Line type="monotone" dataKey="forums" stroke="#8884d8" name="Foros" />
+                                    <Line type="monotone" dataKey="comments" stroke="#FF8042" name="Comentarios" />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
                 </div>
                 {/* Row 4: Hashtag Bar Chart */}
-                <div className="w-full p-4">
-                    <div className="bg-light-green-statistics p-6 rounded-lg shadow-lg h-full">
+                <div className="w-full-statistics p-4-statistics">
+                    <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
                         <h2 className="text-gray-700-statistics">Hashtags más usados</h2>
                         {hashtagUsage.length > 0 ? (
                             <ResponsiveContainer width="95%" height={300}>
@@ -400,14 +419,51 @@ const AdminEstadisticas = () => {
                                     <YAxis className="chart-axis-text-statistics" />
                                     <Tooltip className="chart-tooltip-statistics" />
                                     <Legend className="chart-legend-text-statistics" />
-                                    <Bar dataKey="count" fill="#8884d8" name="Times Used" />
+                                    <Bar dataKey="count" fill="#8884d8" name="Veces usadas" />
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <p className="text-center text-gray-500">No hashtags found.</p>
+                            <p className="text-center-statistics text-gray-500-statistics">No hashtags found.</p>
                         )}
                     </div>
                 </div>
+
+                {/* Row 5: Payments and Revenue */}
+                <div className="flex-statistics flex-wrap-statistics">
+                   <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
+                        <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
+                            <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Pagos Completados por Día</h2>
+                            <ResponsiveContainer width="95%" height={300}>
+                                <LineChart data={paymentsPerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
+                                    <XAxis dataKey="date" className="chart-axis-text-statistics" />
+                                    <YAxis className="chart-axis-text-statistics" />
+                                    <Tooltip className="chart-tooltip-statistics" />
+                                    <Legend className="chart-legend-text-statistics" />
+                                    <Line type="monotone" dataKey="count" stroke="#8884d8" name="Pagos realizados" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                   <div className="w-full-statistics md:w-3/5-statistics p-4-statistics">
+                        <div className="bg-light-green-statistics p-6-statistics rounded-lg-statistics shadow-lg-statistics h-full-statistics">
+                            <h2 className="text-xl-statistics font-semibold-statistics mb-4-statistics text-gray-700-statistics">Ingresos por Día</h2>
+                            <ResponsiveContainer width="95%" height={300}>
+                                <LineChart data={revenuePerDay} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" className="chart-grid-lines-statistics" />
+                                    <XAxis dataKey="date" className="chart-axis-text-statistics" />
+                                    <YAxis className="chart-axis-text-statistics" />
+                                    <Tooltip className="chart-tooltip-statistics" />
+                                    <Legend className="chart-legend-text-statistics" />
+                                    <Line type="monotone" dataKey="total" stroke="#82ca9d" name="Ingresos totales (USD)" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     );
