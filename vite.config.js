@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    assetsInlineLimit: 0, // Ensures fonts are copied as files
+  },
   plugins: [
     react(),
     VitePWA({
@@ -17,49 +20,21 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'logo192.png',
+            src: 'android-chrome-192x192.png', 
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'logo512.png',
+            src: 'android-chrome-512x512.png', 
             sizes: '512x512',
             type: 'image/png'
           }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff,woff2,webp,jpg,jpeg}'],
         navigateFallback: 'index.html',
         runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
         ]
       }
     })
