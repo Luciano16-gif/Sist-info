@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/calendar/EventCalendar';
-import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
+import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.webp';
 import BookingService from '../../components/services/BookingService';
 import ExperienceService from '../../components/services/ExperienceService';
 import useImagePreloader from '../../components/hooks/useImagePreloader';

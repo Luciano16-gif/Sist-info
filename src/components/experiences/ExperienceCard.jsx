@@ -4,10 +4,10 @@ import LazyImage from '../common/LazyImage/LazyImage';
 import './ExperienceCard.css';
 
 // Import all images as constants
-import caminoIcon from '../../assets/images/ExperiencesPage/camino.png';
-import calendarioIcon from '../../assets/images/ExperiencesPage/calendario.png';
-import participantesIcon from '../../assets/images/ExperiencesPage/participantes.png';
-import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
+import caminoIcon from '../../assets/images/ExperiencesPage/camino.webP';
+import calendarioIcon from '../../assets/images/ExperiencesPage/calendario.webP';
+import participantesIcon from '../../assets/images/ExperiencesPage/participantes.webP';
+import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.webP';
 
 /**
  * RatingDisplay component

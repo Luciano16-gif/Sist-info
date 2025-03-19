@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './CodeValidation.css';
-import searchIcon from '../../../src/assets/images/lupa-search.png';
+import searchIcon from '../../../src/assets/images/lupa-search.webp';
 import { db } from './../../firebase-config';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function CodeValidation() {

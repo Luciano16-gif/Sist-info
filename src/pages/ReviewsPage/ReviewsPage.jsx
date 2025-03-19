@@ -1,4 +1,3 @@
-// ReviewsPage.jsx - Updated with fixed rating functionality
 import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
@@ -16,7 +15,7 @@ import {
     increment 
 } from "firebase/firestore";
 import { db } from './../../firebase-config';
-import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
+import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.webp';
 import { useAuth } from '../../components/contexts/AuthContext';
 import LoadingState from '../../components/common/LoadingState/LoadingState';
 

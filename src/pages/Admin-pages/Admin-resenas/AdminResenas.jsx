@@ -5,7 +5,7 @@ import useReviewMetrics from '../../../components/hooks/reviews-hooks/useReviewM
 import LoadingState from '../../../components/common/LoadingState/LoadingState';
 import { db } from '../../../firebase-config';
 import { collection, getDocs, doc, deleteDoc, runTransaction } from 'firebase/firestore';
-import profileFallbackImage from '../../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
+import profileFallbackImage from '../../../assets/images/landing-page/profile_managemente/profile_picture_1.webp';
 import './AdminResenas.css';
 
 const formatDate = (timestamp) => {
