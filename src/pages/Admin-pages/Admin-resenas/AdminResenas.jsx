@@ -29,11 +29,11 @@ const formatDate = (timestamp) => {
     return 'Fecha no disponible';
 };
 
-const AdminReviewCard = ({ review, onDelete }) => {
+const AdminReviewCard = ({ review, onDelete, isDeleting }) => {
     const rating = typeof review.rating === 'number' ? review.rating : 0;
 
     return (
-        <div className="admin-review-card">
+        <div className={`admin-review-card ${isDeleting ? 'deleting' : ''}`}>
             <div className="review-header">
                 <img src={review.profileImage || profileFallbackImage} alt={review.user || "Usuario"} className="review-profile-image" />
                 <div className="review-user-info">
@@ -46,9 +46,9 @@ const AdminReviewCard = ({ review, onDelete }) => {
                     </div>
                 </div>
             </div>
-            <p className="review-experience-name">Experience: {review.experienceId}</p>
+            <p className="review-experience-name">Experiencia: {review.experienceId}</p>
             <p className="review-text">{review.text}</p>
-            <button className="delete-review-button" onClick={() => onDelete(review.experienceId, review.id)}>
+            <button className="delete-review-button" onClick={() => onDelete(review.experienceId, review.id, review.user)}>
                 Borrar Reseña
             </button>
         </div>
@@ -73,13 +73,39 @@ const DeleteConfirmationModal = ({ isOpen, onConfirm, onCancel, message }) => {
 };
 
 const AdminResenas = () => {
-    const { totalReviews, reviews5e, reviews4e, reviews3e, reviews2e, reviews1e, loading, error } = useReviewMetrics();
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const { totalReviews, reviews5e, reviews4e, reviews3e, reviews2e, reviews1e, loading, error } = useReviewMetrics(refreshTrigger);
     const [allReviews, setAllReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
     const [reviewsError, setReviewsError] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control modal visibility
-    const [reviewToDelete, setReviewToDelete] = useState(null); // Store review to delete
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [reviewToDelete, setReviewToDelete] = useState(null);
+    const [deletingReview, setDeletingReview] = useState(null);
+    
+    // Local metrics state for immediate updates
+    const [localMetrics, setLocalMetrics] = useState({
+        totalReviews: 0,
+        reviews5e: 0,
+        reviews4e: 0,
+        reviews3e: 0,
+        reviews2e: 0,
+        reviews1e: 0
+    });
+
+    // Update local metrics when the fetched metrics change
+    useEffect(() => {
+        if (!loading && !error) {
+            setLocalMetrics({
+                totalReviews,
+                reviews5e,
+                reviews4e,
+                reviews3e,
+                reviews2e,
+                reviews1e
+            });
+        }
+    }, [totalReviews, reviews5e, reviews4e, reviews3e, reviews2e, reviews1e, loading, error]);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -110,11 +136,11 @@ const AdminResenas = () => {
             }
         };
         fetchReviews();
-    }, []);
+    }, [refreshTrigger]);
 
     // Initiate deletion process (show modal)
-       const handleDeleteReview = (experienceId, reviewId) => {
-        setReviewToDelete({ experienceId, reviewId });
+    const handleDeleteReview = (experienceId, reviewId, userName) => {
+        setReviewToDelete({ experienceId, reviewId, userName });
         setIsDeleteModalOpen(true);
     };
 
@@ -125,12 +151,53 @@ const AdminResenas = () => {
         setDeleteError(null);
         try {
             const { experienceId, reviewId } = reviewToDelete;
-            const reviewRef = doc(db, 'Experiencias', experienceId, 'reviews', reviewId);
-            await deleteDoc(reviewRef);
-            setAllReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+            
+            // Find the review to get its rating before deletion
+            const reviewToRemove = allReviews.find(review => review.id === reviewId);
+            
+            // Set the specific review as deleting using a composite key
+            setDeletingReview({
+                experienceId,
+                reviewId
+            });
+            
+            // Wait for animation before actually deleting
+            setTimeout(async () => {
+                const reviewRef = doc(db, 'Experiencias', experienceId, 'reviews', reviewId);
+                await deleteDoc(reviewRef);
+                
+                // Update UI in two ways:
+                // 1. Immediate filter to remove deleted review
+                setAllReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+                
+                // 2. Update local metrics immediately
+                if (reviewToRemove) {
+                    setLocalMetrics(prev => {
+                        const rating = reviewToRemove.rating || 0;
+                        const newMetrics = { ...prev, totalReviews: prev.totalReviews - 1 };
+                        
+                        // Decrement the specific star count
+                        if (rating === 5) newMetrics.reviews5e -= 1;
+                        else if (rating === 4) newMetrics.reviews4e -= 1;
+                        else if (rating === 3) newMetrics.reviews3e -= 1;
+                        else if (rating === 2) newMetrics.reviews2e -= 1;
+                        else if (rating === 1) newMetrics.reviews1e -= 1;
+                        
+                        return newMetrics;
+                    });
+                }
+                
+                // 3. Trigger a backend refresh for consistency
+                setRefreshTrigger(prev => prev + 1);
+                
+                // Reset the deleting state
+                setDeletingReview(null);
+            }, 500); // Matching transition time in CSS
+            
         } catch (err) {
             console.error("Error deleting review:", err);
             setDeleteError("Failed to delete the review.");
+            setDeletingReview(null);
         } finally {
             setIsDeleteModalOpen(false);
             setReviewToDelete(null);
@@ -175,19 +242,26 @@ const AdminResenas = () => {
             <hr className="border-1 border-white-600 w-full md:w-96" />
             <h1 className="text-white text-2xl md:text-3xl font-bold">Informacion Relevante</h1>
             <div className="flex flex-wrap justify-start gap-4 md:gap-6 lg:gap-10 my-4">
-                <RelevantInfoS number={totalReviews} description="Reseñas Recibidas" />
-                <RelevantInfoS number={reviews5e} description="Reseñas con 5 estrellas" />
-                <RelevantInfoS number={reviews4e} description="Reseñas con 4 estrellas" />
-                <RelevantInfoS number={reviews3e} description="Reseñas con 3 estrellas" />
-                <RelevantInfoS number={reviews2e} description="Reseñas con 2 estrellas" />
-                <RelevantInfoS number={reviews1e} description="Reseñas con 1 estrella" />
+                <RelevantInfoS number={localMetrics.totalReviews} description="Reseñas Recibidas" />
+                <RelevantInfoS number={localMetrics.reviews5e} description="Reseñas con 5 estrellas" />
+                <RelevantInfoS number={localMetrics.reviews4e} description="Reseñas con 4 estrellas" />
+                <RelevantInfoS number={localMetrics.reviews3e} description="Reseñas con 3 estrellas" />
+                <RelevantInfoS number={localMetrics.reviews2e} description="Reseñas con 2 estrellas" />
+                <RelevantInfoS number={localMetrics.reviews1e} description="Reseñas con 1 estrella" />
             </div>
             <hr className="border-1 border-white-600 w-full md:w-96" />
 
             <h2 className="text-xl md:text-2xl font-bold text-white mt-8">Todas las Reseñas</h2>
             <div className="admin-reviews-grid">
                 {allReviews.map((review) => (
-                    <AdminReviewCard key={review.id} review={review} onDelete={handleDeleteReview} />
+                    <AdminReviewCard 
+                        key={`${review.experienceId}-${review.id}`} 
+                        review={review} 
+                        onDelete={handleDeleteReview}
+                        isDeleting={deletingReview && 
+                                   deletingReview.reviewId === review.id && 
+                                   deletingReview.experienceId === review.experienceId} 
+                    />
                 ))}
             </div>
 

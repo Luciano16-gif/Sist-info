@@ -3,13 +3,31 @@ import React, { useState, useEffect, useRef } from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
 import useGalleryMetrics from '../../../components/hooks/gallery-hooks/useGalleryMetrics'; // Correct path
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase-config';
 import './AdminGaleria.css';  // Make sure this path is correct
 import { useNavigate } from 'react-router-dom'; // Import if you use it
 import LoadingState from '../../../components/common/LoadingState/LoadingState';
 
+// Delete Confirmation Modal Component
+const DeleteConfirmationModal = ({ isOpen, onConfirm, onCancel, message }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal-overlay-gallery">
+            <div className="modal-content-container-gallery delete-modal">
+                <p>{message || "¿Estás seguro de que quieres borrar esta imagen?"}</p>
+                <div className="modal-buttons">
+                    <button className="confirm-button" onClick={onConfirm}>Confirmar</button>
+                    <button className="cancel-button" onClick={onCancel}>Cancelar</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AdminGaleria = () => {
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const {
         publishedImages,
         reportedImages,
@@ -18,7 +36,29 @@ const AdminGaleria = () => {
         usedHashtags,
         loading,
         error
-    } = useGalleryMetrics();
+    } = useGalleryMetrics(refreshTrigger);
+
+    // Local metrics state for immediate updates
+    const [localMetrics, setLocalMetrics] = useState({
+        publishedImages: 0,
+        reportedImages: 0,
+        participatingUsers: 0,
+        createdHashtags: 0,
+        usedHashtags: 0
+    });
+
+    // Update local metrics when the fetched metrics change
+    useEffect(() => {
+        if (!loading && !error) {
+            setLocalMetrics({
+                publishedImages,
+                reportedImages,
+                participatingUsers,
+                createdHashtags,
+                usedHashtags
+            });
+        }
+    }, [publishedImages, reportedImages, participatingUsers, createdHashtags, usedHashtags, loading, error]);
 
     const [adminImages, setAdminImages] = useState([]);
     const [loadingImages, setLoadingImages] = useState(true);
@@ -28,6 +68,13 @@ const AdminGaleria = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    
+    // New states for image deletion
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState(null);
+    const [deletingImageUrl, setDeletingImageUrl] = useState(null);
+    const [deleteError, setDeleteError] = useState(null);
+    
     const navigate = useNavigate(); //  If you don't use navigate, you can remove this
 
     useEffect(() => {
@@ -46,7 +93,12 @@ const AdminGaleria = () => {
                     if (userDocSnap.exists()) {
                         const userData = userDocSnap.data();
                         if (userData.images && Array.isArray(userData.images)) {
-                            firestoreImages = [...firestoreImages, ...userData.images];
+                            // Add userId to each image object for reference
+                            const imagesWithUser = userData.images.map(img => ({
+                                ...img,
+                                userId: userDoc.id
+                            }));
+                            firestoreImages = [...firestoreImages, ...imagesWithUser];
                         }
                     }
                 }
@@ -60,7 +112,7 @@ const AdminGaleria = () => {
         };
 
         loadAllImages();
-    }, []);
+    }, [refreshTrigger]);
 
     const openImage = (image) => {
         setSelectedImage(image);
@@ -70,6 +122,88 @@ const AdminGaleria = () => {
 
     const closeImage = () => {
         setSelectedImage(null);
+    };
+
+    // Add delete image functionality
+    const handleDeleteImage = (image) => {
+        setImageToDelete(image);
+        setIsDeleteModalOpen(true);
+        // If there's an open detail view, close it
+        setSelectedImage(null);
+    };
+    
+    const handleConfirmDelete = async () => {
+        if (!imageToDelete) return;
+        
+        setDeleteError(null);
+        try {
+            // Mark the image as deleting to start animation
+            setDeletingImageUrl(imageToDelete.url);
+            
+            // Update local metrics immediately for a responsive UI feel
+            setLocalMetrics(prev => ({
+                ...prev,
+                publishedImages: Math.max(0, prev.publishedImages - 1)
+            }));
+            
+            // Wait for animation before actual deletion
+            setTimeout(async () => {
+                const { userId, url } = imageToDelete;
+                
+                // Get the user's gallery document
+                const userGalleryRef = doc(db, 'Galeria de Imágenes', userId);
+                const userGallerySnap = await getDoc(userGalleryRef);
+                
+                if (userGallerySnap.exists()) {
+                    const galleryData = userGallerySnap.data();
+                    
+                    // Filter out the image to delete
+                    const updatedImages = galleryData.images.filter(img => img.url !== url);
+                    
+                    // Update the document with the new images array
+                    await updateDoc(userGalleryRef, { images: updatedImages });
+                    
+                    // Update local state to remove the deleted image
+                    setAdminImages(prev => prev.filter(img => img.url !== url));
+                    
+                    // Trigger a refresh of metrics
+                    setRefreshTrigger(prev => prev + 1);
+                    
+                    console.log("Image deleted successfully:", url);
+                } else {
+                    console.error("User gallery document not found:", userId);
+                    throw new Error("Documento de galería no encontrado");
+                }
+                
+                // Reset the deleting state
+                setDeletingImageUrl(null);
+                
+            }, 500); // Match CSS transition time
+            
+        } catch (err) {
+            console.error("Error deleting image:", err);
+            setDeleteError("Error al eliminar la imagen: " + err.message);
+            setDeletingImageUrl(null);
+            
+            // Revert local metrics on error
+            if (!loading && !error) {
+                setLocalMetrics({
+                    publishedImages,
+                    reportedImages,
+                    participatingUsers,
+                    createdHashtags,
+                    usedHashtags
+                });
+            }
+        } finally {
+            setIsDeleteModalOpen(false);
+            setImageToDelete(null);
+        }
+    };
+    
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setImageToDelete(null);
     };
 
     const handleZoomIn = () => setZoomLevel(prevZoom => Math.min(prevZoom + 0.2, 3));
@@ -128,11 +262,11 @@ const AdminGaleria = () => {
                 Información relevante
             </h1>
             <div className="flex flex-wrap justify-start gap-4 md:gap-6 lg:gap-10 my-4">
-                <RelevantInfoS number={publishedImages} description="Imágenes publicadas" />
-                <RelevantInfoS number={reportedImages} description="Imágenes reportadas" />
-                <RelevantInfoS number={participatingUsers} description="Usuarios participantes" />
-                <RelevantInfoS number={createdHashtags} description="Hashtags creados" />
-                <RelevantInfoS number={usedHashtags} description="Hashtags usados" />
+                <RelevantInfoS number={localMetrics.publishedImages} description="Imágenes publicadas" />
+                <RelevantInfoS number={localMetrics.reportedImages} description="Imágenes reportadas" />
+                <RelevantInfoS number={localMetrics.participatingUsers} description="Usuarios participantes" />
+                <RelevantInfoS number={localMetrics.createdHashtags} description="Hashtags creados" />
+                <RelevantInfoS number={localMetrics.usedHashtags} description="Hashtags usados" />
             </div>
             <div className="flex flex-col">
                 <h2 className="text-xl md:text-2xl lg:text-4xl font-bold text-white mr-4">Nuestra Galería</h2>
@@ -142,7 +276,10 @@ const AdminGaleria = () => {
             </div>
             <div className="admin-gallery-grid">
                 {adminImages.map((image, index) => (
-                    <div key={index} className="admin-gallery-image-container">
+                    <div 
+                        key={index} 
+                        className={`admin-gallery-image-container ${deletingImageUrl === image.url ? 'deleting' : ''}`}
+                    >
                         <img
                             src={image.url}
                             alt={`Imagen ${index}`}
@@ -168,6 +305,22 @@ const AdminGaleria = () => {
                     >
                         <button className="close-button-gallery" onClick={(e) => { e.stopPropagation(); closeImage(); }}>
                             X
+                        </button>
+                        <button 
+                            className="delete-button-modal" 
+                            onClick={(e) => { 
+                                e.stopPropagation(); 
+                                // Set the image to delete directly
+                                setImageToDelete(selectedImage);
+                                // Close the image modal
+                                closeImage();
+                                // Open the confirmation modal with a delay to ensure proper sequence
+                                setTimeout(() => {
+                                    setIsDeleteModalOpen(true);
+                                }, 100);
+                            }}
+                        >
+                            Eliminar imagen
                         </button>
                         <img
                             src={selectedImage.url}
@@ -195,6 +348,14 @@ const AdminGaleria = () => {
                     </div>
                 </div>
             )}
+
+            {/* Render the deletion confirmation modal */}
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+                message="¿Estás seguro de que quieres borrar esta imagen?"
+            />
         </div>
     );
 };
