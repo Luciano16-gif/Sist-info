@@ -21,7 +21,6 @@ const HeroText = () => {
                             </button>
                         </div>
                     </Link>
-                    
                 </div>
             ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center px-8 md:px-16 space-y-4 z-10 text-center">
