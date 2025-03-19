@@ -3,10 +3,9 @@ import React, { useState, useEffect } from 'react';
 import './BookingPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import EventCalendar from '../../components/calendar/EventCalendar';
-import { db } from '../../firebase-config';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import storageService from '../../cloudinary-services/storage-service';
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
+import BookingService from '../../components/services/BookingService';
+import ExperienceService from '../../components/services/ExperienceService';
 
 function BookingPage() {
     const navigate = useNavigate();
@@ -18,293 +17,124 @@ function BookingPage() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [availableTimes, setAvailableTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState('');
-    const [totalPaidUsers, setTotalPaidUsers] = useState(0);
     const [reservationsForSelectedTime, setReservationsForSelectedTime] = useState(0);
     const [reservationsForSelectedDate, setReservationsForSelectedDate] = useState(0);
     const [availableDays, setAvailableDays] = useState([]);
     const [dateError, setDateError] = useState("");
     const [guides, setGuides] = useState([]);
-    // Add this state for available slots
     const [availableSlots, setAvailableSlots] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [bookingWindowMessage, setBookingWindowMessage] = useState("");
 
-    // Normalize experience data based on the source (admin view vs regular view)
+    // Load experience data on mount
     useEffect(() => {
-        if (!experienceData) {
-            navigate('/');
-            return;
-        }
-
-        // Normalize the experience data structure
-        const normalizedExperience = isAdmin ? {
-            id: experienceData.id || experienceData.nombre,
-            name: experienceData.nombre,
-            description: experienceData.descripcion,
-            // Handle time field format - convert Firestore format to the expected format
-            time: experienceData.horarioInicio && experienceData.horarioFin 
-                ? `${experienceData.horarioInicio} - ${experienceData.horarioFin}`
-                : "No disponible",
-            days: Array.isArray(experienceData.fechas) ? experienceData.fechas.join(', ') : "",
-            puntoDeSalida: experienceData.puntoSalida,
-            price: experienceData.precio,
-            duracion: experienceData.duracionRecorrido,
-            maxPeople: experienceData.maximoUsuarios,
-            distance: `${experienceData.longitudRecorrido} km`,
-            incluidos: experienceData.incluidosExperiencia,
-            imageUrl: experienceData.imageUrl,
-            guias: experienceData.guias,
-            // Include all raw data for reference
-            rawData: experienceData
-        } : experienceData;
-
-        setExperience(normalizedExperience);
-
-        // Parse available days of the week
-        const parseDays = (daysString) => {
-            if (!daysString) return [];
+        const fetchExperienceData = async () => {
+            setLoading(true);
             
-            // Handle comma-separated days
-            return daysString.split(',').map(day => day.trim());
-        };
-
-        const days = Array.isArray(experienceData.days) 
-            ? experienceData.days 
-            : (experienceData.days || experienceData.fechas);
-            
-        const parsedDays = Array.isArray(days) ? days : parseDays(days);
-        setAvailableDays(parsedDays);
-        
-        // Fetch guides for the experience
-        const fetchGuides = async () => {
-            const guidesData = normalizedExperience.guias || 
-                              (normalizedExperience.rawData && normalizedExperience.rawData.guias);
-            
-            if (!guidesData || !Array.isArray(guidesData)) return;
-            
-            const fetchedGuides = [];
-            for (const guideRef of guidesData) {
-                if (guideRef && guideRef.email) {
-                    try {
-                        const usersRef = collection(db, "lista-de-usuarios");
-                        const q = query(usersRef, where("email", "==", guideRef.email));
-                        const querySnapshot = await getDocs(q);
-                        
-                        if (!querySnapshot.empty) {
-                            const guideDoc = querySnapshot.docs[0];
-                            const guideData = guideDoc.data();
-                            
-                            // Get guide image
-                            let guideImageUrl = '';
-                            if (guideData["Foto de Perfil"]) {
-                                try {
-                                    guideImageUrl = await storageService.getDownloadURL(guideData["Foto de Perfil"]);
-                                } catch (error) {
-                                    guideImageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
-                                }
-                            } else {
-                                guideImageUrl = '../../src/assets/images/landing-page/profile_managemente/profile_picture_1.png';
-                            }
-                            
-                            fetchedGuides.push({
-                                id: guideDoc.id,
-                                name: guideData.name || 'Sin nombre',
-                                lastName: guideData.lastName || '',
-                                image: guideImageUrl,
-                                email: guideRef.email,  // Add email to ensure we have it for the booking process
-                            });
-                        }
-                    } catch (error) {
-                        console.error("Error fetching guide data:", error);
-                    }
-                }
-            }
-            setGuides(fetchedGuides);
-        };
-        
-        fetchGuides();
-        
-    }, [experienceData, navigate, isAdmin]);
-
-    useEffect(() => {
-        if (!experience) return;
-
-        // Generate time slots based on the experience time range
-        const generateTimeSlots = (startTime, endTime, durationMinutes) => {
-            if (!startTime || !endTime || !durationMinutes) {
-                console.log("Missing time data:", { startTime, endTime, durationMinutes });
-                return [];
+            if (!experienceData) {
+                navigate('/');
+                return;
             }
 
             try {
-                const slots = [];
-                const [startHour, startMinute] = startTime.split(':').map(Number);
-                const [endHour, endMinute] = endTime.split(':').map(Number);
-                
-                if (isNaN(startHour) || isNaN(startMinute) || isNaN(endHour) || isNaN(endMinute)) {
-                    console.log("Invalid time format:", { startTime, endTime });
-                    return [];
+                // If we have full experienceData object, use it directly
+                if (experienceData.id) {
+                    const experienceDetails = await ExperienceService.getExperienceById(experienceData.id);
+                    setExperience(experienceDetails);
+                    setGuides(experienceDetails.guides || []);
+                    
+                    // Parse available days
+                    const days = Array.isArray(experienceDetails.days) 
+                        ? experienceDetails.days 
+                        : experienceDetails.days.split(', ');
+                    setAvailableDays(days);
+                    
+                    // Calculate available time slots
+                    const timeSlots = ExperienceService.calculateTimeSlots(experienceDetails);
+                    setAvailableTimes(timeSlots);
+                } 
+                // If we just have an ID, fetch the experience
+                else if (experienceData.nombre) {
+                    const experienceDetails = await ExperienceService.getExperienceById(experienceData.nombre);
+                    setExperience(experienceDetails);
+                    setGuides(experienceDetails.guides || []);
+                    
+                    // Parse available days
+                    const days = Array.isArray(experienceDetails.days) 
+                        ? experienceDetails.days 
+                        : experienceDetails.days.split(', ');
+                    setAvailableDays(days);
+                    
+                    // Calculate available time slots
+                    const timeSlots = ExperienceService.calculateTimeSlots(experienceDetails);
+                    setAvailableTimes(timeSlots);
                 }
                 
-                let currentHour = startHour;
-                let currentMinute = startMinute;
-
-                while (currentHour < endHour || (currentHour === endHour && currentMinute <= endMinute)) {
-                    const formattedHour = String(currentHour).padStart(2, '0');
-                    const formattedMinute = String(currentMinute).padStart(2, '0');
-                    slots.push(`${formattedHour}:${formattedMinute}`);
-                    currentMinute += durationMinutes;
-                    currentHour += Math.floor(currentMinute / 60);
-                    currentMinute %= 60;
-                }
-                
-                if (slots.length > 0) {
-                    const lastSlot = slots[slots.length - 1];
-                    if (lastSlot === endTime) {
-                        slots.pop();
-                    }
-                }
-                
-                return slots;
+                // Set booking window message
+                setBookingWindowMessage("Solo se permiten reservas hasta 2 semanas en el futuro.");
             } catch (error) {
-                console.error("Error generating time slots:", error);
-                return [];
+                console.error("Error fetching experience:", error);
+                setDateError("Error al cargar la experiencia. Por favor intente de nuevo.");
+            } finally {
+                setLoading(false);
             }
         };
 
-        // Parse time from the experience data
-        let startTime = "";
-        let endTime = "";
-        
-        if (experience.time && experience.time.includes('-')) {
-            [startTime, endTime] = experience.time.split('-').map(t => t.trim());
-        } else if (experience.rawData && experience.rawData.horarioInicio && experience.rawData.horarioFin) {
-            startTime = experience.rawData.horarioInicio;
-            endTime = experience.rawData.horarioFin;
-        }
-        
-        // Get the duration - handle possible number or string
-        const duration = typeof experience.duracion === 'number' 
-            ? experience.duracion 
-            : parseInt(experience.duracion || "60");
-        
-        const timeSlots = generateTimeSlots(startTime, endTime, duration);
-        setAvailableTimes(timeSlots);
+        fetchExperienceData();
+    }, [experienceData, navigate]);
 
-        // Fetch Total Paid Users
-        const fetchTotalPaidUsers = async () => {
-            try {
-                const paymentsCollection = collection(db, "payments");
-                const q = query(
-                    paymentsCollection, 
-                    where("experienceId", "==", experience.id), 
-                    where("status", "==", "COMPLETED")
-                );
-                const paymentsSnapshot = await getDocs(q);
-                let totalPeople = 0;
-                paymentsSnapshot.forEach((doc) => {
-                    const bookings = doc.data().bookings || [];
-                    bookings.forEach(booking => {
-                        if (booking.experienceId === experience.id) {
-                            totalPeople += parseInt(booking.selectedPeople, 10) || 0;
-                        }
-                    });
-                });
-                setTotalPaidUsers(totalPeople);
-            } catch (error) {
-                console.error("Error fetching total payment data:", error);
-            }
-        };
-        
-        if (experience.id) {
-            fetchTotalPaidUsers();
-        }
-    }, [experience]);
-
+    // When date or time selection changes, check availability
     useEffect(() => {
-        const fetchReservations = async () => {
+        const checkAvailability = async () => {
             if (!experience || !selectedDate || !selectedTime) {
                 setReservationsForSelectedTime(0);
                 setReservationsForSelectedDate(0);
                 setAvailableSlots(0);
-                return; // Early return if missing data
+                return;
             }
 
-            // Format date for query: "DD/MM/YYYY"
-            const day = String(selectedDate.getDate()).padStart(2, '0');
-            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-            const year = selectedDate.getFullYear();
-            const formattedDate = `${day}/${month}/${year}`;
-
             try {
-                // First, get the experience document to check current available slots
-                const experienceRef = doc(db, "Experiencias", experience.id);
-                const expSnapshot = await getDoc(experienceRef);
-                
-                if (!expSnapshot.exists()) {
-                    console.error("Experience not found");
+                // Check if date is within the booking window
+                const isWithinWindow = BookingService.isWithinBookingWindow(selectedDate);
+                if (!isWithinWindow) {
+                    setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+                    setAvailableSlots(0);
                     return;
                 }
-                
-                const expData = expSnapshot.data();
-                const maxCapacity = expData.maximoUsuarios || experience.maxPeople || 0;
-                const currentAvailableSlots = expData.cuposDisponibles || 0;
 
-                // Query the 'payments' collection
-                const paymentsRef = collection(db, "payments");
-                const q = query(
-                    paymentsRef,
-                    where("experienceId", "==", experience.id),
-                    where("status", "==", "COMPLETED") // Important: Only completed payments
+                // Get availability for this date and time
+                const availability = await BookingService.getAvailableSlots(
+                    experience.id,
+                    selectedDate,
+                    selectedTime
                 );
 
-                const querySnapshot = await getDocs(q);
+                if (availability.error) {
+                    setDateError(availability.error);
+                    setAvailableSlots(0);
+                    return;
+                }
 
-                let peopleInSlot = 0;
-                let peopleInDate = 0;
-
-                querySnapshot.forEach((doc) => {
-                    // Process bookings array inside each payment document
-                    const bookings = doc.data().bookings || [];
-                    
-                    bookings.forEach(booking => {
-                        // Match for time slot - checks both date AND time
-                        if (booking.selectedDay === formattedDate && 
-                            booking.selectedTime === selectedTime &&
-                            booking.experienceId === experience.id) {
-                            peopleInSlot += parseInt(booking.selectedPeople, 10) || 0;
-                        }
-                        
-                        // Match for whole date - checks only date
-                        if (booking.selectedDay === formattedDate &&
-                            booking.experienceId === experience.id) {
-                            peopleInDate += parseInt(booking.selectedPeople, 10) || 0;
-                        }
-                    });
-                });
-                
-                setReservationsForSelectedTime(peopleInSlot);
-                setReservationsForSelectedDate(peopleInDate);
-                
-                // Calculate actual available slots for the time slot
-                const actualAvailableSlots = Math.max(0, currentAvailableSlots - peopleInSlot);
-                setAvailableSlots(actualAvailableSlots);
-                
-                console.log(`Available slots for ${selectedTime} on ${formattedDate}: ${actualAvailableSlots}`);
-                console.log(`People already booked: ${peopleInSlot}`);
-                console.log(`Total capacity: ${currentAvailableSlots}`);
-                
+                setReservationsForSelectedTime(availability.reservationsForTime || 0);
+                setReservationsForSelectedDate(availability.reservationsForDate || 0);
+                setAvailableSlots(availability.availableSlots);
+                setDateError("");
             } catch (error) {
-                console.error("Error fetching reservations:", error);
-                setReservationsForSelectedTime(0);
-                setReservationsForSelectedDate(0);
+                console.error("Error checking availability:", error);
+                setDateError("Error al verificar disponibilidad. Por favor, intente de nuevo.");
                 setAvailableSlots(0);
             }
         };
 
-        fetchReservations();
-    }, [selectedDate, selectedTime, experience]); // Depend on selectedDate, selectedTime, and experience
+        checkAvailability();
+    }, [selectedDate, selectedTime, experience]);
+
+    if (loading) {
+        return <div className="loading-container">Cargando...</div>;
+    }
 
     if (!experience) {
-        return <div className="loading-container">Cargando...</div>;
+        return <div className="loading-container">No se encontró la experiencia.</div>;
     }
 
     const renderIncluidos = () => {
@@ -320,7 +150,6 @@ function BookingPage() {
         );
     };
     
-    // Render guides function
     const renderGuides = () => {
         if (!guides || guides.length === 0) {
             return <BookingDetail title="Guías" value="No hay guías asignados" />;
@@ -361,18 +190,22 @@ function BookingPage() {
             return;
         }
 
+        // Check if date is within booking window
+        if (!BookingService.isWithinBookingWindow(selectedDate)) {
+            setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+            return;
+        }
+
         // Format date for passing to next page
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const year = selectedDate.getFullYear();
-        const formattedDate = `${day}/${month}/${year}`;
+        const formattedDate = BookingService.formatDate(selectedDate);
 
         navigate('/booking-process', { 
             state: { 
                 experience, 
                 selectedDate, 
                 selectedTime,
-                selectedDay: formattedDate // Add formatted date for consistency
+                selectedDay: formattedDate,
+                availableSlots
             } 
         });
     };
@@ -386,6 +219,14 @@ function BookingPage() {
     }
 
     const handleDateSelect = (date) => {
+        // Check if date is within booking window
+        if (!BookingService.isWithinBookingWindow(date)) {
+            setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+            setSelectedDate(null);
+            handleCloseCalendar();
+            return;
+        }
+        
         setSelectedDate(date);
         setDateError(""); // Clear any existing error
         handleCloseCalendar();
@@ -442,6 +283,13 @@ function BookingPage() {
                                 {selectedDate ? "Cambiar Fecha" : "Ver Calendario"}
                             </button>
                         </div>
+                        
+                        {/* Booking Window Message */}
+                        {bookingWindowMessage && (
+                            <div className="booking-window-message">
+                                <p>{bookingWindowMessage}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -539,11 +387,11 @@ function BookingPage() {
             </div>
             {showCalendar && (
                 <div className="calendar-overlay" onClick={handleCloseCalendar}>
-                    <div className="calendar-container sm:mt-[6rem] sm:pb-[3rem] md:mt-18 lg:mt-20 xl:mt-10" onClick={(e) => e.stopPropagation()}>
+                    <div className="calendar-container sm:mt-[6rem] sm:pb-[3rem] md:mt-18 lg:mt-20 xl:mt-20 xl:overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <EventCalendar 
                             onDateSelect={handleDateSelect} 
                             showSelectButton={true} 
-                            validDays={availableDays} // Pass available days to the calendar
+                            validDays={availableDays}
                         />
                         <button className="close-button-calendar" onClick={handleCloseCalendar}>
                             Cerrar Calendario
