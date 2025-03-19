@@ -104,7 +104,7 @@ class BookingService {
             if (!this.isWithinBookingWindow(date)) {
                 return {
                     availableSlots: 0,
-                    error: "Las reservas solo están disponibles hasta 2 semanas en el futuro"
+                    error: "Las reservas solo están disponibles hasta 1 mes en el futuro"
                 };
             }
             
