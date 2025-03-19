@@ -21,14 +21,15 @@ class BookingService {
      */
     isWithinBookingWindow(date) {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to start of day
+        today.setHours(0, 0, 0, 0); // Start of today
         
         const twoWeeksLater = new Date(today);
-        twoWeeksLater.setDate(today.getDate() + 14); // Add 14 days
-        twoWeeksLater.setHours(23, 59, 59, 999); // Set to end of day
+        twoWeeksLater.setDate(today.getDate() + 14); 
+        twoWeeksLater.setHours(23, 59, 59, 999); 
         
-        return date > today && date < twoWeeksLater;
-    } 
+
+        return date >= today && date <= twoWeeksLater;
+      }
 
   /**
    * Format a date object to DD/MM/YYYY string

@@ -377,7 +377,7 @@ function BookingPage() {
             </div>
             {showCalendar && (
                 <div className="calendar-overlay" onClick={handleCloseCalendar}>
-                    <div className="calendar-container sm:mt-[6rem] sm:pb-[3rem] md:mt-18 lg:mt-20 xl:mt-20 xl:overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                    <div className="calendar-container sm:mt-[6rem] sm:pb-[3rem] md:mt-18 lg:mt-20 xl:mt-20" onClick={(e) => e.stopPropagation()}>
                         <EventCalendar 
                             onDateSelect={handleDateSelect} 
                             showSelectButton={true} 
