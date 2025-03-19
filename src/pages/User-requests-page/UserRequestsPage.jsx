@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './UserRequestsPage.css';
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 // Firestore imports
 import { db } from '../../firebase-config';
@@ -174,9 +175,7 @@ const UserRequestsPage = () => {
           <h2 className="section-title">Solicitud para ser Guía</h2>
           
           {loadingGuideApp ? (
-            <div className="loading-container">
-              <p>Cargando solicitud...</p>
-            </div>
+            <LoadingState text='Cargando datos...'/>
           ) : (
             <>
               {guideApplication ? (
@@ -289,9 +288,7 @@ const UserRequestsPage = () => {
           {userRole === 'guia' || userRole === 'admin' ? (
             <>
               {loadingExperiences ? (
-                <div className="loading-container">
-                  <p>Cargando experiencias...</p>
-                </div>
+                <LoadingState text='Cargando datos...'/>
               ) : (
                 <>
                   {experienceRequests.length > 0 ? (

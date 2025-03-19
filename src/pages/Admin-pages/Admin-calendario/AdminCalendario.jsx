@@ -135,6 +135,7 @@ const AdminCalendario = () => {
             onDateSelect={handleDateSelect} 
             showSelectButton={true} 
             key={`calendar-${refreshTrigger}`}
+            isAdmin={true} // Pass isAdmin flag to remove restrictions
           />
         </div>
         
