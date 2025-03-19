@@ -1,4 +1,3 @@
-// ReviewsPage.jsx - Updated with fixed rating functionality
 import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
@@ -15,10 +14,10 @@ import {
     runTransaction,
     increment 
 } from "firebase/firestore";
-import { db } from "/src/firebase-config";
-import profileFallbackImage from "/src/assets/images/landing-page/profile_managemente/profile_picture_1.webp";
-import { useAuth } from "../../components/contexts/AuthContext";
-import LoadingState from "../../components/common/LoadingState/LoadingState";
+import { db } from './../../firebase-config';
+import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.webp';
+import { useAuth } from '../../components/contexts/AuthContext';
+import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 const ErrorState = ({ message }) => (
     <div className="error-container">
@@ -339,13 +338,13 @@ function ReviewsPage() {
             setReviewError("Por favor, selecciona una puntuación.");
             return;
         }
-
+    
         setIsSubmittingReview(true);
-
+    
         try {
             const experienceRef = doc(db, 'Experiencias', selectedReview.id);
             const userReviewId = currentUser.email;
-
+    
             // Use a Date object for immediate display
             const now = new Date();
             const newReview = {
@@ -387,7 +386,8 @@ function ReviewsPage() {
                     // Recalculate the average: ((total * count) - old + new) / count
                     if (totalReviews > 0) {
                         const totalScore = currentRating * totalReviews;
-                        newAvgRating = (totalScore - oldRating + rating) / totalReviews;
+                        // Round to max 2 decimal places
+                        newAvgRating = Math.round(((totalScore - oldRating + rating) / totalReviews) * 100) / 100;
                     }
                 } else {
                     // This is a new review - increment the review count
@@ -396,7 +396,8 @@ function ReviewsPage() {
                     // Calculate new average: ((old_avg * old_count) + new_rating) / new_count
                     if (newTotalReviews > 0) {
                         const totalScore = currentRating * totalReviews;
-                        newAvgRating = (totalScore + rating) / newTotalReviews;
+                        // Round to max 2 decimal places
+                        newAvgRating = Math.round(((totalScore + rating) / newTotalReviews) * 100) / 100;
                     }
                 }
                 
@@ -417,16 +418,16 @@ function ReviewsPage() {
             setAllReviews(prevReviews => {
                 const existingReviews = [...(prevReviews[selectedReview.id] || [])];
                 const reviewIndex = existingReviews.findIndex(review => review.id === userReviewId);
-
+    
                 if (reviewIndex > -1) {
                     existingReviews[reviewIndex] = { ...newReview, id: userReviewId };
                 } else {
                     existingReviews.push({ ...newReview, id: userReviewId });
                 }
                 
-                // Calculate the new average rating for local display
-                const averageRating = calculateAverageRating(existingReviews);
-
+                // Calculate the new average rating for local display (also with 2 decimal places)
+                const averageRating = Math.round(calculateAverageRating(existingReviews) * 100) / 100;
+    
                 return {
                     ...prevReviews,
                     [selectedReview.id]: existingReviews,
@@ -448,7 +449,7 @@ function ReviewsPage() {
                     rating: updatedExpData.puntuacion || 0
                 }));
             }
-
+    
         } catch (error) {
             console.error("Error al publicar la reseña:", error);
             setReviewError("Error al publicar la reseña: " + error.message);

@@ -1,5 +1,5 @@
 import { ACTION_TYPES } from './actions';
-import subirImagen from "/src/assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.webp";
+import subirImagen from '../../../../assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.webp'
 
 /**
  * Helper function to generate recurring dates

@@ -1,12 +1,11 @@
-// AdminResenas.jsx
 import React, { useState, useEffect } from 'react';
 import RelevantInfoS from "../../../components/Admin-components/admin-buttons/InfoSection";
 import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
 import useReviewMetrics from '../../../components/hooks/reviews-hooks/useReviewMetrics';
 import LoadingState from '../../../components/common/LoadingState/LoadingState';
 import { db } from '../../../firebase-config';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import profileFallbackImage from '/src/assets/images/landing-page/profile_managemente/profile_picture_1.webp';
+import { collection, getDocs, doc, deleteDoc, runTransaction } from 'firebase/firestore';
+import profileFallbackImage from '../../../assets/images/landing-page/profile_managemente/profile_picture_1.webp';
 import './AdminResenas.css';
 
 const formatDate = (timestamp) => {
@@ -147,7 +146,7 @@ const AdminResenas = () => {
     // Confirm deletion (called from modal)
     const handleConfirmDelete = async () => {
         if (!reviewToDelete) return;
-
+    
         setDeleteError(null);
         try {
             const { experienceId, reviewId } = reviewToDelete;
@@ -163,32 +162,83 @@ const AdminResenas = () => {
             
             // Wait for animation before actually deleting
             setTimeout(async () => {
-                const reviewRef = doc(db, 'Experiencias', experienceId, 'reviews', reviewId);
-                await deleteDoc(reviewRef);
-                
-                // Update UI in two ways:
-                // 1. Immediate filter to remove deleted review
-                setAllReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
-                
-                // 2. Update local metrics immediately
-                if (reviewToRemove) {
-                    setLocalMetrics(prev => {
-                        const rating = reviewToRemove.rating || 0;
-                        const newMetrics = { ...prev, totalReviews: prev.totalReviews - 1 };
+                try {
+                    // Use a transaction to ensure both the review deletion and experience update are atomic
+                    await runTransaction(db, async (transaction) => {
+                        // Get the experience document
+                        const experienceRef = doc(db, 'Experiencias', experienceId);
+                        const expDoc = await transaction.get(experienceRef);
                         
-                        // Decrement the specific star count
-                        if (rating === 5) newMetrics.reviews5e -= 1;
-                        else if (rating === 4) newMetrics.reviews4e -= 1;
-                        else if (rating === 3) newMetrics.reviews3e -= 1;
-                        else if (rating === 2) newMetrics.reviews2e -= 1;
-                        else if (rating === 1) newMetrics.reviews1e -= 1;
+                        if (!expDoc.exists()) {
+                            throw new Error(`Experience with ID ${experienceId} not found`);
+                        }
                         
-                        return newMetrics;
+                        // Get the review document
+                        const reviewRef = doc(db, 'Experiencias', experienceId, 'reviews', reviewId);
+                        const reviewDoc = await transaction.get(reviewRef);
+                        
+                        if (!reviewDoc.exists()) {
+                            throw new Error(`Review with ID ${reviewId} not found`);
+                        }
+                        
+                        // Get the current rating data from the experience
+                        const expData = expDoc.data();
+                        const currentRating = expData.puntuacion || 0;
+                        const totalReviews = expData.totalReviews || 0;
+                        
+                        // Get the review rating
+                        const reviewData = reviewDoc.data();
+                        const reviewRating = reviewData.rating || 0;
+                        
+                        // Calculate new values
+                        let newTotalReviews = totalReviews - 1;
+                        let newAvgRating = 0;
+                        
+                        // Only recalculate if there will be reviews left
+                        if (newTotalReviews > 0) {
+                            // Formula: new_avg = (total_avg * total_count - deleted_rating) / new_count
+                            const totalScore = currentRating * totalReviews;
+                            // Round to max 2 decimal places
+                            newAvgRating = Math.round(((totalScore - reviewRating) / newTotalReviews) * 100) / 100;
+                        }
+                        
+                        // Update the experience with new metrics
+                        transaction.update(experienceRef, {
+                            puntuacion: newAvgRating,
+                            totalReviews: newTotalReviews
+                        });
+                        
+                        // Delete the review
+                        transaction.delete(reviewRef);
                     });
+                    
+                    // Update UI in two ways:
+                    // 1. Immediate filter to remove deleted review
+                    setAllReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+                    
+                    // 2. Update local metrics immediately
+                    if (reviewToRemove) {
+                        setLocalMetrics(prev => {
+                            const rating = reviewToRemove.rating || 0;
+                            const newMetrics = { ...prev, totalReviews: prev.totalReviews - 1 };
+                            
+                            // Decrement the specific star count
+                            if (rating === 5) newMetrics.reviews5e -= 1;
+                            else if (rating === 4) newMetrics.reviews4e -= 1;
+                            else if (rating === 3) newMetrics.reviews3e -= 1;
+                            else if (rating === 2) newMetrics.reviews2e -= 1;
+                            else if (rating === 1) newMetrics.reviews1e -= 1;
+                            
+                            return newMetrics;
+                        });
+                    }
+                    
+                    // 3. Trigger a backend refresh for consistency
+                    setRefreshTrigger(prev => prev + 1);
+                } catch (transactionError) {
+                    console.error("Transaction error:", transactionError);
+                    setDeleteError(`Error al borrar la reseña: ${transactionError.message}`);
                 }
-                
-                // 3. Trigger a backend refresh for consistency
-                setRefreshTrigger(prev => prev + 1);
                 
                 // Reset the deleting state
                 setDeletingReview(null);
@@ -196,7 +246,7 @@ const AdminResenas = () => {
             
         } catch (err) {
             console.error("Error deleting review:", err);
-            setDeleteError("Failed to delete the review.");
+            setDeleteError("Error al borrar la reseña.");
             setDeletingReview(null);
         } finally {
             setIsDeleteModalOpen(false);

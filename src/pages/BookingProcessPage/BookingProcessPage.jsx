@@ -5,7 +5,7 @@ import { auth } from '../../firebase-config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase-config';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import backgroundImage from '/src/assets/images/ExperiencesPage/paisajeReserva.webp';
+import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.webp';
 import BookingService from '../../components/services/BookingService';
 import html2canvas from 'html2canvas';
 import ReactDOMServer from 'react-dom/server';

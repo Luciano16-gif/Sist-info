@@ -1,8 +1,8 @@
 // ========== HERO SECTION ==========
 
-export { default as HERO_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
+export { default as HERO_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.webp";
 
-export { default as TIP_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.jpg";
+export { default as TIP_IMAGE } from "../assets/images/landing-page-user-photos/top-part/background-landing-user.webp";
 
 // ========== Features section ==========
 
