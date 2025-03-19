@@ -1,3 +1,4 @@
+// firebase-config.js - Unified configuration manager with improved persistence handling
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { 
