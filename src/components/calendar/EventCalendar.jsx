@@ -5,7 +5,7 @@ import { experiencesToCalendarEvents, getEventsForDay, formatDateString } from '
 import LoadingOverlay from '../common/LoadingOverlay';
 import BookingService from '../../components/services/BookingService';
 
-const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
+const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [], isAdmin = false }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -99,9 +99,12 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
     return currentYear < today.year || (currentYear === today.year && currentMonth < today.month);
   };
 
-  // Check if a date is within the booking window (today to 2 weeks from now)
+  // Check if a date is within the booking window (today to 1 month from now)
   const isWithinBookingWindow = (day) => {
     if (!day) return false;
+    
+    // Admin bypass - admins can select any date
+    if (isAdmin) return true;
     
     const date = new Date(currentYear, currentMonth, day);
     return BookingService.isWithinBookingWindow(date);
@@ -110,12 +113,9 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
   // Check if a date is a valid day based on validDates prop and booking window
   const isValidDay = (day) => {
     // First check if the date is in the past
-    if (isPastDate(day)) return false;
+    if (isPastDate(day) && !isAdmin) return false;
     
-    // Check if the date is within the booking window (2 weeks)
-    if (!isWithinBookingWindow(day)) return false;
-    
-    // If no validDates specified, any future or today date within window is valid
+    // If no validDates specified, any future or today date is valid for display
     if (!day || validDates.length === 0) return true;
     
     // For the new system, validDates contains specific dates in ISO string format
@@ -134,6 +134,15 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
     });
   };
 
+  // Check if date is bookable (valid + within window)
+  const isDateBookable = (day) => {
+    // Admin can book any valid date
+    if (isAdmin) return isValidDay(day);
+    
+    // For regular users, date must be valid and within booking window
+    return isValidDay(day) && isWithinBookingWindow(day);
+  };
+
   const adjustSelectedDate = (newMonth, newYear) => {
     if (selectedDate) {
       const daysInNewMonth = new Date(newYear, newMonth + 1, 0).getDate();
@@ -144,13 +153,15 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
   };
 
   const handlePrevMonth = () => {
-    // Don't allow navigating to past months
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-    
-    // Check if the target month is in the past
-    if (prevYear < today.year || (prevYear === today.year && prevMonth < today.month)) {
-      return; // Don't navigate to past months
+    // Admins can navigate to any month, users can't go to past months
+    if (!isAdmin) {
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      
+      // Check if the target month is in the past
+      if (prevYear < today.year || (prevYear === today.year && prevMonth < today.month)) {
+        return; // Don't navigate to past months for regular users
+      }
     }
     
     setIsChangingMonth(true);
@@ -198,10 +209,13 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
 
   // Check if we can navigate to the previous month
   const canGoToPrevMonth = () => {
+    // Admins can go to any month
+    if (isAdmin) return true;
+    
     const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
     
-    // Prevent going to past months
+    // Prevent going to past months for regular users
     return !(prevYear < today.year || (prevYear === today.year && prevMonth < today.month));
   };
 
@@ -274,30 +288,22 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
   };
 
   const handleDayClick = (day) => {
-    // Don't allow selection of past dates
-    if (isPastDate(day)) return;
+    // Don't allow selection of past dates (unless admin)
+    if (!isAdmin && isPastDate(day)) return;
     
-    // Don't allow selection of dates outside the booking window
-    if (!isWithinBookingWindow(day)) {
-      alert("Solo se permiten reservas hasta 2 semanas en el futuro.");
-      return;
+    // Allow selection of all valid dates for viewing (even outside booking window)
+    if (isValidDay(day) || isAdmin) {
+      setSelectedDate(day);
     }
-    
-    // Only allow selection if day is valid (when validDates is provided)
-    if (validDates.length > 0 && !isValidDay(day)) {
-      return; // Don't select invalid days
-    }
-    
-    setSelectedDate(day);
   };
 
   const handleConfirmDate = () => {
     if (selectedDate) {
       const fullDate = new Date(currentYear, currentMonth, selectedDate);
       
-      // Confirm the date is within booking window before passing it up
-      if (!BookingService.isWithinBookingWindow(fullDate)) {
-        alert("Solo se permiten reservas hasta 2 semanas en el futuro.");
+      // For non-admins, confirm the date is within booking window before passing it up
+      if (!isAdmin && !BookingService.isWithinBookingWindow(fullDate)) {
+        alert(`Esta fecha está fuera del período de reserva permitido (${isAdmin ? 'sin restricción' : '1 mes'}).`);
         return;
       }
       
@@ -316,10 +322,10 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
     dayRefs.current = {};
   }, [daysInMonth]);
 
-  // Get the date 2 weeks from today for display
-  const twoWeeksFromNow = useMemo(() => {
+  // Get the date 1 month from today for display
+  const oneMonthFromNow = useMemo(() => {
     const date = new Date();
-    date.setDate(date.getDate() + 14);
+    date.setMonth(date.getMonth() + 1);
     return date;
   }, []);
 
@@ -332,14 +338,14 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
   const getValidDatesMessage = () => {
     if (!validDates || validDates.length === 0) return '';
     
-    // Get only dates within the next 2 weeks for display
+    // Get only dates within the next month for display
     const today = new Date();
-    const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(today.getDate() + 14);
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(today.getMonth() + 1);
     
     const upcomingDates = validDates
       .map(d => new Date(d))
-      .filter(d => d >= today && d <= twoWeeksFromNow)
+      .filter(d => d >= today)
       .sort((a, b) => a - b)
       .slice(0, 5); // Show at most 5 dates to keep it readable
     
@@ -371,11 +377,13 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
         </div>
       )}
       
-      {/* Booking Window Notice */}
-      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 mb-4 rounded" role="alert">
-        <p className="font-medium">Información de reservas</p>
-        <p className="text-sm">Solo se permiten reservas hasta 2 semanas en el futuro (hasta el {formatDateForDisplay(twoWeeksFromNow)}).</p>
-      </div>
+      {/* Booking Window Notice - Only show for regular users */}
+      {!isAdmin && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 mb-4 rounded" role="alert">
+          <p className="font-medium">Información de reservas</p>
+          <p className="text-sm">Solo se permiten reservas hasta 1 mes en el futuro (hasta el {formatDateForDisplay(oneMonthFromNow)}).</p>
+        </div>
+      )}
       
       {/* Valid Dates Instructions - shown when validDates is provided */}
       {validDates && validDates.length > 0 && (
@@ -437,6 +445,24 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                   const validDay = day && isValidDay(day);
                   const pastDay = day && isPastDate(day);
                   const withinWindow = day && isWithinBookingWindow(day);
+                  const canBook = day && isDateBookable(day);
+
+                  // Calculate different styles based on conditions
+                  const getDateClassName = () => {
+                    if (isSelected) return 'bg-blue-500';
+                    if (isToday) return 'bg-green-500';
+                    if (pastDay && !isAdmin) return 'bg-gray-400 opacity-40';
+                    
+                    // Has events but outside booking window
+                    if (dayEvents.length > 0 && !withinWindow && validDay) 
+                      return 'bg-gray-700 opacity-80';
+                      
+                    // Valid day within booking window
+                    if (validDay && withinWindow) 
+                      return 'hover:bg-gray-700';
+                      
+                    return '';
+                  };
 
                   return (
                     <div
@@ -448,22 +474,15 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                       aria-label={day ? `${day} de ${months[currentMonth]} de ${currentYear}${dayEvents.length > 0 ? `, ${dayEvents.length} experiencias` : ''}` : undefined}
                       title={
                         !day ? "" : 
-                        pastDay ? "No se pueden seleccionar fechas pasadas" :
-                        !withinWindow ? "Solo se permiten reservas hasta 2 semanas en el futuro" :
+                        pastDay && !isAdmin ? "No se pueden seleccionar fechas pasadas" :
+                        !withinWindow && !isAdmin ? `Se puede ver pero no reservar (fuera del período de ${isAdmin ? 'sin restricción' : '1 mes'})` :
                         validDates.length > 0 && !validDay ? `Esta experiencia no está disponible en esta fecha.` :
                         ""
                       }
-                      className={`relative rounded-md sm:rounded-lg min-h-[38px] sm:min-h-[50px] p-1 sm:p-2 transition-colors ${
-                        isToday ? 'bg-green-500' :
-                        isSelected ? 'bg-blue-500' :
-                        pastDay ? 'bg-gray-400 opacity-40' :
-                        !withinWindow ? 'bg-gray-400 opacity-40' :
-                        day && validDay ? 'hover:bg-gray-700' : 
-                        ''
-                      } ${
+                      className={`relative rounded-md sm:rounded-lg min-h-[38px] sm:min-h-[50px] p-1 sm:p-2 transition-colors ${getDateClassName()} ${
                         day ? 
-                          pastDay ? 'cursor-not-allowed opacity-40' :
-                          !withinWindow ? 'cursor-not-allowed opacity-40' :
+                          pastDay && !isAdmin ? 'cursor-not-allowed opacity-40' :
+                          validDay && !withinWindow && !isAdmin ? 'cursor-pointer' :
                           validDay ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                         : ''
                       }`}
@@ -475,7 +494,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                           <div className="text-white text-center text-xs sm:text-base font-medium">
                             {day}
                           </div>
-                          {validDay && !pastDay && (
+                          {/* Show event indicators for all valid dates, even those outside booking window */}
+                          {validDay && (
                             <div className="absolute bottom-0 left-0 right-0 flex justify-center space-x-[1px] pb-[2px] sm:pb-1">
                               {/* Show 4 dots on mobile, 5 on tablet/desktop */}
                               {dayEvents.slice(0, window.innerWidth < 640 ? 4 : 5).map((event, index) => (
@@ -490,7 +510,8 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                               )}
                             </div>
                           )}
-                          {!withinWindow && !pastDay && (
+                          {/* Show icon for dates outside booking window */}
+                          {validDay && !withinWindow && !pastDay && !isAdmin && (
                             <div className="absolute top-0 right-0 w-0 h-0 border-t-8 border-r-8 border-yellow-500 border-solid rounded-bl-lg" title="Fuera del período de reserva" />
                           )}
                         </>
@@ -515,10 +536,11 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                 Experiencias para el {selectedDate}/{currentMonth + 1}/{currentYear}
               </h3>
               
-              {/* Outside booking window message */}
-              {selectedDate && !isWithinBookingWindow(selectedDate) && (
+              {/* Outside booking window message - only for regular users */}
+              {selectedDate && !isWithinBookingWindow(selectedDate) && !isAdmin && (
                 <div className="bg-yellow-100 border-left-4 border-yellow-500 text-yellow-800 p-3 mb-3 rounded">
-                  <p className="font-medium">Esta fecha está fuera del período de reserva de 2 semanas.</p>
+                  <p className="font-medium">Esta fecha está fuera del período de reserva de 1 mes.</p>
+                  <p className="text-sm">Puedes ver los detalles pero no podrás hacer una reserva.</p>
                 </div>
               )}
               
@@ -548,7 +570,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                           handleViewBooking(event);
                         }}
                       >
-                        Ver más
+                        {isAdmin || isWithinBookingWindow(selectedDate) ? 'Ver más' : 'Ver detalles'}
                       </button>
                     </div>
                   </div>
@@ -574,8 +596,7 @@ const EventCalendar = ({ onDateSelect, showSelectButton, validDates = [] }) => {
                 onClick={handleConfirmDate}
                 disabled={
                   !selectedDate || 
-                  (validDates.length > 0 && !isValidDay(selectedDate)) ||
-                  !isWithinBookingWindow(selectedDate)
+                  (!isAdmin && !isDateBookable(selectedDate))
                 }
               >
                 Seleccionar Fecha

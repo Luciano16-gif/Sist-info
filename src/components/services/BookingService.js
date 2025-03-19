@@ -23,11 +23,11 @@ class BookingService {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Start of today
         
-        const twoWeeksLater = new Date(today);
-        twoWeeksLater.setDate(today.getDate() + 14); 
-        twoWeeksLater.setHours(23, 59, 59, 999); 
+        const oneMonthLater = new Date(today);
+        oneMonthLater.setMonth(today.getMonth() + 1); // One month from today
+        oneMonthLater.setHours(23, 59, 59, 999); 
         
-        return date >= today && date <= twoWeeksLater;
+        return date >= today && date <= oneMonthLater;
     }
 
     /**
