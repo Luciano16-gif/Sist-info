@@ -131,7 +131,6 @@
     font-weight: 600;
     margin-bottom: 4px;
     color: #172819;
-    font-family: "Ysabeau SC";
     width: 100%;
     line-height: 1.2;
 }
@@ -139,7 +138,6 @@
 .forum-date-forum {
     font-size: 14px;
     color: #5a8146;
-    font-family: "Ysabeau SC";
     margin-top: 5px;
     font-weight: 500;
 }
@@ -153,7 +151,6 @@
     margin: 16px 0;
     overflow: hidden;
     max-height: 180px;
-    font-family: "Ysabeau SC";
     line-height: 1.5;
     mask-image: linear-gradient(to bottom, black, black 80%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black, black 80%, transparent 100%);
@@ -480,7 +477,6 @@
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
-    font-family: "Ysabeau SC";
     text-align: center;
 }
 
@@ -511,7 +507,6 @@
     border-radius: 12px;
     resize: none;
     font-size: 18px;
-    font-family: "Ysabeau SC";
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     word-wrap: break-word; /* Ensure text wraps properly */
     overflow-wrap: break-word;
@@ -537,7 +532,6 @@
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    font-family: "Ysabeau SC";
     align-self: center;
     padding: 6px 12px;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -566,7 +560,6 @@
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    font-family: "Ysabeau SC";
     align-self: center;
     padding: 6px 12px;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -819,7 +812,6 @@
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
-    font-family: "Ysabeau SC";
     font-size: 16px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }

@@ -46,11 +46,13 @@ const UserDropdownMenu = ({
           // Im leaving this empty for now
       ],
       guia: [
-        { to: "/crear-experiencia", label: "Crear Experiencia" }
+        { to: "/crear-experiencia", label: "Crear Experiencia" },
+        { to: "/code-validation", label: "Validar Código" }
       ],
       admin: [
         { to: "/crear-experiencia", label: "Crear Experiencia" },
         { to: "/homeAdmin", label: "Panel Admin" },
+        { to: "/code-validation", label: "Validar Código" },
         { to: "/", label: "Ver Sitio Web" }
       ]
     };

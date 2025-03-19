@@ -15,7 +15,7 @@ import {
 
 class BookingService {
     /**
-     * Check if a date is within the allowed booking window (2 weeks)
+     * Check if a date is within the allowed booking window (1 month)
      * @param {Date} date - The date to check
      * @returns {boolean} - Whether the date is within the allowed window
      */
@@ -104,7 +104,7 @@ class BookingService {
             if (!this.isWithinBookingWindow(date)) {
                 return {
                     availableSlots: 0,
-                    error: "Las reservas solo están disponibles hasta 2 semanas en el futuro"
+                    error: "Las reservas solo están disponibles hasta 1 mes en el futuro"
                 };
             }
             

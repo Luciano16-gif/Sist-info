@@ -11,6 +11,7 @@ import html2canvas from 'html2canvas';
 import ReactDOMServer from 'react-dom/server';
 import LazyImage from '../../components/common/LazyImage/LazyImage';
 import LoadingState from '../../components/common/LoadingState/LoadingState';
+import useImagePreloader from '../../components/hooks/useImagePreloader';
 
 function BookingProcessPage() {
     const location = useLocation();
@@ -31,6 +32,12 @@ function BookingProcessPage() {
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [availableSlots, setAvailableSlots] = useState(0);
     const [bookingWindowMessage, setBookingWindowMessage] = useState('');
+
+    const imagesToPreload = [backgroundImage];
+    if (experience?.imageUrl) {
+        imagesToPreload.push(experience.imageUrl);
+    }
+    const imagesLoaded = useImagePreloader(imagesToPreload);
 
     // Generate a unique booking code on component mount
     useEffect(() => {
@@ -387,7 +394,7 @@ function BookingProcessPage() {
         }
     };
 
-    if (loading) {
+    if (loading || !imagesLoaded) {
         return <LoadingState text="Cargando datos de la reserva..." />;
     }
     

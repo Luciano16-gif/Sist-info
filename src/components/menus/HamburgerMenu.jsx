@@ -16,6 +16,7 @@ const HamburgerMenu = () => {
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
     { href: "/foro", label: "Foro" },
+    { href: "/busqueda", label: "Búsqueda" },
   ];
   // Create final menu items array with conditional item for admin/guide
   const menuItems = [...baseMenuItems];
@@ -184,7 +185,7 @@ const HamburgerMenu = () => {
             {menuItems.map((item, index) => (
               <li key={item.href} className="w-full text-center hover:scale-110 transform transition-all duration-300 my-1">
                 <Link
-                  className="text-white font-ysabeau uppercase underline text-lg tracking-wider py-3 px-4 w-full inline-block"
+                  className="text-white font-ysabeau uppercase text-lg tracking-wider py-3 px-4 w-full inline-block"
                   to={item.href}
                 >
                   {item.label}

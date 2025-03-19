@@ -1,7 +1,7 @@
 // firebase-config.js - Unified configuration manager
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
@@ -89,6 +89,26 @@ if (import.meta.env.VITE_USE_EMULATORS === "true") {
   try {
     db = getFirestore(app);
     console.log("Firestore initialized");
+    
+    // Enable offline persistence for Firestore
+    if (db) {
+      (async () => {
+        try {
+          await enableIndexedDbPersistence(db);
+          console.log("Firestore persistence has been enabled.");
+        } catch (err) {
+          if (err.code === 'failed-precondition') {
+            // Multiple tabs open, persistence can only be enabled in one tab at a time
+            console.log("Persistence failed: Multiple tabs open");
+          } else if (err.code === 'unimplemented') {
+            // The current browser does not support all of the features required for persistence
+            console.log("Persistence not supported by this browser");
+          } else {
+            console.error("Unexpected error when enabling persistence:", err);
+          }
+        }
+      })();
+    }
   } catch (error) {
     console.log("Error initializing Firestore", error);
     firestoreError = error;

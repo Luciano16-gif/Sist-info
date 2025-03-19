@@ -5,7 +5,7 @@ import EventCalendar from '../../components/calendar/EventCalendar';
 import backgroundImage from '../../assets/images/ExperiencesPage/paisajeReserva.png';
 import BookingService from '../../components/services/BookingService';
 import ExperienceService from '../../components/services/ExperienceService';
-import LazyImage from '../../components/common/LazyImage/LazyImage';
+import useImagePreloader from '../../components/hooks/useImagePreloader';
 import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 function BookingPage() {
@@ -26,6 +26,14 @@ function BookingPage() {
     const [availableSlots, setAvailableSlots] = useState(0);
     const [loading, setLoading] = useState(true);
     const [bookingWindowMessage, setBookingWindowMessage] = useState("");
+    const [availabilityLoading, setAvailabilityLoading] = useState(false);
+
+
+    const imagesToPreload = [backgroundImage];
+    if (experience?.imageUrl) {
+        imagesToPreload.push(experience.imageUrl);
+    }
+    const imagesLoaded = useImagePreloader(imagesToPreload);
 
     // Load experience data on mount
     useEffect(() => {
@@ -102,7 +110,7 @@ function BookingPage() {
                 }
                 
                 // Set booking window message
-                setBookingWindowMessage("Solo se permiten reservas hasta 2 semanas en el futuro.");
+                setBookingWindowMessage("Solo se permiten reservas hasta 1 mes en el futuro.");
             } catch (error) {
                 console.error("Error fetching experience:", error);
                 setDateError("Error al cargar la experiencia. Por favor intente de nuevo.");
@@ -117,58 +125,45 @@ function BookingPage() {
     // When date or time selection changes, check availability
     useEffect(() => {
         const checkAvailability = async () => {
-            if (!experience || !selectedDate || !selectedTime) {
-                setReservationsForSelectedTime(0);
-                setReservationsForSelectedDate(0);
-                setAvailableSlots(0);
-                return;
+          // Only proceed if a date and time are selected
+          if (!experience || !selectedDate || !selectedTime) {
+            setReservationsForSelectedTime(0);
+            setReservationsForSelectedDate(0);
+            setAvailableSlots(null); // Use null to indicate no check yet
+            return;
+          }
+          
+          setAvailabilityLoading(true);
+          try {
+            // (Optional) Check booking window and date availability here...
+            const availability = await BookingService.getAvailableSlots(
+              experience.id,
+              selectedDate,
+              selectedTime
+            );
+            
+            if (availability.error) {
+              setDateError(availability.error);
+              setAvailableSlots(0);
+            } else {
+              setReservationsForSelectedTime(availability.reservationsForTime || 0);
+              setReservationsForSelectedDate(availability.reservationsForDate || 0);
+              setAvailableSlots(availability.availableSlots);
+              setDateError("");
             }
-
-            try {
-                // Check if date is within the booking window
-                const isWithinWindow = BookingService.isWithinBookingWindow(selectedDate);
-                if (!isWithinWindow) {
-                    setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
-                    setAvailableSlots(0);
-                    return;
-                }
-                
-                // Check if the date is available for this experience
-                const isAvailable = await BookingService.isDateAvailable(experience.id, selectedDate);
-                if (!isAvailable) {
-                    setDateError("Esta fecha no está disponible para esta experiencia.");
-                    setAvailableSlots(0);
-                    return;
-                }
-
-                // Get availability for this date and time
-                const availability = await BookingService.getAvailableSlots(
-                    experience.id,
-                    selectedDate,
-                    selectedTime
-                );
-
-                if (availability.error) {
-                    setDateError(availability.error);
-                    setAvailableSlots(0);
-                    return;
-                }
-
-                setReservationsForSelectedTime(availability.reservationsForTime || 0);
-                setReservationsForSelectedDate(availability.reservationsForDate || 0);
-                setAvailableSlots(availability.availableSlots);
-                setDateError("");
-            } catch (error) {
-                console.error("Error checking availability:", error);
-                setDateError("Error al verificar disponibilidad. Por favor, intente de nuevo.");
-                setAvailableSlots(0);
-            }
+          } catch (error) {
+            console.error("Error checking availability:", error);
+            setDateError("Error al verificar disponibilidad. Por favor, intente de nuevo.");
+            setAvailableSlots(0);
+          } finally {
+            setAvailabilityLoading(false);
+          }
         };
-
+      
         checkAvailability();
-    }, [selectedDate, selectedTime, experience]);
+      }, [selectedDate, selectedTime, experience]);
 
-    if (loading) {
+    if (loading || !imagesLoaded) {
         return <LoadingState text='Cargando experiencia...'/>;
     }
 
@@ -231,7 +226,7 @@ function BookingPage() {
 
         // Check if date is within booking window
         if (!BookingService.isWithinBookingWindow(selectedDate)) {
-            setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+            setDateError("Solo se permiten reservas hasta 1 mes en el futuro.");
             return;
         }
         
@@ -273,7 +268,7 @@ function BookingPage() {
     const handleDateSelect = (date) => {
         // Check if date is within booking window
         if (!BookingService.isWithinBookingWindow(date)) {
-            setDateError("Solo se permiten reservas hasta 2 semanas en el futuro.");
+            setDateError("Solo se permiten reservas hasta 1 mes en el futuro.");
             setSelectedDate(null);
             handleCloseCalendar();
             return;
@@ -440,7 +435,7 @@ function BookingPage() {
                     )}
 
                     {/* Show available slots message */}
-                    {selectedTime && availableSlots <= 0 && (
+                    {selectedTime && !availabilityLoading && availableSlots === 0 && (
                         <div className="no-slots-message" style={{ color: 'red', textAlign: 'center', margin: '10px 0' }}>
                             No hay cupos disponibles para este horario.
                         </div>

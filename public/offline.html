@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ÁvilaVenturas - Sin conexión</title>
+  <style>
+    body {
+      font-family: "Ysabeau SC", sans-serif;
+      background-color: #1a2a1a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #ffffff;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .button {
+      background-color: #ffffff;
+      color: #1a2a1a;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .button:hover {
+      background-color: #4CAF50;
+    }
+    .logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <img src="../src/assets/images/Logo_Avilaventuras.webp" alt="ÁvilaVenturas Logo" class="logo">
+  <div class="icon">📶</div>
+  <h1>Sin conexión a Internet</h1>
+  <p>Lo sentimos, no puedes acceder a ÁvilaVenturas en este momento porque no tienes conexión a Internet.</p>
+  <button class="button" onclick="window.location.reload()">Intentar de nuevo</button>
+</body>
+</html>

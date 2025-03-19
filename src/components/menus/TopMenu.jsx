@@ -17,6 +17,7 @@ const TopMenu = () => {
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
     { href: "/foro", label: "Foro" },
+    { href: "/busqueda", label: "Búsqueda" },
   ];
 
   // Create final menu items array 
@@ -82,7 +83,7 @@ const TopMenu = () => {
       style={{ zIndex: 9999 }}
     >
       {/* Use a 3-column grid layout for better centering */}
-      <div className="w-full grid grid-cols-3 items-center px-4">
+      <div className="w-full grid grid-cols-[1fr_3fr_1fr] items-center px-4">
         {/* Left section - Logo and user info */}
         <div className="flex items-center">
           <Link to={"/"}>
@@ -105,9 +106,9 @@ const TopMenu = () => {
         
         {/* Center section - Main navigation */}
         <div className="flex justify-center">
-          <ul className="flex flex-wrap justify-center uppercase font-ysabeau underline text-xs lg:text-sm xl:text-base gap-3 md:gap-4 lg:gap-6">
+          <ul className="flex justify-center uppercase font-ysabeau underline text-xs lg:text-sm xl:text-base gap-1 md:gap-2 lg:gap-3">
             {menuItems.map((item) => (
-              <li key={item.href} className="hover:scale-110 transform transition-all duration-300 whitespace-nowrap">
+              <li key={item.href} className="hover:scale-110 transform transition-all duration-300 whitespace-nowrap px-1">
                 <Link to={item.href} className="text-center">{item.label}</Link>
               </li>
             ))}
