@@ -157,113 +157,172 @@ const experienceFormService = {
     }
   },
   
-  /**
-   * Submit a new experience
-   * @param {Object} formData - Experience data to submit
-   * @returns {Promise<Object>} Created experience
-   */
-  async submitExperience(formData) {
-    try {
-      console.log("submitExperience called with formData:", JSON.stringify(formData, null, 2));
+/**
+ * Submit a new experience and update user's activitiesCreated
+ * @param {Object} formData - Experience data to submit
+ * @returns {Promise<Object>} Created experience
+ */
+async submitExperience(formData) {
+  try {
+    console.log("submitExperience called with formData:", JSON.stringify(formData, null, 2));
+    
+    // Enhanced createdBy validation
+    let createdBy = formData.createdBy;
+    
+    // If createdBy is missing, try to recover it
+    if (!createdBy) {
+      console.warn("Missing createdBy in form submission - attempting recovery");
       
-      // Enhanced createdBy validation
-      let createdBy = formData.createdBy;
+      // Try to get from localStorage as last resort
+      try {
+        createdBy = localStorage.getItem('tempUserEmail');
+        console.log("Recovered createdBy from localStorage:", createdBy);
+      } catch (e) {
+        console.error("Failed to retrieve from localStorage:", e);
+      }
       
-      // If createdBy is missing, try to recover it
+      // If still missing, throw an error
       if (!createdBy) {
-        console.warn("Missing createdBy in form submission - attempting recovery");
+        throw new Error("No se pudo identificar al creador de la experiencia. Por favor, inténtelo de nuevo.");
+      }
+    }
+    
+    // Check for duplicate experience name
+    const nameExists = await this.checkExperienceNameExists(formData.nombre);
+    if (nameExists) {
+      throw new Error("El nombre de la experiencia ya existe, intente con otro");
+    }
+    
+    // Upload image to Cloudinary
+    let imageUrl = null;
+    let publicId = null;
+    
+    if (formData.imageFile) {
+      try {
+        console.log("Iniciando subida de imagen a Cloudinary...");
+        const uploadResult = await cloudinaryService.uploadFile(formData.imageFile, `experiences`);
         
-        // Try to get from localStorage as last resort
-        try {
-          createdBy = localStorage.getItem('tempUserEmail');
-          console.log("Recovered createdBy from localStorage:", createdBy);
-        } catch (e) {
-          console.error("Failed to retrieve from localStorage:", e);
+        console.log("Resultado de subida:", uploadResult);
+        
+        if (!uploadResult || !uploadResult.url) {
+          throw new Error("Error al subir la imagen: no se recibió una URL");
         }
         
-        // If still missing, throw an error
-        if (!createdBy) {
-          throw new Error("No se pudo identificar al creador de la experiencia. Por favor, inténtelo de nuevo.");
-        }
+        imageUrl = uploadResult.url;
+        publicId = uploadResult.publicId;
+      } catch (uploadError) {
+        console.error("Error durante la subida de imagen:", uploadError);
+        throw new Error(`Error al subir la imagen: ${uploadError.message}`);
       }
+    } else {
+      throw new Error("Por favor, seleccione una imagen para la experiencia");
+    }
+    
+    // Set default status if not provided
+    const status = formData.status || 'pending';
+    
+    // Format numeric fields properly
+    const precio = parseFloat(formData.precio) || 0;
+    const longitudRecorrido = parseFloat(formData.longitudRecorrido) || 0;
+    const duracionRecorrido = parseInt(formData.duracionRecorrido, 10) || 0;
+    const guiasRequeridos = parseInt(formData.guiasRequeridos, 10) || 0;
+    const minimoUsuarios = parseInt(formData.minimoUsuarios, 10) || 0;
+    const maximoUsuarios = parseInt(formData.maximoUsuarios, 10) || 0;
+    
+    // Create a unique ID for the document (instead of using the name)
+    const experienceId = formData.nombre.trim().replace(/\s+/g, '-').toLowerCase() + 
+                         '-' + Date.now().toString(36);
+    
+    // Prepare data object with guaranteed createdBy
+    const experienciaData = {
+      nombre: formData.nombre,
+      precio: precio,
+      fechas: Array.isArray(formData.fechas) ? formData.fechas : [],
+      descripcion: formData.descripcion,
+      horarioInicio: formData.horarioInicio,
+      horarioFin: formData.horarioFin,
+      puntoSalida: formData.puntoSalida,
+      longitudRecorrido: longitudRecorrido,
+      duracionRecorrido: duracionRecorrido,
+      guiasRequeridos: guiasRequeridos,
+      guias: formData.guiasSeleccionados,
+      minimoUsuarios: minimoUsuarios,
+      maximoUsuarios: maximoUsuarios,
+      incluidosExperiencia: formData.incluidosExperiencia,
+      tipoActividad: formData.tipoActividad,
+      imageUrl,
+      publicId,
+      dificultad: formData.dificultad,
+      status: status,
+      createdBy: createdBy, // Use the validated/recovered email
+      fechaCreacion: new Date().toISOString(),
+      puntuacion: 0,
+      usuariosInscritos: 0,
+      cuposDisponibles: maximoUsuarios
+    };
+    
+    console.log("Final experiencia data to be saved:", {
+      ...experienciaData,
+      imageFile: formData.imageFile ? "Image file present" : "No image file" 
+    });
+    
+    try {
+      // Save to Firestore
+      const docRef = doc(db, "Experiencias", experienceId);
+      await setDoc(docRef, experienciaData);
+      console.log("Experience saved successfully with ID:", experienceId);
       
-      // Check for duplicate experience name
-      const nameExists = await this.checkExperienceNameExists(formData.nombre);
-      if (nameExists) {
-        throw new Error("El nombre de la experiencia ya existe, intente con otro");
-      }
-      
-      // Upload image to Cloudinary
-      let imageUrl = null;
-      let publicId = null;
-      
-      if (formData.imageFile) {
-        try {
-          console.log("Iniciando subida de imagen a Cloudinary...");
-          const uploadResult = await cloudinaryService.uploadFile(formData.imageFile, `experiences`);
+      // Update user's activitiesCreated array
+      try {
+        // Get the user document using createdBy as the email
+        const usersCollection = collection(db, "lista-de-usuarios");
+        const q = query(usersCollection, where("email", "==", createdBy));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];
+          const userData = userDoc.data();
           
-          console.log("Resultado de subida:", uploadResult);
+          // Create new experience reference object
+          const experienceRef = {
+            id: experienceId,
+            nombre: formData.nombre,
+            timestamp: new Date().toISOString()
+          };
           
-          if (!uploadResult || !uploadResult.url) {
-            throw new Error("Error al subir la imagen: no se recibió una URL");
+          // Get existing activitiesCreated array or initialize it
+          let activitiesCreated = [];
+          if (userData.activitiesCreated && Array.isArray(userData.activitiesCreated)) {
+            activitiesCreated = [...userData.activitiesCreated];
           }
           
-          imageUrl = uploadResult.url;
-          publicId = uploadResult.publicId;
-        } catch (uploadError) {
-          console.error("Error durante la subida de imagen:", uploadError);
-          throw new Error(`Error al subir la imagen: ${uploadError.message}`);
+          // Add new experience to array
+          activitiesCreated.push(experienceRef);
+          
+          // Update user document
+          await updateDoc(userDoc.ref, {
+            activitiesCreated: activitiesCreated
+          });
+          
+          console.log("Updated user's activitiesCreated with new experience:", experienceId);
+        } else {
+          console.warn("Could not find user document for email:", createdBy);
         }
-      } else {
-        throw new Error("Por favor, seleccione una imagen para la experiencia");
+      } catch (userUpdateError) {
+        console.error("Error updating user's activitiesCreated:", userUpdateError);
+        // Don't throw - we still successfully created the experience
       }
       
-      // Set default status if not provided
-      const status = formData.status || 'pending';
-      
-      // Prepare data object with guaranteed createdBy
-      const experienciaData = {
-        nombre: formData.nombre,
-        precio: parseFloat(formData.precio),
-        fechas: formData.fechas,
-        descripcion: formData.descripcion,
-        horarioInicio: formData.horarioInicio,
-        horarioFin: formData.horarioFin,
-        puntoSalida: formData.puntoSalida,
-        longitudRecorrido: parseFloat(formData.longitudRecorrido),
-        duracionRecorrido: parseInt(formData.duracionRecorrido),
-        guiasRequeridos: parseInt(formData.guiasRequeridos),
-        guias: formData.guiasSeleccionados,
-        minimoUsuarios: parseInt(formData.minimoUsuarios),
-        maximoUsuarios: parseInt(formData.maximoUsuarios),
-        incluidosExperiencia: formData.incluidosExperiencia,
-        tipoActividad: formData.tipoActividad,
-        imageUrl,
-        publicId,
-        dificultad: formData.dificultad,
-        status: status,
-        createdBy: createdBy, // Use the validated/recovered email
-        fechaCreacion: new Date().toISOString(),
-        puntuacion: 0,
-        usuariosInscritos: 0,
-        cuposDisponibles: parseInt(formData.maximoUsuarios)
-      };
-      
-      console.log("Final experiencia data to be saved:", {
-        ...experienciaData,
-        imageFile: formData.imageFile ? "Image file present" : "No image file" 
-      });
-      
-      // Save to Firestore
-      const docRef = doc(db, "Experiencias", formData.nombre);
-      await setDoc(docRef, experienciaData);
-      
-      return { ...experienciaData, id: formData.nombre };
-    } catch (error) {
-      console.error("Error creating experience:", error);
-      throw error;
+      return { ...experienciaData, id: experienceId };
+    } catch (firestoreError) {
+      console.error("Error saving to Firestore:", firestoreError);
+      throw new Error(`Error al guardar la experiencia: ${firestoreError.message}`);
     }
-  },
+  } catch (error) {
+    console.error("Error creating experience:", error);
+    throw error;
+  }
+},
 
   /**
    * Fetch all pending experience requests

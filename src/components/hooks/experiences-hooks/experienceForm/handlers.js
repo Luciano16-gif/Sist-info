@@ -316,12 +316,15 @@ export const createConfigHandlers = (dispatch, configData) => {
  * Create form operation handlers with a dispatch function
  * @param {Function} dispatch - Reducer dispatch function
  * @param {Object} formFields - Current form field values
+ * @param {Function} getState - Function to get current state
  * @returns {Object} Form operation handlers
  */
 export const createFormOperations = (dispatch, formFields, getState) => {
   // Form validation function
   const validateForm = () => {
-    const validationResult = validateExperienceForm(formFields);
+    // Use getState to ensure we have the latest state
+    const currentFormFields = getState ? getState().formFields : formFields;
+    const validationResult = validateExperienceForm(currentFormFields);
     dispatch(actions.setErrors(validationResult.errors));
     return validationResult;
   };
@@ -339,8 +342,23 @@ export const createFormOperations = (dispatch, formFields, getState) => {
         return false;
       }
       
-      // Submit experience
-      await experienceFormService.submitExperience(formFields);
+      // Get the latest form state
+      const currentFormFields = getState ? getState().formFields : formFields;
+      
+      // Log the fields being submitted for debugging
+      console.log("Submitting form with fields:", currentFormFields);
+      
+      // Ensure createdBy is set
+      if (!currentFormFields.createdBy) {
+        dispatch(actions.setErrors({ 
+          submit: "Error: Missing creator information. Please try logging out and back in."
+        }));
+        dispatch(actions.setSubmitting(false));
+        return false;
+      }
+      
+      // Submit experience with the latest state
+      await experienceFormService.submitExperience(currentFormFields);
       
       // Reset form
       dispatch(actions.resetForm());
@@ -349,7 +367,7 @@ export const createFormOperations = (dispatch, formFields, getState) => {
     } catch (error) {
       console.error("Error creating experience:", error);
       
-      if (error.message.includes("nombre de la experiencia ya existe")) {
+      if (error.message && error.message.includes("nombre de la experiencia ya existe")) {
         dispatch(actions.setErrors({ nombre: error.message }));
       } else {
         dispatch(actions.setErrors({ 
@@ -367,18 +385,20 @@ export const createFormOperations = (dispatch, formFields, getState) => {
   const resetForm = () => {
     dispatch(actions.resetForm());
   };
-  
+
   // We also need to handle repetition change with access to current form state
   const handleRepetitionChange = (weeks) => {
     dispatch(actions.setRepetitionWeeks(weeks));
     
     // Get the current state to access the initial date
-    const state = getState();
-    const initialDate = state.formFields.fechaInicial;
-    
-    // Generate recurring dates if we have an initial date
-    if (initialDate) {
-      dispatch(actions.generateRecurringDates(initialDate, weeks));
+    if (getState) {
+      const state = getState();
+      const initialDate = state.formFields.fechaInicial;
+      
+      // Generate recurring dates if we have an initial date
+      if (initialDate) {
+        dispatch(actions.generateRecurringDates(initialDate, weeks));
+      }
     }
   };
   

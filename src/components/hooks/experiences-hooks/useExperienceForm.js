@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useCallback } from 'react';
 
 // Import reducer components
 import { formReducer, initialState } from './experienceForm/reducer';
@@ -16,6 +16,9 @@ import experienceFormService from '../../services/experienceFormService';
 export const useExperienceForm = () => {
   // Initialize reducer
   const [state, dispatch] = useReducer(formReducer, initialState);
+  
+  // Create a getState function to access current state
+  const getState = useCallback(() => state, [state]);
   
   // Destructure state for easier access
   const { formFields, configData, formHandling } = state;
@@ -43,12 +46,15 @@ export const useExperienceForm = () => {
   // Create handlers with current dispatch and state
   const handlers = createFieldHandlers(dispatch);
   const configHandlers = createConfigHandlers(dispatch, configData);
-  const formOperations = createFormOperations(dispatch, formFields);
   
-  // Expose dispatch function for direct access
+  // Pass getState to formOperations
+  const formOperations = createFormOperations(dispatch, formFields, getState);
+  
+  // Expose dispatch and getState functions for direct access
   formOperations.dispatch = dispatch;
+  formOperations.getState = getState;
   
-  // Returning the public API with the same structure as the original hook (i did it like this maintain compatibility)
+  // Returning the public API with the same structure as the original hook
   return {
     // Form state
     formState: formFields,

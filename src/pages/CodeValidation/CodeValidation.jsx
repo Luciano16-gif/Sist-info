@@ -225,59 +225,61 @@ function CodeValidation() {
 
 
     return (
-        <div className="container-code-validation">
-            <h1 className="title-code-validation">Validar Código de Reserva</h1>
-            <p className="subtitle-code-validation">Ingresa el código de reserva de 6 caracteres:</p>
+        <div className='min-h-screen min-w-screen bg-[#172819] bg-cover p-10'>
+            <div className="container-code-validation min-h-screen bg-[#172819] min-w-screen mt-0">
+                <h1 className="title-code-validation">Validar Código de Reserva</h1>
+                <p className="subtitle-code-validation">Ingresa el código de reserva de 6 caracteres:</p>
 
-            <form className="form-code-validation" onSubmit={handleSearchSubmit}>
-                <div className="input-container-code-validation">
-                    <label htmlFor="code-input">Código:</label>
-                    <div className="input-wrapper">
-                        <input
-                            type="text"
-                            id="code-input"
-                            value={codeInput}
-                            onChange={handleCodeChange}
-                            onKeyDown={handleKeyDown}
-                            className={`input-code-validation ${searchError ? "input-error-code-validation" : ""}`}
-                            placeholder="Ingresa el código..."
-                            maxLength="6"
-                            disabled={isSearching}
-                        />
-                        <img src={searchIcon} alt="Buscar" className="search-icon-code-validation" />
-                        {isSearching && <span className="searching-text-code-validation">Buscando...</span>}
+                <form className="form-code-validation" onSubmit={handleSearchSubmit}>
+                    <div className="input-container-code-validation">
+                        <label htmlFor="code-input">Código:</label>
+                        <div className="input-wrapper">
+                            <input
+                                type="text"
+                                id="code-input"
+                                value={codeInput}
+                                onChange={handleCodeChange}
+                                onKeyDown={handleKeyDown}
+                                className={`input-code-validation ${searchError ? "input-error-code-validation" : ""}`}
+                                placeholder="Ingresa el código..."
+                                maxLength="6"
+                                disabled={isSearching}
+                            />
+                            <img src={searchIcon} alt="Buscar" className="search-icon-code-validation" />
+                            {isSearching && <span className="searching-text-code-validation">Buscando...</span>}
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
 
-            {searchError && <div className="error-message-code-validation">{searchError}</div>}
+                {searchError && <div className="error-message-code-validation">{searchError}</div>}
 
-            {/* Display Booking Details */}
-            {bookingDetails && (
-                <div className="results-container-code-validation">
-                    <h2>Detalles de la Reserva:</h2>
-                    <div className="result-item-code-validation">
-                        <p><strong>Experiencia:</strong> {bookingDetails.experienceName}</p>
-                        <p><strong>Usuario:</strong> {bookingDetails.user?.name} {bookingDetails.user?.lastName}</p>
-                        <p><strong>Correo del Usuario:</strong> {bookingDetails.user?.email}</p>
-                        <p><strong>Fecha:</strong> {bookingDetails.selectedDate}</p>
-                        <p><strong>Hora:</strong> {bookingDetails.selectedTime}</p>
-                        <p><strong>Personas:</strong> {bookingDetails.people}</p>
-                        <p><strong>Código:</strong> {bookingDetails.experienceCode}</p>
-                        {bookingDetails.guides && bookingDetails.guides.length > 0 && (
-                            <p>
-                                <strong>Guías:</strong>
-                                {bookingDetails.guides.map(guide => `${guide.name} ${guide.lastName}`).join(', ')}
-                            </p>
-                        )}
-                        {bookingDetails.transactionId && (
-                            <p><strong>ID de Transacción:</strong> {bookingDetails.transactionId}</p>
-                        )}
+                {/* Display Booking Details */}
+                {bookingDetails && (
+                    <div className="results-container-code-validation">
+                        <h2>Detalles de la Reserva:</h2>
+                        <div className="result-item-code-validation">
+                            <p><strong>Experiencia:</strong> {bookingDetails.experienceName}</p>
+                            <p><strong>Usuario:</strong> {bookingDetails.user?.name} {bookingDetails.user?.lastName}</p>
+                            <p><strong>Correo del Usuario:</strong> {bookingDetails.user?.email}</p>
+                            <p><strong>Fecha:</strong> {bookingDetails.selectedDate}</p>
+                            <p><strong>Hora:</strong> {bookingDetails.selectedTime}</p>
+                            <p><strong>Personas:</strong> {bookingDetails.people}</p>
+                            <p><strong>Código:</strong> {bookingDetails.experienceCode}</p>
+                            {bookingDetails.guides && bookingDetails.guides.length > 0 && (
+                                <p>
+                                    <strong>Guías:</strong>
+                                    {bookingDetails.guides.map(guide => `${guide.name} ${guide.lastName}`).join(', ')}
+                                </p>
+                            )}
+                            {bookingDetails.transactionId && (
+                                <p><strong>ID de Transacción:</strong> {bookingDetails.transactionId}</p>
+                            )}
 
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
+            </div>
         </div>
     );
 }
