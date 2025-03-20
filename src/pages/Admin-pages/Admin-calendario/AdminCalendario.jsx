@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EventCalendar from '../../../components/calendar/EventCalendar';
 import experienceFormService from '../../../components/services/experienceFormService';
 import { useExperiences } from '../../../components/hooks/experiences-hooks/useExperiences';
 import { experiencesToCalendarEvents, getEventsForDay } from '../../../components/utils/calendarUtils';
 import { adminBaseStyles } from '../../../components/Admin-components/adminBaseStyles';
+import LoadingState from '../../../components/common/LoadingState/LoadingState';
 
 const AdminCalendario = () => {
+  const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
@@ -53,6 +56,12 @@ const AdminCalendario = () => {
     console.log(`Found ${events.length} events for selected date`, events);
     setEventsForSelectedDate(events);
   }, [selectedDate, experiences, refreshTrigger]);
+  
+  // Function to handle editing an experience
+  const handleEditClick = (event) => {
+    // Navigate to edit page with the experience ID
+    navigate(`/admin-edit-experience/${event.experienceData.id}`);
+  };
   
   // Function to handle experience deletion confirmation
   const handleDeleteClick = (event) => {
@@ -150,7 +159,7 @@ const AdminCalendario = () => {
               </h3>
               
               {loading ? (
-                <p className="text-gray-300">Cargando experiencias...</p>
+                <LoadingState text="Cargando experiencia..." />
               ) : error ? (
                 <p className="text-red-300">Error: {error}</p>
               ) : eventsForSelectedDate.length > 0 ? (
@@ -165,7 +174,13 @@ const AdminCalendario = () => {
                       <p className="text-gray-300 text-sm my-2 line-clamp-2">
                         {event.description}
                       </p>
-                      <div className="flex justify-end">
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm"
+                          onClick={() => handleEditClick(event)}
+                        >
+                          Editar
+                        </button>
                         <button
                           className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded text-sm"
                           onClick={() => handleDeleteClick(event)}
