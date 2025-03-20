@@ -7,8 +7,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import LazyImage from '../../common/LazyImage/LazyImage';
 import LoadingState from '../../common/LoadingState/LoadingState';
 import ErrorBoundary from '../../common/errorBoundary/ErrorBoundary';
+import CharacterCounter from './CharacterCounter';
 
-const MAX_DESCRIPTION_LENGTH = 200; // Define maximum character length for descriptions
+// Character limit constants
+const MAX_TITLE_LENGTH = 30;       // Max length for forum titles
+const MAX_DESCRIPTION_LENGTH = 200; // Max length for forum descriptions
+const MAX_COMMENT_LENGTH = 300;     // Max length for comments
 
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
@@ -68,8 +72,8 @@ function ForumPage() {
     const [newForumTitle, setNewForumTitle] = useState("");
     const [newForumDescription, setNewForumDescription] = useState("");
     const [reportedForums, setReportedForums] = useState([]);  // Persistently store reported forum IDs
+    const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
     const [reportedComments, setReportedComments] = useState([]); // Persistently store reported comment IDs
-    const location = useLocation();
     const navigate = useNavigate();
     const { forumId } = useParams();
     const forumsLoaded = useRef(false);
@@ -232,16 +236,13 @@ function ForumPage() {
         }
     }, [forums, location.state, navigate, forumsLoaded.current]);
 
+    // Updated useEffect to remove dependency on state for popup
     useEffect(() => {
-        //Check the showPopup flag AND if the popup hasn't been opened yet
-        if (location.state && location.state.showPopup && !popupOpened.current && forumId) {
-            setShowCommentPopup(true);
-            popupOpened.current = true; // Mark the popup as opened
-
-            // Clear the flag: VERY IMPORTANT
-            navigate(location.pathname, { state: {showPopup: false}, replace: true });
+        // Simplify the popup handling - don't rely on navigation state
+        if (forumId && location.pathname.includes(`/foro/${forumId}`)) {
+            console.log("Current forum ID:", forumId);
         }
-    }, [location, navigate, forumId, popupOpened]);
+    }, [forumId, location]);
 
     // Center forums on initial load for mobile and tablets
     useEffect(() => {
@@ -353,25 +354,49 @@ function ForumPage() {
         navigate(`/foro/${forumId}`);
     };
 
-    const handleAddComment = (forumId) => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para comentar.");
-            return;
+    // Simplified comment button click handler - use an async function
+    const handleAddComment = async (forumId) => {
+        try {
+            console.log("Comment button clicked for forum:", forumId);
+            
+            // First, directly show the popup
+            if (forumId) {
+                navigate(`/foro/${forumId}`);
+                // Use a small timeout to ensure navigation completes first
+                setTimeout(() => {
+                    console.log("Opening comment popup");
+                    setShowCommentPopup(true);
+                }, 100);
+            } else {
+                console.error("No forumId provided");
+                setError("Error: No se encontró el ID del foro");
+            }
+        } catch (err) {
+            console.error("Error in handleAddComment:", err);
+            setError("Error al intentar comentar: " + (err.message || "Error desconocido"));
         }
-        // Navigate to the forum page and *then* show the popup
-        navigate(`/foro/${forumId}`, { state: { showPopup: true } }); // Pass showPopup in state
     };
 
-    const handleAddCommentToComment = (forumId, commentId, replyingToUser) => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para comentar.");
-            return;
+    // Simplified comment-to-comment reply handler
+    const handleAddCommentToComment = async (forumId, commentId, replyingToUser) => {
+        try {
+            console.log("Reply button clicked for comment:", commentId);
+            
+            // Set replying information
+            setReplyingTo(commentId);
+            setReplyingToUserName(replyingToUser);
+            
+            // Navigate and show popup
+            navigate(`/foro/${forumId}`);
+            // Use a small timeout to ensure navigation completes first
+            setTimeout(() => {
+                console.log("Opening reply popup");
+                setShowCommentPopup(true);
+            }, 100);
+        } catch (err) {
+            console.error("Error in handleAddCommentToComment:", err);
+            setError("Error al intentar responder: " + (err.message || "Error desconocido"));
         }
-        setReplyingTo(commentId);
-        setReplyingToUserName(replyingToUser);
-        navigate(`/foro/${forumId}`, { state: { showPopup: true } });
     };
 
     const handleCloseCommentPopup = () => {
@@ -387,36 +412,64 @@ function ForumPage() {
     };
 
     const handleCommentInputChange = (event) => {
-        setNewComment(event.target.value);
+        const text = event.target.value;
+        // Only update if under character limit
+        if (text.length <= MAX_COMMENT_LENGTH) {
+            setNewComment(text);
+        }
     };
 
     const handlePublishComment = async () => {
-        const user = await getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para publicar un comentario.");
-            return;
-        }
-        if (!newComment.trim()) {
-            setError("El comentario no puede estar vacío.");
-            return;
-        }
-        if (!forumId) {
-            setError("Error interno: No se especificó el foro de destino.");
-            return;
-        }
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+        
+        setIsSubmitting(true);
+        
         try {
-            const forumRef = doc(db, "Foros", forumId);
-            const forumSnap = await getDoc(forumRef);
-            if (!forumSnap.exists()) {
-                setError("El foro no existe.");
+            const user = await getCurrentUser();
+            if (!user) {
+                setError("Debes iniciar sesión para publicar un comentario.");
+                setIsSubmitting(false);
                 return;
             }
+            
+            if (!newComment.trim()) {
+                setError("El comentario no puede estar vacío.");
+                setIsSubmitting(false);
+                return;
+            }
+            
+            if (newComment.length > MAX_COMMENT_LENGTH) {
+                setError(`El comentario no puede exceder ${MAX_COMMENT_LENGTH} caracteres.`);
+                setIsSubmitting(false);
+                return;
+            }
+            
+            if (!forumId) {
+                setError("Error interno: No se especificó el foro de destino.");
+                setIsSubmitting(false);
+                return;
+            }
+            
+            console.log("Publishing comment to forum:", forumId);
+            
+            const forumRef = doc(db, "Foros", forumId);
+            const forumSnap = await getDoc(forumRef);
+            
+            if (!forumSnap.exists()) {
+                setError("El foro no existe.");
+                setIsSubmitting(false);
+                return;
+            }
+            
             const commentsRef = collection(db, "Foros", forumId, "comments");
             let newCommentId;
+            
             if (replyingTo) {
                 const parentComment = comments.find(c => c.firestoreId === replyingTo);
                 if (!parentComment) {
                     setError("No se ha encontrado el comentario principal al que se va a responder");
+                    setIsSubmitting(false);
                     return;
                 }
                 const replyCount = comments.filter(c => c.ID && c.ID.startsWith(parentComment.ID + ".")).length;
@@ -425,6 +478,7 @@ function ForumPage() {
                 const commentsSnap = await getDocs(commentsRef);
                 newCommentId = `${forumId}.${commentsSnap.size + 1}`;
             }
+            
             const newCommentData = {
                 ID: newCommentId,
                 description: newComment,
@@ -434,22 +488,25 @@ function ForumPage() {
                 userName: user.userName,
                 profileImage: user.profileImage,
             };
+            
             await setDoc(doc(commentsRef, newCommentId), newCommentData);
-            const newCom = { ...newCommentData, firestoreId: newCommentId }
-            setComments(prevComments => [ ...prevComments, newCom]);
-            //Remove state after publishing
-            if (location.state && location.state.showPopup) {
-                navigate(location.pathname, { state: null, replace: true });
-            }
+            console.log("Comment published successfully with ID:", newCommentId);
+            
+            // Update local state
+            const newCom = { ...newCommentData, firestoreId: newCommentId };
+            setComments(prevComments => [...prevComments, newCom]);
+            
+            // Reset all states
             setShowCommentPopup(false);
             setNewComment("");
             setReplyingTo(null);
             setReplyingToUserName(null);
-            popupOpened.current = false; // Reset after publishing
-
+            
         } catch (err) {
             console.error("Error al publicar el comentario:", err);
             setError("Error al publicar el comentario: " + err.message);
+        } finally {
+            setIsSubmitting(false); // Reset submission state regardless of success/failure
         }
     };
 
@@ -459,13 +516,15 @@ function ForumPage() {
         navigate('/foro');
     };
 
+    // Simplified create topic handler
     const handleCreateTopic = () => {
-        const user = getCurrentUser();
-        if (!user) {
-            setError("Debes iniciar sesión para crear un tema.");
-            return;
+        try {
+            console.log("Create topic button clicked");
+            setShowCreateForumPopup(true);
+        } catch (err) {
+            console.error("Error in handleCreateTopic:", err);
+            setError("Error al intentar crear un tema: " + (err.message || "Error desconocido"));
         }
-        setShowCreateForumPopup(true);
     };
 
     const handleCloseCreateForumPopup = () => {
@@ -475,7 +534,11 @@ function ForumPage() {
     };
 
     const handleForumTitleChange = (event) => {
-        setNewForumTitle(event.target.value);
+        const text = event.target.value;
+        // Only update if under character limit
+        if (text.length <= MAX_TITLE_LENGTH) {
+            setNewForumTitle(text);
+        }
     };
 
     // Modified to enforce character limit
@@ -488,17 +551,30 @@ function ForumPage() {
     };
 
     const handlePublishForum = async () => {
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+        
+        setIsSubmitting(true);
+        
         const user = await getCurrentUser();
         if (!user) {
             setError("Debes iniciar sesión para publicar un foro.");
+            setIsSubmitting(false);
             return;
         }
         if (!newForumTitle.trim() || !newForumDescription.trim()) {
             setError("El título y la descripción no pueden estar vacíos.");
+            setIsSubmitting(false);
+            return;
+        }
+        if (newForumTitle.length > MAX_TITLE_LENGTH) {
+            setError(`El título no puede exceder ${MAX_TITLE_LENGTH} caracteres.`);
+            setIsSubmitting(false);
             return;
         }
         if (newForumDescription.length > MAX_DESCRIPTION_LENGTH) {
             setError(`La descripción no puede exceder ${MAX_DESCRIPTION_LENGTH} caracteres.`);
+            setIsSubmitting(false);
             return;
         }
         try {
@@ -532,6 +608,8 @@ function ForumPage() {
         } catch (err) {
             console.error("Error al publicar el foro:", err);
             setError("Error al publicar el foro: " + err.message);
+        } finally {
+            setIsSubmitting(false); // Reset submission state regardless of outcome
         }
     };
 
@@ -674,11 +752,19 @@ function ForumPage() {
                                         <p className='forum-date-forum'>{selectedForum.Date}</p>
                                         <p className="forum-text-forum forum-text-no-fade-forum">{selectedForum.description}</p>
                                         <div className="forum-buttons-forum" style={{ marginLeft: "auto", marginRight: "auto", marginTop: "16px" }}>
-                                            <span className="forum-button-forum" onClick={() => handleAddComment(selectedForum.firestoreId)}>
+                                            <span 
+                                                className="forum-button-forum" 
+                                                onClick={() => handleAddComment(selectedForum.firestoreId)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Comentar
                                             </span>
                                              {/* --- Use openReportModal --- */}
-                                            <span className="forum-button-forum" onClick={() => openReportModal('forum', selectedForum.firestoreId)}>
+                                            <span 
+                                                className="forum-button-forum" 
+                                                onClick={() => openReportModal('forum', selectedForum.firestoreId)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Reportar Foro
                                             </span>
                                              {/* --- End Use openReportModal --- */}
@@ -707,9 +793,19 @@ function ForumPage() {
                                             <p className="comment-date-forum">{comment.Date}</p>
                                             <p className="comment-text-forum">{comment.description}</p>
                                             <div className="comment-button-container-forum">
-                                                <span className="comment-button-forum" onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}>Comentar</span>
+                                                <span 
+                                                    className="comment-button-forum" 
+                                                    onClick={() => handleAddCommentToComment(forumId, comment.firestoreId, comment.userName)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    Comentar
+                                                </span>
                                                 {/* --- Use openReportModal --- */}
-                                                <span className="comment-button-forum" onClick={() => openReportModal('comment', comment.firestoreId)}>
+                                                <span 
+                                                    className="comment-button-forum" 
+                                                    onClick={() => openReportModal('comment', comment.firestoreId)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
                                                     Reportar
                                                 </span>
                                                 {/* --- End Use openReportModal --- */}
@@ -730,13 +826,26 @@ function ForumPage() {
                                         <p className="replying-to-popup">
                                             {replyingToUserName ? `Respondiendo a ${replyingToUserName}` : 'Escribe un comentario'}
                                         </p>
-                                        <textarea
-                                            className="comment-input"
-                                            placeholder="Introduce un texto"
-                                            value={newComment}
-                                            onChange={handleCommentInputChange}
-                                        />
-                                        <button className="publish-button" onClick={handlePublishComment}>Publicar</button>
+                                        <div className="textarea-container">
+                                            <textarea
+                                                className="comment-input"
+                                                placeholder="Introduce un texto"
+                                                value={newComment}
+                                                onChange={handleCommentInputChange}
+                                                maxLength={MAX_COMMENT_LENGTH}
+                                            />
+                                            <CharacterCounter 
+                                                currentLength={newComment.length} 
+                                                maxLength={MAX_COMMENT_LENGTH}
+                                            />
+                                        </div>
+                                        <button 
+                                            className={`publish-button ${isSubmitting ? 'publish-button-disabled' : ''}`} 
+                                            onClick={handlePublishComment}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? 'Publicando...' : 'Publicar'}
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -766,19 +875,26 @@ function ForumPage() {
                                                 threshold={0.1}
                                             />
                                         </div>
-                                        <div className="forum-content-forum">
-                                            <h2 className="forum-subtitle-forum">{forum.Title}</h2>
-                                            <p className='forum-date-forum'>{forum.Date}</p>
-                                            <p className="forum-text-forum">{forum.description}</p>
-                                            <div className="forum-buttons-forum">
-                                                <span className="forum-button-forum" onClick={() => handleViewComments(forum.firestoreId)}>
-                                                    Ver Comentarios
-                                                </span>
-                                                <span className="forum-button-forum" onClick={() => handleAddComment(forum.firestoreId)}>
-                                                    Comentar
-                                                </span>
-                                            </div>
+                                    <div className="forum-content-forum">
+                                        <h2 className="forum-subtitle-forum">{forum.Title}</h2>
+                                        <p className='forum-date-forum'>{forum.Date}</p>
+                                        <p className="forum-text-forum">{forum.description}</p>
+                                        <div className="forum-buttons-forum">
+                                            <span 
+                                                className="forum-button-forum" 
+                                                onClick={() => handleViewComments(forum.firestoreId)}
+                                            >
+                                                Ver Comentarios
+                                            </span>
+                                            <span 
+                                                className="forum-button-forum" 
+                                                onClick={() => handleAddComment(forum.firestoreId)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                Comentar
+                                            </span>
                                         </div>
+                                    </div>
                                     </div>
                                 ))}
                                 {forums.length === 0 && !loadingForums && (
@@ -797,14 +913,21 @@ function ForumPage() {
                                             ×
                                         </span>
                                         <p className="replying-to-popup">Crear Nuevo Foro</p>
-                                        <input
-                                            type="text"
-                                            className="comment-input"
-                                            placeholder="Título del foro"
-                                            value={newForumTitle}
-                                            onChange={handleForumTitleChange}
-                                            style={{ height: "50px" }}
-                                        />
+                                        <div className="textarea-container">
+                                            <input
+                                                type="text"
+                                                className="comment-input"
+                                                placeholder="Título del foro"
+                                                value={newForumTitle}
+                                                onChange={handleForumTitleChange}
+                                                maxLength={MAX_TITLE_LENGTH}
+                                                style={{ height: "50px" }}
+                                            />
+                                            <CharacterCounter 
+                                                currentLength={newForumTitle.length} 
+                                                maxLength={MAX_TITLE_LENGTH}
+                                            />
+                                        </div>
                                         <div className="textarea-container">
                                             <textarea
                                                 className="comment-input"
@@ -813,12 +936,17 @@ function ForumPage() {
                                                 onChange={handleForumDescriptionChange}
                                                 maxLength={MAX_DESCRIPTION_LENGTH}
                                             />
-                                            <div className="character-counter">
-                                                {newForumDescription.length}/{MAX_DESCRIPTION_LENGTH}
-                                            </div>
+                                            <CharacterCounter 
+                                                currentLength={newForumDescription.length} 
+                                                maxLength={MAX_DESCRIPTION_LENGTH}
+                                            />
                                         </div>
-                                        <button className="publish-button" onClick={handlePublishForum}>
-                                            Publicar Foro
+                                        <button 
+                                            className={`publish-button ${isSubmitting ? 'publish-button-disabled' : ''}`} 
+                                            onClick={handlePublishForum}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? 'Publicando...' : 'Publicar Foro'}
                                         </button>
                                     </div>
                                 </div>

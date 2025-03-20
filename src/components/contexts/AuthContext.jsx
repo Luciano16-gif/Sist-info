@@ -321,6 +321,12 @@ export const AuthProvider = ({ children }) => {
         return null;
       }
       
+      // For Google auth, we need to ensure the Firestore data is fetched
+      // before returning, as the redirect might happen immediately after
+      if (result) {
+        await fetchUserData(result);
+      }
+      
       return result; // This will be the user object on success
     } catch (error) {
       // This should rarely happen now, but just in case

@@ -212,103 +212,66 @@ export const emailSignUp = async (userData) => {
 };
 
 export const googleAuth = async (isSignUp = false) => {
-  let user = null;
-  
   try {
-    // Start the popup flow
-    const result = await signInWithPopup(auth, googleProvider);
-    user = result.user;
-    const trimmedEmail = user.email?.trim();
-
-    // Validate email domain after getting it from the popup
-    const emailValidation = validateEmailUtil(trimmedEmail);
-    if (!emailValidation.isValid) {
-      await cleanupAuthUser(user);
-      return {
-        error: true,
-        message: 'Por favor, utiliza un correo electrónico de la Universidad Metropolitana.'
-      };
-    }
-
-    // Email is valid, now check Firestore
-    try {
-      const userDocRef = doc(db, USERS_COLLECTION, trimmedEmail);
+    const provider = new GoogleAuthProvider();
+    
+    // Force account selection even if user is already logged in
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
+    // Sign in with popup
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Check if this is a new user (for sign up flow)
+    if (isSignUp || result._tokenResponse?.isNewUser) {
+      // Check if user already exists in Firestore
+      const userDocRef = doc(db, "lista-de-usuarios", user.email);
       const userDoc = await getDoc(userDocRef);
-
-      // For sign up, check if user already exists
-      if (isSignUp && userDoc.exists()) {
-        await cleanupAuthUser(user);
-        return {
-          error: true,
-          message: 'Ya ha registrado un usuario con ese correo.'
-        };
-      }
-
-      // For login, check if user doesn't exist in Firestore
-      if (!isSignUp && !userDoc.exists()) {
-        await cleanupAuthUser(user);
-        return {
-          error: true,
-          message: 'No existe una cuenta con este correo. Por favor, regístrese primero.'
-        };
-      }
-
-      // All validation passed, now create the document if needed for signup
-      if (!userDoc.exists() && isSignUp) {
-        const displayName = user.displayName || '';
-        const nameParts = displayName.split(' ');
-        
+      
+      if (!userDoc.exists()) {
+        // Create a new user document in Firestore
         const userData = {
-          email: trimmedEmail,
-          name: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(' ') || "",
-          'Foto de Perfil': user.photoURL || "",
-          phone: "",
-          userType: "usuario",
-          'Registro/Inicio de Sesión': 'Google Authentication',
-          days: [],
-          actualRoute: [],
-          activitiesPerformed: [],
-          mostPerformedActivity: {Actividad:"", timesPerformed: 0},
-          schedule: [],
-          activitiesCreated: []
+          name: user.displayName?.split(' ')[0] || '',
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+          email: user.email,
+          userType: 'usuario',
+          createdAt: new Date().toISOString(),
+          authProvider: 'google',
+          uid: user.uid
         };
-
-        // Create the Firestore document
+        
+        // Save to Firestore
         await setDoc(userDocRef, userData);
       }
-
-      return user;
-    } catch (firestoreError) {
-      console.error("Firestore operation failed:", firestoreError);
-      await cleanupAuthUser(user);
-      return {
-        error: true,
-        message: 'Error al procesar tu cuenta. Por favor, intenta de nuevo.'
-      };
     }
+    
+    return user;
   } catch (error) {
-    // For any initial auth error, clean up if needed
-    if (user) {
-      await cleanupAuthUser(user);
-    } else {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        await cleanupAuthUser(currentUser);
-      }
-    }
+    console.error("Google auth error:", error);
     
-    // Handle specific errors
-    if (error.code === 'auth/popup-closed-by-user') {
-      return {
-        error: true,
-        message: 'Se cerró la ventana de autenticación.'
-      };
-    }
-    
-    return handleAuthError(error);
+    // Return a standardized error object
+    return {
+      error: true,
+      code: error.code,
+      message: translateFirebaseError(error.code) || error.message
+    };
   }
 };
+
+// Helper function to translate Firebase error codes
+function translateFirebaseError(errorCode) {
+  const errorMessages = {
+    'auth/user-not-found': 'No existe una cuenta con este correo electrónico.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/email-already-in-use': 'Este correo electrónico ya está en uso.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    'auth/invalid-email': 'El formato del correo electrónico no es válido.',
+    'auth/popup-closed-by-user': 'Inicio de sesión cancelado. La ventana fue cerrada.',
+    // Add more error translations as needed
+  };
+  
+  return errorMessages[errorCode] || null;
+}
 
 export const logOut = async () => {
   try {
