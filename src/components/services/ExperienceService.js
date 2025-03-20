@@ -6,7 +6,9 @@ import {
   getDocs, 
   query, 
   where, 
-  updateDoc 
+  updateDoc,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 import storageService from '../../cloudinary-services/storage-service';
 
@@ -414,6 +416,71 @@ class ExperienceService {
     } catch (error) {
       console.error("Error adding review:", error);
       throw new Error("Error al agregar la reseña");
+    }
+  }
+
+  /**
+   * Create a new experience
+   * @param {Object} experienceData - Experience data to create
+   * @param {Function} updateUserProfile - Function to update user's profile with the new experience
+   * @returns {Promise<Object>} - Created experience data with ID
+   */
+  async createExperience(experienceData, updateUserProfile) {
+    try {
+      // Add timestamp
+      const dataWithTimestamp = {
+        ...experienceData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      // Add to Firestore
+      const experiencesRef = collection(db, "Experiencias");
+      const docRef = await addDoc(experiencesRef, dataWithTimestamp);
+      
+      // Get the created document ID
+      const experienceId = docRef.id;
+      
+      // Update the user's profile to include this experience in their created list
+      if (updateUserProfile && typeof updateUserProfile === 'function') {
+        await updateUserProfile(experienceId);
+      }
+      
+      return {
+        id: experienceId,
+        ...dataWithTimestamp
+      };
+    } catch (error) {
+      console.error("Error creating experience:", error);
+      throw new Error("No se pudo crear la experiencia");
+    }
+  }
+
+  /**
+   * Update an existing experience
+   * @param {string} experienceId - ID of the experience to update
+   * @param {Object} experienceData - Updated experience data
+   * @returns {Promise<Object>} - Updated experience data
+   */
+  async updateExperience(experienceId, experienceData) {
+    try {
+      const experienceRef = doc(db, "Experiencias", experienceId);
+      
+      // Add updated timestamp
+      const dataWithTimestamp = {
+        ...experienceData,
+        updatedAt: serverTimestamp()
+      };
+      
+      await updateDoc(experienceRef, dataWithTimestamp);
+      
+      return {
+        id: experienceId,
+        ...dataWithTimestamp
+      };
+    } catch (error) {
+      console.error("Error updating experience:", error);
+      throw new Error("No se pudo actualizar la experiencia");
     }
   }
 }
