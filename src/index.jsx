@@ -62,11 +62,11 @@ import './index.css';
 
 // ========== PWA Registration ==========
 if ('serviceWorker' in navigator) {
-  const updateSW = registerSW({
+  const swUpdater = registerSW({
     onNeedRefresh() {
       // This function is called when new content is available
       if (confirm('Nuevo contenido disponible. ¿Recargar?')) {
-        updateSW(true);
+        swUpdater(true);
       }
     },
     onOfflineReady() {

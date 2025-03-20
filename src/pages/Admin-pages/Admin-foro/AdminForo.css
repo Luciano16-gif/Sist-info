@@ -24,8 +24,16 @@
   overflow: hidden;
   width: 100%;
   transition: all 0.3s ease;
-  padding-bottom: 40px;
   position: relative;
+  padding-bottom: 10px;
+}
+
+/* Contenedor para la información del autor y el botón */
+.comment-item .flex {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 40px;
 }
 
 /* Add responsive breakpoints */
@@ -78,8 +86,9 @@
     font-size: 0.75rem;
     transition: background-color 0.2s ease;
     position: absolute;
-    bottom: 10px;
+    bottom: 8px;
     right: 10px;
+    margin-top: 5px;
 }
 
 .delete-forum-button:hover,
@@ -195,4 +204,64 @@
   height: 0;
   margin: 0;
   padding: 0;
+}
+
+/* Reestructuración completa del layout del comentario */
+.comment-item {
+  overflow: hidden;
+  width: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* Contenedor para la información del autor y el botón */
+.comment-item .flex {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+/* Reposicionar el botón de borrar comentario más cerca del contenido */
+.delete-comment-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s ease;
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  margin-top: 5px;
+}
+
+/* Ajustar el espacio inferior de la info del comentario */
+.comment-info {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+/* Asegurar espacio adecuado para la versión móvil */
+@media (max-width: 640px) {
+  .comment-item {
+    padding-bottom: 35px;
+  }
+  
+  .comment-info {
+    margin-bottom: 5px;
+  }
+}
+
+/* Ajuste adicional para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .comment-item {
+        padding-bottom: 60px;
+    }
 }
