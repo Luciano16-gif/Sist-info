@@ -203,7 +203,7 @@ function GalleryPage() {
 
             if (!auth.currentUser) {
                 console.error("No user logged in.");
-                alert("Please log in to upload images.");
+                alert("Por favor regístrate para subir imágenes.");
                 return;
             }
 
@@ -289,14 +289,14 @@ function GalleryPage() {
         if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
             const hashtagRegex = /^[a-zA-Z0-9_]+$/;
             if (!hashtagRegex.test(newHashtag.trim())) {
-                setHashtagError("Hashtags can only contain letters, numbers, and underscores.");
+                setHashtagError("Los hashtags solamente pueden contener letras, números y espacios");
                 return;
             }
             setHashtags([...hashtags, newHashtag.trim()]);
             setNewHashtag("");
             setHashtagError("");
         }
-    };
+    };  
 
     const handleHashtagClick = (tag) => {
         if (!hashtags.includes(tag)) {
@@ -770,7 +770,7 @@ function GalleryPage() {
                 <div className="modal-overlay-gallery">
                     <div className="modal-content-container-gallery" style={{ maxWidth: '500px' }}>
                         <button className="close-button-gallery" onClick={handleCancelUpload}>X</button>
-                        <h2>Upload Image</h2>
+                        <h2 style={{ color: '#8AFFB9', fontSize: '26px', marginBottom: '18px' }}>Subir Imagen</h2>
                         {selectedFile && (
                             <img src={URL.createObjectURL(selectedFile)} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
                         )}
@@ -814,10 +814,12 @@ function GalleryPage() {
                             </div>
                         </div>
 
-                        <button disabled={uploading} onClick={handleConfirmUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', border: 'none', marginTop: "20px" }}>
-                            {uploading ? 'Subiendo...' : 'Publicar imagen'}
-                        </button>
-                        <button onClick={handleCancelUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#ccc', color: 'black', border: 'none', marginTop: '10px', marginLeft: '3px' }}>Cancelar</button>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px', width: '100%' }}>
+                            <button disabled={uploading} onClick={handleConfirmUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#4CAF50', color: 'white', border: 'none' }}>
+                                {uploading ? 'Subiendo...' : 'Publicar imagen'}
+                            </button>
+                            <button onClick={handleCancelUpload} style={{ padding: '10px 15px', borderRadius: '4px', backgroundColor: '#ccc', color: 'black', border: 'none' }}>Cancelar</button>
+                        </div>
                     </div>
                 </div>
             )}

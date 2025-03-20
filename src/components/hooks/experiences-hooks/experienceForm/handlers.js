@@ -93,18 +93,54 @@ export const createFieldHandlers = (dispatch) => {
     dispatch(actions.toggleArrayItem('incluidosExperiencia', option));
   };
   
-  // Date toggle handler
-  const handleDateChange = (date) => {
-    dispatch(actions.toggleArrayItem('fechas', date));
+  // date handlers (new)
+  const handleDateChange = (dateValue) => {
+    if (Array.isArray(dateValue)) {
+      // If it's an array of dates, update the entire fechas array
+      dispatch(actions.updateArrayField('fechas', dateValue));
+    } else {
+      // If it's a single date string, add it to the array if not already there
+      const currentDates = formState.fechas || [];
+      
+      // Prevent duplicates
+      if (!currentDates.includes(dateValue)) {
+        dispatch(actions.updateArrayField('fechas', [...currentDates, dateValue]));
+      }
+    }
+  };
+  
+  // Handle repetition weeks change
+  const handleRepetitionChange = (weeks) => {
+    dispatch(actions.setRepetitionWeeks(weeks));
+    
+    // Get the initial date from the form state
+    const getState = () => {
+      // This is a placeholder - you'll need to provide access to the current state
+      // Perhaps through a custom hook or context
+      return store.getState();
+    };
+    
+    const initialDate = getState().formFields.fechaInicial;
+    
+    // Generate recurring dates if we have an initial date
+    if (initialDate) {
+      dispatch(actions.generateRecurringDates(initialDate, weeks));
+    }
+  };
+  
+  // Handle adding a custom date
+  const handleAddCustomDate = (date) => {
+    dispatch(actions.addDate(date, 'custom'));
+  };
+  
+  // Handle removing a date
+  const handleRemoveDate = (date) => {
+    dispatch(actions.removeDate(date));
   };
   
   // Difficulty level handler
-  const handleDificultadClick = (level, currentLevel) => {
-    if (currentLevel === level && currentLevel === 1) {
-      dispatch(actions.updateField('dificultad', 0));
-    } else {
-      dispatch(actions.updateField('dificultad', level));
-    }
+  const handleDificultadClick = (level) => {
+    dispatch(actions.updateField('dificultad', level));
   };
   
   // Image upload handler
@@ -158,6 +194,9 @@ export const createFieldHandlers = (dispatch) => {
     handleTipoActividadChange,
     handleIncluidosChange,
     handleDateChange,
+    handleRepetitionChange,
+    handleAddCustomDate,
+    handleRemoveDate,
     handleDificultadClick,
     handleImageChange,
     handleSeleccionarGuia,
@@ -177,6 +216,8 @@ export const createFieldHandlers = (dispatch) => {
  * @returns {Object} Configuration handlers
  */
 export const createConfigHandlers = (dispatch, configData) => {
+  // (Rest of the original code remains unchanged)
+  
   // Add new activity type handler
   const handleAgregarNuevoTipo = async (nuevoTipo) => {
     try {
@@ -277,7 +318,7 @@ export const createConfigHandlers = (dispatch, configData) => {
  * @param {Object} formFields - Current form field values
  * @returns {Object} Form operation handlers
  */
-export const createFormOperations = (dispatch, formFields) => {
+export const createFormOperations = (dispatch, formFields, getState) => {
   // Form validation function
   const validateForm = () => {
     const validationResult = validateExperienceForm(formFields);
@@ -327,10 +368,25 @@ export const createFormOperations = (dispatch, formFields) => {
     dispatch(actions.resetForm());
   };
   
+  // We also need to handle repetition change with access to current form state
+  const handleRepetitionChange = (weeks) => {
+    dispatch(actions.setRepetitionWeeks(weeks));
+    
+    // Get the current state to access the initial date
+    const state = getState();
+    const initialDate = state.formFields.fechaInicial;
+    
+    // Generate recurring dates if we have an initial date
+    if (initialDate) {
+      dispatch(actions.generateRecurringDates(initialDate, weeks));
+    }
+  };
+  
   return {
     validateForm,
     handleSubmit,
     resetForm,
+    handleRepetitionChange,
     // These are included for API compatibility
     setHorarioInicio: (value) => dispatch(actions.updateField('horarioInicio', value)),
     setHorarioFin: (value) => dispatch(actions.updateField('horarioFin', value)),

@@ -2,7 +2,6 @@
     background-color: #1a2a1a;
     color: #fff;
     padding: 20px;
-    font-family: "Ysabeau SC", sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,7 +47,6 @@
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-family: "Ysabeau SC", sans-serif;
     font-size: 18px;
     box-sizing: border-box;
     background-color: #3a4a3a;

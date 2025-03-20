@@ -7,31 +7,32 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
-  // Use enhanced currentUser with updated photoURL
   const { currentUser, logout, userRole } = useAuth();
 
   // Define base menu items
   const baseMenuItems = [
-    { href: "/experiencias", label: "Experiencias" },
-    { href: "/user-requests", label: "Mis Solicitudes" }, 
+    { href: "/experiencias", label: "Experiencias" }, 
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
     { href: "/reviews", label: "Reseñas" },
+    { href: "/foro", label: "Foro" },
+    { href: "/busqueda", label: "Búsqueda" },
   ];
   // Create final menu items array with conditional item for admin/guide
   const menuItems = [...baseMenuItems];
+
+  if (currentUser) {
+    menuItems.push({ href: "/user-requests", label: "Mis Solicitudes" });
+  }
   
   // Add "Crear Experiencia" for admin and guide users after "Experiencias"
   if (currentUser && (userRole === 'admin' || userRole === 'guia')) {
     menuItems.splice(1, 0, { href: "/crear-experiencia", label: "Crear Experiencia" });
   }
 
-  // Add admin-specific menu items
+  // Add "Panel Admin" for admin users only
   if (currentUser && userRole === 'admin') {
-    menuItems.push(
-      { href: "/admin-experiencias-pendientes", label: "Experiencias Pendientes" },
-      { href: "/admin-guias-pendientes", label: "Guías Pendientes" }
-    );
+    menuItems.splice(2, 0, { href: "/homeAdmin", label: "Panel Admin" });
   }
 
   const sesionItems = [
@@ -184,7 +185,7 @@ const HamburgerMenu = () => {
             {menuItems.map((item, index) => (
               <li key={item.href} className="w-full text-center hover:scale-110 transform transition-all duration-300 my-1">
                 <Link
-                  className="text-white font-ysabeau uppercase underline text-lg tracking-wider py-3 px-4 w-full inline-block"
+                  className="text-white font-ysabeau uppercase text-lg tracking-wider py-3 px-4 w-full inline-block"
                   to={item.href}
                 >
                   {item.label}

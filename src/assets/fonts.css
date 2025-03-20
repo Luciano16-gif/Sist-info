@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'Ysabeau SC';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/YsabeauSC-Medium.woff2') format('woff2'),
+       url('../assets/fonts/YsabeauSC-Medium.ttf') format('truetype');
+}

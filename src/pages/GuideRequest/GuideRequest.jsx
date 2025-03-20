@@ -89,7 +89,6 @@ function GuideRequest() {
         fetchUserData();
     }, [currentUser, userRole]);
 
-    // The rest of the component remains mostly the same...
     const handleChange = (e) => {
         const { name, value } = e.target;
         let formattedValue = value;
@@ -204,8 +203,11 @@ function GuideRequest() {
         if (!formData.weeklyDays) {
             tempErrors.weeklyDays = "Días semanales son requeridos.";
             isValid = false;
-        } else if (isNaN(parseInt(formData.weeklyDays)) || parseInt(formData.weeklyDays) <= 0 || parseInt(formData.weeklyDays) > 7) {
-            tempErrors.weeklyDays = "Ingrese un número de días válido (entre 1 y 7).";
+        } else if (isNaN(parseInt(formData.weeklyDays)) || parseInt(formData.weeklyDays) <= 0) {
+            tempErrors.weeklyDays = "Ingrese un número de días válido (mayor que cero).";
+            isValid = false;
+        } else if (parseInt(formData.weeklyDays) > 7) {
+            tempErrors.weeklyDays = "El máximo de días semanales permitido es 7.";
             isValid = false;
         }
         if (!formData.languages.trim()) {
@@ -438,7 +440,7 @@ function GuideRequest() {
                                 max="40"
                                 disabled={isFormDisabled}
                             />
-                             {errors.weeklyHours && <div className="form-error-guide-request">{errors.weeklyHours}</div>}
+                            {errors.weeklyHours && <div className="form-error-guide-request">{errors.weeklyHours}</div>}
                         </div>
 
                         <div className="form-field-guide-request">
@@ -450,11 +452,10 @@ function GuideRequest() {
                                 value={formData.weeklyDays}
                                 onChange={handleChange}
                                 placeholder='0'
-                                min="1"
-                                max="7"
+                                /* Removed min and max attributes to prevent browser validation */
                                 disabled={isFormDisabled}
                             />
-                             {errors.weeklyDays && <div className="form-error-guide-request">{errors.weeklyDays}</div>}
+                            {errors.weeklyDays && <div className="form-error-guide-request">{errors.weeklyDays}</div>}
                         </div>
                     </div>
                     <div className="form-row-guide-request">

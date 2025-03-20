@@ -1,6 +1,7 @@
 import { forum_background } from "../../constants/LandingData";
-
+import { Link } from "react-router-dom";
 const ForumSection = () => {
+
   return (
     <div className="relative w-full min-h-[500px]">
       {/* Background Layer - Lower z-index */}
@@ -43,12 +44,10 @@ const ForumSection = () => {
             </p>
             
             {/* Button */}
-            <a 
-              href="#" 
-              className="inline-block px-8 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-bold rounded-full border-2 border-white border-opacity-50 transition-all duration-300 text-xl"
-            >
+            <Link to='/foro' className="inline-block px-8 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-bold rounded-full border-2 border-white 
+            border-opacity-50 transition-all duration-300 text-xl">
               Ver foro
-            </a>
+            </Link> 
           </div>
           
           {/* Footer copyright */}

@@ -1,4 +1,7 @@
-import React, { useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
+import './DatePicker.css';
 
 /**
  * Error message component for form fields
@@ -110,27 +113,238 @@ export const TimeInput = ({ id, label, value, onChange, error }) => {
 };
 
 /**
- * Date selector component for weekdays
+ * Updated DateSelector component with specific date selection
  */
-export const DateSelector = ({ selectedDates, onDateChange, error }) => {
-  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+export const DateSelector = ({ selectedDates = [], onDateChange, error }) => {
+  const [mainDate, setMainDate] = useState(null);
+  const [repetitionWeeks, setRepetitionWeeks] = useState(0);
+  const [customDate, setCustomDate] = useState(null);
+  const [customDates, setCustomDates] = useState([]);
+  
+  // Separate main/recurring dates from custom dates when component mounts or selectedDates changes
+  useEffect(() => {
+    // If we don't have a mainDate yet but have selectedDates, try to set the main date
+    if (!mainDate && selectedDates.length > 0) {
+      const firstDate = new Date(selectedDates[0]);
+      if (!isNaN(firstDate.getTime())) {
+        setMainDate(firstDate);
+        
+        // Try to determine repetition by looking at intervals between dates
+        // This is a simplified approach - might not be perfect
+        if (selectedDates.length > 1) {
+          const weekDates = selectedDates.filter((_, index) => index > 0 && index <= 12);
+          setRepetitionWeeks(weekDates.length);
+        }
+      }
+    }
+  }, []);
+  
+  // Generate recurring dates based on main date and repetition weeks
+  const generateDates = (baseDate, weeks) => {
+    if (!baseDate) return [];
+    
+    const dates = [];
+    const baseDateObj = new Date(baseDate);
+    
+    // Add the main date
+    dates.push(baseDateObj.toISOString());
+    
+    // Add recurring dates if weeks > 0
+    for (let i = 1; i <= weeks; i++) {
+      const nextDate = new Date(baseDateObj);
+      nextDate.setDate(baseDateObj.getDate() + (i * 7));
+      dates.push(nextDate.toISOString());
+    }
+    
+    return dates;
+  };
+  
+  // Handle when repetition is changed
+  const handleRepetitionChange = (weeks) => {
+    if (!mainDate) return;
+    
+    setRepetitionWeeks(weeks);
+    
+    // Generate new dates based on main date and repetition
+    const newRecurringDates = generateDates(mainDate, weeks);
+    
+    // Combine with custom dates and update
+    onDateChange([...newRecurringDates, ...customDates]);
+  };
+  
+  // Handle main date selection
+  const handleDateSelect = (date) => {
+    if (!date) return;
+    
+    setMainDate(date);
+    
+    // Generate dates based on the current repetition setting
+    const newRecurringDates = generateDates(date, repetitionWeeks);
+    
+    // Combine with custom dates and update
+    onDateChange([...newRecurringDates, ...customDates]);
+  };
+  
+  // Handle adding a custom date
+  const handleAddCustomDate = () => {
+    if (!customDate) return;
+    
+    const dateStr = customDate.toISOString();
+    
+    // Add to custom dates list
+    const newCustomDates = [...customDates, dateStr];
+    setCustomDates(newCustomDates);
+    
+    // Add to selected dates
+    const recurringDates = mainDate ? generateDates(mainDate, repetitionWeeks) : [];
+    onDateChange([...recurringDates, ...newCustomDates]);
+    
+    // Reset custom date picker
+    setCustomDate(null);
+  };
+  
+  // Handle removing a date
+  const handleRemoveDate = (dateToRemove) => {
+    // Check if it's the main date
+    if (mainDate && mainDate.toISOString() === dateToRemove) {
+      // If removing main date, clear main date and all recurring dates
+      setMainDate(null);
+      setRepetitionWeeks(0);
+      
+      // Keep only custom dates
+      onDateChange([...customDates.filter(d => d !== dateToRemove)]);
+      return;
+    }
+    
+    // Check if it's a recurring date (not the main date)
+    const isRecurringDate = mainDate && 
+      repetitionWeeks > 0 && 
+      generateDates(mainDate, repetitionWeeks).includes(dateToRemove);
+      
+    if (isRecurringDate) {
+      // If removing a recurring date, remove all recurring dates and reset repetition
+      setRepetitionWeeks(0);
+      
+      // Keep only main date and custom dates
+      const mainDateStr = mainDate ? mainDate.toISOString() : null;
+      const updatedDates = [
+        ...(mainDateStr ? [mainDateStr] : []),
+        ...customDates.filter(d => d !== dateToRemove)
+      ];
+      onDateChange(updatedDates);
+      return;
+    }
+    
+    // Otherwise it's a custom date
+    const newCustomDates = customDates.filter(d => d !== dateToRemove);
+    setCustomDates(newCustomDates);
+    
+    // Update selected dates
+    const recurringDates = mainDate ? generateDates(mainDate, repetitionWeeks) : [];
+    onDateChange([...recurringDates, ...newCustomDates]);
+  };
+  
+  // Format a date for display
+  const formatDate = (dateStr) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "Fecha inválida";
+      
+      return date.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return "Fecha inválida";
+    }
+  };
+  
+  // Remove duplicate dates
+  const uniqueDates = Array.from(new Set(selectedDates));
   
   return (
     <div className="campo-crear-experiencia">
-      <label>Día de la semana</label>
-      <div className="date-buttons-container">
-        {days.map((day) => (
-          <button
-            key={day}
-            type="button"
-            className={`date-button ${selectedDates.includes(day) ? 'selected' : ''}`}
-            onClick={() => onDateChange(day)}
-          >
-            {day}
-          </button>
-        ))}
+      <label>Fecha Inicial</label>
+      
+      {/* Main date picker */}
+      <div className="date-select-container">
+        <DatePicker
+          selected={mainDate}
+          onChange={handleDateSelect}
+          dateFormat="dd/MM/yyyy"
+          minDate={new Date()}
+          placeholderText="Seleccione fecha inicial"
+          className={error ? 'input-error' : ''}
+        />
       </div>
-      <FormError error={error} />
+      
+      {/* Repetition options - only show if main date is selected */}
+      {mainDate && (
+        <div className="repetition-container">
+          <label>Repetir semanalmente por:</label>
+          <div className="date-buttons-container">
+            {[0, 1, 2, 3, 4, 8, 12].map((weeks) => (
+              <button
+                key={weeks}
+                type="button"
+                className={`date-button ${repetitionWeeks === weeks ? 'selected' : ''}`}
+                onClick={() => handleRepetitionChange(weeks)}
+              >
+                {weeks === 0 ? 'Sin repetición' : `${weeks} semanas`}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Custom date selection */}
+      <div className="custom-date-container">
+        <label>Agregar fecha adicional:</label>
+        <div className="add-activity-container">
+          <DatePicker
+            selected={customDate}
+            onChange={setCustomDate}
+            dateFormat="dd/MM/yyyy"
+            minDate={new Date()}
+            placeholderText="Fecha adicional"
+            className="nuevo-tipo-input"
+          />
+          <button
+            type="button"
+            onClick={handleAddCustomDate}
+            disabled={!customDate}
+            className="add-activity-button"
+          >
+            Agregar
+          </button>
+        </div>
+      </div>
+      
+      {/* Display selected dates */}
+      {uniqueDates.length > 0 && (
+        <div className="selected-dates-container">
+          <label>Fechas seleccionadas:</label>
+          <div className="incluidos-options-container">
+            {uniqueDates.map((dateStr, index) => (
+              <div key={index} className="incluido-option">
+                <span>{formatDate(dateStr)}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveDate(dateStr)}
+                  className="remove-date-button"
+                  aria-label="Eliminar fecha"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {error && <div className="form-error">{error}</div>}
     </div>
   );
 };

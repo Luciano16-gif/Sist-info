@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { auth } from '../../firebase-config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
@@ -27,6 +27,13 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [firestoreUserData, setFirestoreUserData] = useState(null);
   
+  // Add a new state for the last valid user
+  const [lastValidUser, setLastValidUser] = useState(null);
+  const userStateRef = useRef({ user: null, role: null });
+
+  // This is to ensure users return to the landing page after a logout
+  const navigate = useNavigate();
+  
   // Function to fetch user data from Firestore
   const fetchUserData = async (user) => {
     if (!user) return null;
@@ -54,9 +61,43 @@ export const AuthProvider = ({ children }) => {
         };
         
         setCurrentUser(enhancedUser);
+        
+        // Store valid user data in localStorage and state
+        try {
+          localStorage.setItem('lastValidUserEmail', user.email);
+          localStorage.setItem('lastValidUserRole', userData.userType || 'usuario');
+        } catch (e) {
+          console.error("Failed to store user in localStorage:", e);
+        }
+        
+        // Update last valid user state
+        setLastValidUser(enhancedUser);
+        
+        // Store in ref for immediate access
+        userStateRef.current = { 
+          user: enhancedUser, 
+          role: userData.userType || 'usuario' 
+        };
+        
         return userData;
       } else {
         setUserRole('usuario');
+        
+        // Update last valid user state with basic info
+        const basicUser = { ...user, role: 'usuario' };
+        setLastValidUser(basicUser);
+        
+        // Store valid user email in localStorage
+        try {
+          localStorage.setItem('lastValidUserEmail', user.email);
+          localStorage.setItem('lastValidUserRole', 'usuario');
+        } catch (e) {
+          console.error("Failed to store user in localStorage:", e);
+        }
+        
+        // Store in ref for immediate access
+        userStateRef.current = { user, role: 'usuario' };
+        
         return null;
       }
     } catch (error) {
@@ -66,23 +107,101 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-  // Effect to handle auth state changes
+  // Add this effect to maintain a record of the last valid user
   useEffect(() => {
+    if (currentUser && currentUser.email) {
+      // Store the current valid user
+      setLastValidUser(currentUser);
+      
+      // Also store in localStorage for recovery if needed
+      try {
+        localStorage.setItem('lastValidUserEmail', currentUser.email);
+        localStorage.setItem('lastValidUserRole', userRole || 'usuario');
+      } catch (e) {
+        console.error("Failed to store user in localStorage:", e);
+      }
+      
+      // Update ref for immediate access
+      userStateRef.current = { user: currentUser, role: userRole };
+    }
+  }, [currentUser, userRole]);
+  
+  // Effect to handle auth state changes now with mobile resilience in mind
+  useEffect(() => {
+    let authCheckTimeout = null;
+    
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      
       if (user) {
+        // Clear any pending timeouts
+        if (authCheckTimeout) {
+          clearTimeout(authCheckTimeout);
+          authCheckTimeout = null;
+        }
+        
         await fetchUserData(user);
+        setLoading(false);
       } else {
+        
+        // Simply clear everything on logout without prompts
         setCurrentUser(null);
         setUserRole(null);
         setFirestoreUserData(null);
+        setLastValidUser(null);
+        userStateRef.current = { user: null, role: null };
+        
+        // Clear local storage
+        try {
+          localStorage.removeItem('lastValidUserEmail');
+          localStorage.removeItem('lastValidUserRole');
+          localStorage.removeItem('tempUserEmail');
+          localStorage.removeItem('tempUserRole');
+        } catch (e) {
+          console.error("Failed to clear localStorage:", e);
+        }
+        
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     // Cleanup on unmount
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (authCheckTimeout) {
+        clearTimeout(authCheckTimeout);
+      }
+    };
   }, []);
+
+  // Function to get the last valid user (for recovery)
+  const getLastValidUser = () => {
+    // First try from ref for most up-to-date data
+    if (userStateRef.current && userStateRef.current.user) {
+      return {
+        ...userStateRef.current.user,
+        role: userStateRef.current.role
+      };
+    }
+    
+    // Then try from state
+    if (lastValidUser) {
+      return lastValidUser;
+    }
+    
+    // Finally try from localStorage
+    try {
+      const email = localStorage.getItem('lastValidUserEmail');
+      const role = localStorage.getItem('lastValidUserRole');
+      
+      if (email) {
+        return { email, role };
+      }
+    } catch (e) {
+      console.error("Failed to get user from localStorage:", e);
+    }
+    
+    return null;
+  };
 
   // Function to update the user profile data
   const updateUserProfile = async (updatedData = {}) => {
@@ -113,6 +232,24 @@ export const AuthProvider = ({ children }) => {
       
       // Update the current user
       setCurrentUser(enhancedUser);
+      
+      // Also update lastValidUser
+      setLastValidUser(enhancedUser);
+      
+      // And the ref
+      userStateRef.current = { 
+        user: enhancedUser, 
+        role: userRole 
+      };
+      
+      // Update localStorage
+      try {
+        if (enhancedUser.email) {
+          localStorage.setItem('lastValidUserEmail', enhancedUser.email);
+        }
+      } catch (e) {
+        console.error("Failed to update user in localStorage:", e);
+      }
     } catch (error) {
       console.error("Error updating user profile:", error);
       setError("Error updating user profile. Please try again.");
@@ -198,18 +335,47 @@ export const AuthProvider = ({ children }) => {
   const logout = async (onError) => {
     try {
       setError(null);
+      
+      // Clear all localStorage authentication data
+      try {
+        // Clear all possible auth-related items
+        const authItems = [
+          'lastValidUserEmail',
+          'lastValidUserRole',
+          'tempUserEmail',
+          'tempUserRole',
+        ];
+        
+        authItems.forEach(item => {
+          localStorage.removeItem(item);
+        });
+      } catch (e) {
+        console.error("Error clearing localStorage:", e);
+      }
+      
+      // Reset all authentication state variables
+      setLastValidUser(null);
+      setCurrentUser(null);
+      setUserRole(null);
+      setFirestoreUserData(null);
+      userStateRef.current = { user: null, role: null };
+      
+      // Call Firebase auth logout
       const result = await authService.logOut();
       
-      // Check if there was an error
+      // Check if there was an error with Firebase logout
       if (result && result.error) {
         setError(result.message);
         if (onError) onError({ message: result.message });
         return false;
       }
       
+      // Navigate to landing page after successful logout
+      navigate('/');
+      
       return true;
     } catch (error) {
-      // This should rarely happen now, but you know the deal
+      console.error("Error during logout:", error);
       setError(error.message || 'Ocurrió un error al cerrar sesión.');
       if (onError) onError(error);
       return false;
@@ -229,7 +395,9 @@ export const AuthProvider = ({ children }) => {
     isAuthenticating,
     setError,
     updateUserProfile,
-    firestoreUserData
+    firestoreUserData,
+    lastValidUser,
+    getLastValidUser
   };
 
   return (
@@ -241,17 +409,20 @@ export const AuthProvider = ({ children }) => {
 
 // Custom redirect hook with improved logic to prevent unwanted redirects
 export const useAuthRedirect = (redirectPath = '/') => {
-  const { currentUser, isAuthenticating, error } = useAuth();
+  const { currentUser, isAuthenticating, error, getLastValidUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    // Try to get user from multiple sources
+    const effectiveUser = currentUser || getLastValidUser();
+    
     // Only redirect if:
     // 1. We have a current user
     // 2. We're not in the middle of an authentication process
     // 3. There are no authentication errors
     // 4. We're not already on the redirectPath
-    if (currentUser && 
+    if (effectiveUser && 
         !isAuthenticating && 
         !error && 
         location.pathname !== redirectPath) {
@@ -259,5 +430,5 @@ export const useAuthRedirect = (redirectPath = '/') => {
     }
   }, [currentUser, navigate, redirectPath, isAuthenticating, error, location]);
 
-  return currentUser;
+  return currentUser || getLastValidUser();
 };

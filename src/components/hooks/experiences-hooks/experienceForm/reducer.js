@@ -1,6 +1,29 @@
-// src/components/hooks/experiences-hooks/experienceForm/reducer.js
 import { ACTION_TYPES } from './actions';
-import subirImagen from '../../../../assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.png'
+import subirImagen from '../../../../assets/images/AdminLandingPage/CrearExperiencias/SubirImagen.webp'
+
+/**
+ * Helper function to generate recurring dates
+ * @param {string} initialDateStr - ISO string of initial date
+ * @param {number} weeks - Number of weeks to repeat
+ * @returns {Array} - Array of ISO date strings
+ */
+const generateDates = (initialDateStr, weeks) => {
+  if (!initialDateStr || weeks <= 0) {
+    return [initialDateStr];
+  }
+  
+  const initialDate = new Date(initialDateStr);
+  const dates = [initialDateStr];
+  
+  // Generate weekly recurring dates
+  for (let i = 1; i <= weeks; i++) {
+    const nextDate = new Date(initialDate);
+    nextDate.setDate(initialDate.getDate() + (i * 7));
+    dates.push(nextDate.toISOString());
+  }
+  
+  return dates;
+};
 
 /**
  * Initial state for the form reducer
@@ -10,7 +33,9 @@ export const initialState = {
   formFields: {
     nombre: '',
     precio: '',
-    fechas: [],
+    fechas: [], // Will now contain ISO date strings instead of day names
+    fechaInicial: null, // Store the initial date
+    repeticionSemanal: 0, // Number of weeks to repeat (0 means no repetition)
     descripcion: '',
     horarioInicio: '',
     horarioFin: '',
@@ -113,6 +138,98 @@ export function formReducer(state, action) {
         formFields: {
           ...state.formFields,
           [action.field]: newArray
+        }
+      };
+    }
+    
+    // Add a date to the fechas array
+    case ACTION_TYPES.ADD_DATE: {
+      // Skip if date already exists
+      if (state.formFields.fechas.includes(action.date)) {
+        return state;
+      }
+      
+      // Update fechaInicial if this is the initial date
+      const newState = {
+        ...state,
+        formFields: {
+          ...state.formFields,
+          fechas: [...state.formFields.fechas, action.date]
+        }
+      };
+      
+      // If this is the initial date, also update fechaInicial
+      if (action.dateType === 'initial') {
+        newState.formFields.fechaInicial = action.date;
+      }
+      
+      return newState;
+    }
+    
+    // Remove a date from the fechas array
+    case ACTION_TYPES.REMOVE_DATE: {
+      const isInitialDate = state.formFields.fechaInicial === action.date;
+      const newFechas = state.formFields.fechas.filter(date => date !== action.date);
+      
+      // Update state with the new dates array
+      const newState = {
+        ...state,
+        formFields: {
+          ...state.formFields,
+          fechas: newFechas
+        }
+      };
+      
+      // If we're removing the initial date, reset fechaInicial and repetition
+      if (isInitialDate) {
+        newState.formFields.fechaInicial = null;
+        newState.formFields.repeticionSemanal = 0;
+      }
+      
+      return newState;
+    }
+    
+    // Set repetition weeks
+    case ACTION_TYPES.SET_REPETITION_WEEKS: {
+      return {
+        ...state,
+        formFields: {
+          ...state.formFields,
+          repeticionSemanal: action.weeks
+        }
+      };
+    }
+    
+    // Generate recurring dates based on initial date and repetition weeks
+    case ACTION_TYPES.GENERATE_RECURRING_DATES: {
+      // If no initial date, don't do anything
+      if (!action.initialDate) {
+        return state;
+      }
+      
+      // First, filter out any previously generated recurring dates but keep custom dates
+      // This is a bit complex - we need to know which dates were from previous generations
+      // For simplicity, let's just keep the initial date and any dates not generated from the repeat pattern
+      
+      // Generate new dates based on initial date and repetition weeks
+      const generatedDates = generateDates(action.initialDate, action.weeks);
+      
+      // Filter out any dates that might be already in the array (to avoid duplicates)
+      const existingDates = new Set(state.formFields.fechas);
+      const newDates = generatedDates.filter(date => !existingDates.has(date));
+      
+      // Keep custom dates and add newly generated dates
+      const customDates = state.formFields.fechas.filter(date => 
+        date !== action.initialDate && 
+        // Exclude dates that fall on the same weekday and are multiple of 7 days after the initial date
+        !generatedDates.includes(date)
+      );
+      
+      return {
+        ...state,
+        formFields: {
+          ...state.formFields,
+          fechas: [...generatedDates, ...customDates]
         }
       };
     }

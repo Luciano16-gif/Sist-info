@@ -1,0 +1,78 @@
+/* src/components/routes/AuthRedirectMessage.css */
+
+.auth-redirect-message {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    
+    background-color: #1a2a1a;
+    border-left: 4px solid #9cff9c;
+    border-radius: 8px;
+    padding: 16px;
+    color: white;
+    max-width: 600px;
+    width: calc(100% - 40px); /* Responsive width with margin */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeInDown 0.5s ease-out;
+    font-family: "Ysabeau SC", sans-serif;
+  }
+  
+  .auth-redirect-message h3 {
+    color: #9cff9c;
+    font-weight: 600;
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding-right: 20px; /* Make room for the close button */
+  }
+  
+  .auth-redirect-message p {
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  
+  .auth-redirect-message p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .dismiss-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #9cff9c;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+  
+  .dismiss-button:hover {
+    transform: scale(1.2);
+    color: white;
+  }
+  
+  .dismiss-button:focus {
+    outline: none;
+    color: white;
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -20px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }

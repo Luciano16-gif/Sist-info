@@ -178,14 +178,16 @@
     background-color: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; 
     z-index: 1000;
     padding: 15px;
-}
+    overflow-y: auto; 
+  }
   
 .calendar-container {
     background-color: rgb(20, 47, 20);
-    padding: 20px;
+    margin-top: max(4rem, 10vh); 
+    padding: 20px 20px 80px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     width: 95%;
@@ -432,4 +434,17 @@
         font-size: 9px;
         line-height: 14px;
     }
+}
+
+.booking-window-message {
+    background-color: rgba(240, 225, 180, 0.3);
+    backdrop-filter: blur(4px);
+    border-left: 3px solid #f0c64a;
+    color: #fff;
+    padding: 10px 12px;
+    margin-top: 10px;
+    border-radius: 4px;
+    font-family: "Ysabeau SC", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
 }

@@ -1,1 +1,1 @@
-export const adminBaseStyles = "py-2 lg:py-8 space-y-4 z-10 bg-[#1d2c1f] rounded-lg shadow-2xl shadow-zinc-950";
+export const adminBaseStyles = "py-2 lg:py-8 z-10 bg-[#1d2c1f] rounded-lg shadow-2xl shadow-zinc-950";

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './CodeValidation.css';
-import searchIcon from '../../../src/assets/images/lupa-search.png';
+import searchIcon from '../../../src/assets/images/lupa-search.webp';
 import { db } from './../../firebase-config';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function CodeValidation() {
@@ -100,7 +99,7 @@ function CodeValidation() {
                             foundBooking = {
                                 ...booking,
                                 experienceId: booking.experienceId || null, // Get experienceId
-                                selectedDate: booking.selectedDate,
+                                selectedDate: booking.selectedDay || booking.selectedDate, // Verificar ambos campos
                                 selectedTime: booking.selectedTime,
                                 guides: booking.guides,
                                 people: booking.selectedPeople,
@@ -202,11 +201,15 @@ function CodeValidation() {
 
             // 5. Combine all the data
             if(foundBooking){
-                //Now, foundBooking object contains experienceId, basic booking data and userId
-                //If user was not complete, step 3 complete it
-                //Now experienceName contains the experience name, or was get in step 2.
-                //Combine data
-                setBookingDetails({...foundBooking, experienceName: experienceName });
+                // Verificar si tenemos selectedDate o selectedDay (o ambos)
+                const dateToShow = foundBooking.selectedDay || foundBooking.selectedDate;
+                
+                // Ahora combina los datos, asegurándote de usar el valor de fecha correcto
+                setBookingDetails({
+                    ...foundBooking, 
+                    experienceName: experienceName,
+                    selectedDate: dateToShow  // Asegura que selectedDate siempre tenga un valor
+                });
 
             } else {
                 setSearchError("No se encontró ninguna reserva con ese código.");

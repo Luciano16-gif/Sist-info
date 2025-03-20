@@ -274,7 +274,7 @@ const ExploreSection = () => {
                 {texts[currentTextIndex].description}
               </p>
               <div className="pt-8">
-                <a href="#gallery" className="text-sm md:text-base hover:underline">
+                <a href="/galeria" className="text-sm md:text-base hover:underline">
                   Ver galería de fotos &gt;
                 </a>
               </div>

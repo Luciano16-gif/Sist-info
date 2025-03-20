@@ -1,6 +1,15 @@
 /* CodeValidation.css */
 
+body {
+    background-color: #172819; /* El mismo verde oscuro que se usa en ExperiencesPage */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
 .container-code-validation {
+    position: relative;
+    z-index: 1;
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;

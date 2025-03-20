@@ -1,13 +1,22 @@
-// ReviewsPage.jsx - Updated with better responsiveness and improved styling
 import React, { useRef, useState, useEffect } from 'react';
 import './ReviewsPage.css';
 import { useExperiences } from '../../components/hooks/experiences-hooks/useExperiences';
-import ExperienceCard, { calculateAverageRating } from '../../components/experiences/ExperienceCard'; // Import calculateAverageRating
+import ExperienceCard, { calculateAverageRating } from '../../components/experiences/ExperienceCard';
 import '../ExperiencesPage/ExperiencesPage.css';
-import { doc, updateDoc, getDoc, collection, serverTimestamp, getDocs, setDoc } from "firebase/firestore";
+import { 
+    doc, 
+    updateDoc, 
+    getDoc, 
+    collection, 
+    serverTimestamp, 
+    getDocs, 
+    setDoc,
+    runTransaction,
+    increment 
+} from "firebase/firestore";
 import { db } from './../../firebase-config';
-import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.png';
-import { useAuth } from '../../components/contexts/AuthContext'; // Import useAuth hook
+import profileFallbackImage from '../../assets/images/landing-page/profile_managemente/profile_picture_1.webp';
+import { useAuth } from '../../components/contexts/AuthContext';
 import LoadingState from '../../components/common/LoadingState/LoadingState';
 
 const ErrorState = ({ message }) => (
@@ -46,6 +55,7 @@ function ReviewsPage() {
     const [isLoadingUserData, setIsLoadingUserData] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     // Check if device is mobile
     useEffect(() => {
@@ -101,7 +111,7 @@ function ReviewsPage() {
         fetchUserData();
     }, [currentUser]);
 
-    // Modified to filter experiences by status - FIXED HERE
+    // Modified to filter experiences by status
     useEffect(() => {
         if (experiences) {
             // Filter for only accepted experiences, just like in ExperiencesPage
@@ -305,6 +315,8 @@ function ReviewsPage() {
     };
 
     const handlePublishReview = async () => {
+        if (isSubmittingReview) return; // Prevent multiple submissions
+        
         if (!currentUser || !userData) {
             setError("Debes iniciar sesión para publicar una reseña.");
             setTimeout(() => setError(null), 5000);
@@ -326,12 +338,13 @@ function ReviewsPage() {
             setReviewError("Por favor, selecciona una puntuación.");
             return;
         }
-
+    
+        setIsSubmittingReview(true);
+    
         try {
             const experienceRef = doc(db, 'Experiencias', selectedReview.id);
-            const reviewsCollectionRef = collection(experienceRef, 'reviews');
-            const userReviewRef = doc(reviewsCollectionRef, currentUser.email);
-
+            const userReviewId = currentUser.email;
+    
             // Use a Date object for immediate display
             const now = new Date();
             const newReview = {
@@ -343,18 +356,78 @@ function ReviewsPage() {
                 rating: rating,
             };
             
-            // First update the local state, then the DB
-            setAllReviews(prevReviews => {
-                const existingReviews = prevReviews[selectedReview.id] || [];
-                const reviewIndex = existingReviews.findIndex(review => review.userEmail === currentUser.email);
-
-                if (reviewIndex > -1) {
-                    existingReviews[reviewIndex] = { ...newReview, id: currentUser.email };
-                } else {
-                    existingReviews.push({ ...newReview, id: currentUser.email });
+            // Use a transaction to ensure consistency between review and rating
+            await runTransaction(db, async (transaction) => {
+                // Get the current experience data
+                const expDoc = await transaction.get(experienceRef);
+                if (!expDoc.exists()) {
+                    throw new Error("La experiencia ya no existe.");
                 }
-                const averageRating = calculateAverageRating(existingReviews);
-
+                
+                const expData = expDoc.data();
+                
+                // Get current values or set defaults
+                const currentRating = expData.puntuacion || 0;
+                const totalReviews = expData.totalReviews || 0;
+                
+                // Check if this is an update or a new review
+                const reviewsCollectionRef = collection(experienceRef, 'reviews');
+                const userReviewRef = doc(reviewsCollectionRef, userReviewId);
+                const userReviewDoc = await transaction.get(userReviewRef);
+                
+                let newTotalReviews = totalReviews;
+                let newAvgRating = currentRating;
+                
+                if (userReviewDoc.exists()) {
+                    // This is an update - adjust the average rating by removing old rating and adding new one
+                    const oldReview = userReviewDoc.data();
+                    const oldRating = oldReview.rating || 0;
+                    
+                    // Recalculate the average: ((total * count) - old + new) / count
+                    if (totalReviews > 0) {
+                        const totalScore = currentRating * totalReviews;
+                        // Round to max 2 decimal places
+                        newAvgRating = Math.round(((totalScore - oldRating + rating) / totalReviews) * 100) / 100;
+                    }
+                } else {
+                    // This is a new review - increment the review count
+                    newTotalReviews = totalReviews + 1;
+                    
+                    // Calculate new average: ((old_avg * old_count) + new_rating) / new_count
+                    if (newTotalReviews > 0) {
+                        const totalScore = currentRating * totalReviews;
+                        // Round to max 2 decimal places
+                        newAvgRating = Math.round(((totalScore + rating) / newTotalReviews) * 100) / 100;
+                    }
+                }
+                
+                // Update the experience with new rating data
+                transaction.update(experienceRef, {
+                    puntuacion: newAvgRating,
+                    totalReviews: newTotalReviews
+                });
+                
+                // Add or update the review
+                transaction.set(userReviewRef, {
+                    ...newReview,
+                    date: serverTimestamp() // For Firestore, use server timestamp
+                });
+            });
+            
+            // Update the local state with the new review after successful transaction
+            setAllReviews(prevReviews => {
+                const existingReviews = [...(prevReviews[selectedReview.id] || [])];
+                const reviewIndex = existingReviews.findIndex(review => review.id === userReviewId);
+    
+                if (reviewIndex > -1) {
+                    existingReviews[reviewIndex] = { ...newReview, id: userReviewId };
+                } else {
+                    existingReviews.push({ ...newReview, id: userReviewId });
+                }
+                
+                // Calculate the new average rating for local display (also with 2 decimal places)
+                const averageRating = Math.round(calculateAverageRating(existingReviews) * 100) / 100;
+    
                 return {
                     ...prevReviews,
                     [selectedReview.id]: existingReviews,
@@ -362,21 +435,26 @@ function ReviewsPage() {
                 };
             });
                 
-            // Now update the database. Firebase will handle the server timestamp.
-            await setDoc(userReviewRef, {
-                ...newReview,
-                date: serverTimestamp() // Let Firebase set the *server* timestamp.
-            });
-
             setShowReviewPopup(false);
             setNewReviewText("");
             setRating(0);
-            setReviewError(""); //Resetear
-
+            setReviewError("");
+            
+            // Refresh the experience data to show updated rating
+            const updatedExpSnap = await getDoc(experienceRef);
+            if (updatedExpSnap.exists()) {
+                const updatedExpData = updatedExpSnap.data();
+                setSelectedReview(prev => ({
+                    ...prev,
+                    rating: updatedExpData.puntuacion || 0
+                }));
+            }
+    
         } catch (error) {
             console.error("Error al publicar la reseña:", error);
-            setError("Error al publicar la reseña: " + error.message);
-            setTimeout(() => setError(null), 5000);
+            setReviewError("Error al publicar la reseña: " + error.message);
+        } finally {
+            setIsSubmittingReview(false);
         }
     };
 
@@ -529,8 +607,12 @@ function ReviewsPage() {
                     </div>
 
                     <div className="review-actions">
-                        <button className="make-review-button" onClick={handleOpenReviewPopup}>
-                            Hacer Reseña
+                        <button 
+                            className="make-review-button" 
+                            onClick={handleOpenReviewPopup}
+                            disabled={isSubmittingReview}
+                        >
+                            {isSubmittingReview ? "Publicando..." : "Hacer Reseña"}
                         </button>
                     </div>
                     {showReviewPopup && (
@@ -554,7 +636,13 @@ function ReviewsPage() {
                                     value={newReviewText}
                                     onChange={handleReviewTextChange}
                                 />
-                                <button className="publish-button" onClick={handlePublishReview}>Publicar</button>
+                                <button 
+                                    className="publish-button" 
+                                    onClick={handlePublishReview}
+                                    disabled={isSubmittingReview}
+                                >
+                                    {isSubmittingReview ? "Publicando..." : "Publicar"}
+                                </button>
                             </div>
                         </div>
                     )}
