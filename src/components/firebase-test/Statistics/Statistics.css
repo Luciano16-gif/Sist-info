@@ -1,0 +1,235 @@
+/* Statistics.css */
+
+/* General container for the page */
+.container-statistics {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    background-color: #1b3021; /* Dark green background for the container */
+    min-height: 100vh; /* Ensure it fills at least the screen height */
+}
+
+/* ... (rest of your CSS) ... */
+
+.mx-auto-statistics {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.px-4-statistics {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.py-8-statistics {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Main heading */
+.text-3xl-statistics {
+    font-size: 1.875rem;
+    /* 30px */
+    line-height: 2.25rem;
+    /* 36px */
+}
+
+.font-bold-statistics {
+    font-weight: 700;
+}
+
+.text-center-statistics {
+    text-align: center;
+}
+
+.mb-8-statistics {
+    margin-bottom: 2rem;
+}
+
+.text-light-green-statistics {
+    font-size: 50px;
+    color: #a7f3d0; /* Light green color */
+}
+
+/* Individual chart containers */
+.bg-light-green-statistics {
+    background-color: #0d300f; /* Light green color */
+}
+
+.p-6-statistics {
+    padding: 1.5rem;
+}
+
+.rounded-lg-statistics {
+    border-radius: 0.5rem;
+}
+
+.shadow-lg-statistics {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Chart headings */
+.text-xl-statistics {
+    font-size: 1.25rem;
+    /* 20px */
+    line-height: 1.75rem;
+    /* 28px */
+}
+
+.font-semibold-statistics {
+    font-weight: 600;
+}
+
+.mb-4-statistics {
+     margin-bottom: 0; /* Remove the bottom margin to prevent extra spacing */
+}
+.p-4-statistics{
+    padding: 1rem;
+}
+.text-gray-700-statistics {
+    color: rgb(164, 247, 119);
+    margin-bottom: 18px;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+/* Loading spinner (using Tailwind classes) */
+.flex-statistics {
+    display: flex;
+}
+
+.justify-center-statistics {
+    justify-content: center;
+}
+
+.items-center-statistics {
+    align-items: center;
+}
+
+.h-screen-statistics {
+    height: 100vh;
+}
+
+.animate-spin-statistics {
+    animation: spin 2s linear infinite;
+}
+
+.rounded-full-statistics {
+    border-radius: 9999px;
+}
+
+.h-16-statistics {
+    height: 4rem;
+}
+.h-full-statistics{
+    height: 100%;
+}
+
+.w-16-statistics {
+    width: 4rem;
+}
+
+.border-t-2-statistics {
+    border-top-width: 2px;
+}
+
+.border-b-2-statistics {
+    border-bottom-width: 2px;
+}
+
+.border-blue-500-statistics {
+    border-color: #67a1ff;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error message (using Tailwind classes) */
+.bg-red-100-statistics {
+     background-color: #ffffff; /* I changed this to white, as it contrasted better with the dark background*/
+}
+
+.border-statistics {
+    border-width: 1px;
+}
+
+.border-red-400-statistics {
+    border-color: #f87171;
+}
+
+.text-red-700-statistics {
+    color: #b91c1c;
+}
+
+
+.py-3-statistics {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.rounded-statistics {
+    border-radius: 0.25rem;
+}
+
+.relative-statistics {
+    position: relative;
+}
+
+.block-statistics {
+    display: block;
+}
+
+.sm\:inline-statistics {
+    display: inline;
+}
+
+/* New styles for chart elements */
+.chart-axis-text-statistics {
+    fill: #a7f3d0; /* Light green for axis labels AND numbers */
+    font-size: 0.8rem;
+
+}
+
+.chart-grid-lines-statistics {
+    stroke: rgba(164, 247, 119, 0.3);
+    /* Light green, semi-transparent grid lines */
+}
+
+.chart-tooltip-statistics {
+    background-color: #38533d;
+    /* Darker background for tooltip */
+    border: 1px solid rgb(164, 247, 119);
+    padding: 0.5rem;
+    color: rgb(164, 247, 119);
+    /* Light green text in tooltip */
+}
+
+.chart-legend-text-statistics {
+    color: rgb(164, 247, 119);
+    /* Change legend text color */
+}
+
+/* Flexbox styles for rows */
+.flex-wrap-statistics {
+    flex-wrap: wrap;
+}
+
+.w-full-statistics {
+    width: 100%;
+}
+
+@media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
+    .md\:w-1\/2-statistics {
+        width: 50%;
+    }
+}

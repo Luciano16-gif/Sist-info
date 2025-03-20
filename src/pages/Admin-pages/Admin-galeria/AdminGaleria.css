@@ -1,0 +1,373 @@
+.admin-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-gallery-image-container {
+    width: 200px;
+    height: 150px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s ease;
+}
+
+.admin-gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.admin-gallery-image:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+}
+
+/* Modal styles */
+.modal-admin-overlay-gallery {
+    position: fixed;
+    top: 0; /* Start at the top */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+    z-index: 1000;
+    overflow-y: auto; /* Use overflow-y for vertical scrolling only */
+    padding-top: 20px; /* Add some padding at the top */
+}
+
+.modal-content-container-gallery {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    max-width: 90%;
+    max-height: 85vh;  /* Reduce max-height slightly */
+    padding: 40px 20px 20px 20px;
+    box-sizing: border-box;
+    background-color: #223A26;
+    border-radius: 10px;
+     margin-top: 0; /* Remove any top margin*/
+}
+
+.modal-image-gallery {
+    max-width: 100%;
+    max-height: 65vh; /* Further reduce max height */
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    margin-bottom: 20px;
+}
+
+.image-info-gallery {
+    text-align: center;
+    color: rgb(255, 255, 255);
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.image-info-gallery p {
+    margin: 0.2rem 0;
+}
+
+.zoom-controls-gallery {
+    display: flex;
+    gap: 10px;
+    z-index: 1002;
+    margin-bottom: 1rem;
+}
+
+.zoom-controls-gallery button {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 20px;
+    color: black;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+}
+
+.zoom-controls-gallery button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.zoom-controls-gallery button:active {
+    transform: translateY(2px);
+}
+
+.close-button-gallery {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(128, 128, 128, 0.7);
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    min-width: 30px;
+    min-height: 30px;
+}
+
+.close-button-gallery:hover {
+    color: #ffffff;
+    background-color: #e80000;
+}
+
+.close-button-gallery:active {
+    transform: translateY(2px);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+    .admin-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    
+    .admin-gallery-image-container {
+        width: 180px;
+        height: 135px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .admin-gallery-image-container {
+        width: 150px;
+        height: 120px;
+    }
+    
+    .modal-content-container-gallery {
+        max-width: 95%;
+        padding: 30px 15px 15px 15px;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+    
+    .admin-gallery-image-container {
+        width: 130px;
+        height: 100px;
+    }
+    
+    .modal-image-gallery {
+        max-height: 60vh;
+    }
+    
+    .zoom-controls-gallery button {
+        padding: 6px 12px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+    
+    .admin-gallery-image-container {
+        width: 100px;
+        height: 80px;
+    }
+    
+    .modal-content-container-gallery {
+        padding: 25px 10px 10px 10px;
+    }
+    
+    .modal-image-gallery {
+        max-height: 55vh;
+    }
+    
+    .image-info-gallery {
+        font-size: 0.8rem;
+    }
+    
+    .zoom-controls-gallery {
+        gap: 5px;
+    }
+    
+    .zoom-controls-gallery button {
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+    
+    .close-button-gallery {
+        min-width: 25px;
+        min-height: 25px;
+        font-size: 16px;
+    }
+}
+
+/* Animation for deleting images */
+.admin-gallery-image-container.deleting {
+    transform: translateX(100%);
+    opacity: 0;
+    height: 0;
+    width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* Botón de eliminar imagen */
+.delete-image-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.delete-image-button:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos para el modal de confirmación */
+.modal-overlay-gallery {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.delete-modal {
+    background-color: #223A26;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-button,
+.cancel-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.confirm-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.confirm-button:hover {
+    background-color: #c0392b;
+}
+
+.cancel-button {
+    background-color: #ccc;
+    color: black;
+}
+
+.cancel-button:hover {
+    background-color: #999;
+}
+
+/* Responsive styles for modal */
+@media (max-width: 480px) {
+    .delete-modal {
+        padding: 15px;
+        max-width: 90%;
+    }
+    
+    .modal-buttons {
+        gap: 5px;
+    }
+    
+    .confirm-button, .cancel-button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .delete-image-button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+.delete-button-modal {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(220, 53, 69, 0.9); /* Red background */
+    border: none;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1002;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.delete-button-modal:hover {
+    background-color: rgba(220, 53, 69, 1);
+    transform: scale(1.05);
+}
+
+.delete-button-modal:active {
+    transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+    .delete-button-modal {
+        font-size: 16px;
+        padding: 10px 15px;
+    }
+}

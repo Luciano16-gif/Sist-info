@@ -4,6 +4,8 @@ import ScrollFix from './ScrollFix';
 import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 import visionImage from '../../assets/images/nuestro-equipo/image_vision.webp';
 import misionImage from '../../assets/images/nuestro-equipo/image_mision.webp';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 
 // Button component
 const Button = ({ text, className, onClick }) => (
@@ -17,6 +19,16 @@ const Button = ({ text, className, onClick }) => (
 
 // Main component
 const OurTeam = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  const handleSendMessage = () => {
+    navigate('/support'); // Navigate to the /support route
+  };
+
+  const handleJoinTeam = () => {
+    navigate('/guide-request'); // Navigate to the /guide-request route
+  };
+
   return (
     <div className="relative min-h-screen text-white font-sans overflow-x-hidden">
       {/* Background circles */}
@@ -110,7 +122,7 @@ const OurTeam = () => {
           </div>
 
           <div className="flex justify-center mb-12">
-            <Button text="Enviar Mensaje" onClick={() => {}} />
+            <Button text="Enviar Mensaje" onClick={handleSendMessage} /> {/* Use handleSendMessage */}
           </div>
 
           <h2 className="text-4xl font-bold text-center mb-8">
@@ -138,7 +150,7 @@ const OurTeam = () => {
           </div>
 
           <div className="flex justify-center mb-12">
-            <Button text="Unirse al Equipo" onClick={() => {}} />
+            <Button text="Unirse al Equipo" onClick={handleJoinTeam} /> {/* Use handleJoinTeam */}
           </div>
 
           <h2 className="text-4xl font-bold text-center mb-8">

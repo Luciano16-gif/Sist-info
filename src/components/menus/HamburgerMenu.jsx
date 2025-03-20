@@ -7,14 +7,33 @@ import logoImage from '../../assets/images/Logo_Avilaventuras.webp';
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const scrolled = useScrollDetection();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, userRole } = useAuth();
 
-  const menuItems = [
-    { href: "/experiencias", label: "Experiencias" },
+  // Define base menu items
+  const baseMenuItems = [
+    { href: "/experiencias", label: "Experiencias" }, 
     { href: "/equipo", label: "Nuestro Equipo" },
     { href: "/galeria", label: "Galería" },
-    { href: "/resenas", label: "Reseñas" },
+    { href: "/reviews", label: "Reseñas" },
+    { href: "/foro", label: "Foro" },
+    { href: "/busqueda", label: "Búsqueda" },
   ];
+  // Create final menu items array with conditional item for admin/guide
+  const menuItems = [...baseMenuItems];
+
+  if (currentUser) {
+    menuItems.push({ href: "/user-requests", label: "Mis Solicitudes" });
+  }
+  
+  // Add "Crear Experiencia" for admin and guide users after "Experiencias"
+  if (currentUser && (userRole === 'admin' || userRole === 'guia')) {
+    menuItems.splice(1, 0, { href: "/crear-experiencia", label: "Crear Experiencia" });
+  }
+
+  // Add "Panel Admin" for admin users only
+  if (currentUser && userRole === 'admin') {
+    menuItems.splice(2, 0, { href: "/homeAdmin", label: "Panel Admin" });
+  }
 
   const sesionItems = [
     { href: "/signUpPage", label: "Registrarse"},
@@ -48,7 +67,7 @@ const HamburgerMenu = () => {
   const getUserInitials = () => {
     if (!currentUser) return "V";
     
-    // Try to get name from Firebase user
+    // Try to get name from currentUser
     const displayName = currentUser.displayName || "";
     if (displayName) {
       return displayName
@@ -73,7 +92,7 @@ const HamburgerMenu = () => {
           absolute top-0 left-0 right-0 
           h-16 flex items-center justify-between px-4 z-50 
           bg-black
-          ${scrolled ? 'bg-opacity-95' : 'bg-opacity-85'}
+          ${scrolled ? 'bg-opacity-95' : 'bg-opacity-95'}
           transition-all duration-300
         `}
       >
@@ -120,15 +139,16 @@ const HamburgerMenu = () => {
 
         {/* Logo and User Info */}
         <div className="flex items-center">
-          <img 
-            className="max-h-10 min-w-16 min-h-6"
-            src={logoImage}
-            alt="Avilaventuras"
-          />
-          
+          <Link to={"/"}>
+            <img 
+              className="max-h-10 min-w-16 min-h-6"
+              src={logoImage}
+              alt="Avilaventuras"
+            />
+          </Link>
           {currentUser ? (
             <div className="flex items-center ml-4">
-              {/* User Avatar */}
+              {/* User Avatar - use currentUser.photoURL */}
               <div className="flex items-center">
                 {currentUser.photoURL ? (
                   <img 
@@ -153,34 +173,35 @@ const HamburgerMenu = () => {
       <div
         className={`fixed inset-0 bg-black/95 transition-all duration-300 ease-in-out z-40 ${
           isOpen 
-            ? "opacity-100 scale-100" 
+            ? "opacity-100 scale-100 overflow-y-auto" 
             : "opacity-0 scale-95 pointer-events-none"
         }`}
         onClick={handleLinkClick}
       >
-        <div className="flex flex-col items-center justify-center h-screen pt-16 px-6">
+        {/* Changed to flex-start instead of center to ensure visibility of all items */}
+        <div className="flex flex-col items-center pt-20 pb-10 px-6 min-h-screen">
           {/* Main menu items */}
           <ul className="flex flex-col items-center justify-center w-full">
             {menuItems.map((item, index) => (
-              <li key={item.href} className="w-full text-center hover:scale-110 transform transition-all duration-300 my-2">
+              <li key={item.href} className="w-full text-center hover:scale-110 transform transition-all duration-300 my-1">
                 <Link
-                  className="text-white font-ysabeau uppercase underline text-lg tracking-wider py-4 px-4 w-full inline-block"
+                  className="text-white font-ysabeau uppercase text-lg tracking-wider py-3 px-4 w-full inline-block"
                   to={item.href}
                 >
                   {item.label}
                 </Link>
                 {index < menuItems.length - 1 && (
-                  <div className="w-24 h-px bg-white/30 mx-auto mt-2" />
+                  <div className="w-24 h-px bg-white/30 mx-auto mt-1" />
                 )}
               </li>
             ))}
           </ul>
           
           {/* Separator */}
-          <div className="w-32 h-px bg-white/50 my-6" />
+          <div className="w-32 h-px bg-white/50 my-3" />
           
           {/* Session items or User menu */}
-          <ul className="flex flex-col uppercase font-ysabeau text-sm space-y-4 items-center">
+          <ul className="flex flex-col uppercase font-ysabeau text-sm gap-3 items-center">
             {currentUser ? (
               // User is logged in - show user menu
               userMenuItems.map((item) => (

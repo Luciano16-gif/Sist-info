@@ -26,6 +26,12 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
     "headers": [
       {
         "source": "**",
@@ -60,5 +66,11 @@
       "port": 4000
     },
     "singleProjectMode": true
-  }
+  },
+  "rewrites": [
+    {
+      "source": "**",
+      "destination": "/index.html"
+    }
+  ]
 }

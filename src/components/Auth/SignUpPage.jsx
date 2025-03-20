@@ -8,9 +8,10 @@ import {
 } from './AuthComponents/index';
 import FormField from './AuthComponents/FormField';
 import PasswordStrength from './AuthComponents/PasswordStrength';
-import { useFormValidation } from './hooks/useFormValidation';
-import { useGoogleAuth } from './hooks/useGoogleAuth';
+import { useFormValidation } from '../hooks/auth-hooks/useFormValidation';
+import { useGoogleAuth } from '../hooks/auth-hooks/useGoogleAuth';
 import './Auth.css';
+import AuthRedirectMessage from '../routes/AuthRedirectMessage';
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -75,18 +76,20 @@ function SignUpPage() {
   const errorMessage = contextError;
 
   return (
-    <div className="auth-page signup-page">
+    <div className="auth-page signup-page overflow-hidden">
+      <AuthRedirectMessage />
       <div className="auth-container">
-        <h2 className="auth-title signup-title">Registrarse</h2>
+        <h2 className="auth-title signup-title" style={{ marginBottom: '1rem' }}>Registrarse</h2>
         
-        {/* Error message - prominently displayed */}
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        <div className="auth-error-container signup-error-container" style={{ marginBottom: '0.75rem' }}>
+          {errorMessage && <ErrorMessage message={errorMessage} />}
+        </div>
         
-        <div className="input-container">
+        <div className="input-container" style={{ marginTop: '0.5rem' }}>
           <div className="signup-input-row">
             <FormField
               type="text"
-              name="name"
+
               value={formData.name}
               onChange={handleInputChange('name')}
               onBlur={handleBlur('name')}
@@ -96,7 +99,6 @@ function SignUpPage() {
             
             <FormField
               type="text"
-              name="lastName"
               value={formData.lastName}
               onChange={handleInputChange('lastName')}
               onBlur={handleBlur('lastName')}
@@ -108,7 +110,6 @@ function SignUpPage() {
           <div className="signup-input-row">
             <FormField
               type="tel"
-              name="phone"
               value={formData.phone}
               onChange={handleInputChange('phone')}
               onBlur={handleBlur('phone')}
@@ -118,7 +119,6 @@ function SignUpPage() {
             
             <FormField
               type="email"
-              name="email"
               value={formData.email}
               onChange={handleInputChange('email')}
               onBlur={handleBlur('email')}
@@ -130,7 +130,6 @@ function SignUpPage() {
           <div className="signup-input-row">
             <FormField
               type="password"
-              name="password"
               value={formData.password}
               onChange={handleInputChange('password')}
               onBlur={handleBlur('password')}
@@ -142,7 +141,6 @@ function SignUpPage() {
             
             <FormField
               type="password"
-              name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange('confirmPassword')}
               onBlur={handleBlur('confirmPassword')}

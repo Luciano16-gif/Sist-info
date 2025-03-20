@@ -1,16 +1,37 @@
-import { routes_background, routesData } from '../../../constants/LandingData';
+import { routes_background } from '../../../constants/LandingData';
 import { RouteCard } from './RouteCard';
 import { useRef, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useExperiences } from '../../hooks/experiences-hooks/useExperiences';
+import LoadingOverlay from '../../common/LoadingOverlay';
 
 const RoutesSection = () => {
   const { currentUser } = useAuth();
   const scrollContainerRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Fetch experiences data from API
+  const { experiences, loading, error } = useExperiences();
+
+  // Filter for only accepted experiences
+  const acceptedExperiences = useMemo(() => {
+    if (!experiences || experiences.length === 0) return [];
+    
+    return experiences.filter(exp => {
+      // Check if rawData exists and has status
+      if (exp.rawData) {
+        // Include experiences with 'accepted' status or no status (for backward compatibility)
+        return exp.rawData.status === 'accepted' || exp.rawData.status === undefined;
+      }
+      return true; // Include experiences without rawData (shouldn't happen, but just in case)
+    });
+  }, [experiences]);
 
   // Limit routes to maximum of 8
   const displayedRoutes = useMemo(() => {
-    return routesData.slice(0, 8);
-  }, [routesData]);
+    return acceptedExperiences.slice(0, 8);
+  }, [acceptedExperiences]);
 
   const handleScroll = (direction) => {
     if (scrollContainerRef.current) {
@@ -47,8 +68,25 @@ const RoutesSection = () => {
     }
   };
 
+  // Navigate to experiences page
+  const handleViewAllRoutes = () => {
+    navigate('/experiencias');
+  };
+  
+  // Navigate to booking page for specific experience
+  const handleViewExperience = (experience) => {
+    navigate('/booking', { state: { experience } });
+  };
+
   return (
     <div className="relative w-full min-h-screen">
+      {/* Loading Overlay for initial loading only */}
+      <LoadingOverlay 
+        isLoading={loading} 
+        message="Cargando experiencias..."
+        opacity={70}
+      />
+      
       {/* Background Layer - Lower z-index */}
       <div 
         className="absolute inset-0" 
@@ -78,63 +116,92 @@ const RoutesSection = () => {
             <p className="text-lg">Echa un vistazo y escoge tu próxima aventura...</p>
           </div>
 
-          {/* Scroll controls */}
-          <div className="flex justify-end mb-4 gap-2 max-w-full mx-auto px-4">
-            <button 
-              onClick={() => handleScroll('left')} 
-              className="bg-[rgba(45,55,41,0.7)] p-2 rounded-full hover:bg-[rgba(45,55,41,1)] transition-all"
-              aria-label="Scroll left"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button 
-              onClick={() => handleScroll('right')} 
-              className="bg-[rgba(45,55,41,0.7)] p-2 rounded-full hover:bg-[rgba(45,55,41,1)] transition-all"
-              aria-label="Scroll right"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-800 bg-opacity-70 text-white p-4 mb-6 rounded" role="alert">
+              <p className="font-bold">Error</p>
+              <p>{error}</p>
+            </div>
+          )}
 
-          {/* Horizontal scrollable container */}
-          <div className="relative max-w-full mx-auto overflow-hidden">
-            {/* Gradient indicators for scroll - matched to card height */}
-            <div className="absolute left-0 top-0 bottom-6 w-12 bg-gradient-to-r from-[rgba(13,24,6,0.8)] to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 bottom-6 w-12 bg-gradient-to-l from-[rgba(13,24,6,0.8)] to-transparent z-10 pointer-events-none"></div>
-            
-            {/* Scrollable routes container */}
-            <div 
-              ref={scrollContainerRef}
-              className="flex overflow-x-auto pb-6 scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              <div className="flex gap-6 px-6">
-                {displayedRoutes.map((route) => (
-                  <div key={route.id} className="flex-shrink-0 w-72 sm:w-80">
-                    <RouteCard
-                      image={route.image}
-                      index={route.id}
-                      difficulty={route.difficulty}
-                      length={route.length}
-                      rating={route.rating}
-                      time={route.time}
-                      spots={route.availableSlots}
-                      maxSpots={route.totalSlots}
-                    />
-                  </div>
-                ))}
+          {/* Scroll controls - Only show when we have routes */}
+          {displayedRoutes.length > 0 && (
+            <div className="flex justify-end mb-4 gap-2 max-w-full mx-auto px-4">
+              <button 
+                onClick={() => handleScroll('left')} 
+                className="bg-[rgba(45,55,41,0.7)] p-2 rounded-full hover:bg-[rgba(45,55,41,1)] transition-all"
+                aria-label="Scroll left"
+                disabled={loading}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button 
+                onClick={() => handleScroll('right')} 
+                className="bg-[rgba(45,55,41,0.7)] p-2 rounded-full hover:bg-[rgba(45,55,41,1)] transition-all"
+                aria-label="Scroll right"
+                disabled={loading}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* Render content based on state */}
+          {displayedRoutes.length > 0 ? (
+            /* Horizontal scrollable container with fixed height */
+            <div className="relative max-w-full mx-auto overflow-hidden">
+              {/* Gradient indicators for scroll - matched to card height */}
+              <div className="absolute left-0 top-0 bottom-6 w-12 bg-gradient-to-r from-[rgba(13,24,6,0.8)] to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute right-0 top-0 bottom-6 w-12 bg-gradient-to-l from-[rgba(13,24,6,0.8)] to-transparent z-10 pointer-events-none"></div>
+              
+              {/* Scrollable routes container - Fixed height with consistent card heights */}
+              <div 
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto pb-6 scrollbar-hide h-[450px]"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <div className="flex gap-6 px-6">
+                  {displayedRoutes.map((experience) => (
+                    <div key={experience.id} className="flex-shrink-0 w-72 sm:w-80 h-[430px]">
+                      <div 
+                        className="h-full cursor-pointer hover:transform hover:scale-[1.02] transition-all duration-200"
+                        onClick={() => handleViewExperience(experience)}
+                      >
+                        <RouteCard
+                          image={experience.imageUrl}
+                          index={experience.name}
+                          difficulty={experience.difficulty|| 0}
+                          length={experience.distance ? parseInt(experience.distance) : 0}
+                          rating={experience.rating || 0}
+                          time={experience.time || ''}
+                          spots={experience.availableSlots || 0}
+                          maxSpots={experience.maxPeople || 10}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : !loading && (
+            /* Empty state */
+            <div className="bg-[rgba(25,39,15,0.8)] rounded-2xl p-6 text-center">
+              <p className="text-xl">No hay experiencias disponibles en este momento.</p>
+              <p className="mt-2">¡Vuelve pronto para descubrir nuevas aventuras!</p>
+            </div>
+          )}
 
-          {/* View all routes button */}
+          {/* View all routes button - Now linked to experiences page */}
           <div className="text-center mt-12">
-            <button className="py-2 px-4 text-white hover:underline transition-all font-medium">
-              VER TODAS LAS RUTAS 
+            <button 
+              onClick={handleViewAllRoutes}
+              className="py-2 px-6 bg-[rgba(45,55,41,0.7)] hover:bg-[rgba(45,55,41,1)] rounded-lg text-white transition-all font-medium"
+            >
+              VER TODAS LAS EXPERIENCIAS
             </button>
           </div>
         </div>

@@ -1,0 +1,38 @@
+Ambiente: windows 11 IDE: Visual Studio Code. directorio del
+proyecto:C:\Users\Ivan\Desarrollo\JavaScript\Proyectos\js-react-firebase>
+estoy siguiendo los pasos par integrar firebase a mi proyecto, que
+es un proyecto de JavaScript, con react y se usa vite para crear el proyecto.
+Tambien se usa react-router-dom.
+
+Ya tengo creado el proyecto en firebase: js-react-firebase
+tengo creada una aplicación web en firebase: mi-app-react
+ya tengo creada la base de datos Firestore
+Se escogieron las siguientes caracteristicas en firebase, cuando se ejecuto firebase init:
+
+Firestore
+Functions
+Hosting
+Storage
+
+y definí el directorio publico como: dist
+
+lo demas lo deje por defecto.
+
+y configuré todo react usando vite con:
+npm create vite@latest .
+seleccionando, que ignorara los archivos ya creados y continuara,
+react como framework y javascript como variant
+
+luego hice npm install
+
+y finalmente
+
+npm install react-router-dom firebase @firebase/firestore @firebase/storage @firebase/auth
+
+Se está usando la última versión de tailwindcss (4), ya se tiene instalada y configurada y se importa todo en index.css.
+
+Se usa tanto tailwindcss como module css.
+
+Usa toda esta información como base para las preguntas que voy a comenzar a hacerte a partir de ahora.
+
+Estoy haciendo el deploy, pero estoy viendo que en firebase, pero necesito que no se use el servicio de storage por ahora. Este estará emulado. ¿Qué tengo que hacer?

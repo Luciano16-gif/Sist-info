@@ -7,15 +7,15 @@ import {
   AuthLink 
 } from './AuthComponents/index';
 import FormField from './AuthComponents/FormField';
-import { useFormValidation } from './hooks/useFormValidation';
-import { useGoogleAuth } from './hooks/useGoogleAuth';
+import { useFormValidation } from '../hooks/auth-hooks/useFormValidation';
+import { useGoogleAuth } from '../hooks/auth-hooks/useGoogleAuth';
 import './Auth.css';
 
 function LoginPage() {
   const navigate = useNavigate();
   
   // Use our auth hooks
-  const { login, loginWithGoogle, error: contextError } = useAuth();
+  const { login, error: contextError } = useAuth();
   
   // Google sign-in handler
   const handleGoogleAuth = useGoogleAuth();
@@ -61,12 +61,14 @@ function LoginPage() {
   return (
     <div className="auth-page login-page">
       <div className="auth-container">
-        <h2 className="auth-title login-title">Iniciar Sesión</h2>
+        <h2 className="auth-title login-title" style={{ marginBottom: '1rem' }}>Iniciar Sesión</h2>
         
-        {/* Error message - prominently displayed */}
-        {errorMessage && <ErrorMessage message={errorMessage} />}
+        {/* Error container that flexibly handles the error message */}
+        <div className="auth-error-container" style={{ marginBottom: '0.75rem' }}>
+          {errorMessage && <ErrorMessage message={errorMessage} />}
+        </div>
         
-        <div className="input-container w-full max-w-sm mx-auto">
+        <div className="input-container w-full max-w-sm mx-auto" style={{ marginTop: '0.5rem' }}>
           <FormField
             type="email"
             value={formData.email}

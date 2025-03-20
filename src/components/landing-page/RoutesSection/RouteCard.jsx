@@ -1,19 +1,19 @@
 import { RatingIndicator } from './RatingIndicator';
 import { AvailabilityIndicator } from './AvailabilityIndicator';
 
-// RouteCard component
+// RouteCard component with fixed height
 export const RouteCard = ({ image, index, difficulty, length, rating, time, spots, maxSpots }) => {
   return (
     <div className="flex flex-col h-full">
-      {/* Card image */}
-      <img src={image} alt={`Ruta ${index}`} className="w-full h-40 object-cover rounded-t-2xl" />
+      {/* Card image with fixed height */}
+      <img src={image} alt={`${index}`} className="w-full h-40 object-cover rounded-t-2xl" />
 
-      {/* Card content with background and rounded bottom */}
-      <div className="bg-[rgba(45,55,41,255)] p-4 rounded-b-2xl flex-grow flex flex-col"> 
-        <h3 className="text-xl md:text-2xl font-bold text-center mb-4">Ruta {index}</h3>
+      {/* Card content with fixed height and better spacing */}
+      <div className="bg-[rgba(45,55,41,255)] p-4 rounded-b-2xl flex-grow flex flex-col h-[330px]"> 
+        <h3 className="text-xl md:text-2xl font-bold text-center mb-4">{index}</h3>
 
-        {/* Route details */}
-        <div className="space-y-3 flex-grow">
+        {/* Route details - fixed spacing between items */}
+        <div className="space-y-4 flex-grow">
           {/* Difficulty */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -60,8 +60,8 @@ export const RouteCard = ({ image, index, difficulty, length, rating, time, spot
           </div>
         </div>
 
-        {/* Available spots */}
-        <div className="flex items-center justify-center mt-4 text-sm">
+        {/* Available spots - fixed position at bottom */}
+        <div className="flex items-center justify-center mt-auto pt-4 text-sm border-t border-gray-700">
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4M12 16h.01" />
