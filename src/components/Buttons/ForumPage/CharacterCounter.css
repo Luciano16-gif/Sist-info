@@ -1,0 +1,22 @@
+.character-counter {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 14px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background-color: rgba(245, 245, 245, 0.8);
+    transition: color 0.3s ease;
+    font-family: "Ysabeau SC", sans-serif;
+    z-index: 1;
+  }
+  
+  /* Mobile optimization */
+  @media screen and (max-width: 768px) {
+    .character-counter {
+      font-size: 12px;
+      padding: 1px 3px;
+      bottom: 3px;
+      right: 8px;
+    }
+  }
