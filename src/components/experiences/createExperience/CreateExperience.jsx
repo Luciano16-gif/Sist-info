@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './CreateExperience.css';
 
 // Auth context - for currentUser and userRole information
@@ -10,6 +10,22 @@ import { useExperienceForm } from '../../hooks/experiences-hooks/useExperienceFo
 
 // Import actions directly 
 import { updateField } from '../../hooks/experiences-hooks/experienceForm/actions';
+
+// Import ExperienceService
+import ExperienceService from '../../services/ExperienceService';
+
+// Import LoadingState component
+import LoadingState from '../../../components/common/LoadingState/LoadingState';
+
+// Import validation and utility modules
+import { 
+  validateExperienceEditForm,
+  prepareExperienceUpdateData
+} from '../../utils/ExperienceEditValidation';
+
+import {
+  createSafeDateChangeHandler
+} from '../../utils/experienceDateHandlers';
 
 // UI Components
 import {
@@ -26,10 +42,13 @@ import {
 } from '../ExperienceFormComponent';
 
 /**
- * CreateExperience component - Allows creating new experiences
+ * CreateExperience component - Allows creating or editing experiences
  * Only accessible to guides and admins
  */
-function CreateExperience() {
+function CreateExperience({ isEditMode = false }) {
+  // Get the experience ID from URL when in edit mode
+  const { id } = useParams();
+  
   // Get current user info, role, navigate function, and addCreatedExperience
   const { currentUser, userRole, getLastValidUser, addCreatedExperience } = useAuth();
   const navigate = useNavigate();
@@ -37,6 +56,9 @@ function CreateExperience() {
   // Loading state while checking permissions
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false);
+  const [loadingExperience, setLoadingExperience] = useState(isEditMode);
+  const [loadError, setLoadError] = useState(null);
+  const [experienceLoaded, setExperienceLoaded] = useState(false); // Track if experience was loaded
   
   // Setup for new item inputs
   const [nuevoTipoActividad, setNuevoTipoActividad] = useState("");
@@ -53,6 +75,9 @@ function CreateExperience() {
     formOperations
   } = useExperienceForm();
   
+  // Add these for edit mode
+  const [originalExperience, setOriginalExperience] = useState(null);
+  
   // Success message state
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -60,6 +85,119 @@ function CreateExperience() {
   // Add these new variables for auth persistence
   const [persistentUserData, setPersistentUserData] = useState(null);
   const userDataRef = useRef(null);
+
+  // Create enhanced date change handler that prevents removing all dates
+  const safeDateChangeHandler = createSafeDateChangeHandler(
+    handlers.handleDateChange, 
+    formOperations.dispatch,
+    formHandling.errors
+  );
+
+  // This effect runs to load the experience data when in edit mode
+  useEffect(() => {
+    // Only run this effect once when we're in edit mode and have an ID
+    // and haven't already loaded the experience
+    if (isEditMode && id && !experienceLoaded) {
+      const loadExperienceData = async () => {
+        try {
+          setLoadingExperience(true);
+          setLoadError(null);
+          
+          console.log("Loading experience with ID:", id);
+          const experience = await ExperienceService.getExperienceById(id);
+          setOriginalExperience(experience);
+          
+          // Pre-fill form with experience data
+          if (experience) {
+            console.log("Loaded experience data:", experience);
+            
+            // Update form fields with existing data
+            formOperations.dispatch(updateField('nombre', experience.name || ''));
+            formOperations.dispatch(updateField('precio', experience.price?.toString() || ''));
+            formOperations.dispatch(updateField('descripcion', experience.description || ''));
+            
+            // Parse time format (e.g., "10:00 - 14:00" -> "10:00" and "14:00")
+            if (experience.time) {
+              const timeParts = experience.time.split('-').map(t => t.trim());
+              if (timeParts.length === 2) {
+                formOperations.dispatch(updateField('horarioInicio', timeParts[0]));
+                formOperations.dispatch(updateField('horarioFin', timeParts[1]));
+              }
+            }
+            
+            // Handle the distance (e.g. "5 km" -> "5")
+            if (experience.distance) {
+              const distanceValue = experience.distance.replace(/[^\d.]/g, '');
+              formOperations.dispatch(updateField('longitudRecorrido', distanceValue));
+            }
+            
+            // Handle duration
+            formOperations.dispatch(updateField('duracionRecorrido', experience.duracion?.toString() || ''));
+            
+            // Parse min/max people
+            formOperations.dispatch(updateField('minimoUsuarios', experience.minPeople?.toString() || ''));
+            formOperations.dispatch(updateField('maximoUsuarios', experience.maxPeople?.toString() || ''));
+            
+            // Handle guides
+            if (experience.rawData?.guiasRequeridos) {
+              formOperations.dispatch(updateField('guiasRequeridos', experience.rawData.guiasRequeridos.toString()));
+            }
+            
+            if (experience.rawData?.guias) {
+              formOperations.dispatch(updateField('guiasSeleccionados', experience.rawData.guias || []));
+            }
+            
+            // Handle included items
+            if (experience.incluidos) {
+              formOperations.dispatch(updateField('incluidosExperiencia', experience.incluidos));
+            }
+            
+            // Handle departure point
+            if (experience.puntoDeSalida) {
+              formOperations.dispatch(updateField('puntoSalida', experience.puntoDeSalida));
+            }
+            
+            // Handle activity type
+            if (experience.rawData?.tipoActividad) {
+              formOperations.dispatch(updateField('tipoActividad', experience.rawData.tipoActividad));
+            }
+            
+            // Handle difficulty
+            if (experience.difficulty) {
+              formOperations.dispatch(updateField('dificultad', experience.difficulty));
+            }
+            
+            // Handle dates
+            if (experience.rawData?.fechas) {
+              formOperations.dispatch(updateField('fechas', experience.rawData.fechas));
+            }
+            
+            // Handle image
+            if (experience.imageUrl) {
+              // Just set the preview URL, the original file we can't retrieve
+              formOperations.dispatch(updateField('imagePreview', experience.imageUrl));
+            }
+            
+            // Set createdBy from the original experience
+            if (experience.rawData?.createdBy) {
+              formOperations.dispatch(updateField('createdBy', experience.rawData.createdBy));
+            }
+
+            // Mark experience as loaded to prevent further loading attempts
+            setExperienceLoaded(true);
+          }
+          
+          setLoadingExperience(false);
+        } catch (error) {
+          console.error("Error loading experience:", error);
+          setLoadError(error.message || "Error al cargar la experiencia");
+          setLoadingExperience(false);
+        }
+      };
+      
+      loadExperienceData();
+    }
+  }, [isEditMode, id, formOperations, experienceLoaded]); // Added experienceLoaded to dependencies
   
   // This effect runs once on component mount and captures user data
   useEffect(() => {
@@ -156,7 +294,6 @@ function CreateExperience() {
         }
 
         // If we get here, user is unauthorized
-
         setUnauthorized(true);
         setLoading(false);
       } catch (error) {
@@ -302,19 +439,92 @@ function CreateExperience() {
                          localStorage.getItem('tempUserRole') || 
                          'guia';
     
-    // Execute form submission
-    const success = await formOperations.handleSubmit();
-    
-    if (success) {
-      // Different success messages based on role
-      if (effectiveRole === 'admin') {
-        setSuccessMessage('¡Experiencia creada exitosamente!');
-      } else {
-        setSuccessMessage('¡Solicitud de experiencia enviada! Un administrador la revisará pronto.');
+    // EDIT MODE: Update instead of create
+    if (isEditMode) {
+      try {
+        formOperations.dispatch(updateField('setSubmitting', true));
+        
+        // Get the latest form state
+        const currentFormState = formOperations.getState ? formOperations.getState().formFields : {};
+        
+        // Ensure createdBy is set 
+        if (!currentFormState.createdBy) {
+          formOperations.dispatch(updateField('createdBy', userEmail));
+        }
+        
+        // Perform validation with special rules for edit mode
+        const { isValid, errors } = validateExperienceEditForm(
+          currentFormState, 
+          originalExperience,
+          formOperations.validateForm().errors
+        );
+        
+        if (!isValid) {
+          // Update the form with validation errors
+          formOperations.dispatch(updateField('errors', errors));
+          console.log("Form validation failed:", errors);
+          formOperations.dispatch(updateField('setSubmitting', false));
+          return false;
+        }
+        
+        // Ensure preserving the original experience ID
+        if (id && originalExperience) {
+          // Prepare the data for update using our utility function
+          const updateData = prepareExperienceUpdateData(currentFormState, originalExperience);
+          
+          console.log("Updating experience with data:", updateData);
+          
+          // Use ExperienceService to update
+          const result = await ExperienceService.updateExperience(id, updateData);
+          
+          if (result) {
+            setSuccessMessage('¡Experiencia actualizada exitosamente!');
+            setShowSuccess(true);
+            
+            // Redirect after a delay
+            setTimeout(() => {
+              navigate('/admin-calendario');
+            }, 2000);
+            
+            return true;
+          }
+        } else {
+          formOperations.dispatch(updateField('submit', "Error: No se pudo determinar el ID de la experiencia a actualizar."));
+          return false;
+        }
+      } catch (error) {
+        console.error("Error updating experience:", error);
+        formOperations.dispatch(updateField('submit', error.message || "Error al actualizar la experiencia."));
+        return false;
+      } finally {
+        formOperations.dispatch(updateField('setSubmitting', false));
+      }
+    } else {
+      // REGULAR CREATE MODE - standard validation
+      const { isValid, errors } = formOperations.validateForm();
+      
+      if (!isValid) {
+        // If validation fails, show errors and return
+        console.log("Form validation failed:", errors);
+        return false;
       }
       
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 5000); // Hide after 5 seconds
+      // Use existing code for creation
+      const success = await formOperations.handleSubmit();
+      
+      if (success) {
+        // Different success messages based on role
+        if (effectiveRole === 'admin') {
+          setSuccessMessage('¡Experiencia creada exitosamente!');
+        } else {
+          setSuccessMessage('¡Solicitud de experiencia enviada! Un administrador la revisará pronto.');
+        }
+        
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 5000); // Hide after 5 seconds
+      }
+      
+      return success;
     }
   };
 
@@ -338,10 +548,31 @@ function CreateExperience() {
   }
 
   // Show loading state
-  if (loading) {
+  if (loading || loadingExperience) {
     return (
       <div className="crear-experiencia-container-crear-experiencia">
-        <h1 className="titulo-crear-experiencia">Cargando...</h1>
+        <LoadingState 
+          text={isEditMode ? "Cargando datos de la experiencia..." : "Cargando..."} 
+        />
+      </div>
+    );
+  }
+
+  // Show error state if there's a load error
+  if (loadError) {
+    return (
+      <div className="crear-experiencia-container-crear-experiencia">
+        <h1 className="titulo-crear-experiencia">Error</h1>
+        <p className="error-message">
+          {loadError}
+        </p>
+        <button 
+          className="boton-agregar-crear-experiencia self-center" 
+          onClick={() => navigate('/admin-calendario')}
+          style={{ marginTop: '20px' }}
+        >
+          Volver al Calendario
+        </button>
       </div>
     );
   }
@@ -352,17 +583,30 @@ function CreateExperience() {
                        localStorage.getItem('tempUserRole') || 
                        'guia';
 
+  // Set page title and button text based on mode
+  const pageTitle = isEditMode 
+    ? 'Editar Experiencia' 
+    : effectiveRole === 'admin' 
+      ? 'Agregar una nueva Experiencia' 
+      : 'Solicitar una nueva Experiencia';
+
+  const buttonText = isEditMode 
+    ? 'Actualizar' 
+    : effectiveRole === 'admin' 
+      ? 'Agregar' 
+      : 'Enviar Solicitud';
+
   return (
     <div className="crear-experiencia-container-crear-experiencia">
       <h1 className="titulo-crear-experiencia">
-        {effectiveRole === 'admin' 
-          ? 'Agregar una nueva Experiencia' 
-          : 'Solicitar una nueva Experiencia'}
+        {pageTitle}
       </h1>
       <p className="subtitulo-crear-experiencia">
-        {effectiveRole === 'admin'
-          ? 'Expande nuestra lista de servicios y experiencias únicas...'
-          : 'Propón una nueva experiencia para que los administradores la aprueben...'}
+        {isEditMode
+          ? 'Actualiza la información de esta experiencia...'
+          : effectiveRole === 'admin'
+            ? 'Expande nuestra lista de servicios y experiencias únicas...'
+            : 'Propón una nueva experiencia para que los administradores la aprueben...'}
       </p>
 
       {/* Success Message */}
@@ -396,6 +640,7 @@ function CreateExperience() {
             value={formState.nombre}
             onChange={handlers.handleNombreChange}
             error={formHandling.errors.nombre}
+            placeholder={originalExperience?.name || ""}
           />
 
           <div className="campo-row-crear-experiencia">
@@ -406,6 +651,7 @@ function CreateExperience() {
                 value={formState.precio}
                 onChange={handlers.handlePrecioChange}
                 error={formHandling.errors.precio}
+                placeholder={originalExperience?.price?.toString() || ""}
               />
             </div>
             
@@ -416,10 +662,10 @@ function CreateExperience() {
             />
           </div>
 
-          {/* Date Selection */}
+          {/* Date Selection - using enhanced handler */}
           <DateSelector
             selectedDates={formState.fechas}
-            onDateChange={handlers.handleDateChange}
+            onDateChange={safeDateChangeHandler}
             error={formHandling.errors.fechas}
           />
 
@@ -430,6 +676,7 @@ function CreateExperience() {
             value={formState.descripcion}
             onChange={handlers.handleDescripcionChange}
             error={formHandling.errors.descripcion}
+            placeholder={originalExperience?.description || ""}
           />
 
           {/* Time Range */}
@@ -440,6 +687,7 @@ function CreateExperience() {
               value={formState.horarioInicio}
               onChange={handlers.handleTimeChange('horarioInicio')}
               error={formHandling.errors.horarioInicio}
+              placeholder={originalExperience?.time?.split('-')[0]?.trim() || ""}
             />
 
             <TimeInput
@@ -448,6 +696,7 @@ function CreateExperience() {
               value={formState.horarioFin}
               onChange={handlers.handleTimeChange('horarioFin')}
               error={formHandling.errors.horarioFin}
+              placeholder={originalExperience?.time?.split('-')[1]?.trim() || ""}
             />
           </div>
 
@@ -469,6 +718,7 @@ function CreateExperience() {
               newValueState={[nuevoPuntoSalida, setNuevoPuntoSalida]}
               onNewValueChange={(e) => setNuevoPuntoSalida(e.target.value)}
               newValueError={formHandling.errors.nuevoPunto}
+              placeholder={originalExperience?.puntoDeSalida || ""}
             />
             
             <TextInput
@@ -477,6 +727,7 @@ function CreateExperience() {
               value={formState.guiasRequeridos}
               onChange={handlers.handleIntegerInputChange(handlers.setGuiasRequeridos)}
               error={formHandling.errors.guiasRequeridos}
+              placeholder={originalExperience?.rawData?.guiasRequeridos?.toString() || ""}
             />
           </div>
 
@@ -496,6 +747,7 @@ function CreateExperience() {
               value={formState.minimoUsuarios}
               onChange={handlers.handleIntegerInputChange(handlers.setMinimoUsuarios)}
               error={formHandling.errors.minimoUsuarios}
+              placeholder={originalExperience?.minPeople?.toString() || ""}
             />
 
             <CheckboxGroup
@@ -527,6 +779,7 @@ function CreateExperience() {
               value={formState.maximoUsuarios}
               onChange={handlers.handleIntegerInputChange(handlers.setMaximoUsuarios)}
               error={formHandling.errors.maximoUsuarios}
+              placeholder={originalExperience?.maxPeople?.toString() || ""}
             />
             
             <TextInput
@@ -535,6 +788,7 @@ function CreateExperience() {
               value={formState.longitudRecorrido}
               onChange={handlers.handleLongitudChange}
               error={formHandling.errors.longitudRecorrido}
+              placeholder={originalExperience?.distance?.replace(/[^\d.]/g, '') || ""}
             />
           </div>
 
@@ -546,6 +800,7 @@ function CreateExperience() {
               value={formState.duracionRecorrido}
               onChange={handlers.handleDuracionChange}
               error={formHandling.errors.duracionRecorrido}
+              placeholder={originalExperience?.duracion?.toString() || ""}
             />
             
             <OptionSelector
@@ -560,16 +815,17 @@ function CreateExperience() {
               onNewValueChange={(e) => setNuevoTipoActividad(e.target.value)}
               newValueError={formHandling.errors.nuevoTipo}
               containerClassName="campo-tipo-actividad"
+              placeholder={originalExperience?.rawData?.tipoActividad || ""}
             />
           </div>
         </div>
       </div>
 
-      {/* Submit Button with different text based on role */}
+      {/* Submit Button with different text based on mode */}
       <SubmitButton 
         onClick={handleSubmit}
         isSubmitting={formHandling.isSubmitting}
-        text={effectiveRole === 'admin' ? "Agregar" : "Enviar Solicitud"}
+        text={buttonText}
       />
     </div>
   );

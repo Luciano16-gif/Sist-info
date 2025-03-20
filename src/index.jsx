@@ -124,6 +124,7 @@ root.render(
           {/* Admin Protected Routes */}
           <Route element={<AdminProtectedRoute />}>
             <Route element={<LayoutAdmin />}>
+              <Route path="/admin-edit-experience/:id" element={<CreateExperience isEditMode={true} />} />
               <Route path="/homeAdmin" element={<AdminLanding />} />
               <Route path="/admin-guias-pendientes" element={<AdminGuideRequests />} />
               <Route path="/admin-experiencias-pendientes" element={<AdminExperienceRequests />} />
