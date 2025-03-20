@@ -6,6 +6,18 @@ export default defineConfig({
   build: {
     assetsInlineLimit: 0, // Ensures fonts are copied as files
   },
+  server: {
+    host: true, // Expose to all network interfaces
+    port: 5173, // Fixed port for consistent OAuth redirects
+    open: true
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis', // Fix Firebase Auth global object issue
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -34,8 +46,9 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,ttf,woff,woff2,webp,jpg,jpeg}'],
         navigateFallback: 'index.html',
-        runtimeCaching: [
-        ]
+        // Don't cache auth-related URLs
+        navigateFallbackDenylist: [/^\/_\//, /\/[^/?]+\.[^/]+$/],
+        runtimeCaching: []
       }
     })
   ]

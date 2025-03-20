@@ -30,8 +30,8 @@ import {
  * Only accessible to guides and admins
  */
 function CreateExperience() {
-  // Get current user info, role, and navigate function
-  const { currentUser, userRole, getLastValidUser } = useAuth();
+  // Get current user info, role, navigate function, and addCreatedExperience
+  const { currentUser, userRole, getLastValidUser, addCreatedExperience } = useAuth();
   const navigate = useNavigate();
 
   // Loading state while checking permissions
@@ -202,6 +202,35 @@ function CreateExperience() {
       console.error("Dispatch function not available");
     }
   };
+  
+  // Function to update the original handleSubmit in useExperienceForm
+  const originalHandleSubmit = formOperations.handleSubmit;
+  
+  // Store the original handleSubmit function if it exists
+  useEffect(() => {
+    if (formOperations.handleSubmit && !formOperations._originalHandleSubmit) {
+      formOperations._originalHandleSubmit = formOperations.handleSubmit;
+      
+      // Override handleSubmit to add our experience update
+      formOperations.handleSubmit = async () => {
+        try {
+          // Call the original submit function and get the result (this should be the created experience)
+          const result = await formOperations._originalHandleSubmit();
+          
+          // If successful and we have the experience ID, update the user's profile
+          if (result && result.id && addCreatedExperience) {
+            console.log("Experience created successfully, updating user profile with ID:", result.id);
+            await addCreatedExperience(result.id);
+          }
+          
+          return result;
+        } catch (error) {
+          console.error("Error during experience creation:", error);
+          throw error; // Re-throw to let the original error handling deal with it
+        }
+      };
+    }
+  }, [formOperations, addCreatedExperience]);
   
   // Enhanced handleSubmit function with better state management
   const handleSubmit = async () => {

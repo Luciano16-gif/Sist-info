@@ -358,12 +358,14 @@ export const createFormOperations = (dispatch, formFields, getState) => {
       }
       
       // Submit experience with the latest state
-      await experienceFormService.submitExperience(currentFormFields);
+      const result = await experienceFormService.submitExperience(currentFormFields);
       
       // Reset form
       dispatch(actions.resetForm());
       dispatch(actions.setSubmitSuccess(true));
-      return true;
+      
+      // IMPORTANT: Return the result which contains the experience ID
+      return result;
     } catch (error) {
       console.error("Error creating experience:", error);
       

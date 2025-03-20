@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { auth } from '../../firebase-config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as authService from '../services/authService';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase-config';
 import LoadingScreen from '../loading/LoadingScreen';
 
@@ -256,6 +256,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // New function to add a created experience to the user's profile
+  const addCreatedExperience = async (experienceId) => {
+    if (!currentUser || !currentUser.email) {
+      console.error("No user is logged in or user email is missing");
+      return false;
+    }
+    
+    try {
+      const userDocRef = doc(db, "lista-de-usuarios", currentUser.email);
+      
+      // Update Firestore document to add the experience ID
+      await updateDoc(userDocRef, {
+        activitiesCreated: arrayUnion(experienceId)
+      });
+      
+      // Update local state to reflect the change
+      const updatedActivitiesCreated = 
+        firestoreUserData && firestoreUserData.activitiesCreated 
+          ? [...firestoreUserData.activitiesCreated, experienceId] 
+          : [experienceId];
+      
+      const updatedFirestoreData = {
+        ...firestoreUserData,
+        activitiesCreated: updatedActivitiesCreated
+      };
+      
+      // Update the state
+      setFirestoreUserData(updatedFirestoreData);
+      
+      // Update the enhanced user object
+      const enhancedUser = {
+        ...currentUser,
+        firestoreData: updatedFirestoreData
+      };
+      
+      setCurrentUser(enhancedUser);
+      setLastValidUser(enhancedUser);
+      userStateRef.current = { 
+        user: enhancedUser, 
+        role: userRole 
+      };
+      
+      return true;
+    } catch (error) {
+      console.error("Error adding created experience:", error);
+      setError("Error updating your profile with the new experience.");
+      return false;
+    }
+  };
+
   // Define authentication methods using authService
   const login = async (email, password, onError) => {
     try {
@@ -403,7 +453,8 @@ export const AuthProvider = ({ children }) => {
     updateUserProfile,
     firestoreUserData,
     lastValidUser,
-    getLastValidUser
+    getLastValidUser,
+    addCreatedExperience // Add the new function to the context value
   };
 
   return (
