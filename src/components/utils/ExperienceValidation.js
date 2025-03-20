@@ -322,7 +322,7 @@ export const validateExperienceForm = (formData) => {
   }
   
   // Image validation
-  if (!formData.imageFile) {
+  if (!formData.imageFile && !formData.imagePreview) {
     errors.imagen = 'Debe seleccionar una imagen para la experiencia.';
     isValid = false;
   }

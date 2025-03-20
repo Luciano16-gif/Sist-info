@@ -11,10 +11,8 @@
  */
 export const createSafeDateChangeHandler = (originalHandler, dispatch, errors) => {
     return (dates) => {
-      // Prevent removing all dates - at least one date is required
+      // Only prevent completely empty dates array
       if (dates && dates.length > 0) {
-        originalHandler(dates);
-        
         // Clear any existing error
         if (errors.fechas) {
           const updatedErrors = { ...errors };
@@ -24,8 +22,11 @@ export const createSafeDateChangeHandler = (originalHandler, dispatch, errors) =
             errors: updatedErrors
           });
         }
+        
+        // Allow the update since we have at least one date
+        originalHandler(dates);
       } else {
-        // If attempting to remove all dates, show an error
+        // If attempting to remove all dates, show an error but don't update
         dispatch({
           type: 'SET_ERRORS',
           errors: {
@@ -33,6 +34,8 @@ export const createSafeDateChangeHandler = (originalHandler, dispatch, errors) =
             fechas: 'Se requiere al menos una fecha para la experiencia.'
           }
         });
+        
+        console.warn("Attempted to remove all dates, which is not allowed");
       }
     };
   };

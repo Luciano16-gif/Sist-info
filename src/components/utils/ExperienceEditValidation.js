@@ -1,8 +1,4 @@
 /**
- * Validation utilities for experience editing mode
- */
-
-/**
  * Validate image requirement for edit mode
  * @param {Object} formState - Current form state
  * @param {Object} originalExperience - Original experience data
