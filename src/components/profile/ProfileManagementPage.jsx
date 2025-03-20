@@ -38,7 +38,8 @@ function ProfileManagementPage() {
     
     // Use the auth context with enhanced user profile functionality
     const { 
-        currentUser, 
+        currentUser,
+        userRole, 
         logout, 
         error, 
         setError, 
@@ -486,9 +487,8 @@ function ProfileManagementPage() {
                         isEditing={isEditing}
                         fechaRegistro={fechaRegistro}
                     />
-
                     <StatsSection 
-                        tipoUsuario={tipoUsuario}
+                        tipoUsuario={userRole}
                         activitiesCreatedCount={activitiesCreatedCount}
                         activitiesPerformed={activitiesPerformed}
                         mostPerformedActivity={mostPerformedActivity}

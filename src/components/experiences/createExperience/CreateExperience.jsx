@@ -180,8 +180,8 @@ function CreateExperience() {
       console.error("Dispatch function not available");
     }
   };
-
-  // Add setter for createdBy field with logging
+  
+  // Improved setter for createdBy field with verification
   handlers.setCreatedBy = (email) => {
     const dispatch = formOperations.dispatch;
     if (dispatch) {
@@ -189,26 +189,36 @@ function CreateExperience() {
       
       // Verify the field was actually updated
       setTimeout(() => {
-      }, 0);
+        if (formOperations.getState) {
+          const currentState = formOperations.getState();
+          console.log("createdBy after update:", currentState.formFields.createdBy);
+          if (currentState.formFields.createdBy !== email) {
+            console.warn("createdBy field wasn't updated correctly, forcing it");
+            dispatch(updateField('createdBy', email));
+          }
+        }
+      }, 10);
     } else {
       console.error("Dispatch function not available");
     }
   };
   
-  // Enhanced handleSubmit function
+  // Enhanced handleSubmit function with better state management
   const handleSubmit = async () => {
-    
-    // Source of truth for user email, checking multiple places
+    // Get the user's email from multiple sources
     let userEmail = null;
     
-    // Try to get email from multiple sources in order of preference
+    // Try to get email from current user
     if (currentUser && currentUser.email) {
       userEmail = currentUser.email;
     } else if (userDataRef.current && userDataRef.current.email) {
+      // Try reference
       userEmail = userDataRef.current.email;
     } else if (persistentUserData && persistentUserData.email) {
+      // Try state
       userEmail = persistentUserData.email;
     } else {
+      // Try localStorage
       try {
         const storedEmail = localStorage.getItem('tempUserEmail');
         if (storedEmail) {
@@ -244,13 +254,15 @@ function CreateExperience() {
     // Small delay to ensure state is updated
     await new Promise(resolve => setTimeout(resolve, 50));
     
-    // Check the form state before submitting
-    const formCopy = { ...formState };
+    // Get the current form state to verify createdBy
+    const currentFormState = formOperations.getState ? formOperations.getState().formFields : {};
     
-    if (!formCopy.createdBy) {
-      console.warn("createdBy still missing after setting, forcing it again");
-      formCopy.createdBy = userEmail;
-      // Force direct update to form state
+    // Log the current form state for debugging
+    console.log("Form state before submission:", currentFormState);
+    
+    // Double-check the createdBy field
+    if (!currentFormState.createdBy) {
+      console.warn("createdBy still missing before submission, forcing it once more");
       formOperations.dispatch(updateField('createdBy', userEmail));
       await new Promise(resolve => setTimeout(resolve, 50));
     }
@@ -263,6 +275,7 @@ function CreateExperience() {
     
     // Execute form submission
     const success = await formOperations.handleSubmit();
+    
     if (success) {
       // Different success messages based on role
       if (effectiveRole === 'admin') {

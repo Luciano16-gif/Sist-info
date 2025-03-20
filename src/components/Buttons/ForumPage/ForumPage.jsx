@@ -10,9 +10,9 @@ import ErrorBoundary from '../../common/errorBoundary/ErrorBoundary';
 import CharacterCounter from './CharacterCounter';
 
 // Character limit constants
-const MAX_TITLE_LENGTH = 30;       // Max length for forum titles
-const MAX_DESCRIPTION_LENGTH = 200; // Max length for forum descriptions
-const MAX_COMMENT_LENGTH = 300;     // Max length for comments
+const MAX_TITLE_LENGTH = 50;       // Max length for forum titles
+const MAX_DESCRIPTION_LENGTH = 500; // Max length for forum descriptions
+const MAX_COMMENT_LENGTH = 500;     // Max length for comments
 
 const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
