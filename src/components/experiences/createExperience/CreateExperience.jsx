@@ -665,7 +665,6 @@ function CreateExperience({ isEditMode = false }) {
       <div className="crear-experiencia-container-crear-experiencia">
         <LoadingState 
           text={isEditMode ? "Cargando datos de la experiencia..." : "Cargando..."} 
-          className="min-h-[300px]"
         />
       </div>
     );
